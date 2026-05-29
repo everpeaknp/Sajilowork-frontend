@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { reviewService } from '@/services/review.service';
@@ -24,8 +25,13 @@ export default function ReviewModal({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const canSubmit = useMemo(() => rating >= 1 && rating <= 5, [rating]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -55,13 +61,24 @@ export default function ReviewModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[80]">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-full max-w-lg rounded-3xl bg-white border border-outline-variant shadow-xl overflow-hidden">
-          <div className="flex items-start justify-between gap-4 p-6 border-b border-gray-100">
-            <div>
+  const modalTree = (
+    <div className="fixed inset-0 z-[10050]">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden />
+      <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div
+          className="pointer-events-auto w-full max-w-lg rounded-3xl bg-white border border-outline-variant shadow-xl overflow-hidden mx-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="relative p-6 border-b border-gray-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-50 text-gray-600"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="text-center px-10">
               <p className="text-xs font-black tracking-[0.2em] text-gray-400 uppercase">
                 Review
               </p>
@@ -72,14 +89,6 @@ export default function ReviewModal({
                 Your feedback helps keep the marketplace trustworthy.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-50 text-gray-600"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
           <div className="p-6 space-y-5">
@@ -123,5 +132,11 @@ export default function ReviewModal({
       </div>
     </div>
   );
+
+  if (!isMounted || typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(modalTree, document.body);
 }
 

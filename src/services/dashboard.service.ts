@@ -160,15 +160,6 @@ export interface TopPerformer {
   total_earned: number;
 }
 
-export interface AdminDashboard {
-  platform_overview: PlatformOverview;
-  growth_metrics: GrowthMetrics;
-  category_statistics: CategoryStatistics[];
-  recent_activity: RecentActivity;
-  financial_summary: FinancialSummary;
-  top_performers: TopPerformer[];
-}
-
 class DashboardService {
   private readonly BASE_PATH = '/dashboard';
 
@@ -227,13 +218,6 @@ class DashboardService {
     return apiClient.get(`${this.BASE_PATH}/top_performers/`, {
       params: { limit }
     });
-  }
-
-  /**
-   * Get comprehensive admin dashboard (admin only)
-   */
-  async getAdminDashboard(): Promise<ApiResponse<AdminDashboard>> {
-    return apiClient.get(`${this.BASE_PATH}/admin_dashboard/`);
   }
 }
 

@@ -102,7 +102,7 @@ export default function TaskCard({
             }
           : undefined
       }
-      className={`rounded-2xl p-4 sm:p-5 border transition-colors group cursor-pointer relative flex flex-col min-w-0 w-full ${cardSurfaceClass} ${className}`.trim()}
+      className={`rounded-2xl border p-4 sm:p-5 transition-colors group cursor-pointer relative flex flex-col min-w-0 w-full ${cardSurfaceClass} ${className}`.trim()}
     >
       {/* Title + actions + price */}
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -119,7 +119,7 @@ export default function TaskCard({
                     e.stopPropagation();
                     onEdit();
                   }}
-                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-white/80 transition-colors"
+                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-[#f1f4f9] transition-colors"
                   title="Edit task"
                   aria-label="Edit task"
                 >
@@ -133,7 +133,7 @@ export default function TaskCard({
                     e.stopPropagation();
                     onDelete();
                   }}
-                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-white/80 transition-colors"
+                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-[#f1f4f9] transition-colors"
                   title="Delete task"
                   aria-label="Delete task"
                 >
@@ -165,7 +165,7 @@ export default function TaskCard({
       </div>
 
       {/* Status, offers, avatar */}
-      <div className="flex items-center justify-between gap-3 min-w-0 pt-2 border-t border-outline-variant/60">
+      <div className="flex items-center justify-between gap-3 min-w-0 pt-2">
         <div className="min-w-0 flex flex-col gap-0.5">
           <span
             className={`font-sans text-sm sm:text-[15px] font-bold leading-5 ${statusTextClass(status)}`}
@@ -183,7 +183,7 @@ export default function TaskCard({
           alt={user.name}
           name={user.name}
           size="md"
-          className="shrink-0 ring-2 ring-white"
+          className="shrink-0"
         />
       </div>
     </div>

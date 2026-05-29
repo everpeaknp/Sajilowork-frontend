@@ -89,7 +89,7 @@ function getNotificationHref(notification: NotificationType): string {
 }
 
 const mobileDropdownPanelClass =
-  'fixed left-3 right-3 top-[calc(3.5rem+0.5rem)] z-[10000] max-h-[min(70dvh,28rem)] overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-xl ring-1 ring-gray-900/5 animate-in fade-in slide-in-from-top-3 duration-200 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72';
+  'fixed left-3 right-3 top-[calc(3.5rem+0.5rem)] z-[10000] max-h-[min(70dvh,28rem)] overflow-hidden rounded-2xl bg-white p-4 animate-in fade-in slide-in-from-top-3 duration-200 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72';
 
 function MobileDropdownBackdrop({ onClose }: { onClose: () => void }) {
   return (
@@ -361,7 +361,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-[9999] isolate w-full border-b border-gray-100 bg-white">
+    <header className="sticky top-0 z-[9999] isolate w-full bg-white">
       <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
         {/* Left section: Logo & Primary Links */}
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8 md:flex-none">
@@ -379,7 +379,7 @@ export default function Navbar() {
             <nav className="hidden md:flex items-center space-x-6">
               <button
                 onClick={handlePostTaskClick}
-                className="rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0047ff] cursor-pointer inline-flex items-center gap-1.5 shadow-sm active:scale-95"
+                className="rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0047ff] cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
               >
                 <PlusCircle className="h-4 w-4" />
                 Post a task
@@ -398,7 +398,7 @@ export default function Navbar() {
               >
                 My tasks
                 {myTasksCount > 0 && !tasksLoading && (
-                  <span className="absolute -top-1.5 -right-3.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
+                  <span className="absolute -top-1.5 -right-3.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-pulse">
                     {myTasksCount}
                   </span>
                 )}
@@ -419,7 +419,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/signup"
-                className="rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047ff]"
+                className="rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0047ff]"
               >
                 Sign up
               </Link>
@@ -449,7 +449,7 @@ export default function Navbar() {
                 >
                   <Bell className="h-5 w-5 sm:h-5 sm:w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white">
+                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
@@ -460,7 +460,7 @@ export default function Navbar() {
                   <>
                     <MobileDropdownBackdrop onClose={() => setNotificationsOpen(false)} />
                     <div className={mobileDropdownPanelClass}>
-                    <div className="flex items-center justify-between border-b border-gray-150 pb-2 mb-2">
+                    <div className="flex items-center justify-between pb-2 mb-2">
                       <h4 className="text-sm font-bold text-gray-900">Notifications</h4>
                       <div className="flex items-center gap-1">
                         {unreadCount > 0 && (
@@ -491,7 +491,7 @@ export default function Navbar() {
                             key={n.id}
                             onClick={() => handleNotificationClick(n)}
                             className={`p-2.5 rounded-lg transition-colors cursor-pointer text-left ${
-                              !n.is_read ? 'bg-[#005fff]/5 border-l-2 border-[#005fff]' : 'hover:bg-gray-50'
+                              !n.is_read ? 'bg-[#005fff]/5' : 'hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex justify-between items-start gap-2">
@@ -522,7 +522,7 @@ export default function Navbar() {
                 >
                   <MessageSquare className="h-5 w-5" />
                   {unreadMessagesCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white">
+                    <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
                       {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                     </span>
                   )}
@@ -533,7 +533,7 @@ export default function Navbar() {
                   <>
                     <MobileDropdownBackdrop onClose={() => setMessagesOpen(false)} />
                     <div className={mobileDropdownPanelClass}>
-                    <div className="flex items-center justify-between border-b border-gray-150 pb-2 mb-2">
+                    <div className="flex items-center justify-between pb-2 mb-2">
                       <h4 className="text-sm font-bold text-gray-900">Recent Chats</h4>
                       <button
                         onClick={() => setMessagesOpen(false)}
@@ -564,9 +564,7 @@ export default function Navbar() {
                                 key={convId}
                                 onClick={() => openConversation(convId)}
                                 className={`flex items-start space-x-3 p-2 rounded-xl min-h-[4.5rem] transition-colors cursor-pointer text-left ${
-                                  hasUnread
-                                    ? 'bg-[#005fff]/5 border-l-2 border-[#005fff]'
-                                    : 'hover:bg-gray-50'
+                                  hasUnread ? 'bg-[#005fff]/5' : 'hover:bg-gray-50'
                                 }`}
                               >
                                 <UserAvatar
@@ -592,7 +590,7 @@ export default function Navbar() {
                               setMessagesOpen(false);
                               router.push('/message');
                             }}
-                            className="w-full text-center text-xs font-bold text-[#005fff] hover:underline pt-2 border-t border-gray-100 cursor-pointer"
+                            className="w-full text-center text-xs font-bold text-[#005fff] hover:underline pt-2 cursor-pointer"
                           >
                             View all messages
                           </button>
@@ -628,15 +626,15 @@ export default function Navbar() {
                     src={user?.profile_image}
                     name={user ? `${user.first_name} ${user.last_name}` : 'User'}
                     size="sm"
-                    className="ring-2 ring-gray-100 transition hover:ring-[#005fff] cursor-pointer sm:!w-10 sm:!h-10"
+                    className="transition cursor-pointer sm:!w-10 sm:!h-10"
                   />
                 </button>
 
                 {/* Profile Dropdown Menu (desktop only) */}
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-3 hidden w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl ring-1 ring-gray-900/5 animate-in fade-in slide-in-from-top-3 duration-200 md:block z-[10000]">
+                  <div className="absolute right-0 mt-3 hidden w-64 rounded-2xl bg-white p-2 animate-in fade-in slide-in-from-top-3 duration-200 md:block z-[10000]">
                     {/* User Info */}
-                    <div className="px-3 py-3 border-b border-gray-100">
+                    <div className="px-3 py-3">
                       <p className="text-sm font-bold text-gray-900">
                         {user?.first_name} {user?.last_name}
                       </p>
@@ -677,8 +675,6 @@ export default function Navbar() {
                         <Settings className="h-4 w-4 text-gray-400" />
                         <span>Settings</span>
                       </button>
-
-                      <div className="my-1 border-t border-gray-100" />
 
                       <button
                         onClick={() => {
@@ -753,14 +749,14 @@ export default function Navbar() {
       {/* Guest mobile menu only (signed-in users use icon shortcuts in the bar) */}
       {mobileMenuOpen && !isAuthenticated && (
         <nav
-          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white px-3 py-3 shadow-lg md:hidden sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain bg-white px-3 py-3 md:hidden sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           aria-label="Mobile navigation"
         >
           <div className="space-y-2">
             <Link
               href="/signin"
               onClick={() => setMobileMenuOpen(false)}
-              className="block w-full min-h-11 rounded-full border border-gray-200 py-3 text-center text-sm font-semibold text-[#3c4a6b] transition hover:bg-gray-50"
+              className="block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold text-[#3c4a6b] transition hover:bg-gray-50"
             >
               Sign in
             </Link>

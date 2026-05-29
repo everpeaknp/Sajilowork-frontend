@@ -130,6 +130,11 @@ export default function TaskDetails({
   const [showMakeOfferModal, setShowMakeOfferModal] = useState(false);
   const [walletAvailableBalance, setWalletAvailableBalance] = useState<number | null>(null);
   const [loadingWalletBalance, setLoadingWalletBalance] = useState(false);
+  const [shouldPromptReview, setShouldPromptReview] = useState(false);
+
+  useEffect(() => {
+    setShouldPromptReview(false);
+  }, [lookup]);
 
   const sidebarMoreOptionsRef = useRef<HTMLDivElement>(null);
   const mobileMoreOptionsRef = useRef<HTMLDivElement>(null);
@@ -410,6 +415,12 @@ export default function TaskDetails({
     setIsCompleting(true);
     try {
       const data = await confirmWorkComplete();
+      const completedStatus = (data?.task?.status ?? detailTask?.status ?? task.status ?? '')
+        .toString()
+        .toLowerCase();
+      if (completedStatus === 'completed') {
+        setShouldPromptReview(true);
+      }
       toast.success(
         data?.message ||
           (data?.payment_released && data.net_amount
@@ -650,6 +661,8 @@ export default function TaskDetails({
           taskId={reviewTaskId}
           taskStatus={String(currentStatus || '')}
           revieweeName={revieweeName}
+          promptReviewNow={shouldPromptReview}
+          onPromptConsumed={() => setShouldPromptReview(false)}
         />
       ) : null}
     </div>

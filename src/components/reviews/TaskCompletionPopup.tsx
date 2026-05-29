@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Star } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { reviewService } from '@/services/review.service';
 import { useAuth } from '@/hooks/useAuth';
 import ReviewModal from './ReviewModal';
@@ -10,12 +10,17 @@ export type TaskCompletionPopupProps = {
   taskId: string;
   taskStatus?: string | null;
   revieweeName: string;
+  /** Open the review modal once (e.g. immediately after the task becomes completed). */
+  promptReviewNow?: boolean;
+  onPromptConsumed?: () => void;
 };
 
 export default function TaskCompletionPopup({
   taskId,
   taskStatus,
   revieweeName,
+  promptReviewNow = false,
+  onPromptConsumed,
 }: TaskCompletionPopupProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -52,19 +57,17 @@ export default function TaskCompletionPopup({
   }, [user, isCompleted, taskId]);
 
   useEffect(() => {
-    if (!checked) return;
-    if (isCompleted && user && !hasReviewed) {
-      setOpen(true);
-    }
-  }, [checked, isCompleted, user, hasReviewed]);
+    if (!promptReviewNow || !checked || !isCompleted || !user || hasReviewed) return;
+    setOpen(true);
+    onPromptConsumed?.();
+  }, [promptReviewNow, checked, isCompleted, user, hasReviewed, onPromptConsumed]);
 
   if (!user || !isCompleted || !taskId) return null;
 
   if (!checked) {
     return (
-      <div className="px-1 sm:px-2 animate-pulse space-y-2">
-        <div className="h-3 w-20 bg-outline-variant/40 rounded" />
-        <div className="h-3 w-full bg-outline-variant/30 rounded" />
+      <div className="px-1 sm:px-2">
+        <div className="h-11 w-full rounded-full bg-outline-variant/30 animate-pulse" />
       </div>
     );
   }
@@ -87,23 +90,7 @@ export default function TaskCompletionPopup({
 
   return (
     <>
-      <div className="px-1 sm:px-2 space-y-3">
-        <div className="flex items-start gap-3 md:gap-4">
-          <div className="w-10 h-10 rounded-full bg-surface-dim flex items-center justify-center shrink-0">
-            <Star className="w-5 h-5 text-primary" aria-hidden />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-1">
-              Review
-            </p>
-            <p className="font-bold text-primary text-base md:text-lg">
-              How was working with {revieweeName}?
-            </p>
-            <p className="text-xs md:text-sm text-on-surface-variant mt-1">
-              Your feedback helps others choose confidently.
-            </p>
-          </div>
-        </div>
+      <div className="px-1 sm:px-2">
         <button
           type="button"
           onClick={() => setOpen(true)}

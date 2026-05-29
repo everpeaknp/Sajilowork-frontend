@@ -179,7 +179,7 @@ export default function FilterBar({
     }`;
 
   return (
-    <div className="relative z-[200] border-b border-outline-variant bg-white">
+    <div className="relative z-[200] bg-white">
       <div className="flex min-w-0 flex-col gap-2.5 px-3 py-2.5 sm:px-6 sm:py-3 lg:flex-row lg:items-center lg:gap-6 lg:px-10">
         <div className="flex min-w-0 items-center gap-2 lg:shrink-0">
           <button
@@ -203,7 +203,7 @@ export default function FilterBar({
                   query: e.target.value || undefined,
                 })
               }
-              className="w-full rounded-full border border-[#2f6bff]/30 bg-white py-2 pl-10 pr-4 font-sans text-[14px] shadow-sm outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-[#2f6bff]/50"
+              className="w-full rounded-full bg-[#f1f4f9] py-2 pl-10 pr-4 font-sans text-[14px] outline-none transition-all placeholder:text-on-surface-variant/60 focus:bg-[#eef2f8]"
             />
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function FilterBar({
                   placeholder="Search categories"
                   value={categorySearchQuery}
                   onChange={(e) => setCategorySearchQuery(e.target.value)}
-                  className="w-full rounded-full border border-transparent bg-[#f1f4f9] py-3 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-primary/30"
+                  className="w-full rounded-full bg-[#f1f4f9] py-3 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60 focus:bg-[#eef2f8]"
                 />
               </div>
               <div className="grid min-h-0 grid-cols-1 gap-y-3 px-1 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4">
@@ -275,7 +275,7 @@ export default function FilterBar({
                         name="category"
                         checked={draftCategory === cat}
                         onChange={() => setDraftCategory(cat)}
-                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-outline-variant bg-white transition-all checked:border-primary checked:bg-primary"
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-full bg-[#e8edf5] transition-all checked:bg-primary"
                       />
                       <svg
                         className="pointer-events-none absolute h-3 w-3 scale-0 text-white transition-transform peer-checked:scale-100"
@@ -350,7 +350,7 @@ export default function FilterBar({
                       onClick={() => setDraftWorkType(type)}
                       className={`rounded-xl py-2.5 font-sans text-[13px] font-bold capitalize transition-all sm:py-3 sm:text-[14px] ${
                         draftWorkType === type
-                          ? 'bg-[#000d45] text-white shadow-md'
+                          ? 'bg-[#000d45] text-white'
                           : 'text-on-surface hover:bg-white/50'
                       }`}
                     >
@@ -368,7 +368,7 @@ export default function FilterBar({
                   placeholder="e.g. Kathmandu, Lalitpur"
                   value={draftLocation}
                   onChange={(e) => setDraftLocation(e.target.value)}
-                  className="w-full rounded-2xl border border-transparent bg-[#f1f4f9] px-4 py-3 font-semibold text-[#000d45] outline-none transition-all focus:border-primary/30 sm:px-6 sm:py-4"
+                  className="w-full rounded-2xl bg-[#f1f4f9] px-4 py-3 font-semibold text-[#000d45] outline-none transition-all focus:bg-[#eef2f8] sm:px-6 sm:py-4"
                 />
               </div>
               <div>
