@@ -1,0 +1,21 @@
+/**
+ * Services Index
+ * 
+ * Central export point for all API services
+ */
+
+export { authService } from './auth.service';
+export { userService } from './user.service';
+export { taskService } from './task.service';
+export { bidService } from './bid.service';
+export { dashboardService } from './dashboard.service';
+export { paymentService } from './payment.service';
+export { notificationService } from './notification.service';
+export { reviewService } from './review.service';
+export { chatService } from './chat.service';
+export { categoryService } from './category.service';
+export { searchService } from './search.service';
+export { blogService } from './blog.service';
+
+// Re-export API client and token manager for direct access
+export { apiClient, tokenManager } from '@/lib/api/client';

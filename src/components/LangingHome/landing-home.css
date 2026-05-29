@@ -1,0 +1,29 @@
+/**
+ * Landing typography — PP Formula (headlines) + Manrope (body).
+ * Add licensed WOFF2 files from Pangram Pangram to public/fonts/formula/
+ * (e.g. PPFormula-Bold.woff2, PPFormula-ExtraBold.woff2, PPFormula-Black.woff2).
+ */
+
+@font-face {
+  font-family: "PP Formula";
+  src: url("/fonts/formula/PPFormula-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PP Formula";
+  src: url("/fonts/formula/PPFormula-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PP Formula";
+  src: url("/fonts/formula/PPFormula-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}

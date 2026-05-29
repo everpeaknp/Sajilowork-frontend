@@ -1,0 +1,200 @@
+/**
+ * Authentication Service
+ * 
+ * Handles all authentication-related API calls
+ */
+
+import { apiClient, tokenManager } from '@/lib/api/client';
+import { 
+  User, 
+  AuthTokens, 
+  LoginCredentials, 
+  RegisterData,
+  ApiResponse 
+} from '@/types';
+
+export const authService = {
+  /**
+   * Register a new user
+   */
+  async register(data: RegisterData): Promise<ApiResponse<{ user: User; tokens: AuthTokens }>> {
+    const response = await apiClient.post<{ user: User; tokens: AuthTokens }>('/users/register/', data);
+    
+    if (response.success && response.data.tokens) {
+      tokenManager.setTokens(response.data.tokens.access, response.data.tokens.refresh);
+    }
+    
+    return response;
+  },
+
+  /**
+   * Login user
+   */
+  async login(credentials: LoginCredentials): Promise<ApiResponse<{ user: User; tokens: AuthTokens }>> {
+    try {
+      // Call backend login endpoint
+      const response = await apiClient.post<any>('/auth/login/', credentials);
+
+      // Backend returns { access, refresh, user } directly (not wrapped in data)
+      const responseData = response.data || response;
+      
+      if (responseData.access && responseData.refresh && responseData.user) {
+        const { access, refresh, user } = responseData;
+        
+        // Store tokens
+        tokenManager.setTokens(access, refresh);
+
+        // Return in expected format
+        return {
+          success: true,
+          message: 'Login successful',
+          data: {
+            user: user as User,
+            tokens: { access, refresh }
+          },
+          errors: null
+        };
+      }
+
+      // If response doesn't have expected structure, return as is
+      return {
+        success: false,
+        message: response.message || 'Login failed',
+        data: response.data,
+        errors: response.errors
+      };
+    } catch (error: any) {
+      // Extract the most specific error message
+      const errorMessage = 
+        error?.message ||
+        error?.error ||
+        error?.detail ||
+        (error?.errors && typeof error.errors === 'object' ? JSON.stringify(error.errors) : null) ||
+        'Login failed. Please check your credentials.';
+      // Re-throw with proper error structure
+      throw {
+        message: errorMessage,
+        errors: error?.errors || null,
+        status: error?.status || 500
+      };
+    }
+  },
+
+  /**
+   * Logout user
+   */
+  async logout(): Promise<ApiResponse<void>> {
+    const refreshToken = tokenManager.getRefreshToken();
+    
+    try {
+      await apiClient.post('/auth/logout/', { refresh: refreshToken });
+    } catch (error) {
+      // Continue with logout even if API call fails
+      // Common case: refresh token already expired/invalid. We still clear local session.
+    } finally {
+      tokenManager.clearTokens();
+    }
+    
+    return {
+      success: true,
+      message: 'Logged out successfully',
+      data: undefined,
+      errors: null
+    };
+  },
+
+  /**
+   * Refresh access token
+   */
+  async refreshToken(): Promise<ApiResponse<AuthTokens>> {
+    const refreshToken = tokenManager.getRefreshToken();
+    
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+    
+    const response = await apiClient.post<AuthTokens>('/auth/token/refresh/', {
+      refresh: refreshToken
+    });
+    
+    if (response.success && response.data) {
+      tokenManager.setTokens(response.data.access, refreshToken);
+    }
+    
+    return response;
+  },
+
+  /**
+   * Get current user profile
+   */
+  async getCurrentUser(): Promise<ApiResponse<User>> {
+    return apiClient.get<User>('/users/me/');
+  },
+
+  /**
+   * Request password reset
+   */
+  async requestPasswordReset(email: string): Promise<ApiResponse<void>> {
+    // Backend: /api/v1/users/password-reset/
+    return apiClient.post('/users/password-reset/', { email });
+  },
+
+  /**
+   * Reset password with token
+   */
+  async resetPassword(uid: string, token: string, newPassword: string): Promise<ApiResponse<void>> {
+    // Backend: /api/v1/users/password-reset/confirm/
+    return apiClient.post('/users/password-reset/confirm/', {
+      uid,
+      token,
+      new_password: newPassword,
+      new_password_confirm: newPassword,
+    });
+  },
+
+  /**
+   * Change password (authenticated user)
+   */
+  async changePassword(oldPassword: string, newPassword: string): Promise<ApiResponse<void>> {
+    return apiClient.post('/auth/password-change/', {
+      old_password: oldPassword,
+      new_password: newPassword
+    });
+  },
+
+  /**
+   * Verify email with token
+   */
+  async verifyEmail(token: string): Promise<ApiResponse<void>> {
+    return apiClient.post('/auth/verify-email/', { token });
+  },
+
+  /**
+   * Resend verification email
+   */
+  async resendVerificationEmail(): Promise<ApiResponse<void>> {
+    return apiClient.post('/auth/resend-verification/');
+  },
+
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated(): boolean {
+    const token = tokenManager.getAccessToken();
+    return !!token && !tokenManager.isTokenExpired(token);
+  },
+
+  /**
+   * Get stored tokens
+   */
+  getTokens(): AuthTokens | null {
+    const access = tokenManager.getAccessToken();
+    const refresh = tokenManager.getRefreshToken();
+    
+    if (!access || !refresh) return null;
+    
+    return { access, refresh };
+  }
+};
+
+export default authService;

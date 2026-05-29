@@ -1,0 +1,123 @@
+'use client';
+
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import UserAvatar from '@/components/common/UserAvatar';
+import { userService } from '@/services/user.service';
+import { useAuthStore } from '@/store/auth.store';
+
+interface TaskPosterFollowProps {
+  posterId: string | null;
+  profileSlug: string | null;
+  posterName: string;
+  posterAvatar: string;
+  postedAgo?: string;
+}
+
+export default function TaskPosterFollow({
+  posterId,
+  profileSlug,
+  posterName,
+  posterAvatar,
+  postedAgo,
+}: TaskPosterFollowProps) {
+  const { user } = useAuthStore();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+
+  const isOwnProfile =
+    posterId && user?.id && String(user.id) === String(posterId);
+
+  const profileHref = profileSlug ? `/users/${encodeURIComponent(profileSlug)}` : null;
+
+  useEffect(() => {
+    if (!posterId) return;
+    let cancelled = false;
+    void userService.getFollowStatus(posterId).then((res) => {
+      if (cancelled || !res.success || !res.data) return;
+      setIsFollowing(res.data.is_following);
+      setFollowersCount(res.data.followers_count ?? 0);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [posterId]);
+
+  const handleFollow = useCallback(async () => {
+    if (!posterId || isOwnProfile) return;
+    if (!user) {
+      window.location.href = '/signin';
+      return;
+    }
+    setFollowLoading(true);
+    try {
+      const res = isFollowing
+        ? await userService.unfollowUser(posterId)
+        : await userService.followUser(posterId);
+      if (!res.success || !res.data) {
+        toast.error(res.message || 'Could not update follow status');
+        return;
+      }
+      setIsFollowing(res.data.is_following);
+      setFollowersCount(res.data.followers_count ?? 0);
+      toast.success(res.data.is_following ? 'Following' : 'Unfollowed');
+    } catch {
+      toast.error('Could not update follow status');
+    } finally {
+      setFollowLoading(false);
+    }
+  }, [posterId, isOwnProfile, user, isFollowing]);
+
+  const avatar = profileHref ? (
+    <Link href={profileHref} className="shrink-0 rounded-full">
+      <UserAvatar src={posterAvatar} alt={posterName} name={posterName} size="lg" />
+    </Link>
+  ) : (
+    <UserAvatar src={posterAvatar} alt={posterName} name={posterName} size="lg" />
+  );
+
+  return (
+    <div className="flex items-start gap-3 md:gap-4 px-1 sm:px-2">
+      {avatar}
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-1">
+          Posted by
+        </p>
+        {profileHref ? (
+          <Link
+            href={profileHref}
+            className="font-bold text-primary text-base md:text-lg truncate block hover:underline"
+          >
+            {posterName}
+          </Link>
+        ) : (
+          <p className="font-bold text-primary text-base md:text-lg truncate">{posterName}</p>
+        )}
+        {postedAgo && (
+          <p className="text-on-surface-variant text-xs md:text-sm">{postedAgo}</p>
+        )}
+        {posterId && (
+          <p className="text-on-surface-variant text-xs md:text-sm mt-0.5">
+            {followersCount === 1 ? '1 follower' : `${followersCount} followers`}
+          </p>
+        )}
+      </div>
+      {posterId && !isOwnProfile && (
+        <button
+          type="button"
+          onClick={() => void handleFollow()}
+          disabled={followLoading}
+          className={`shrink-0 px-3 md:px-4 py-1.5 md:py-2 border-2 font-semibold text-xs md:text-sm rounded-full transition-all whitespace-nowrap disabled:opacity-60 ${
+            isFollowing
+              ? 'border-outline-variant text-on-surface-variant bg-surface-dim hover:bg-surface-variant/30'
+              : 'border-primary text-primary hover:bg-primary hover:text-white'
+          }`}
+        >
+          {followLoading ? '…' : isFollowing ? 'Following' : 'Follow'}
+        </button>
+      )}
+    </div>
+  );
+}

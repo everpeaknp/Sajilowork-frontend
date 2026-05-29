@@ -1,0 +1,252 @@
+/**
+ * Task Service
+ * 
+ * Handles all task-related API calls
+ */
+
+import { apiClient } from '@/lib/api/client';
+import { 
+  Task, 
+  Category,
+  TaskFormData,
+  TaskAttachment,
+  TaskQuestion,
+  TaskStatus,
+  SearchFilters,
+  ApiResponse,
+  PaginatedResponse
+} from '@/types';
+
+export const taskService = {
+  /**
+   * Get all tasks with filters
+   */
+  async getTasks(
+    params?: Record<string, string | number>
+  ): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    return apiClient.get<PaginatedResponse<Task>>('/tasks/', { params });
+  },
+
+  /**
+   * Get task by ID (deprecated - use getTaskBySlug instead)
+   */
+  async getTaskById(taskId: string): Promise<ApiResponse<Task>> {
+    return apiClient.get<Task>(`/tasks/${taskId}/`);
+  },
+
+  /**
+   * Get task by slug
+   */
+  async getTaskBySlug(slug: string): Promise<ApiResponse<Task>> {
+    return apiClient.get<Task>(`/tasks/${slug}/`);
+  },
+
+  /**
+   * Create new task
+   */
+  async createTask(data: TaskFormData): Promise<ApiResponse<Task>> {
+    return apiClient.post<Task>('/tasks/', data);
+  },
+
+  /**
+   * Update task by slug (backend uses slug as lookup_field)
+   */
+  async updateTask(slugOrId: string, data: Partial<TaskFormData>): Promise<ApiResponse<Task>> {
+    return apiClient.patch<Task>(`/tasks/${slugOrId}/`, data);
+  },
+
+  /**
+   * Delete task by slug (backend uses slug as lookup_field)
+   */
+  async deleteTask(slugOrId: string): Promise<ApiResponse<void>> {
+    return apiClient.delete(`/tasks/${slugOrId}/`);
+  },
+
+  /**
+   * Publish draft task
+   */
+  async publishTask(taskId: string): Promise<ApiResponse<Task>> {
+    return apiClient.post<Task>(`/tasks/${taskId}/publish/`);
+  },
+
+  /**
+   * Cancel task
+   */
+  async cancelTask(taskId: string, reason?: string): Promise<ApiResponse<Task>> {
+    return apiClient.post<Task>(`/tasks/${taskId}/cancel/`, { reason });
+  },
+
+  /**
+   * Complete task
+   */
+  async completeTask(taskId: string): Promise<ApiResponse<Task>> {
+    return apiClient.post<Task>(`/tasks/${taskId}/complete/`);
+  },
+
+  /**
+   * Update task status via TaskViewSet.update_status.
+   * Backend expects slug lookup field and a JSON body: { status: 'in_progress' | 'completed' | ... }.
+   */
+  async updateTaskStatus(
+    taskId: string,
+    status: TaskStatus
+  ): Promise<ApiResponse<{ message: string; task: Task }>> {
+    return apiClient.patch<{ message: string; task: Task }>(
+      `/tasks/${taskId}/update_status/`,
+      { status }
+    );
+  },
+
+  /**
+   * Get user's posted tasks
+   */
+  async getMyTasks(status?: string): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    return apiClient.get<PaginatedResponse<Task>>('/tasks/my_tasks/', {
+      params: { status }
+    });
+  },
+
+  /**
+   * Get tasks assigned to user
+   */
+  async getAssignedTasks(status?: string): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    return apiClient.get<PaginatedResponse<Task>>('/tasks/assigned_tasks/', {
+      params: { status }
+    });
+  },
+
+  /**
+   * Get bookmarked tasks
+   */
+  async getBookmarkedTasks(): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    return apiClient.get<PaginatedResponse<Task>>('/tasks/bookmarked/');
+  },
+
+  /** Add bookmark (creates TaskBookmark row). */
+  async bookmarkTask(slug: string): Promise<ApiResponse<{ message?: string }>> {
+    return apiClient.post<{ message?: string }>(`/tasks/${slug}/bookmark/`);
+  },
+
+  /** Remove bookmark. */
+  async unbookmarkTask(slug: string): Promise<ApiResponse<{ message?: string }>> {
+    return apiClient.delete<{ message?: string }>(`/tasks/${slug}/bookmark/`);
+  },
+
+  /**
+   * Get all categories
+   */
+  async getCategories(): Promise<ApiResponse<Category[]>> {
+    return apiClient.get<Category[]>('/tasks/categories/');
+  },
+
+  /**
+   * Get category by ID
+   */
+  async getCategoryById(categoryId: string): Promise<ApiResponse<Category>> {
+    return apiClient.get<Category>(`/tasks/categories/${categoryId}/`);
+  },
+
+  /**
+   * Upload task attachment
+   */
+  async uploadAttachment(
+    taskId: string, 
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<ApiResponse<TaskAttachment>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('task', taskId);
+    
+    return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
+  },
+
+  /**
+   * Delete task attachment
+   */
+  async deleteAttachment(attachmentId: string): Promise<ApiResponse<void>> {
+    return apiClient.delete(`/tasks/attachments/${attachmentId}/`);
+  },
+
+  /**
+   * Get task questions (included on task detail; list endpoint is not exposed)
+   */
+  async getTaskQuestions(slugOrId: string): Promise<ApiResponse<TaskQuestion[]>> {
+    const detail = await this.getTaskBySlug(slugOrId);
+    if (!detail.success || !detail.data) {
+      return {
+        success: false,
+        message: detail.message ?? 'Failed to load questions',
+        data: [],
+      };
+    }
+    const questions = (detail.data as Task & { questions?: TaskQuestion[] }).questions ?? [];
+    return { success: true, data: questions, message: 'OK' };
+  },
+
+  /**
+   * Ask question about task (DRF action: POST /tasks/{slug}/ask_question/)
+   */
+  async askQuestion(slugOrId: string, question: string): Promise<ApiResponse<TaskQuestion>> {
+    return apiClient.post<TaskQuestion>(`/tasks/${slugOrId}/ask_question/`, { question });
+  },
+
+  /**
+   * Answer task question (task poster only)
+   */
+  async answerQuestion(
+    slugOrId: string,
+    questionId: string,
+    answer: string
+  ): Promise<ApiResponse<TaskQuestion>> {
+    return apiClient.patch<TaskQuestion>(
+      `/tasks/${slugOrId}/questions/${questionId}/`,
+      { answer }
+    );
+  },
+
+  /**
+   * Report task
+   */
+  async reportTask(taskId: string, reason: string, description?: string): Promise<ApiResponse<void>> {
+    return apiClient.post(`/tasks/${taskId}/report/`, { reason, description });
+  },
+
+  /**
+   * Search tasks
+   */
+  async searchTasks(query: string, filters?: SearchFilters): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    return apiClient.get<PaginatedResponse<Task>>('/tasks/', {
+      params: { search: query, ...filters }
+    });
+  },
+
+  /**
+   * Get nearby tasks
+   */
+  async getNearbyTasks(
+    latitude: number,
+    longitude: number,
+    radius?: number
+  ): Promise<ApiResponse<Task[]>> {
+    return apiClient.get<Task[]>('/tasks/nearby/', {
+      params: { latitude, longitude, radius }
+    });
+  },
+
+  /**
+   * Get featured tasks
+   */
+  async getFeaturedTasks(): Promise<ApiResponse<Task[]>> {
+    return apiClient.get<Task[]>('/tasks/featured/');
+  },
+
+  /**
+   * Get urgent tasks
+   */
+  async getUrgentTasks(): Promise<ApiResponse<Task[]>> {
+    return apiClient.get<Task[]>('/tasks/urgent/');
+  }
+};
+
+export default taskService;
