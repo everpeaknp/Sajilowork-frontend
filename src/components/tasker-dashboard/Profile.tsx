@@ -350,7 +350,7 @@ export default function Profile() {
     >
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">Profile Settings</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">Profile Settings</h1>
           <p className="text-gray-500 mt-2">Manage your personal information and public presence.</p>
         </div>
         {publicProfileHref ? (
@@ -381,7 +381,7 @@ export default function Profile() {
         {/* Left Column: Avatar */}
         <div className="lg:col-span-4 space-y-6 flex flex-col items-center lg:items-start">
           <div className="relative group">
-            <div className="w-48 h-48 rounded-[40px] bg-gray-100 border-4 border-white shadow-2xl overflow-hidden">
+            <div className="h-32 w-32 overflow-hidden rounded-[32px] border-4 border-white bg-gray-100 shadow-2xl sm:h-48 sm:w-48 sm:rounded-[40px]">
               <img 
                 src={profile.profileImage} 
                 alt="Profile" 

@@ -11,6 +11,7 @@ export type ReviewModalProps = {
   onClose: () => void;
   taskId: string;
   revieweeName: string;
+  onSuccess?: () => void;
 };
 
 export default function ReviewModal({
@@ -18,6 +19,7 @@ export default function ReviewModal({
   onClose,
   taskId,
   revieweeName,
+  onSuccess,
 }: ReviewModalProps) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -44,6 +46,7 @@ export default function ReviewModal({
         return;
       }
       toast.success('Review submitted');
+      onSuccess?.();
       onClose();
     } catch (e: any) {
       toast.error(e?.message || 'Failed to submit review');

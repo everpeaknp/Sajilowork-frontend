@@ -12,7 +12,6 @@ interface TaskPosterFollowProps {
   profileSlug: string | null;
   posterName: string;
   posterAvatar: string;
-  postedAgo?: string;
 }
 
 export default function TaskPosterFollow({
@@ -20,17 +19,18 @@ export default function TaskPosterFollow({
   profileSlug,
   posterName,
   posterAvatar,
-  postedAgo,
 }: TaskPosterFollowProps) {
   const { user } = useAuthStore();
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followersCount, setFollowersCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
 
   const isOwnProfile =
     posterId && user?.id && String(user.id) === String(posterId);
 
-  const profileHref = profileSlug ? `/users/${encodeURIComponent(profileSlug)}` : null;
+  const profileSegment = profileSlug || posterId;
+  const profileHref = profileSegment
+    ? `/users/${encodeURIComponent(profileSegment)}`
+    : null;
 
   useEffect(() => {
     if (!posterId) return;
@@ -38,7 +38,6 @@ export default function TaskPosterFollow({
     void userService.getFollowStatus(posterId).then((res) => {
       if (cancelled || !res.success || !res.data) return;
       setIsFollowing(res.data.is_following);
-      setFollowersCount(res.data.followers_count ?? 0);
     });
     return () => {
       cancelled = true;
@@ -61,7 +60,6 @@ export default function TaskPosterFollow({
         return;
       }
       setIsFollowing(res.data.is_following);
-      setFollowersCount(res.data.followers_count ?? 0);
       toast.success(res.data.is_following ? 'Following' : 'Unfollowed');
     } catch {
       toast.error('Could not update follow status');
@@ -94,14 +92,6 @@ export default function TaskPosterFollow({
           </Link>
         ) : (
           <p className="font-bold text-primary text-base md:text-lg truncate">{posterName}</p>
-        )}
-        {postedAgo && (
-          <p className="text-on-surface-variant text-xs md:text-sm">{postedAgo}</p>
-        )}
-        {posterId && (
-          <p className="text-on-surface-variant text-xs md:text-sm mt-0.5">
-            {followersCount === 1 ? '1 follower' : `${followersCount} followers`}
-          </p>
         )}
       </div>
       {posterId && !isOwnProfile && (

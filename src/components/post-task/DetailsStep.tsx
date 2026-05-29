@@ -5,6 +5,8 @@ import { Plus, X } from 'lucide-react';
 
 export interface TaskData {
   title: string;
+  categoryId: string;
+  categoryName: string;
   dateType: 'specific' | 'before' | 'flexible' | '';
   specificDate: string;
   beforeDate: string;
@@ -67,16 +69,19 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ data, updateData, show
   };
 
   return (
-    <div className="max-w-2xl text-[#0a1452]">
-      <h1 className="text-4xl font-bold mb-12 uppercase tracking-tight" style={{ fontFamily: '"Space Grotesk", sans-serif' }}>
+    <div className="w-full text-[#0a1452]">
+      <h1
+        className="mb-6 text-2xl font-bold uppercase tracking-tight sm:mb-8 sm:text-3xl lg:mb-12 lg:text-4xl"
+        style={{ fontFamily: '"Space Grotesk", sans-serif' }}
+      >
         Provide more details
       </h1>
 
-      <div className="space-y-10">
+      <div className="space-y-6 sm:space-y-8 lg:space-y-10">
         <div>
           <label className="block text-[15px] font-bold mb-4">What are the details?</label>
           <textarea
-            className={`w-full bg-white border-2 rounded-2xl p-5 text-lg placeholder:text-gray-400 outline-none min-h-[160px] resize-none transition-all ${
+            className={`min-h-[140px] w-full resize-none rounded-2xl border-2 bg-white p-4 text-base placeholder:text-gray-400 outline-none transition-all sm:min-h-[160px] sm:p-5 sm:text-lg lg:min-h-[200px] ${
               showError 
                 ? 'border-[#ff4d00] focus:ring-0' 
                 : 'border-blue-100 focus:border-[#0066ff] focus:ring-0'
@@ -111,7 +116,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ data, updateData, show
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-32 h-32 bg-gray-50 rounded-2xl border-2 border-transparent hover:border-gray-200 flex items-center justify-center transition-all group"
+              className="flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-transparent bg-gray-50 transition-all group hover:border-gray-200 sm:h-32 sm:w-32"
             >
               <div className="w-10 h-10 rounded-full border-2 border-[#0066ff] flex items-center justify-center text-[#0066ff] group-hover:bg-[#0066ff] group-hover:text-white transition-all">
                 <Plus className="w-6 h-6 stroke-[3]" />
@@ -121,7 +126,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ data, updateData, show
             {previews.map((p) => (
               <div
                 key={p.url}
-                className="relative w-32 h-32 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50"
+                className="relative h-24 w-24 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 sm:h-32 sm:w-32"
               >
                 <img
                   src={p.url}

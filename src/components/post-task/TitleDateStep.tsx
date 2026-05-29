@@ -3,8 +3,13 @@ import React, { useState } from 'react';
 import { Sun, Sunrise, Sunset, CloudMoon, ChevronDown, Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 
+import type { Category } from '@/types';
+import { CategorySelect } from '@/components/post-task/CategorySelect';
+
 export interface TaskData {
   title: string;
+  categoryId: string;
+  categoryName: string;
   dateType: 'specific' | 'before' | 'flexible' | '';
   specificDate: string;
   beforeDate: string;
@@ -23,14 +28,29 @@ export interface TaskData {
 interface TitleDateStepProps {
   data: TaskData;
   updateData: (updates: Partial<TaskData>) => void;
+  categories: Category[];
+  categoriesLoaded: boolean;
   showErrors?: boolean;
-  errors?: Partial<Record<'title' | 'dateType' | 'specificDate' | 'beforeDate' | 'timeSlot', string>>;
+  errors?: Partial<
+    Record<
+      'title' | 'categoryId' | 'dateType' | 'specificDate' | 'beforeDate' | 'timeSlot',
+      string
+    >
+  >;
 }
 
-export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, showErrors, errors }) => {
+export const TitleDateStep: React.FC<TitleDateStepProps> = ({
+  data,
+  updateData,
+  categories,
+  categoriesLoaded,
+  showErrors,
+  errors,
+}) => {
   const [showCalendar, setShowCalendar] = useState<'specific' | 'before' | null>(null);
   const [isTitleTouched, setIsTitleTouched] = useState(false);
   const titleError = errors?.title && (showErrors || isTitleTouched) ? errors.title : null;
+  const categoryError = errors?.categoryId && showErrors ? errors.categoryId : null;
   const dateError = errors?.dateType && showErrors ? errors.dateType : null;
   const timeSlotError = errors?.timeSlot && showErrors ? errors.timeSlot : null;
 
@@ -71,18 +91,31 @@ export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, 
     });
   };
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-4xl font-bold mb-12 uppercase tracking-tight text-gray-900" style={{ fontFamily: '"Space Grotesk", sans-serif' }}>
+    <div className="w-full">
+      <h1
+        className="mb-6 text-2xl font-bold uppercase tracking-tight text-gray-900 sm:mb-8 sm:text-3xl md:text-[2rem] lg:mb-10 lg:text-4xl"
+        style={{ fontFamily: '"Space Grotesk", sans-serif' }}
+      >
         Let's start with the basics
       </h1>
 
-      <div className="space-y-10">
-        {/* Title Input */}
+      <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+        <CategorySelect
+          categories={categories}
+          categoriesLoaded={categoriesLoaded}
+          value={data.categoryId}
+          onChange={(categoryId, categoryName) =>
+            updateData({ categoryId, categoryName })
+          }
+          showError={showErrors}
+          error={categoryError ?? undefined}
+        />
+
         <div>
           <label className="block text-[15px] font-bold text-gray-800 mb-4">In a few words, what do you need done?</label>
           <input
             type="text"
-            className={`w-full bg-gray-50 rounded-2xl p-5 text-lg placeholder:text-gray-400 outline-none transition-all shadow-sm ${
+            className={`w-full rounded-2xl bg-gray-50 p-4 text-base placeholder:text-gray-400 shadow-sm outline-none transition-all sm:p-5 sm:text-lg ${
               titleError ? 'ring-2 ring-[#ff4d00]' : 'focus:ring-2 focus:ring-[#0066ff]'
             }`}
             placeholder="e.g. Help move my sofa"
@@ -103,7 +136,7 @@ export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, 
             <button
               type="button"
               onClick={() => handleDateTypeClick('specific')}
-              className={`flex items-center gap-2 px-5 py-3 rounded-full border-2 transition-all cursor-pointer ${
+              className={`flex cursor-pointer items-center gap-2 rounded-full border-2 px-4 py-2.5 transition-all sm:px-5 sm:py-3 ${
                 hasSpecificDate
                   ? 'bg-blue-950 border-blue-950 text-white shadow-lg shadow-blue-950/20'
                   : 'bg-white border-gray-200 text-blue-950 hover:bg-blue-950 hover:border-blue-950 hover:text-white hover:shadow-lg hover:shadow-blue-950/20'
@@ -123,7 +156,7 @@ export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, 
             <button
               type="button"
               onClick={() => handleDateTypeClick('before')}
-              className={`flex items-center gap-2 px-7 py-3 rounded-full border-2 transition-all cursor-pointer ${
+              className={`flex cursor-pointer items-center gap-2 rounded-full border-2 px-4 py-2.5 transition-all sm:px-7 sm:py-3 ${
                 hasBeforeDate
                   ? 'bg-blue-950 border-blue-950 text-white shadow-lg shadow-blue-950/20'
                   : 'bg-white border-gray-200 text-blue-950 hover:bg-blue-950 hover:border-blue-950 hover:text-white hover:shadow-lg hover:shadow-blue-950/20'
@@ -145,7 +178,7 @@ export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, 
                 updateData({ dateType: 'flexible' });
                 setShowCalendar(null);
               }}
-              className={`px-7 py-3 rounded-full border-2 transition-all ${
+              className={`rounded-full border-2 px-4 py-2.5 transition-all sm:px-7 sm:py-3 ${
                 data.dateType === 'flexible'
                   ? 'bg-blue-950 border-blue-950 text-white shadow-lg shadow-blue-950/20'
                   : 'bg-white border-gray-200 text-blue-950 hover:bg-blue-950 hover:border-blue-950 hover:text-white hover:shadow-lg hover:shadow-blue-950/20'
@@ -209,7 +242,7 @@ export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, 
             </label>
 
             {data.timeOfDayRequired && (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
                 {[
                   { id: 'morning', icon: Sunrise, label: 'Morning', sub: 'Before 10am' },
                   { id: 'midday', icon: Sun, label: 'Midday', sub: '10am - 2pm' },
@@ -222,15 +255,15 @@ export const TitleDateStep: React.FC<TitleDateStepProps> = ({ data, updateData, 
                     <button
                       key={slot.id}
                       onClick={() => updateData({ timeSlot: slot.id as any })}
-                      className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${
+                      className={`flex flex-col items-center justify-center rounded-2xl border-2 p-3 transition-all sm:p-6 ${
                         isActive
                           ? 'bg-blue-50 border-[#0066ff] text-[#0066ff] shadow-sm'
                           : 'bg-gray-50 border-transparent hover:border-gray-200 text-gray-500'
                       }`}
                     >
-                      <Icon className={`w-7 h-7 mb-3 ${isActive ? 'text-[#0066ff]' : 'text-gray-400'}`} />
-                      <span className="text-[15px] font-bold mb-1">{slot.label}</span>
-                      <span className="text-[11px] font-medium opacity-70">{slot.sub}</span>
+                      <Icon className={`mb-2 h-6 w-6 sm:mb-3 sm:h-7 sm:w-7 ${isActive ? 'text-[#0066ff]' : 'text-gray-400'}`} />
+                      <span className="text-xs font-bold sm:text-[15px]">{slot.label}</span>
+                      <span className="text-[10px] font-medium opacity-70 sm:text-[11px]">{slot.sub}</span>
                     </button>
                   );
                 })}

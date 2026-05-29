@@ -63,18 +63,18 @@ export default function GridCategories({ onSelectGridCategory }: GridCategoriesP
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 w-full text-left">
+    <div className="mx-auto w-full max-w-7xl px-4 py-10 text-left sm:px-6 sm:py-16 lg:px-8">
       {/* Sleek, Premium Header */}
-      <div className="mb-10 max-w-3xl">
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-[#005fff] mb-2.5 block">
+      <div className="mb-6 max-w-3xl sm:mb-10">
+        <span className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[#005fff] sm:mb-2.5 sm:text-[11px]">
           Professional Services
         </span>
         <h2
-          className={`${landingHeadline} text-3xl sm:text-4xl text-[#03113c] leading-tight`}
+          className={`${landingHeadline} text-2xl leading-tight text-[#03113c] text-balance sm:text-4xl`}
         >
           Explore specialized services
         </h2>
-        <p className="text-[13px] sm:text-[14px] text-gray-500 mt-2.5 leading-relaxed font-medium max-w-2xl">
+        <p className="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-gray-500 sm:mt-2.5 sm:text-[14px]">
           From speedy everyday tasks to custom programming. Describe what you need, post for free,
           and receive responses from fully verified specialists instantly.
         </p>
@@ -86,7 +86,7 @@ export default function GridCategories({ onSelectGridCategory }: GridCategoriesP
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-80px' }}
-        className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"
+        className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4 lg:grid-cols-6"
       >
         {GRID_CATEGORIES.map((grid) => {
           const IconComponent = IconMap[grid.iconName] || Compass;
@@ -97,17 +97,17 @@ export default function GridCategories({ onSelectGridCategory }: GridCategoriesP
               variants={itemVariants}
               type="button"
               onClick={() => onSelectGridCategory(grid.name)}
-              className="group relative bg-[#F3F3F7] rounded-2xl p-4 hover:bg-[#EAEAEF] transition-all duration-300 cursor-pointer text-center flex flex-col items-center justify-center h-[115px] select-none overflow-hidden focus:outline-hidden focus:ring-2 focus:ring-[#005fff]/40"
+              className="group relative flex min-h-[96px] cursor-pointer select-none flex-col items-center justify-center overflow-hidden rounded-xl bg-[#F3F3F7] p-3 text-center transition-all duration-300 hover:bg-[#EAEAEF] focus:outline-hidden focus:ring-2 focus:ring-[#005fff]/40 active:scale-[0.98] sm:min-h-[115px] sm:rounded-2xl sm:p-4"
             >
               {/* Centered Modern Icon (Pure Black, No white background) */}
-              <div className="text-black transition-all duration-300 group-hover:scale-110 mb-2.5 shrink-0">
-                <IconComponent className="h-6 w-6" />
+              <div className="mb-2 shrink-0 text-black transition-all duration-300 group-hover:scale-110 sm:mb-2.5">
+                <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
 
               {/* Centered Title (Pure Black) */}
-              <div className="w-full">
+              <div className="w-full px-0.5">
                 <h3
-                  className={`${landingHeadlineSm} text-xs sm:text-sm text-black leading-tight group-hover:text-[#005fff] transition-colors duration-200`}
+                  className={`${landingHeadlineSm} line-clamp-2 text-[11px] leading-tight text-black transition-colors duration-200 group-hover:text-[#005fff] sm:text-sm`}
                 >
                   {grid.name}
                 </h3>

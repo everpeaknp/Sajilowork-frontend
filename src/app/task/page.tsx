@@ -12,6 +12,9 @@ import FilterBar from '@/components/task/FilterBar';
 import TaskCard from '@/components/task/TaskCard';
 import TaskDetails from '@/components/task/TaskDetails';
 import TaskMapPreview from '@/components/task/TaskMapPreview';
+import TaskBrowseMobileSheet, {
+  type BrowseSheetSnap,
+} from '@/components/task/TaskBrowseMobileSheet';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useTaskStore } from '@/store';
 import { useAuth } from '@/hooks/useAuth';
@@ -42,6 +45,7 @@ export default function App() {
   /** Sidebar card or "View Task" — full TaskDetails */
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
   const [isCompactSidebar, setIsCompactSidebar] = useState(false);
+  const [sheetSnap, setSheetSnap] = useState<BrowseSheetSnap>('map');
   
   const tasks = useTaskStore((s) => s.tasks);
   const filters = useTaskStore((s) => s.filters);
@@ -49,6 +53,7 @@ export default function App() {
   const fetchTasks = useTaskStore((s) => s.fetchTasks);
   const fetchCategories = useTaskStore((s) => s.fetchCategories);
   const categories = useTaskStore((s) => s.categories);
+  const categoriesLoaded = useTaskStore((s) => s.categoriesLoaded);
   const isLoading = useTaskStore((s) => s.isLoading);
   const error = useTaskStore((s) => s.error);
   const taskList = Array.isArray(tasks) ? tasks : [];
@@ -153,14 +158,16 @@ export default function App() {
     [findTaskByKey, detailTaskId]
   );
 
-  const handleTaskFocus = useCallback((taskKey: string) => {
-    setFocusedTaskId(taskKey);
-    setDetailTaskId(null);
-  }, []);
-
   const handleViewTask = useCallback((taskKey: string) => {
     setFocusedTaskId(taskKey);
     setDetailTaskId(taskKey);
+    setSheetSnap('map');
+  }, []);
+
+  const handleTaskFocus = useCallback((taskKey: string) => {
+    setFocusedTaskId(taskKey);
+    setDetailTaskId(null);
+    setSheetSnap('map');
   }, []);
 
   const handleCloseMapPreview = useCallback(() => {
@@ -362,7 +369,7 @@ export default function App() {
   }, [focusedTaskId, detailTaskId, mappedTasks]);
 
   return (
-    <div className="flex flex-col h-screen bg-surface">
+    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
       <Navbar />
       
       <main ref={mainRef} className="flex-1 flex overflow-hidden">
@@ -430,6 +437,7 @@ export default function App() {
                           <TaskCard
                             key={`${task.id}-${sortKey}-${index}`}
                             {...cardProps}
+                            showOffersOnly
                             isActive={isActive}
                             onClick={() => handleViewTask(taskKey)}
                           />
@@ -483,6 +491,7 @@ export default function App() {
             currentFilters={safeFilters}
             onFilterChange={handleFilterChange}
             categories={categories}
+            categoriesLoaded={categoriesLoaded}
             isSidebarVisible={isSidebarVisible}
             onToggleSidebar={() => setIsSidebarVisible(!isSidebarVisible)}
             isCompactSidebar={isCompactSidebar}
@@ -507,6 +516,60 @@ export default function App() {
                 onViewTask={() => handleViewTask(String(previewMapTask.slug || previewMapTask.id))}
               />
             )}
+
+            {/* iPhone-style map ↔ list sheet (mobile only; desktop uses left sidebar) */}
+            <TaskBrowseMobileSheet
+              snap={sheetSnap}
+              onSnapChange={setSheetSnap}
+              taskCount={filteredTaskList.length}
+              hidden={Boolean(detailTask)}
+            >
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                  <p className="font-semibold text-on-surface-variant">Loading tasks…</p>
+                </div>
+              ) : filteredTaskList.length > 0 ? (
+                <div className="flex flex-col gap-3 pb-2">
+                  {filteredTaskList.map((task, index) => {
+                    const cardProps = getTaskCardProps(task);
+                    const taskKey = task.slug || task.id;
+                    const sortKey = safeFilters.sort_by ?? 'newest';
+                    return (
+                      <TaskCard
+                        key={`mobile-${task.id}-${sortKey}-${index}`}
+                        {...cardProps}
+                        showOffersOnly
+                        isActive={detailTaskId === taskKey}
+                        onClick={() => handleViewTask(taskKey)}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center px-2 py-10 text-center">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-dim">
+                    <SlidersHorizontal className="h-7 w-7 text-on-surface-variant" />
+                  </div>
+                  <h3 className="mb-2 text-base font-bold text-on-surface">
+                    {taskList.length > 0
+                      ? 'No tasks match your filters'
+                      : 'No tasks available'}
+                  </h3>
+                  <p className="mb-4 text-sm text-on-surface-variant">
+                    {taskList.length > 0
+                      ? 'Try adjusting search or filters.'
+                      : 'Be the first to post a task!'}
+                  </p>
+                  <a
+                    href="/post-task"
+                    className="rounded-full bg-primary px-6 py-2 font-semibold text-white hover:bg-primary/90"
+                  >
+                    Post a Task
+                  </a>
+                </div>
+              )}
+            </TaskBrowseMobileSheet>
 
             {/* Friendly overlay when no tasks have coordinates at all.
                 Hide while a detail panel is open so it doesn't feel like a task error. */}

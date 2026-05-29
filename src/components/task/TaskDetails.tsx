@@ -10,6 +10,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import MakeOfferModal from './modals/MakeOfferModal';
 import ReportTaskModal from './modals/ReportTaskModal';
+import SetUpAlertsModal from './modals/SetUpAlertsModal';
 import UserAvatar from '@/components/common/UserAvatar';
 import { getMediaUrl, isTaskImageAttachment } from '@/lib/utils';
 import { formatNPR, formatTaskLocation, formatTaskLocationShort } from '@/lib/nepalLocale';
@@ -26,6 +27,8 @@ import { bidService, extractBidList } from '@/services/bid.service';
 import { taskService } from '@/services/task.service';
 import { getTaskTimeSlotFromRequirements } from '@/lib/timeSlot';
 import TaskTimeSlotText from '@/components/common/TaskTimeSlotText';
+import { saveSimilarTaskPrefill, suggestTaskAlertKeyword } from '@/lib/similarTask';
+import notificationService from '@/services/notification.service';
 
 interface TaskDetailsProps {
   task: Task;
@@ -76,6 +79,8 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
   const [showMakeOfferModal, setShowMakeOfferModal] = useState(false);
   const [isSidebarMoreOptionsOpen, setIsSidebarMoreOptionsOpen] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
+  const [reportSubmitting, setReportSubmitting] = useState(false);
   const [bids, setBids] = useState<Bid[]>([]);
   const [questions, setQuestions] = useState<TaskQuestion[]>([]);
   const [loadingBids, setLoadingBids] = useState(false);
@@ -267,10 +272,14 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
   }, [refreshOffersAndNotifyParent]);
 
   const sidebarMoreOptionsRef = useRef<HTMLDivElement>(null);
+  const mobileMoreOptionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (sidebarMoreOptionsRef.current && !sidebarMoreOptionsRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const insideDesktop = sidebarMoreOptionsRef.current?.contains(target);
+      const insideMobile = mobileMoreOptionsRef.current?.contains(target);
+      if (!insideDesktop && !insideMobile) {
         setIsSidebarMoreOptionsOpen(false);
       }
     }
@@ -372,10 +381,110 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
     }
   };
 
-  const handleReportSubmit = (category: string, comment: string) => {
-    // Handle report submission
-    console.log('Report submitted:', { category, comment });
-    setShowReportModal(false);
+  const requireSignedIn = useCallback(
+    (message: string, redirectPath: string): boolean => {
+      if (user?.id) return true;
+      toast.error(message);
+      router.push(`/signin?redirect=${encodeURIComponent(redirectPath)}`);
+      return false;
+    },
+    [router, user?.id]
+  );
+
+  const handlePostSimilarTask = useCallback(() => {
+    if (!requireSignedIn('Please sign in to post a task', '/post-task?from=similar')) {
+      return;
+    }
+    saveSimilarTaskPrefill(viewTask);
+    setIsSidebarMoreOptionsOpen(false);
+    router.push('/post-task?from=similar');
+  }, [requireSignedIn, router, viewTask]);
+
+  const handleSetUpAlerts = useCallback(() => {
+    if (!requireSignedIn('Please sign in to set up alerts', '/task')) {
+      return;
+    }
+    setIsSidebarMoreOptionsOpen(false);
+    setShowAlertsModal(true);
+  }, [requireSignedIn]);
+
+  const handleAlertKeywordSubmit = useCallback(
+    async (keyword: string) => {
+      try {
+        const response = await notificationService.addTaskAlertKeyword(keyword);
+        if (response.success) {
+          toast.success(`Alert saved for "${keyword}"`);
+          return;
+        }
+        toast.error(response.message || 'Failed to save alert');
+        throw new Error(response.message || 'Failed to save alert');
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string'
+            ? (err as { message: string }).message
+            : 'Failed to save alert';
+        if (/unique|already/i.test(message)) {
+          toast.error('You already have an alert for this keyword');
+        } else {
+          toast.error(message);
+        }
+        throw err;
+      }
+    },
+    []
+  );
+
+  const mapReportReason = (category: string): 'spam' | 'inappropriate' | 'fraud' | 'duplicate' | 'other' => {
+    switch (category) {
+      case 'spam':
+      case 'inappropriate':
+      case 'fraud':
+      case 'duplicate':
+        return category;
+      default:
+        return 'other';
+    }
+  };
+
+  const handleReportSubmit = async (category: string, comment: string) => {
+    if (!requireSignedIn('Please sign in to report a task', '/task')) {
+      return;
+    }
+
+    const taskKey = task.slug || task.id;
+    if (!taskKey) {
+      toast.error('Could not report this task');
+      return;
+    }
+
+    const reason = mapReportReason(category);
+    const description =
+      category === 'safety'
+        ? `[Safety concern] ${comment.trim()}`
+        : comment.trim();
+
+    setReportSubmitting(true);
+    try {
+      const response = await taskService.reportTask(String(taskKey), reason, description);
+      if (response.success) {
+        toast.success(
+          response.data?.message ||
+            response.message ||
+            'Report submitted. Our team will review it.'
+        );
+        setShowReportModal(false);
+        return;
+      }
+      toast.error(response.message || 'Failed to submit report');
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string'
+          ? (err as { message: string }).message
+          : 'Failed to submit report';
+      toast.error(message);
+    } finally {
+      setReportSubmitting(false);
+    }
   };
 
   const nestedPoster = getTaskPosterUser(task);
@@ -398,15 +507,70 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
     (a) => a && isTaskImageAttachment(a.file_type)
   );
 
-  const postedAgo = task.created_at
-    ? `${Math.floor((Date.now() - new Date(task.created_at).getTime()) / (1000 * 60 * 60 * 24))} days ago`
-    : 'Recently';
-  
+  const moreOptionsSection = (optionsRef: React.RefObject<HTMLDivElement | null>) => (
+    <div className="flex flex-col gap-3 md:gap-4">
+      <div ref={optionsRef}>
+        <div
+          onClick={() => setIsSidebarMoreOptionsOpen(!isSidebarMoreOptionsOpen)}
+          className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-surface-dim rounded-2xl cursor-pointer hover:bg-surface-variant/20 transition-all group border border-transparent hover:border-outline-variant"
+        >
+          <span className="font-bold text-sm md:text-base text-[#000d45]">More Options</span>
+          <ChevronLeft
+            className={`w-4 h-4 md:w-5 md:h-5 transition-transform shrink-0 ${isSidebarMoreOptionsOpen ? '-rotate-90' : 'rotate-90'}`}
+          />
+        </div>
+
+        <AnimatePresence>
+          {isSidebarMoreOptionsOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-2 space-y-1">
+                <button
+                  type="button"
+                  onClick={handlePostSimilarTask}
+                  className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
+                >
+                  <Copy className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
+                  <span className="font-semibold text-xs md:text-sm">Post a similar task</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSetUpAlerts}
+                  className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
+                >
+                  <Bell className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
+                  <span className="font-semibold text-xs md:text-sm">Set up Alerts</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          if (!requireSignedIn('Please sign in to report a task', '/task')) return;
+          setShowReportModal(true);
+        }}
+        className="flex items-center justify-center gap-2 text-on-surface-variant font-sans text-xs md:text-[14px] font-normal leading-[20px] hover:text-error transition-colors py-2"
+      >
+        <Flag className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
+        Report this task
+      </button>
+    </div>
+  );
+
   return (
     <motion.div 
-      initial={{ opacity: 0, x: 24 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 24 }}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 16 }}
       transition={{ type: 'spring', damping: 28, stiffness: 260 }}
       className="absolute inset-0 bg-white z-[50] max-w-[100vw] overflow-y-auto overflow-x-hidden flex flex-col"
     >
@@ -472,61 +636,9 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
                 profileSlug={posterProfileSlug}
                 posterName={posterName}
                 posterAvatar={posterAvatar}
-                postedAgo={postedAgo}
               />
 
-              <div className="flex flex-col gap-3 md:gap-4">
-                <div ref={sidebarMoreOptionsRef}>
-                  <div 
-                    onClick={() => setIsSidebarMoreOptionsOpen(!isSidebarMoreOptionsOpen)}
-                    className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-surface-dim rounded-2xl cursor-pointer hover:bg-surface-variant/20 transition-all group border border-transparent hover:border-outline-variant"
-                  >
-                    <span className="font-bold text-sm md:text-base text-[#000d45]">More Options</span>
-                    <ChevronLeft className={`w-4 h-4 md:w-5 md:h-5 transition-transform shrink-0 ${isSidebarMoreOptionsOpen ? '-rotate-90' : 'rotate-90'}`} />
-                  </div>
-
-                  <AnimatePresence>
-                    {isSidebarMoreOptionsOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-2 space-y-1">
-                          <button
-                            onClick={() => {
-                              // Handle post similar task
-                            }}
-                            className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
-                          >
-                            <Copy className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
-                            <span className="font-semibold text-xs md:text-sm">Post a similar task</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              // Handle set up alerts
-                            }}
-                            className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
-                          >
-                            <Bell className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
-                            <span className="font-semibold text-xs md:text-sm">Set up Alerts</span>
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <button 
-                  onClick={() => setShowReportModal(true)}
-                  className="flex items-center justify-center gap-2 text-on-surface-variant font-sans text-xs md:text-[14px] font-normal leading-[20px] hover:text-error transition-colors py-2"
-                >
-                  <Flag className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
-                  Report this task
-                </button>
-              </div>
+              <div className="hidden lg:block">{moreOptionsSection(sidebarMoreOptionsRef)}</div>
             </div>
           </div>
 
@@ -1033,6 +1145,10 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
               </Link>
             </div>
 
+            <div className="lg:hidden pt-6 md:pt-8">
+              {moreOptionsSection(mobileMoreOptionsRef)}
+            </div>
+
             {/* Horizontal Action Buttons - Bottom */}
             <div className="pt-6 md:pt-10 border-t border-outline-variant">
               <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-6">
@@ -1090,10 +1206,18 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
         onBidSuccess={handleBidSuccess}
       />
 
-      <ReportTaskModal 
-        isOpen={showReportModal} 
+      <ReportTaskModal
+        isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
         onSubmit={handleReportSubmit}
+        isSubmitting={reportSubmitting}
+      />
+
+      <SetUpAlertsModal
+        isOpen={showAlertsModal}
+        onClose={() => setShowAlertsModal(false)}
+        suggestedKeyword={suggestTaskAlertKeyword(viewTask)}
+        onSubmit={handleAlertKeywordSubmit}
       />
     </motion.div>
   );

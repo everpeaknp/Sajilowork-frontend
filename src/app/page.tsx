@@ -12,7 +12,7 @@ import HomeAuthRedirect from "@/app/_components/HomeAuthRedirect";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white selection:bg-[#1161fe] selection:text-white font-body">
+    <div className="mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white font-body selection:bg-[#1161fe] selection:text-white">
       <HomeAuthRedirect />
       <Navbar />
       <main>

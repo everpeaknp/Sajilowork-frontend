@@ -2,24 +2,29 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, Menu, SlidersHorizontal } from 'lucide-react';
+import { Menu, SlidersHorizontal } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import Navbar from '@/components/common/navbar';
 import UserAvatar from '@/components/common/UserAvatar';
+import FilterBar from '@/components/my-task/FilterBar';
 import TaskCard from '@/components/my-task/TaskCard';
 import TaskDetails from '@/components/my-task/TaskDetails';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { taskService } from '@/services/task.service';
-import type { Task } from '@/types';
+import type { SearchFilters, Task } from '@/types';
+import { filterAndSortTasks, hasActiveFilters } from '@/lib/taskFilters';
 import { getMediaUrl } from '@/lib/utils';
+import TaskBrowseMobileSheet, {
+  type BrowseSheetSnap,
+} from '@/components/task/TaskBrowseMobileSheet';
 import {
   type MyTasksFilterId,
-  MY_TASKS_STATUS_FILTERS,
   formatMyTaskStatusLabel,
   extractTaskList,
   mergeUserTasks,
+  isUserInvolvedInMyTask,
   matchesMyTasksFilter,
   countMyTasksByFilter,
   getTaskBidCount,
@@ -83,10 +88,16 @@ export default function MyTasksPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({});
   const [activeStatus, setActiveStatus] = useState<MyTasksFilterId>('all');
   const [isCompactSidebar, setIsCompactSidebar] = useState(false);
+  const [sheetSnap, setSheetSnap] = useState<BrowseSheetSnap>('map');
   const { isSidebarVisible, sidebarWidth, isResizing, setIsResizing, mainRef } = useSidebar();
+
+  const handleSelectTask = useCallback((taskId: string) => {
+    setSelectedTaskId(taskId);
+    setSheetSnap('map');
+  }, []);
 
   const loadUserTasks = useCallback(async () => {
     setIsLoading(true);
@@ -136,17 +147,11 @@ export default function MyTasksPage() {
   );
 
   const filteredTasks = useMemo(() => {
-    let filtered = userTasks;
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (task) =>
-          task.title.toLowerCase().includes(q) ||
-          task.address?.toLowerCase().includes(q) ||
-          task.city?.toLowerCase().includes(q)
-      );
-    }
+    const involved = userTasks.filter((task) =>
+      isUserInvolvedInMyTask(task, user?.id)
+    );
+    const { status: _status, ...filtersWithoutStatus } = searchFilters;
+    let filtered = filterAndSortTasks(involved, filtersWithoutStatus);
 
     if (activeStatus !== 'all') {
       filtered = filtered.filter((task) =>
@@ -155,7 +160,7 @@ export default function MyTasksPage() {
     }
 
     return filtered;
-  }, [userTasks, searchQuery, activeStatus, user?.id]);
+  }, [userTasks, searchFilters, activeStatus, user?.id]);
 
   function transformTaskForMap(task: Task): import('@/components/my-task/types').Task {
     return transformApiTaskToMyTaskView(task, user?.id);
@@ -181,6 +186,103 @@ export default function MyTasksPage() {
   }, [filteredTasks]);
 
   // Convert Task to display format for TaskCard
+  const renderTaskList = () => {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="mb-4 h-16 w-16 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="font-semibold text-on-surface-variant">Loading your tasks…</p>
+        </div>
+      );
+    }
+
+    if (filteredTasks.length === 0) {
+      return (
+        <div className="flex flex-col items-center px-4 py-10 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-dim">
+            <SlidersHorizontal className="h-8 w-8 text-on-surface-variant" />
+          </div>
+          <h3 className="mb-2 text-lg font-bold text-on-surface">
+            {activeStatus === 'all' && !hasActiveFilters(searchFilters) && 'No tasks yet'}
+            {(activeStatus !== 'all' || hasActiveFilters(searchFilters)) &&
+              (activeStatus !== 'all'
+                ? (EMPTY_STATE_BY_FILTER[activeStatus]?.title ?? 'No tasks in this status')
+                : 'No tasks found')}
+          </h3>
+          <p className="mb-4 text-sm text-on-surface-variant">
+            {activeStatus === 'all' && !hasActiveFilters(searchFilters) &&
+              'Start by posting your first task or making an offer to get started.'}
+            {activeStatus === 'all' && hasActiveFilters(searchFilters) &&
+              'Try a different search term or filter.'}
+            {activeStatus !== 'all' &&
+              (EMPTY_STATE_BY_FILTER[activeStatus]?.description ??
+                'Tasks you post or are assigned to will show here.')}
+          </p>
+          {activeStatus === 'all' && !hasActiveFilters(searchFilters) && (
+            <a
+              href="/post-task"
+              className="rounded-full bg-primary px-6 py-2 font-semibold text-white hover:bg-primary/90"
+            >
+              Post Your First Task
+            </a>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-3 pb-2">
+        {filteredTasks.map((task) => {
+          const cardProps = getTaskCardProps(task);
+          const taskSlug = task.slug || String(task.id);
+          const taskId = String(task.id);
+          const isActive = selectedTaskId === taskId;
+
+          return (
+            <TaskCard
+              key={task.id}
+              {...cardProps}
+              id={taskId}
+              slug={taskSlug}
+              isActive={isActive}
+              onClick={() => handleSelectTask(taskId)}
+              onEdit={
+                cardProps.canEdit
+                  ? () => {
+                      window.location.href = `/edit-task/${taskSlug}`;
+                    }
+                  : undefined
+              }
+              onDelete={
+                cardProps.canDelete
+                  ? async () => {
+                      if (!(await confirmDeleteTask())) return;
+                      try {
+                        await taskService.deleteTask(taskSlug);
+                        toast.success('Task deleted successfully');
+                        loadUserTasks();
+                      } catch (error: unknown) {
+                        const err = error as {
+                          response?: { data?: { detail?: string; error?: string } };
+                          message?: string;
+                        };
+                        const errorMessage =
+                          err?.response?.data?.detail ||
+                          err?.response?.data?.error ||
+                          err?.message ||
+                          'Failed to delete task';
+                        toast.error(errorMessage);
+                      }
+                    }
+                  : undefined
+              }
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
   function getTaskCardProps(task: Task) {
     const poster = resolvePoster(task);
     const rawStatus = task.status || 'open';
@@ -206,7 +308,7 @@ export default function MyTasksPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-surface">
+    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
       <Navbar />
       
       <main ref={mainRef} className="flex-1 flex overflow-hidden">
@@ -234,7 +336,7 @@ export default function MyTasksPage() {
                       return (
                         <button
                           key={task.id}
-                          onClick={() => setSelectedTaskId(taskId)}
+                          onClick={() => handleSelectTask(taskId)}
                           className={`rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${
                             isSelected ? 'border-primary shadow-lg' : 'border-outline-variant'
                           }`}
@@ -256,89 +358,8 @@ export default function MyTasksPage() {
               </div>
             ) : (
               // Full view - Task cards
-              <div className="flex-1 overflow-y-auto px-10 py-6 scrollbar-thin scrollbar-thumb-outline-variant">
-                {isLoading ? (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-                    <p className="text-on-surface-variant font-semibold">Loading your tasks...</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3 pb-2">
-                    {filteredTasks.length > 0 ? (
-                      filteredTasks.map((task) => {
-                        const cardProps = getTaskCardProps(task);
-                      const taskSlug = task.slug || String(task.id);
-                      const taskId = String(task.id);
-                      const isActive = selectedTaskId === taskId;
-                        
-                        return (
-                            <TaskCard
-                              key={task.id}
-                              {...cardProps}
-                              id={taskId}
-                              slug={taskSlug}
-                              isActive={isActive}
-                              onClick={() => setSelectedTaskId(taskId)}
-                              onEdit={
-                                cardProps.canEdit
-                                  ? () => {
-                                      window.location.href = `/edit-task/${taskSlug}`;
-                                    }
-                                  : undefined
-                              }
-                              onDelete={cardProps.canDelete ? async () => {
-                                if (!(await confirmDeleteTask())) {
-                                  return;
-                                }
-
-                                try {
-                                  await taskService.deleteTask(taskSlug);
-                                  toast.success('Task deleted successfully');
-                                  // Refresh the task list
-                                  loadUserTasks();
-                                } catch (error: any) {
-                                  const errorMessage = error?.response?.data?.detail 
-                                    || error?.response?.data?.error
-                                    || error?.message 
-                                    || 'Failed to delete task';
-                                  toast.error(errorMessage);
-                                }
-                              } : undefined}
-                            />
-                        );
-                      })
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                        <div className="w-16 h-16 bg-surface-dim rounded-full flex items-center justify-center mb-4">
-                          <SlidersHorizontal className="w-8 h-8 text-on-surface-variant" />
-                        </div>
-                        <h3 className="text-lg font-bold text-on-surface mb-2">
-                          {activeStatus === 'all' && !searchQuery && 'No tasks yet'}
-                          {activeStatus === 'all' && searchQuery && 'No tasks found'}
-                          {activeStatus !== 'all' &&
-                            (EMPTY_STATE_BY_FILTER[activeStatus]?.title ??
-                              'No tasks in this status')}
-                        </h3>
-                        <p className="text-on-surface-variant font-sans text-[14px] font-normal leading-[20px] mb-4">
-                          {activeStatus === 'all' && !searchQuery &&
-                            'Start by posting your first task or making an offer to get started.'}
-                          {activeStatus === 'all' && searchQuery && 'Try a different search term.'}
-                          {activeStatus !== 'all' &&
-                            (EMPTY_STATE_BY_FILTER[activeStatus]?.description ??
-                              'Tasks you post or are assigned to will show here.')}
-                        </p>
-                        {activeStatus === 'all' && !searchQuery && (
-                          <a
-                            href="/post-task"
-                            className="px-6 py-2 bg-primary text-white rounded-full font-semibold hover:bg-primary/90 transition-colors"
-                          >
-                            Post Your First Task
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+              <div className="flex-1 overflow-y-auto px-6 py-6 lg:px-10 scrollbar-thin scrollbar-thumb-outline-variant">
+                {renderTaskList()}
               </div>
             )}
 
@@ -359,56 +380,36 @@ export default function MyTasksPage() {
         )}
 
         {/* Right Area - Filters + Map */}
-        <div className="flex flex-1 flex-col relative overflow-visible min-w-0">
-          {/* Filter Bar with Search and Status Filters */}
-          <div className="bg-white border-b border-outline-variant px-10 py-3 flex items-center justify-between relative z-50">
-            <div className="flex items-center gap-6 flex-nowrap min-w-0">
-              <button
-                onClick={() => setIsCompactSidebar(!isCompactSidebar)}
-                className="p-2 hover:bg-surface-dim rounded-lg transition-colors flex-shrink-0"
-                title={isCompactSidebar ? 'Show full sidebar' : 'Show compact sidebar'}
-              >
-                <Menu className="w-5 h-5 text-on-surface-variant" />
-              </button>
+        <div className="flex flex-1 flex-col relative min-w-0 min-h-0 z-0">
+          <FilterBar
+            currentFilters={searchFilters}
+            onFilterChange={(next) =>
+              setSearchFilters({ ...next, status: undefined })
+            }
+            isSidebarVisible={isSidebarVisible}
+            onToggleSidebar={() => {}}
+            isCompactSidebar={isCompactSidebar}
+            onToggleCompact={() => setIsCompactSidebar(!isCompactSidebar)}
+            statusTabs={{
+              active: activeStatus,
+              onChange: setActiveStatus,
+              counts: filterCounts,
+            }}
+          />
 
-              <div className="relative flex-shrink-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-white border border-[#2f6bff]/30 focus:border-[#2f6bff]/50 shadow-sm rounded-full py-2 pl-10 pr-4 w-64 outline-none transition-all placeholder:text-on-surface-variant/60 font-sans text-[14px]"
-                />
-              </div>
-
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-1 min-w-0">
-                {MY_TASKS_STATUS_FILTERS.map((filter) => {
-                  const count = filterCounts[filter.id];
-                  return (
-                    <button
-                      key={filter.id}
-                      type="button"
-                      onClick={() => setActiveStatus(filter.id)}
-                      className={`font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-                        activeStatus === filter.id
-                          ? 'text-[#2f6bff]'
-                          : 'text-black/70 hover:text-[#2f6bff]'
-                      }`}
-                    >
-                      {filter.label}
-                      {count > 0 ? ` (${count})` : ''}
-                    </button>
-                  );
-                })}
-              </div>
+          <div className="relative min-h-0 flex-1 overflow-hidden bg-surface-dim">
+            <div className="absolute inset-0">
+              <MapView tasks={transformedTasks} onTaskSelect={handleSelectTask} />
             </div>
-          </div>
 
-          <div className="flex-1 bg-surface-dim relative overflow-hidden">
-            <div style={{ width: '100%', height: '100%' }}>
-              <MapView tasks={transformedTasks} onTaskSelect={(id) => setSelectedTaskId(id)} />
-            </div>
+            <TaskBrowseMobileSheet
+              snap={sheetSnap}
+              onSnapChange={setSheetSnap}
+              taskCount={filteredTasks.length}
+              hidden={Boolean(selectedTask)}
+            >
+              {renderTaskList()}
+            </TaskBrowseMobileSheet>
 
             {/* Friendly empty state when NO filtered task has coords.
                 Hide it when a task is selected so it doesn't look like a task-level error. */}

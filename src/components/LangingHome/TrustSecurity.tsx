@@ -26,8 +26,8 @@ const FEATURES = [
 
 export default function TrustSecurity() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28">
-      <div className="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
+      <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14 xl:gap-20">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -39,10 +39,10 @@ export default function TrustSecurity() {
             <img
               src={IMAGES.TRUST_PHOTO}
               alt="Secure community"
-              className="rounded-[28px] shadow-2xl w-full h-[520px] sm:h-[560px] object-cover"
+              className="h-[280px] w-full rounded-2xl object-cover shadow-2xl sm:h-[420px] sm:rounded-[28px] md:h-[520px] lg:h-[560px]"
             />
             {/* Overlay decoration */}
-            <div className="absolute inset-0 rounded-[28px] bg-gradient-to-t from-[#03113c]/30 to-transparent pointer-events-none" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-[#03113c]/30 to-transparent sm:rounded-[28px]" />
           </div>
 
           <motion.div
@@ -50,13 +50,13 @@ export default function TrustSecurity() {
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5, duration: 0.5 }}
-            className="absolute -bottom-6 -right-3 sm:-bottom-7 sm:-right-6 bg-white/95 backdrop-blur-md p-6 sm:p-7 rounded-3xl shadow-[0_28px_70px_-22px_rgba(0,0,0,0.25)] border border-outline-variant/70 flex items-center gap-4 z-20"
+            className="absolute -bottom-4 right-2 z-20 flex items-center gap-3 rounded-2xl border border-outline-variant/70 bg-white/95 p-4 shadow-[0_28px_70px_-22px_rgba(0,0,0,0.25)] backdrop-blur-md sm:-bottom-7 sm:-right-6 sm:gap-4 sm:rounded-3xl sm:p-7"
           >
-            <div className="bg-primary/10 p-3.5 rounded-2xl text-primary">
-              <CheckCircle className="h-8 w-8" strokeWidth={2.5} />
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary sm:rounded-2xl sm:p-3.5">
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.5} />
             </div>
             <div>
-              <p className={`${landingHeadlineSm} text-xl sm:text-2xl text-[#061257] leading-tight`}>
+              <p className={`${landingHeadlineSm} text-base leading-tight text-[#061257] sm:text-2xl`}>
                 100% Verified
               </p>
               <p className="text-[11px] font-medium text-[#6a719a] mt-1">
@@ -69,7 +69,7 @@ export default function TrustSecurity() {
           <div className="absolute -top-10 -left-10 w-56 h-56 bg-primary/10 rounded-full blur-3xl -z-10" />
         </motion.div>
 
-        <div className="space-y-10 sm:space-y-12">
+        <div className="space-y-8 sm:space-y-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -80,7 +80,7 @@ export default function TrustSecurity() {
               Trust & safety
             </span>
             <h2
-              className={`${landingHeadline} text-3xl sm:text-4xl md:text-[40px] leading-[1.1] tracking-[-0.03em]`}
+              className={`${landingHeadline} text-2xl leading-[1.1] tracking-[-0.03em] text-balance sm:text-4xl md:text-[40px]`}
             >
               Trust and safety features <br className="hidden sm:block" />
               <span className="text-[#384179]">for your protection</span>
@@ -125,7 +125,7 @@ export default function TrustSecurity() {
           >
             <Link
               href="/cancellation-policy"
-              className="inline-flex items-center justify-center rounded-full bg-[#061257] px-7 py-3 text-xs sm:text-sm font-semibold text-white hover:bg-primary transition-colors duration-200 cursor-pointer shadow-md active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#061257] px-7 py-3 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-primary active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:w-auto sm:text-sm"
             >
               Learn about safety
             </Link>

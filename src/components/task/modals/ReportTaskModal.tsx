@@ -3,14 +3,21 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Loader2 } from 'lucide-react';
 
 interface ReportTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (category: string, comment: string) => void;
+  onSubmit: (category: string, comment: string) => void | Promise<void>;
+  isSubmitting?: boolean;
 }
 
-export default function ReportTaskModal({ isOpen, onClose, onSubmit }: ReportTaskModalProps) {
+export default function ReportTaskModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSubmitting = false,
+}: ReportTaskModalProps) {
   const [reportCategory, setReportCategory] = useState('');
   const [reportComment, setReportComment] = useState('');
   const [isMounted, setIsMounted] = useState(false);
@@ -20,16 +27,22 @@ export default function ReportTaskModal({ isOpen, onClose, onSubmit }: ReportTas
   }, []);
 
   const handleSubmit = () => {
-    onSubmit(reportCategory, reportComment);
-    setReportCategory('');
-    setReportComment('');
+    void onSubmit(reportCategory, reportComment);
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     onClose();
     setReportCategory('');
     setReportComment('');
   };
+
+  useEffect(() => {
+    if (!isOpen && !isSubmitting) {
+      setReportCategory('');
+      setReportComment('');
+    }
+  }, [isOpen, isSubmitting]);
 
   const modalTree = (
     <AnimatePresence>
@@ -98,16 +111,24 @@ export default function ReportTaskModal({ isOpen, onClose, onSubmit }: ReportTas
               <div className="flex items-center gap-3 mt-8">
                 <button
                   onClick={handleClose}
-                  className="flex-1 py-3 border-2 border-outline-variant text-on-surface font-semibold rounded-full hover:bg-surface-dim transition-all"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 border-2 border-outline-variant text-on-surface font-semibold rounded-full hover:bg-surface-dim transition-all disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={!reportCategory || !reportComment.trim()}
-                  className="flex-1 py-3 bg-[#2f6bff] text-white font-semibold rounded-full hover:bg-[#2f6bff]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!reportCategory || !reportComment.trim() || isSubmitting}
+                  className="flex-1 py-3 bg-[#2f6bff] text-white font-semibold rounded-full hover:bg-[#2f6bff]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                 >
-                  Send Report
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+                      Sending…
+                    </>
+                  ) : (
+                    'Send Report'
+                  )}
                 </button>
               </div>
             </div>

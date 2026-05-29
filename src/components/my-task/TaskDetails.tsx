@@ -31,10 +31,15 @@ import { taskService } from '@/services/task.service';
 import { bidService, extractBidList } from '@/services/bid.service';
 import { paymentService } from '@/services/payment.service';
 import type { Bid, Task as ApiTask, TaskQuestion } from '@/types';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
-import { canSubmitOfferOnTask } from '@/lib/taskUtils';
+import {
+  canSubmitOfferOnTask,
+  getTaskPosterId,
+  getTaskPosterProfileSlug,
+  getTaskPosterUser,
+} from '@/lib/taskUtils';
 import { confirmCancelTask, confirmDeleteTask } from '@/lib/confirmToast';
 import { getTaskTimeSlotFromRequirements } from '@/lib/timeSlot';
 import TaskTimeSlotText from '@/components/common/TaskTimeSlotText';
@@ -127,12 +132,18 @@ export default function TaskDetails({
   const [loadingWalletBalance, setLoadingWalletBalance] = useState(false);
 
   const sidebarMoreOptionsRef = useRef<HTMLDivElement>(null);
+  const mobileMoreOptionsRef = useRef<HTMLDivElement>(null);
   const canMakeOffer = Boolean(
     detailTask && canSubmitOfferOnTask(detailTask, user?.id)
   );
 
   const statusSource = detailTask ?? apiTask;
   const currentStatus = statusSource?.status ?? task.status;
+
+  const reviewTaskId = useMemo(() => {
+    const fromApi = statusSource?.id ?? apiTask?.id;
+    return fromApi ? String(fromApi) : '';
+  }, [statusSource?.id, apiTask?.id]);
 
   const taskRoles = useMemo(
     () => resolveMyTaskRoles(statusSource ?? (task as unknown as ApiTask), user?.id),
@@ -299,10 +310,10 @@ export default function TaskDetails({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        sidebarMoreOptionsRef.current &&
-        !sidebarMoreOptionsRef.current.contains(event.target as Node)
-      ) {
+      const target = event.target as Node;
+      const insideDesktop = sidebarMoreOptionsRef.current?.contains(target);
+      const insideMobile = mobileMoreOptionsRef.current?.contains(target);
+      if (!insideDesktop && !insideMobile) {
         setIsSidebarMoreOptionsOpen(false);
       }
     }
@@ -517,36 +528,35 @@ export default function TaskDetails({
     }
   };
 
-  const posterAvatar = getMediaUrl(task.user.avatar);
+  const posterSource = statusSource ?? apiTask ?? null;
+
   const posterId = useMemo(() => {
-    if (task.posterId) return String(task.posterId);
-    const src: any = detailTask ?? apiTask;
-    const nested =
-      (src?.poster && typeof src.poster === 'object' ? src.poster : null) ||
-      (src?.owner && typeof src.owner === 'object' ? src.owner : null);
-    return String(nested?.id || src?.poster_id || src?.owner_id || '') || null;
-  }, [task.posterId, detailTask, apiTask]);
+    if (task.posterId) return task.posterId;
+    if (posterSource) return getTaskPosterId(posterSource);
+    return null;
+  }, [task.posterId, posterSource]);
 
   const posterSlug = useMemo(() => {
     if (task.posterUsername) return task.posterUsername;
-    const src: any = detailTask ?? apiTask;
-    const nested =
-      (src?.poster && typeof src.poster === 'object' ? src.poster : null) ||
-      (src?.owner && typeof src.owner === 'object' ? src.owner : null);
-    return (nested?.username ?? src?.owner_username ?? null) as string | null;
-  }, [task.posterUsername, detailTask, apiTask]);
+    if (posterSource) return getTaskPosterProfileSlug(posterSource);
+    return null;
+  }, [task.posterUsername, posterSource]);
 
-  const postedDaysAgo = (() => {
-    try {
-      const ms = Date.now() - task.postedDate.getTime();
-      const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-      if (days <= 0) return 'Today';
-      if (days === 1) return '1 day ago';
-      return `${days} days ago`;
-    } catch {
-      return 'Recently';
+  const posterDisplayName = useMemo(() => {
+    const nested = posterSource ? getTaskPosterUser(posterSource) : null;
+    if (nested) {
+      const full =
+        `${nested.first_name || ''} ${nested.last_name || ''}`.trim() ||
+        nested.full_name;
+      if (full) return full;
     }
-  })();
+    return task.user.name;
+  }, [posterSource, task.user.name]);
+
+  const posterAvatar = useMemo(() => {
+    const nested = posterSource ? getTaskPosterUser(posterSource) : null;
+    return getMediaUrl(nested?.profile_image || task.user.avatar);
+  }, [posterSource, task.user.avatar]);
 
   const mapLink = (() => {
     const lat = task.coordinates[0];
@@ -557,6 +567,93 @@ export default function TaskDetails({
     if (!query) return null;
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   })();
+
+  const moreOptionsSection = (optionsRef: RefObject<HTMLDivElement | null>) => (
+    <div className="flex flex-col gap-3 md:gap-4">
+      <div ref={optionsRef}>
+        <div
+          onClick={() => setIsSidebarMoreOptionsOpen(!isSidebarMoreOptionsOpen)}
+          className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-surface-dim rounded-2xl cursor-pointer hover:bg-surface-variant/20 transition-all group border border-transparent hover:border-outline-variant"
+        >
+          <span className="font-bold text-sm md:text-base text-[#000d45]">More Options</span>
+          <ChevronLeft
+            className={`w-4 h-4 md:w-5 md:h-5 transition-transform shrink-0 ${isSidebarMoreOptionsOpen ? '-rotate-90' : 'rotate-90'}`}
+          />
+        </div>
+
+        <AnimatePresence>
+          {isSidebarMoreOptionsOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-2 space-y-1">
+                {task.canEdit && (
+                  <button
+                    type="button"
+                    onClick={handleEdit}
+                    disabled={isDeleting || isCancelling}
+                    className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface disabled:opacity-50"
+                  >
+                    <Edit className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
+                    <span className="font-semibold text-xs md:text-sm">Edit task</span>
+                  </button>
+                )}
+                {task.canCancel && (
+                  <button
+                    type="button"
+                    onClick={() => void handleCancel()}
+                    disabled={isDeleting || isCancelling}
+                    className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface disabled:opacity-50"
+                  >
+                    <Ban className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
+                    <span className="font-semibold text-xs md:text-sm">
+                      {isCancelling ? 'Cancelling…' : 'Cancel task'}
+                    </span>
+                  </button>
+                )}
+                {task.canDelete !== false && (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isDeleting || isCancelling}
+                    className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-error disabled:opacity-50"
+                  >
+                    <Trash2 className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+                    <span className="font-semibold text-xs md:text-sm">
+                      {isDeleting ? 'Deleting…' : 'Delete task'}
+                    </span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(window.location.href);
+                    toast.success('Link copied');
+                  }}
+                  className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
+                >
+                  <Copy className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
+                  <span className="font-semibold text-xs md:text-sm">Copy task link</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {reviewTaskId ? (
+        <TaskCompletionPopup
+          taskId={reviewTaskId}
+          taskStatus={String(currentStatus || '')}
+          revieweeName={revieweeName}
+        />
+      ) : null}
+    </div>
+  );
 
   const rootClassName = isPageVariant
     ? 'relative w-full flex-1 min-h-0 bg-white overflow-y-auto overflow-x-hidden flex flex-col'
@@ -584,11 +681,6 @@ export default function TaskDetails({
           {/* Budget sidebar */}
           <div className="w-full min-w-0 lg:w-[min(100%,320px)] lg:max-w-[320px] shrink-0 order-first lg:order-last">
             <div className="lg:sticky lg:top-8 space-y-4 md:space-y-6">
-              <TaskCompletionPopup
-                taskId={String((statusSource as any)?.id || task.id)}
-                taskStatus={String(currentStatus || '')}
-                revieweeName={revieweeName}
-              />
               <div className="bg-[#f1f4f9] rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 text-center border border-outline-variant">
                 <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-2">
                   Task Budget
@@ -680,87 +772,11 @@ export default function TaskDetails({
               <TaskPosterFollow
                 posterId={posterId}
                 profileSlug={posterSlug}
-                posterName={task.user.name}
+                posterName={posterDisplayName}
                 posterAvatar={posterAvatar}
-                postedAgo={postedDaysAgo}
               />
 
-              <div className="flex flex-col gap-3 md:gap-4">
-                <div ref={sidebarMoreOptionsRef}>
-                  <div
-                    onClick={() => setIsSidebarMoreOptionsOpen(!isSidebarMoreOptionsOpen)}
-                    className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-surface-dim rounded-2xl cursor-pointer hover:bg-surface-variant/20 transition-all group border border-transparent hover:border-outline-variant"
-                  >
-                    <span className="font-bold text-sm md:text-base text-[#000d45]">More Options</span>
-                    <ChevronLeft
-                      className={`w-4 h-4 md:w-5 md:h-5 transition-transform shrink-0 ${isSidebarMoreOptionsOpen ? '-rotate-90' : 'rotate-90'}`}
-                    />
-                  </div>
-
-                  <AnimatePresence>
-                    {isSidebarMoreOptionsOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-2 space-y-1">
-                          {task.canEdit && (
-                            <button
-                              type="button"
-                              onClick={handleEdit}
-                              disabled={isDeleting || isCancelling}
-                              className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface disabled:opacity-50"
-                            >
-                              <Edit className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
-                              <span className="font-semibold text-xs md:text-sm">Edit task</span>
-                            </button>
-                          )}
-                          {task.canCancel && (
-                            <button
-                              type="button"
-                              onClick={() => void handleCancel()}
-                              disabled={isDeleting || isCancelling}
-                              className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface disabled:opacity-50"
-                            >
-                              <Ban className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
-                              <span className="font-semibold text-xs md:text-sm">
-                                {isCancelling ? 'Cancelling…' : 'Cancel task'}
-                              </span>
-                            </button>
-                          )}
-                          {task.canDelete !== false && (
-                            <button
-                              type="button"
-                              onClick={handleDelete}
-                              disabled={isDeleting || isCancelling}
-                              className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-error disabled:opacity-50"
-                            >
-                              <Trash2 className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
-                              <span className="font-semibold text-xs md:text-sm">
-                                {isDeleting ? 'Deleting…' : 'Delete task'}
-                              </span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              void navigator.clipboard.writeText(window.location.href);
-                              toast.success('Link copied');
-                            }}
-                            className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
-                          >
-                            <Copy className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
-                            <span className="font-semibold text-xs md:text-sm">Copy task link</span>
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
+              <div className="hidden lg:block">{moreOptionsSection(sidebarMoreOptionsRef)}</div>
             </div>
           </div>
 
@@ -1206,6 +1222,10 @@ export default function TaskDetails({
               >
                 Learn more
               </Link>
+            </div>
+
+            <div className="lg:hidden pt-6 md:pt-8">
+              {moreOptionsSection(mobileMoreOptionsRef)}
             </div>
 
             <div className="pt-6 md:pt-10 border-t border-outline-variant">

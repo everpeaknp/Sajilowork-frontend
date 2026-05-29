@@ -12,6 +12,8 @@ import {
 
 export interface TaskData {
   title: string;
+  categoryId: string;
+  categoryName: string;
   dateType: 'specific' | 'before' | 'flexible' | '';
   specificDate: string;
   beforeDate: string;
@@ -212,38 +214,43 @@ export const LocationStep: React.FC<LocationStepProps> = ({ data, updateData, sh
   };
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-4xl font-bold text-[#0a1452] mb-12 uppercase tracking-tight" style={{ fontFamily: '"Space Grotesk", sans-serif' }}>
+    <div className="w-full">
+      <h1
+        className="mb-6 text-2xl font-bold uppercase tracking-tight text-[#0a1452] sm:mb-8 sm:text-3xl lg:mb-12 lg:text-4xl"
+        style={{ fontFamily: '"Space Grotesk", sans-serif' }}
+      >
         Tell us where
       </h1>
 
-      <div className="space-y-10">
-        <div className="flex gap-4">
+      <div className="space-y-6 sm:space-y-8 lg:space-y-10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
           <button
+            type="button"
             onClick={() => handleLocationTypeChange('in-person')}
-            className={`flex-1 p-8 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+            className={`flex-1 rounded-2xl border-2 p-5 text-center transition-all cursor-pointer sm:p-8 ${
               data.locationType === 'in-person'
                 ? 'bg-[#0a1452] border-[#0a1452] text-white shadow-xl shadow-blue-900/20'
                 : 'bg-gray-50 border-transparent text-[#0a1452] hover:border-gray-200'
             }`}
           >
-            <MapPin className={`w-8 h-8 mx-auto mb-4 ${data.locationType === 'in-person' ? 'text-white' : 'text-[#0a1452]'}`} />
-            <div className="font-bold text-xl mb-2">In-person</div>
+            <MapPin className={`mx-auto mb-3 h-7 w-7 sm:mb-4 sm:h-8 sm:w-8 ${data.locationType === 'in-person' ? 'text-white' : 'text-[#0a1452]'}`} />
+            <div className="mb-1 text-lg font-bold sm:mb-2 sm:text-xl">In-person</div>
             <div className={`text-sm font-medium leading-relaxed ${data.locationType === 'in-person' ? 'text-blue-100' : 'text-gray-500'}`}>
               Select this if you need the Tasker physically there
             </div>
           </button>
 
           <button
+            type="button"
             onClick={() => handleLocationTypeChange('remote')}
-            className={`flex-1 p-8 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+            className={`flex-1 rounded-2xl border-2 p-5 text-center transition-all cursor-pointer sm:p-8 ${
               data.locationType === 'remote'
                 ? 'bg-[#0a1452] border-[#0a1452] text-white shadow-xl shadow-blue-900/20'
                 : 'bg-gray-50 border-transparent text-[#0a1452] hover:border-gray-200'
             }`}
           >
-            <Smartphone className={`w-8 h-8 mx-auto mb-4 ${data.locationType === 'remote' ? 'text-white' : 'text-[#0a1452]'}`} />
-            <div className="font-bold text-xl mb-2">Online</div>
+            <Smartphone className={`mx-auto mb-3 h-7 w-7 sm:mb-4 sm:h-8 sm:w-8 ${data.locationType === 'remote' ? 'text-white' : 'text-[#0a1452]'}`} />
+            <div className="mb-1 text-lg font-bold sm:mb-2 sm:text-xl">Online</div>
             <div className={`text-sm font-medium leading-relaxed ${data.locationType === 'remote' ? 'text-blue-100' : 'text-gray-500'}`}>
               Select this if the Tasker can do it from home
             </div>
@@ -264,7 +271,7 @@ export const LocationStep: React.FC<LocationStepProps> = ({ data, updateData, sh
                 aria-controls={suggestionsListId}
                 aria-autocomplete="list"
                 autoComplete="off"
-                className={`w-full bg-gray-50 rounded-2xl py-5 pl-14 pr-16 text-lg placeholder:text-gray-400 outline-none transition-all ${
+                className={`w-full rounded-2xl bg-gray-50 py-4 pl-12 pr-14 text-base placeholder:text-gray-400 outline-none transition-all sm:py-5 sm:pl-14 sm:pr-16 sm:text-lg ${
                   showLocationError ? 'ring-2 ring-[#ff4d00]' : 'focus:ring-2 focus:ring-[#0066ff]'
                 }`}
                 placeholder="e.g. Kalimati, Kathmandu or Lalitpur"

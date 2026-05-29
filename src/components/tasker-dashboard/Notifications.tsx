@@ -210,7 +210,7 @@ export default function Notifications() {
               <div className="h-1 w-10 bg-primary rounded-full" />
               <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Updates</span>
             </div>
-            <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">Notifications</h1>
+            <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">Notifications</h1>
           </div>
           {unreadCount > 0 && (
             <button

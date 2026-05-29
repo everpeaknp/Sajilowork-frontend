@@ -65,24 +65,24 @@ export default function TaskFeed() {
   const row2 = [...marqueeSource.slice(4, 8), ...marqueeSource.slice(4, 8)];
 
   return (
-    <section className="bg-white py-20 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 text-center">
-        <h2 className={`${landingHeadline} text-5xl sm:text-6xl text-[#0b1442] mb-6`}>
+    <section className="overflow-x-hidden bg-white py-12 sm:py-16 md:py-20">
+      <div className="mx-auto mb-10 max-w-7xl px-4 text-center sm:mb-16 sm:px-6 lg:px-8">
+        <h2 className={`${landingHeadline} mb-4 text-2xl text-[#0b1442] text-balance sm:mb-6 sm:text-4xl md:text-5xl lg:text-6xl`}>
           See what others are getting done
         </h2>
         <Link
           href={browseTasksHref(activeCategory ?? undefined)}
-          className="inline-block text-sm font-semibold text-[#1161fe] hover:underline mb-10"
+          className="mb-6 inline-block text-sm font-semibold text-[#1161fe] hover:underline sm:mb-10"
         >
           Browse all open tasks →
         </Link>
 
         <div className="relative border-b border-gray-300 pb-1">
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 pb-5">
+          <div className="-mx-4 flex items-center justify-start gap-6 overflow-x-auto px-4 pb-5 no-scrollbar sm:mx-0 sm:flex-wrap sm:justify-center sm:gap-8 sm:overflow-visible sm:px-0 md:gap-12">
             <button
               type="button"
               onClick={() => setActiveCategory(null)}
-              className={`text-sm font-bold pb-3 relative transition-colors ${
+              className={`relative shrink-0 pb-3 text-sm font-bold transition-colors ${
                 activeCategory === null ? "text-[#0b1442]" : "text-[#384179] hover:text-[#1161fe]"
               }`}
             >
@@ -98,7 +98,7 @@ export default function TaskFeed() {
                   key={cat}
                   type="button"
                   onClick={() => setActiveCategory(cat)}
-                  className={`text-sm font-bold pb-3 relative transition-colors ${
+                  className={`relative shrink-0 pb-3 text-sm font-bold transition-colors ${
                     active ? "text-[#0b1442]" : "text-[#384179] hover:text-[#1161fe]"
                   }`}
                 >
@@ -165,7 +165,7 @@ function TaskCard({ task }: { task: LandingTaskCard }) {
   return (
     <Link
       href={href}
-      className="inline-block w-[340px] bg-[#f0f5ff] p-6 rounded-2xl transition-all cursor-pointer whitespace-normal group/card text-left flex flex-col justify-between h-[220px] hover:shadow-lg hover:ring-2 hover:ring-[#1161fe]/20"
+      className="group/card inline-flex h-[200px] w-[min(85vw,300px)] shrink-0 cursor-pointer flex-col justify-between whitespace-normal rounded-2xl bg-[#f0f5ff] p-5 text-left transition-all hover:shadow-lg hover:ring-2 hover:ring-[#1161fe]/20 sm:h-[220px] sm:w-[340px] sm:p-6"
     >
       <div>
         <div className="flex justify-between items-start mb-4">

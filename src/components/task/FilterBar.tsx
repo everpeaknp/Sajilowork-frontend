@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, SlidersHorizontal, ArrowUpDown, Search, Clock, Target, DollarSign, Menu } from 'lucide-react';
 import { SearchFilters, Category } from '@/types';
 import { hasActiveFilters } from '@/lib/taskFilters';
-import { formatBudgetRange, formatNPR } from '@/lib/nepalLocale';
+import { categoryFilterLabels } from '@/lib/taskUtils';
+import { formatBudgetRange } from '@/lib/nepalLocale';
+import { useMobileFilterBodyLock } from '@/lib/filterBarMobile';
+import FilterDropdownPanel, { FilterPanelActions } from '@/components/common/FilterDropdownPanel';
 import { toast } from 'sonner';
 
 const DEFAULT_LOCATION = '';
@@ -15,6 +17,7 @@ interface FilterBarProps {
   currentFilters: SearchFilters;
   onFilterChange: (filters: SearchFilters) => void;
   categories?: Category[];
+  categoriesLoaded?: boolean;
   isSidebarVisible: boolean;
   onToggleSidebar: () => void;
   isCompactSidebar?: boolean;
@@ -25,6 +28,7 @@ export default function FilterBar({
   currentFilters,
   onFilterChange,
   categories = [],
+  categoriesLoaded = false,
   isCompactSidebar = false,
   onToggleCompact,
 }: FilterBarProps) {
@@ -51,9 +55,7 @@ export default function FilterBar({
   const otherFiltersRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
 
-  const categoryLabels = categories.length > 0
-    ? categories.map((c) => c.name)
-    : [];
+  const categoryLabels = categoryFilterLabels(categories);
 
   useEffect(() => {
     setDraftCategory(currentFilters.category || '');
@@ -64,29 +66,6 @@ export default function FilterBar({
     setDraftBudgetMax(currentFilters.budget_max ?? DEFAULT_BUDGET_MAX);
     setDraftStatus(currentFilters.status);
   }, [currentFilters]);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
-      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
-        setIsLocationOpen(false);
-      }
-      if (priceRef.current && !priceRef.current.contains(event.target as Node)) {
-        setIsPriceOpen(false);
-      }
-      if (otherFiltersRef.current && !otherFiltersRef.current.contains(event.target as Node)) {
-        setIsOtherFiltersOpen(false);
-      }
-      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
-        setIsSortOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const filteredCategoryLabels = categoryLabels.filter((cat) =>
     cat.toLowerCase().includes(categorySearchQuery.toLowerCase())
@@ -189,34 +168,49 @@ export default function FilterBar({
             ? 'Most recent'
             : null;
 
-  return (
-    <div className="bg-white border-b border-outline-variant px-10 py-3 flex items-center relative z-[200] isolate overflow-visible">
-      <div className="flex items-center gap-6 flex-nowrap flex-1 min-w-0">
-        <button
-          onClick={onToggleCompact}
-          className="p-2 hover:bg-surface-dim rounded-lg transition-colors flex-shrink-0"
-          title={isCompactSidebar ? 'Show full sidebar' : 'Show compact sidebar'}
-        >
-          <Menu className="w-5 h-5 text-on-surface-variant" />
-        </button>
+  const anyPanelOpen =
+    isCategoryOpen || isLocationOpen || isPriceOpen || isOtherFiltersOpen || isSortOpen;
 
-        <div className="relative flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
-          <input
-            type="text"
-            placeholder="Search tasks..."
-            value={currentFilters.query || ''}
-            onChange={(e) =>
-              onFilterChange({
-                ...currentFilters,
-                query: e.target.value || undefined,
-              })
-            }
-            className="bg-white border border-[#2f6bff]/30 focus:border-[#2f6bff]/50 shadow-sm rounded-full py-2 pl-10 pr-4 w-64 outline-none transition-all placeholder:text-on-surface-variant/60 font-sans text-[14px]"
-          />
+  useMobileFilterBodyLock(anyPanelOpen);
+
+  const filterTriggerClass = (active: boolean) =>
+    `flex min-h-[44px] touch-manipulation items-center gap-1.5 whitespace-nowrap font-sans text-[13px] font-semibold transition-colors sm:gap-2 sm:min-h-0 ${
+      active ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
+    }`;
+
+  return (
+    <div className="relative z-[200] border-b border-outline-variant bg-white">
+      <div className="flex min-w-0 flex-col gap-2.5 px-3 py-2.5 sm:px-6 sm:py-3 lg:flex-row lg:items-center lg:gap-6 lg:px-10">
+        <div className="flex min-w-0 items-center gap-2 lg:shrink-0">
+          <button
+            type="button"
+            onClick={onToggleCompact}
+            className="hidden shrink-0 rounded-lg p-2 transition-colors hover:bg-surface-dim lg:flex"
+            title={isCompactSidebar ? 'Show full sidebar' : 'Show compact sidebar'}
+          >
+            <Menu className="h-5 w-5 text-on-surface-variant" />
+          </button>
+
+          <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={currentFilters.query || ''}
+              onChange={(e) =>
+                onFilterChange({
+                  ...currentFilters,
+                  query: e.target.value || undefined,
+                })
+              }
+              className="w-full rounded-full border border-[#2f6bff]/30 bg-white py-2 pl-10 pr-4 font-sans text-[14px] shadow-sm outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-[#2f6bff]/50"
+            />
+          </div>
         </div>
 
-        <div className="relative flex-shrink-0" ref={categoryRef}>
+        <div className="flex min-w-0 flex-1 touch-pan-x items-center gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-6 sm:pb-0.5 [&::-webkit-scrollbar]:hidden">
+
+        <div className="relative shrink-0" ref={categoryRef}>
           <div
             onClick={() => {
               setIsCategoryOpen(!isCategoryOpen);
@@ -225,101 +219,98 @@ export default function FilterBar({
               setIsOtherFiltersOpen(false);
               setIsSortOpen(false);
             }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isCategoryOpen || currentFilters.category
-                ? 'text-[#2f6bff]'
-                : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
+            className={`${filterTriggerClass(Boolean(isCategoryOpen || currentFilters.category))} cursor-pointer`}
           >
-            {currentFilters.category ? currentFilters.category : 'Category'}
+            <span className="max-w-[7.5rem] truncate sm:max-w-none">
+              {currentFilters.category ? currentFilters.category : 'Category'}
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`} />
           </div>
 
-          <AnimatePresence>
-            {isCategoryOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-full sm:w-[550px] md:w-[600px] lg:w-[650px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-4 sm:p-6 md:p-8 cursor-default max-h-[80vh] overflow-y-auto"
-                style={{ transformOrigin: 'top left' }}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase">All Categories</span>
-                  <button
-                    onClick={() => setDraftCategory('')}
-                    className="text-primary font-bold font-sans text-[14px] hover:underline"
-                  >
-                    Clear all
-                  </button>
-                </div>
-
-                <div className="relative mb-8">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
-                  <input
-                    type="text"
-                    placeholder="Search categories"
-                    value={categorySearchQuery}
-                    onChange={(e) => setCategorySearchQuery(e.target.value)}
-                    className="w-full bg-[#f1f4f9] border border-transparent focus:border-primary/30 rounded-full py-3.5 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-3 sm:gap-y-4 max-h-[300px] sm:max-h-[350px] md:max-h-[400px] overflow-y-auto px-1 mb-6 sm:mb-8 scrollbar-thin scrollbar-thumb-outline-variant">
-                  {filteredCategoryLabels.map((cat) => (
-                    <label key={cat} className="flex items-center gap-3 cursor-pointer group whitespace-normal">
-                      <div className="relative flex items-center justify-center">
-                        <input
-                          type="radio"
-                          name="category"
-                          checked={draftCategory === cat}
-                          onChange={() => setDraftCategory(cat)}
-                          className="peer appearance-none w-5 h-5 border-2 border-outline-variant rounded-full bg-white checked:bg-primary checked:border-primary transition-all cursor-pointer"
-                        />
-                        <svg
-                          className="absolute w-3 h-3 text-white scale-0 peer-checked:scale-100 transition-transform pointer-events-none"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="font-sans text-[16px] text-on-surface group-hover:text-primary transition-colors font-medium">
-                        {cat}
-                      </span>
-                    </label>
-                  ))}
-                  {filteredCategoryLabels.length === 0 && (
-                    <div className="col-span-2 py-8 text-center text-on-surface-variant font-sans text-[16px] italic">
-                      {categoryLabels.length === 0
-                        ? 'Loading categories…'
-                        : `No categories found matching "${categorySearchQuery}"`}
+          <FilterDropdownPanel
+            open={isCategoryOpen}
+            onClose={() => setIsCategoryOpen(false)}
+            anchorRef={categoryRef}
+            title="All Categories"
+            desktopClassName="sm:w-[550px] md:w-[600px] lg:max-w-[650px]"
+          >
+            <div className="flex flex-col min-h-0">
+              <div className="mb-4 flex shrink-0 justify-end sm:hidden">
+                <button
+                  type="button"
+                  onClick={() => setDraftCategory('')}
+                  className="font-sans text-[14px] font-bold text-primary hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="mb-4 hidden shrink-0 items-center justify-between sm:flex">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  Pick a category
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDraftCategory('')}
+                  className="font-sans text-[14px] font-bold text-primary hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="relative mb-4 shrink-0">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
+                <input
+                  type="text"
+                  placeholder="Search categories"
+                  value={categorySearchQuery}
+                  onChange={(e) => setCategorySearchQuery(e.target.value)}
+                  className="w-full rounded-full border border-transparent bg-[#f1f4f9] py-3 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-primary/30"
+                />
+              </div>
+              <div className="grid min-h-0 grid-cols-1 gap-y-3 px-1 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4">
+                {filteredCategoryLabels.map((cat) => (
+                  <label key={cat} className="group flex cursor-pointer items-center gap-3">
+                    <div className="relative flex items-center justify-center">
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={draftCategory === cat}
+                        onChange={() => setDraftCategory(cat)}
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-outline-variant bg-white transition-all checked:border-primary checked:bg-primary"
+                      />
+                      <svg
+                        className="pointer-events-none absolute h-3 w-3 scale-0 text-white transition-transform peer-checked:scale-100"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <button
-                    onClick={() => setIsCategoryOpen(false)}
-                    className="text-primary font-bold font-sans text-[16px] hover:underline px-4 py-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleApplyCategories}
-                    className="text-primary font-extrabold font-sans text-[16px] hover:underline px-4 py-2"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                    <span className="font-sans text-[15px] font-medium text-on-surface transition-colors group-hover:text-primary sm:text-[16px]">
+                      {cat}
+                    </span>
+                  </label>
+                ))}
+                {filteredCategoryLabels.length === 0 && (
+                  <p className="col-span-full py-6 text-center text-sm italic text-on-surface-variant sm:text-base">
+                    {!categoriesLoaded
+                      ? 'Loading categories…'
+                      : categorySearchQuery.trim()
+                        ? `No categories found matching "${categorySearchQuery}"`
+                        : 'No categories available'}
+                  </p>
+                )}
+              </div>
+              <FilterPanelActions
+                onCancel={() => setIsCategoryOpen(false)}
+                onApply={handleApplyCategories}
+              />
+            </div>
+          </FilterDropdownPanel>
         </div>
 
-        <div className="relative flex-shrink-0" ref={locationRef}>
+        <div className="relative shrink-0" ref={locationRef}>
           <div
             onClick={() => {
               setIsLocationOpen(!isLocationOpen);
@@ -328,98 +319,88 @@ export default function FilterBar({
               setIsOtherFiltersOpen(false);
               setIsSortOpen(false);
             }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isLocationOpen || locationActive ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
+            className={`${filterTriggerClass(isLocationOpen || locationActive)} cursor-pointer`}
           >
-            Location
+            <span className="shrink-0">Location</span>
             {currentFilters.work_type && currentFilters.work_type !== 'flexible' && (
-              <span className="text-[11px] font-normal opacity-80">
+              <span className="hidden text-[11px] font-normal opacity-80 sm:inline">
                 ({currentFilters.work_type === 'in_person' ? 'In person' : 'Remote'})
               </span>
             )}
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`} />
           </div>
 
-          <AnimatePresence>
-            {isLocationOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-full sm:w-[350px] md:w-[400px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-4 sm:p-6 md:p-8 cursor-default"
-                style={{ transformOrigin: 'top left' }}
-              >
-                <div className="space-y-8">
-                  <div>
-                    <h4 className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-4">To be done</h4>
-                    <div className="grid grid-cols-3 gap-2 bg-[#f1f4f9] p-1 rounded-2xl">
-                      {(['in_person', 'remote', 'flexible'] as const).map((type) => (
-                        <button
-                          key={type}
-                          onClick={() => setDraftWorkType(type)}
-                          className={`py-3 rounded-xl font-bold font-sans text-[14px] transition-all capitalize ${
-                            draftWorkType === type ? 'bg-[#000d45] text-white shadow-md' : 'text-on-surface hover:bg-white/50'
-                          }`}
-                        >
-                          {type.replace('_', ' ')}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-4">Suburb or city</h4>
-                    <input
-                      type="text"
-                      placeholder="e.g. Kathmandu, Lalitpur"
-                      value={draftLocation}
-                      onChange={(e) => setDraftLocation(e.target.value)}
-                      className="w-full bg-[#f1f4f9] border border-transparent focus:border-primary/30 rounded-2xl py-4 px-6 outline-none transition-all font-semibold text-[#000d45]"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase">Distance</h4>
-                      <span className="font-bold text-[#000d45]">
-                        {draftDistance >= 100 ? 'Any distance' : `${draftDistance} km`}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="5"
-                      max="100"
-                      value={draftDistance}
-                      onChange={(e) => setDraftDistance(parseFloat(e.target.value))}
-                      className="w-full h-2 bg-[#f1f4f9] rounded-lg appearance-none cursor-pointer accent-primary"
-                    />
-                    <p className="text-xs text-on-surface-variant mt-2">
-                      Uses your browser location when applied (for distance and “closest” sort).
-                    </p>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
+          <FilterDropdownPanel
+            open={isLocationOpen}
+            onClose={() => setIsLocationOpen(false)}
+            anchorRef={locationRef}
+            title="Location"
+            desktopClassName="sm:w-[400px]"
+          >
+            <div className="space-y-5 sm:space-y-6">
+              <div>
+                <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  To be done
+                </h4>
+                <div className="grid grid-cols-1 gap-2 rounded-2xl bg-[#f1f4f9] p-1 sm:grid-cols-3">
+                  {(['in_person', 'remote', 'flexible'] as const).map((type) => (
                     <button
-                      onClick={() => setIsLocationOpen(false)}
-                      className="text-primary font-bold font-sans text-[16px] hover:underline px-4 py-2"
+                      key={type}
+                      type="button"
+                      onClick={() => setDraftWorkType(type)}
+                      className={`rounded-xl py-2.5 font-sans text-[13px] font-bold capitalize transition-all sm:py-3 sm:text-[14px] ${
+                        draftWorkType === type
+                          ? 'bg-[#000d45] text-white shadow-md'
+                          : 'text-on-surface hover:bg-white/50'
+                      }`}
                     >
-                      Cancel
+                      {type.replace('_', ' ')}
                     </button>
-                    <button
-                      onClick={() => void handleApplyLocation()}
-                      className="text-primary font-extrabold font-sans text-[16px] hover:underline px-4 py-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+              <div>
+                <h4 className="mb-3 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                  Suburb or city
+                </h4>
+                <input
+                  type="text"
+                  placeholder="e.g. Kathmandu, Lalitpur"
+                  value={draftLocation}
+                  onChange={(e) => setDraftLocation(e.target.value)}
+                  className="w-full rounded-2xl border border-transparent bg-[#f1f4f9] px-4 py-3 font-semibold text-[#000d45] outline-none transition-all focus:border-primary/30 sm:px-6 sm:py-4"
+                />
+              </div>
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                    Distance
+                  </h4>
+                  <span className="font-bold text-[#000d45]">
+                    {draftDistance >= 100 ? 'Any distance' : `${draftDistance} km`}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="100"
+                  value={draftDistance}
+                  onChange={(e) => setDraftDistance(parseFloat(e.target.value))}
+                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[#f1f4f9] accent-primary"
+                />
+                <p className="mt-2 text-xs text-on-surface-variant">
+                  Uses your browser location when applied (for distance and “closest” sort).
+                </p>
+              </div>
+              <FilterPanelActions
+                onCancel={() => setIsLocationOpen(false)}
+                onApply={() => void handleApplyLocation()}
+              />
+            </div>
+          </FilterDropdownPanel>
         </div>
 
-        <div className="relative flex-shrink-0" ref={priceRef}>
+        <div className="relative shrink-0" ref={priceRef}>
           <div
             onClick={() => {
               setIsPriceOpen(!isPriceOpen);
@@ -427,91 +408,72 @@ export default function FilterBar({
               setIsLocationOpen(false);
               setIsOtherFiltersOpen(false);
             }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isPriceOpen || priceActive ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
+            className={`${filterTriggerClass(isPriceOpen || priceActive)} cursor-pointer`}
           >
-            {priceActive
-              ? formatBudgetRange(
-                  currentFilters.budget_min ?? 0,
-                  currentFilters.budget_max ?? DEFAULT_BUDGET_MAX
-                )
-              : 'Any price'}
+            <span className="max-w-[6.5rem] truncate sm:max-w-none">
+              {priceActive
+                ? formatBudgetRange(
+                    currentFilters.budget_min ?? 0,
+                    currentFilters.budget_max ?? DEFAULT_BUDGET_MAX
+                  )
+                : 'Any price'}
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isPriceOpen ? 'rotate-180' : ''}`} />
           </div>
 
-          <AnimatePresence>
-            {isPriceOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-full sm:w-[350px] md:w-[400px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-4 sm:p-6 md:p-8 cursor-default"
-                style={{ transformOrigin: 'top left' }}
-              >
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-8">Task Price</h4>
-                    <div className="text-center mb-8">
-                      <span className="text-2xl font-bold text-[#000d45]">
-                        {formatBudgetRange(draftBudgetMin, draftBudgetMax)}
-                      </span>
-                    </div>
-
-                    <div className="relative h-2 bg-[#f1f4f9] rounded-full mt-4">
-                      <div
-                        className="absolute h-full bg-primary rounded-full"
-                        style={{
-                          left: `${(draftBudgetMin / DEFAULT_BUDGET_MAX) * 100}%`,
-                          right: `${100 - (draftBudgetMax / DEFAULT_BUDGET_MAX) * 100}%`,
-                        }}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max={DEFAULT_BUDGET_MAX}
-                        value={draftBudgetMin}
-                        onChange={(e) =>
-                          setDraftBudgetMin(Math.min(parseFloat(e.target.value), draftBudgetMax - 100))
-                        }
-                        className="absolute w-full h-full appearance-none bg-transparent pointer-events-auto cursor-pointer accent-primary"
-                        style={{ zIndex: 3 }}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max={DEFAULT_BUDGET_MAX}
-                        value={draftBudgetMax}
-                        onChange={(e) =>
-                          setDraftBudgetMax(Math.max(parseFloat(e.target.value), draftBudgetMin + 100))
-                        }
-                        className="absolute w-full h-full appearance-none bg-transparent pointer-events-auto cursor-pointer accent-primary"
-                        style={{ zIndex: 4 }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
-                    <button
-                      onClick={() => setIsPriceOpen(false)}
-                      className="text-primary font-bold font-sans text-[16px] hover:underline px-4 py-2"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleApplyPrice}
-                      className="text-primary font-extrabold font-sans text-[16px] hover:underline px-4 py-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <FilterDropdownPanel
+            open={isPriceOpen}
+            onClose={() => setIsPriceOpen(false)}
+            anchorRef={priceRef}
+            title="Task price"
+            desktopClassName="sm:w-[400px]"
+          >
+            <div className="space-y-6">
+              <div className="text-center">
+                <span className="text-xl font-bold text-[#000d45] sm:text-2xl">
+                  {formatBudgetRange(draftBudgetMin, draftBudgetMax)}
+                </span>
+              </div>
+              <div className="relative mt-2 h-2 rounded-full bg-[#f1f4f9]">
+                <div
+                  className="absolute h-full rounded-full bg-primary"
+                  style={{
+                    left: `${(draftBudgetMin / DEFAULT_BUDGET_MAX) * 100}%`,
+                    right: `${100 - (draftBudgetMax / DEFAULT_BUDGET_MAX) * 100}%`,
+                  }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max={DEFAULT_BUDGET_MAX}
+                  value={draftBudgetMin}
+                  onChange={(e) =>
+                    setDraftBudgetMin(Math.min(parseFloat(e.target.value), draftBudgetMax - 100))
+                  }
+                  className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-primary"
+                  style={{ zIndex: 3 }}
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max={DEFAULT_BUDGET_MAX}
+                  value={draftBudgetMax}
+                  onChange={(e) =>
+                    setDraftBudgetMax(Math.max(parseFloat(e.target.value), draftBudgetMin + 100))
+                  }
+                  className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-primary"
+                  style={{ zIndex: 4 }}
+                />
+              </div>
+              <FilterPanelActions
+                onCancel={() => setIsPriceOpen(false)}
+                onApply={handleApplyPrice}
+              />
+            </div>
+          </FilterDropdownPanel>
         </div>
 
-        <div className="relative flex-shrink-0" ref={otherFiltersRef}>
+        <div className="relative shrink-0" ref={otherFiltersRef}>
           <div
             onClick={() => {
               setIsOtherFiltersOpen(!isOtherFiltersOpen);
@@ -519,76 +481,61 @@ export default function FilterBar({
               setIsLocationOpen(false);
               setIsPriceOpen(false);
             }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isOtherFiltersOpen || currentFilters.status ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
+            className={`${filterTriggerClass(Boolean(isOtherFiltersOpen || currentFilters.status))} cursor-pointer`}
           >
-            <SlidersHorizontal className="w-4 h-4" />
-            More filters
+            <SlidersHorizontal className="h-4 w-4 shrink-0" />
+            <span className="sm:hidden">More</span>
+            <span className="hidden sm:inline">More filters</span>
           </div>
 
-          <AnimatePresence>
-            {isOtherFiltersOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full right-0 mt-2 w-full sm:w-[350px] md:w-[400px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-4 sm:p-6 md:p-8 cursor-default"
-                style={{ transformOrigin: 'top right' }}
-              >
-                <div className="space-y-8">
-                  <div>
-                    <h4 className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-8">Other Filters</h4>
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-[#000d45] font-sans text-[16px]">Open tasks only</p>
-                          <p className="text-on-surface-variant font-sans text-[14px]">Show only open tasks</p>
-                        </div>
-                        <button
-                          onClick={() => setDraftStatus(draftStatus === 'open' ? undefined : 'open')}
-                          className={`w-12 h-6 rounded-full transition-all relative ${draftStatus === 'open' ? 'bg-primary' : 'bg-outline-variant'}`}
-                        >
-                          <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${draftStatus === 'open' ? 'left-7' : 'left-1'}`} />
-                        </button>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-[#000d45] font-sans text-[16px]">Assigned tasks only</p>
-                          <p className="text-on-surface-variant font-sans text-[14px]">Show only assigned tasks</p>
-                        </div>
-                        <button
-                          onClick={() => setDraftStatus(draftStatus === 'assigned' ? undefined : 'assigned')}
-                          className={`w-12 h-6 rounded-full transition-all relative ${draftStatus === 'assigned' ? 'bg-primary' : 'bg-outline-variant'}`}
-                        >
-                          <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${draftStatus === 'assigned' ? 'left-7' : 'left-1'}`} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
-                    <button
-                      onClick={() => setIsOtherFiltersOpen(false)}
-                      className="text-primary font-bold font-sans text-[16px] hover:underline px-4 py-2"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleApplyOtherFilters}
-                      className="text-primary font-extrabold font-sans text-[16px] hover:underline px-4 py-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
+          <FilterDropdownPanel
+            open={isOtherFiltersOpen}
+            onClose={() => setIsOtherFiltersOpen(false)}
+            anchorRef={otherFiltersRef}
+            title="More filters"
+            align="right"
+            desktopClassName="sm:w-[400px]"
+          >
+            <div className="space-y-6">
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="font-sans text-[16px] font-bold text-[#000d45]">Open tasks only</p>
+                  <p className="font-sans text-[14px] text-on-surface-variant">Show only open tasks</p>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <button
+                  type="button"
+                  onClick={() => setDraftStatus(draftStatus === 'open' ? undefined : 'open')}
+                  className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'open' ? 'bg-primary' : 'bg-outline-variant'}`}
+                >
+                  <div
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${draftStatus === 'open' ? 'left-7' : 'left-1'}`}
+                  />
+                </button>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="font-sans text-[16px] font-bold text-[#000d45]">Assigned tasks only</p>
+                  <p className="font-sans text-[14px] text-on-surface-variant">Show only assigned tasks</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDraftStatus(draftStatus === 'assigned' ? undefined : 'assigned')}
+                  className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'assigned' ? 'bg-primary' : 'bg-outline-variant'}`}
+                >
+                  <div
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${draftStatus === 'assigned' ? 'left-7' : 'left-1'}`}
+                  />
+                </button>
+              </div>
+              <FilterPanelActions
+                onCancel={() => setIsOtherFiltersOpen(false)}
+                onApply={handleApplyOtherFilters}
+              />
+            </div>
+          </FilterDropdownPanel>
         </div>
 
-        <div className="relative flex-shrink-0" ref={sortRef}>
+        <div className="relative shrink-0" ref={sortRef}>
           <div
             onClick={() => {
               setIsSortOpen(!isSortOpen);
@@ -597,59 +544,59 @@ export default function FilterBar({
               setIsPriceOpen(false);
               setIsOtherFiltersOpen(false);
             }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isSortOpen || sortLabel ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
+            className={`${filterTriggerClass(Boolean(isSortOpen || sortLabel))} cursor-pointer`}
           >
-            <ArrowUpDown className="w-4 h-4" />
-            {sortLabel || 'Sort'}
+            <ArrowUpDown className="h-4 w-4 shrink-0" />
+            <span className="max-w-[5.5rem] truncate sm:max-w-none">{sortLabel || 'Sort'}</span>
           </div>
 
-          <AnimatePresence>
-            {isSortOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full right-0 mt-2 w-full sm:w-[280px] md:w-[320px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-2 sm:p-3 cursor-default"
-                style={{ transformOrigin: 'top right' }}
-              >
-                <div className="space-y-1">
-                  {[
-                    { id: 'newest' as const, label: 'Most recently posted', icon: Clock },
-                    { id: 'budget_high' as const, label: 'Highest price', icon: DollarSign },
-                    { id: 'budget_low' as const, label: 'Lowest price', icon: DollarSign },
-                    { id: 'closest' as const, label: 'Closest to me', icon: Target },
-                  ].map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = (currentFilters.sort_by || 'newest') === option.id;
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => void handleSortChange(option.id)}
-                        className={`w-full text-left px-5 py-4 rounded-2xl font-semibold font-sans text-[16px] transition-all flex items-center gap-4 ${
-                          isSelected ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
-                        }`}
-                      >
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-[#000d45]' : 'text-on-surface-variant'}`} />
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <FilterDropdownPanel
+            open={isSortOpen}
+            onClose={() => setIsSortOpen(false)}
+            anchorRef={sortRef}
+            title="Sort by"
+            align="right"
+            desktopClassName="sm:w-[320px]"
+          >
+            <div className="space-y-1">
+              {[
+                { id: 'newest' as const, label: 'Most recently posted', icon: Clock },
+                { id: 'budget_high' as const, label: 'Highest price', icon: DollarSign },
+                { id: 'budget_low' as const, label: 'Lowest price', icon: DollarSign },
+                { id: 'closest' as const, label: 'Closest to me', icon: Target },
+              ].map((option) => {
+                const Icon = option.icon;
+                const isSelected = (currentFilters.sort_by || 'newest') === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => void handleSortChange(option.id)}
+                    className={`flex min-h-[48px] w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-sans text-[15px] font-semibold transition-all sm:gap-4 sm:px-5 sm:py-4 sm:text-[16px] ${
+                      isSelected ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
+                    }`}
+                  >
+                    <Icon
+                      className={`h-5 w-5 shrink-0 ${isSelected ? 'text-[#000d45]' : 'text-on-surface-variant'}`}
+                    />
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </FilterDropdownPanel>
         </div>
 
         {hasActiveFilters(currentFilters) && (
           <button
+            type="button"
             onClick={handleClearAll}
-            className="text-primary font-semibold font-sans text-[13px] hover:underline whitespace-nowrap flex-shrink-0"
+            className="min-h-[44px] shrink-0 touch-manipulation whitespace-nowrap font-sans text-[13px] font-semibold text-primary hover:underline sm:min-h-0"
           >
             Clear all
           </button>
         )}
+        </div>
       </div>
     </div>
   );

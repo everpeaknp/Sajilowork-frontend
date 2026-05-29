@@ -123,32 +123,32 @@ export default function ServiceFeatures() {
   }, [carouselControls, carouselItems.length]);
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <div className="grid lg:grid-cols-2 gap-20 items-center">
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+      <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
         <div>
           <h2
-            className={`${landingHeadline} text-4xl sm:text-5xl md:text-6xl mb-8 leading-[1.08] tracking-[-0.035em]`}
+            className={`${landingHeadline} mb-6 text-2xl leading-[1.1] tracking-[-0.03em] text-balance sm:mb-8 sm:text-4xl md:text-5xl lg:text-6xl`}
           >
             Post your first task <br className="hidden md:block" /> in seconds
           </h2>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {STEPS.map((text, i) => (
-              <div key={i} className="flex gap-4 items-start">
-                <div className="mt-1 bg-[#1161fe]/10 p-1 rounded-full text-[#1161fe]">
+              <div key={i} className="flex items-start gap-3 sm:gap-4">
+                <div className="mt-0.5 shrink-0 rounded-full bg-[#1161fe]/10 p-1 text-[#1161fe] sm:mt-1">
                   <CheckCircle2 size={20} />
                 </div>
-                <p className="text-[#6a719a] font-medium text-lg leading-relaxed">{text}</p>
+                <p className="text-base font-medium leading-relaxed text-[#6a719a] sm:text-lg">{text}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-10">
-            <Link href="/post-task">
+          <div className="mt-8 sm:mt-10">
+            <Link href="/post-task" className="block w-full sm:inline-block sm:w-auto">
               <motion.span
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-block bg-[#1161fe] hover:bg-blue-600 text-white px-10 py-5 rounded-full font-semibold text-lg transition-all shadow-xl shadow-[#1161fe]/25 cursor-pointer"
+                className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-[#1161fe] px-8 py-4 text-base font-semibold text-white shadow-xl shadow-[#1161fe]/25 transition-all hover:bg-blue-600 sm:inline-flex sm:px-10 sm:py-5 sm:text-lg"
               >
                 Post your task
               </motion.span>
@@ -157,7 +157,7 @@ export default function ServiceFeatures() {
         </div>
 
         <div
-          className="relative min-h-[520px] sm:min-h-[560px] lg:h-[620px] overflow-hidden px-2 py-6"
+          className="relative min-h-[360px] overflow-hidden px-1 py-4 sm:min-h-[480px] sm:px-2 sm:py-6 lg:h-[620px] lg:min-h-[560px]"
           onMouseEnter={() => carouselControls.stop()}
           onMouseLeave={() =>
             carouselControls.start({
@@ -172,13 +172,13 @@ export default function ServiceFeatures() {
           <motion.div
             animate={carouselControls}
             initial={{ y: "0%" }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4"
+            className="grid grid-cols-2 gap-2.5 py-2 sm:grid-cols-4 sm:gap-4 sm:py-4"
           >
             {[...carouselItems, ...carouselItems].map((cat, i) => (
               <Link
                 key={`${cat.name}-${i}`}
                 href={cat.name === "More" ? cat.href : postTaskHref(cat.name)}
-                className="bg-[#eef4ff]/50 p-6 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-[#1161fe] hover:text-white transition-all group/card shadow-sm"
+                className="group/card flex min-h-[88px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl bg-[#eef4ff]/50 p-4 shadow-sm transition-all hover:bg-[#1161fe] hover:text-white sm:min-h-0 sm:gap-3 sm:rounded-2xl sm:p-6"
               >
                 <div className="text-gray-400 group-hover/card:text-white transition-colors">
                   {cat.name === "More" ? <Plus size={28} /> : iconForCategory(cat.name)}

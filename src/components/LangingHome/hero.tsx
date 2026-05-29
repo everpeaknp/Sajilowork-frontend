@@ -7,46 +7,46 @@ import { landingHeadline, landingHeadlineSm } from "./landingTypography";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#005fff] via-[#0047ff] to-[#03113c] text-white pt-20 pb-24 sm:pb-28">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#005fff] via-[#0047ff] to-[#03113c] pt-16 pb-12 text-white sm:pt-20 sm:pb-20 md:pb-24 lg:pb-28">
       {/* Decorative background visual ambient circles and polygons (match Discover hero) */}
-      <div className="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-sky-400 via-indigo-500 to-transparent pointer-events-none" />
-      <div className="absolute top-1/4 right-1/12 h-64 w-64 bg-cyan-400 rounded-full mix-blend-screen filter blur-3xl opacity-10 pointer-events-none animate-pulse" />
-      <div className="absolute -bottom-10 -left-10 h-72 w-72 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-15 pointer-events-none" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 xl:gap-16 items-center">
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-sky-400 via-indigo-500 to-transparent opacity-20" />
+      <div className="pointer-events-none absolute top-1/4 right-0 hidden h-48 w-48 animate-pulse rounded-full bg-cyan-400 opacity-10 mix-blend-screen blur-3xl filter sm:block sm:h-64 sm:w-64" />
+      <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-blue-500 opacity-15 mix-blend-screen blur-3xl filter sm:h-72 sm:w-72" />
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
             <h1
-              className={`${landingHeadline} text-5xl sm:text-6xl md:text-7xl leading-[1.02] tracking-[-0.045em]`}
+              className={`${landingHeadline} text-[2rem] leading-[1.05] tracking-[-0.04em] text-balance sm:text-5xl md:text-6xl lg:text-7xl`}
             >
               Get Anything Done
             </h1>
 
-            <p className="mt-5 text-base sm:text-lg text-blue-100/90 max-w-xl leading-relaxed font-medium">
+            <p className="mt-4 max-w-xl text-sm leading-relaxed font-medium text-blue-100/90 sm:mt-5 sm:text-base md:text-lg">
               The ultimate marketplace to outsource tasks, find local services, and reclaim your time. From cleaning to coding, we've got you covered.
             </p>
 
-            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/85">
-              <span className={`${landingHeadlineSm} text-sm`}>1M+ customers</span>
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/85 sm:mt-7 sm:gap-x-6 sm:text-sm">
+              <span className={landingHeadlineSm}>1M+ customers</span>
               <span className="h-1 w-1 rounded-full bg-white/35" aria-hidden />
-              <span className={`${landingHeadlineSm} text-sm`}>2.5M+ tasks done</span>
+              <span className={landingHeadlineSm}>2.5M+ tasks done</span>
               <span className="h-1 w-1 rounded-full bg-white/35" aria-hidden />
-              <span className={`${landingHeadlineSm} text-sm`}>4M+ reviews</span>
+              <span className={landingHeadlineSm}>4M+ reviews</span>
             </div>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-4">
               <Link
                 href="/post-task"
-                className="mt-10 rounded-full bg-white px-8 py-4 font-bold text-base text-[#061257] transition-all shadow-xl shadow-black/10 hover:bg-white/95 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-center text-sm font-bold text-[#061257] shadow-xl shadow-black/10 transition-all hover:bg-white/95 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:w-auto sm:px-8 sm:py-4 sm:text-base"
               >
                 Post a task for free
               </Link>
               <Link
                 href="/signup?role=tasker"
-                className="mt-10 rounded-full border border-white/25 bg-transparent px-8 py-4 font-bold text-base text-white transition-all hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-white/25 bg-transparent px-6 py-3.5 text-center text-sm font-bold text-white transition-all hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:w-auto sm:px-8 sm:py-4 sm:text-base"
               >
                 Earn money
               </Link>
@@ -59,16 +59,16 @@ export default function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            <div className="relative w-full max-w-lg">
-              <div className="absolute -inset-6 rounded-[3rem] bg-white/10 blur-2xl opacity-60" aria-hidden />
+            <div className="relative w-full max-w-md sm:max-w-lg">
+              <div className="absolute -inset-4 rounded-[2rem] bg-white/10 opacity-60 blur-2xl sm:-inset-6 sm:rounded-[3rem]" aria-hidden />
               <img
                 src={IMAGES.HERO_MAIN}
                 alt="Professional at work"
-                className="relative w-full rounded-[2.5rem] shadow-2xl border border-white/15 aspect-square object-cover"
+                className="relative aspect-[4/3] w-full rounded-2xl border border-white/15 object-cover shadow-2xl sm:aspect-square sm:rounded-[2.5rem]"
               />
-              <div className="absolute -bottom-6 left-6 rounded-2xl bg-white px-4 py-3 shadow-2xl">
-                <p className={`${landingHeadlineSm} text-xs text-[#061257]`}>100% Verified</p>
-                <p className="text-[11px] font-medium text-[#6a719a] mt-0.5">Trust & safety first</p>
+              <div className="absolute bottom-3 left-3 rounded-xl bg-white px-3 py-2 shadow-2xl sm:-bottom-6 sm:left-6 sm:rounded-2xl sm:px-4 sm:py-3">
+                <p className={`${landingHeadlineSm} text-[10px] text-[#061257] sm:text-xs`}>100% Verified</p>
+                <p className="mt-0.5 text-[10px] font-medium text-[#6a719a] sm:text-[11px]">Trust & safety first</p>
               </div>
             </div>
           </motion.div>

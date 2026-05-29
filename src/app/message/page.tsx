@@ -6,7 +6,7 @@ import Navbar from '@/components/common/navbar';
 
 export default function MessagePage() {
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="mobile-bottom-nav-offset flex h-[100dvh] flex-col overflow-hidden md:pb-0">
       <Navbar />
       <div className="flex-1 overflow-hidden">
         <Suspense

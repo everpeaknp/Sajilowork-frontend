@@ -8,6 +8,10 @@
   --outline-variant: #e5e7eb;
   --surface-container-low: #f9fafb;
   --surface-container: #f3f4f6;
+  --surface: #ffffff;
+  --surface-low: #f9fafb;
+  --surface-dim: #f3f4f6;
+  --surface-variant: #e5e7eb;
   --error: #ef4444;
 }
 
@@ -19,6 +23,10 @@
   --color-outline-variant: var(--outline-variant);
   --color-surface-container-low: var(--surface-container-low);
   --color-surface-container: var(--surface-container);
+  --color-surface: var(--surface);
+  --color-surface-low: var(--surface-low);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-variant: var(--surface-variant);
   --color-error: var(--error);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -143,4 +151,15 @@ body {
 .blog-content pre {
   overflow-x: auto;
   padding: 1rem;
+}
+
+/* Floating mobile bottom nav (see MobileBottomNav.tsx) */
+@media (max-width: 767px) {
+  body.has-mobile-bottom-nav {
+    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.has-mobile-bottom-nav .mobile-bottom-nav-offset {
+    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
+  }
 }

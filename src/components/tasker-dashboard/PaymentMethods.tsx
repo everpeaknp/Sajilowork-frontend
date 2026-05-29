@@ -752,7 +752,7 @@ export default function PaymentMethods() {
             <div className="h-1 w-10 bg-primary rounded-full" />
             <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Financials</span>
           </div>
-          <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">Payments</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">Payments</h1>
           <p className="text-gray-500 mt-2">Manage your funding sources and digital wallet.</p>
         </div>
 
@@ -803,7 +803,7 @@ export default function PaymentMethods() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-blue-200/60 uppercase tracking-widest mb-1">Available Balance</p>
-                      <p className="text-5xl font-black tracking-tighter">
+                      <p className="text-3xl font-black tracking-tighter sm:text-5xl">
                         {formatNPR(walletData?.available_balance ?? 0)}
                       </p>
                       <div className="mt-6 grid grid-cols-2 gap-4">

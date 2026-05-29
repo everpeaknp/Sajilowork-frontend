@@ -521,7 +521,7 @@ export default function Settings() {
           <div className="h-1 w-10 bg-primary rounded-full" />
           <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Account Control</span>
         </div>
-        <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">Settings</h1>
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">Settings</h1>
         <p className="text-gray-500 mt-2">Personalize your account security, notifications, and verification status.</p>
       </header>
 

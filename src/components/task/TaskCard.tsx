@@ -17,6 +17,8 @@ interface TaskCardProps {
   /** Shown next to clock icon — defaults to "Anytime" */
   timeLabel?: string;
   offerCount?: number;
+  /** When true, footer shows offer count only (no status label). Used on /task browse. */
+  showOffersOnly?: boolean;
   user: {
     name: string;
     avatar: string;
@@ -91,6 +93,7 @@ export default function TaskCard({
   dueDate,
   timeLabel = 'Anytime',
   offerCount = 0,
+  showOffersOnly = false,
   user,
   onClick,
   isActive = false,
@@ -149,15 +152,25 @@ export default function TaskCard({
       {/* Status, offers, avatar */}
       <div className="flex items-center justify-between gap-3 min-w-0 pt-2 border-t border-outline-variant/60">
         <div className="min-w-0 flex flex-col gap-0.5">
-          <span
-            className={`font-sans text-sm sm:text-[15px] font-bold leading-5 ${statusTextClass(status)}`}
-          >
-            {displayStatus}
-          </span>
-          {offerCount > 0 && (
-            <span className="font-sans text-xs text-on-surface-variant leading-4">
-              {offerCount} {offerCount === 1 ? 'offer' : 'offers'}
+          {showOffersOnly ? (
+            <span className="font-sans text-sm sm:text-[15px] font-bold leading-5 text-on-surface-variant">
+              {offerCount > 0
+                ? `${offerCount} ${offerCount === 1 ? 'offer' : 'offers'}`
+                : 'No offers'}
             </span>
+          ) : (
+            <>
+              <span
+                className={`font-sans text-sm sm:text-[15px] font-bold leading-5 ${statusTextClass(status)}`}
+              >
+                {displayStatus}
+              </span>
+              {offerCount > 0 && (
+                <span className="font-sans text-xs text-on-surface-variant leading-4">
+                  {offerCount} {offerCount === 1 ? 'offer' : 'offers'}
+                </span>
+              )}
+            </>
           )}
         </div>
         <UserAvatar

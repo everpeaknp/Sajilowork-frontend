@@ -8,6 +8,8 @@ import {
   canEditMyPostedTask,
   canDeleteMyPostedTask,
   canCancelMyTask,
+  getTaskPosterId,
+  getTaskPosterProfileSlug,
 } from '@/lib/taskUtils';
 
 export const toCoord = (raw: unknown): number => {
@@ -68,11 +70,8 @@ export function transformApiTaskToMyTaskView(
       : task.category?.name || 'General';
 
   const poster = resolvePoster(task);
-  const posterNested: any =
-    (task.poster && typeof task.poster === 'object' ? task.poster : null) ||
-    (task.owner && typeof task.owner === 'object' ? task.owner : null);
-  const posterId = posterNested?.id ? String(posterNested.id) : null;
-  const posterUsername = (posterNested?.username ?? null) as string | null;
+  const posterId = getTaskPosterId(task);
+  const posterUsername = getTaskPosterProfileSlug(task);
 
   let postedDate = new Date();
   let dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);

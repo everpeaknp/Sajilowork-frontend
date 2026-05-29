@@ -323,7 +323,7 @@ export default function Skills() {
             Professional Profile
           </span>
         </div>
-        <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">
           Your Skills
         </h1>
         <p className="text-gray-500 mt-2 max-w-2xl font-medium">

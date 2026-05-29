@@ -1,16 +1,24 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, ArrowUpDown, Search, Clock, DollarSign, Menu } from 'lucide-react';
 import { SearchFilters } from '@/types';
+import {
+  type MyTasksFilterId,
+  MY_TASKS_STATUS_FILTERS,
+} from '@/lib/taskUtils';
+import { formatBudgetRange } from '@/lib/nepalLocale';
+import { useMobileFilterBodyLock } from '@/lib/filterBarMobile';
+import FilterDropdownPanel, { FilterPanelActions } from '@/components/common/FilterDropdownPanel';
+
+const DEFAULT_BUDGET_MAX = 10000;
 
 const CATEGORIES = [
   'Acoustic Sound Proofing', 'Advisory', 'Beauty Services', 'Bicycle Repair',
   'Boat Detailing', 'Body Art', 'Bricklayer', 'Builder',
   'Interstate Deliveries', 'Knitting / Needlecraft', 'Labour', 'Letterbox & Flyer Distribution',
   'Locksmiths', 'Market Research', 'Maternity, Childcare & Babysitting', 'Mechanic',
-  'Cleaning', 'Gardening'
+  'Cleaning', 'Gardening',
 ];
 
 const STATUS_OPTIONS = [
@@ -23,7 +31,13 @@ const STATUS_OPTIONS = [
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'disputed', label: 'Disputed' },
-];
+] as const;
+
+export type MyTaskStatusTabsConfig = {
+  active: MyTasksFilterId;
+  onChange: (id: MyTasksFilterId) => void;
+  counts: Record<MyTasksFilterId, number>;
+};
 
 interface FilterBarProps {
   currentFilters: SearchFilters;
@@ -32,74 +46,76 @@ interface FilterBarProps {
   onToggleSidebar: () => void;
   isCompactSidebar?: boolean;
   onToggleCompact?: () => void;
+  /** Horizontal status tabs (All tasks, Posted, …) instead of the Status dropdown */
+  statusTabs?: MyTaskStatusTabsConfig;
 }
 
-export default function FilterBar({ currentFilters, onFilterChange, isCompactSidebar = false, onToggleCompact }: FilterBarProps) {
+export default function FilterBar({
+  currentFilters,
+  onFilterChange,
+  isCompactSidebar = false,
+  onToggleCompact,
+  statusTabs,
+}: FilterBarProps) {
+  const useStatusTabs = Boolean(statusTabs);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [isPriceOpen, setIsPriceOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [categorySearchQuery, setCategorySearchQuery] = useState('');
 
-  // Internal draft states
   const [draftCategory, setDraftCategory] = useState<string>(currentFilters.category || '');
-  const [draftStatus, setDraftStatus] = useState<
-    | 'draft'
-    | 'open'
-    | 'assigned'
-    | 'funded'
-    | 'in_progress'
-    | 'pending_approval'
-    | 'completed'
-    | 'cancelled'
-    | 'disputed'
-    | undefined
-  >(currentFilters.status);
-  const [draftBudgetMin, setDraftBudgetMin] = useState(currentFilters.budget_min || 0);
-  const [draftBudgetMax, setDraftBudgetMax] = useState(currentFilters.budget_max || 10000);
+  const [draftStatus, setDraftStatus] = useState<SearchFilters['status']>(currentFilters.status);
+  const [draftBudgetMin, setDraftBudgetMin] = useState(currentFilters.budget_min ?? 0);
+  const [draftBudgetMax, setDraftBudgetMax] = useState(currentFilters.budget_max ?? DEFAULT_BUDGET_MAX);
 
   const categoryRef = useRef<HTMLDivElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
   const priceRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
 
-  // Sync draft state when currentFilters changes
   useEffect(() => {
     setDraftCategory(currentFilters.category || '');
     setDraftStatus(currentFilters.status);
-    setDraftBudgetMin(currentFilters.budget_min || 0);
-    setDraftBudgetMax(currentFilters.budget_max || 10000);
+    setDraftBudgetMin(currentFilters.budget_min ?? 0);
+    setDraftBudgetMax(currentFilters.budget_max ?? DEFAULT_BUDGET_MAX);
   }, [currentFilters]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
-      if (statusRef.current && !statusRef.current.contains(event.target as Node)) {
-        setIsStatusOpen(false);
-      }
-      if (priceRef.current && !priceRef.current.contains(event.target as Node)) {
-        setIsPriceOpen(false);
-      }
-      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
-        setIsSortOpen(false);
-      }
-    }
+  const filteredCategoryLabels = CATEGORIES.filter((cat) =>
+    cat.toLowerCase().includes(categorySearchQuery.toLowerCase())
+  );
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const togglePanel = (panel: 'category' | 'status' | 'price' | 'sort') => {
+    const next = {
+      category: panel === 'category' ? !isCategoryOpen : false,
+      status: panel === 'status' ? !isStatusOpen : false,
+      price: panel === 'price' ? !isPriceOpen : false,
+      sort: panel === 'sort' ? !isSortOpen : false,
+    };
+    setIsCategoryOpen(next.category);
+    setIsStatusOpen(next.status);
+    setIsPriceOpen(next.price);
+    setIsSortOpen(next.sort);
+  };
 
-  const filteredCategoriesLabels = CATEGORIES.filter(cat => cat.toLowerCase().includes(searchQuery.toLowerCase()));
+  const anyPanelOpen =
+    isCategoryOpen ||
+    (!useStatusTabs && isStatusOpen) ||
+    isPriceOpen ||
+    isSortOpen;
+  useMobileFilterBodyLock(anyPanelOpen);
 
   const handleApplyCategories = () => {
-    onFilterChange({ ...currentFilters, category: draftCategory });
+    onFilterChange({ ...currentFilters, category: draftCategory || undefined });
     setIsCategoryOpen(false);
   };
 
   const handleApplyPrice = () => {
-    onFilterChange({ ...currentFilters, budget_min: draftBudgetMin, budget_max: draftBudgetMax });
+    onFilterChange({
+      ...currentFilters,
+      budget_min: draftBudgetMin > 0 ? draftBudgetMin : undefined,
+      budget_max: draftBudgetMax < DEFAULT_BUDGET_MAX ? draftBudgetMax : undefined,
+    });
     setIsPriceOpen(false);
   };
 
@@ -108,163 +124,209 @@ export default function FilterBar({ currentFilters, onFilterChange, isCompactSid
     setIsSortOpen(false);
   };
 
+  const priceActive =
+    (currentFilters.budget_min != null && currentFilters.budget_min > 0) ||
+    (currentFilters.budget_max != null && currentFilters.budget_max < DEFAULT_BUDGET_MAX);
+
+  const statusLabel = currentFilters.status
+    ? STATUS_OPTIONS.find((s) => s.value === currentFilters.status)?.label
+    : null;
+
+  const sortLabel =
+    currentFilters.sort_by === 'budget_high'
+      ? 'Highest price'
+      : currentFilters.sort_by === 'budget_low'
+        ? 'Lowest price'
+        : currentFilters.sort_by === 'newest'
+          ? 'Most recent'
+          : null;
+
+  const filterTriggerClass = (active: boolean) =>
+    `flex min-h-[44px] touch-manipulation cursor-pointer items-center gap-1.5 whitespace-nowrap font-sans text-[13px] font-semibold transition-colors sm:min-h-0 sm:gap-2 ${
+      active ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
+    }`;
+
   return (
-    <div className="bg-white border-b border-outline-variant px-10 py-3 flex items-center relative z-[200] isolate overflow-visible">
-      <div className="flex items-center gap-6 flex-nowrap">
-        {/* Toggle Sidebar Button */}
-        <button
-          onClick={onToggleCompact}
-          className="p-2 hover:bg-surface-dim rounded-lg transition-colors flex-shrink-0"
-          title={isCompactSidebar ? 'Show full sidebar' : 'Show compact sidebar'}
-        >
-          <Menu className="w-5 h-5 text-on-surface-variant" />
-        </button>
+    <div className="relative z-[200] border-b border-outline-variant bg-white">
+      <div className="flex min-w-0 flex-col gap-2.5 px-3 py-2.5 sm:px-6 sm:py-3 lg:flex-row lg:items-center lg:gap-6 lg:px-10">
+        <div className="flex min-w-0 items-center gap-2 lg:shrink-0">
+          <button
+            type="button"
+            onClick={onToggleCompact}
+            className="hidden shrink-0 rounded-lg p-2 transition-colors hover:bg-surface-dim lg:flex"
+            title={isCompactSidebar ? 'Show full sidebar' : 'Show compact sidebar'}
+          >
+            <Menu className="h-5 w-5 text-on-surface-variant" />
+          </button>
 
-        {/* Search Input */}
-        <div className="relative flex-shrink-0">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
-          <input
-            type="text"
-            placeholder="Search my tasks..."
-            value={currentFilters.query || ''}
-            onChange={(e) => onFilterChange({ ...currentFilters, query: e.target.value })}
-            className="bg-white border border-[#2f6bff]/30 focus:border-[#2f6bff]/50 shadow-sm rounded-full py-2 pl-10 pr-4 w-64 outline-none transition-all placeholder:text-on-surface-variant/60 font-sans text-[14px]"
-          />
+          <div className="relative min-w-0 flex-1 lg:w-64 lg:flex-none">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
+            <input
+              type="text"
+              placeholder="Search my tasks..."
+              value={currentFilters.query || ''}
+              onChange={(e) =>
+                onFilterChange({
+                  ...currentFilters,
+                  query: e.target.value || undefined,
+                })
+              }
+              className="w-full rounded-full border border-[#2f6bff]/30 bg-white py-2 pl-10 pr-4 font-sans text-[14px] shadow-sm outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-[#2f6bff]/50"
+            />
+          </div>
         </div>
 
-        {/* Category Filter */}
-        <div className="relative flex-shrink-0" ref={categoryRef}>
-          <div
-            onClick={() => {
-              setIsCategoryOpen(!isCategoryOpen);
-              setIsStatusOpen(false);
-              setIsPriceOpen(false);
-              setIsSortOpen(false);
-            }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isCategoryOpen ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
-          >
-            Category
-            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`} />
+        {statusTabs ? (
+          <div className="flex min-w-0 touch-pan-x items-center gap-3 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden lg:min-w-0 lg:flex-1">
+            {MY_TASKS_STATUS_FILTERS.map((filter) => {
+              const count = statusTabs.counts[filter.id];
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => statusTabs.onChange(filter.id)}
+                  className={`min-h-[44px] shrink-0 touch-manipulation whitespace-nowrap font-sans text-[13px] font-semibold transition-colors sm:min-h-0 ${
+                    statusTabs.active === filter.id
+                      ? 'text-[#2f6bff]'
+                      : 'text-black/70 hover:text-[#2f6bff]'
+                  }`}
+                >
+                  {filter.label}
+                  {count > 0 ? ` (${count})` : ''}
+                </button>
+              );
+            })}
           </div>
+        ) : null}
 
-          <AnimatePresence>
-            {isCategoryOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-full sm:w-[550px] md:w-[600px] lg:w-[650px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-4 sm:p-6 md:p-8 cursor-default max-h-[80vh] overflow-y-auto"
-                style={{ transformOrigin: 'top left' }}
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase">All Categories</span>
-                  <button
-                    onClick={() => setDraftCategory('')}
-                    className="text-primary font-bold font-sans text-[14px] font-normal leading-[20px] hover:underline"
-                  >
-                    Clear all
-                  </button>
-                </div>
+        <div className="flex min-w-0 flex-1 touch-pan-x items-center gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-6 sm:pb-0.5 [&::-webkit-scrollbar]:hidden">
+          <div className="relative shrink-0" ref={categoryRef}>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => togglePanel('category')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  togglePanel('category');
+                }
+              }}
+              className={filterTriggerClass(Boolean(isCategoryOpen || currentFilters.category))}
+            >
+              <span className="max-w-[7.5rem] truncate sm:max-w-none">
+                {currentFilters.category || 'Category'}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`}
+              />
+            </div>
 
-                <div className="relative mb-8">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" />
-                  <input
-                    type="text"
-                    placeholder="Search categories"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#f1f4f9] border border-transparent focus:border-primary/30 rounded-full py-3.5 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-3 sm:gap-y-4 max-h-[300px] sm:max-h-[350px] md:max-h-[400px] overflow-y-auto px-1 mb-6 sm:mb-8 scrollbar-thin scrollbar-thumb-outline-variant">
-                  {filteredCategoriesLabels.map((cat) => (
-                    <label key={cat} className="flex items-center gap-3 cursor-pointer group whitespace-normal">
-                      <div className="relative flex items-center justify-center">
-                        <input
-                          type="radio"
-                          name="category"
-                          checked={draftCategory === cat}
-                          onChange={() => setDraftCategory(cat)}
-                          className="peer appearance-none w-5 h-5 border-2 border-outline-variant rounded bg-white checked:bg-primary checked:border-primary transition-all cursor-pointer"
-                        />
-                        <svg
-                          className="absolute w-3 h-3 text-white scale-0 peer-checked:scale-100 transition-transform pointer-events-none"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <span className="font-sans text-[16px] font-normal leading-[24px] text-on-surface group-hover:text-primary transition-colors font-medium">
-                        {cat}
-                      </span>
-                    </label>
-                  ))}
-                  {filteredCategoriesLabels.length === 0 && (
-                    <div className="col-span-2 py-8 text-center text-on-surface-variant font-sans text-[16px] font-normal leading-[24px] italic">
-                      No categories found matching "{searchQuery}"
+            <FilterDropdownPanel
+              open={isCategoryOpen}
+              onClose={() => setIsCategoryOpen(false)}
+              anchorRef={categoryRef}
+              title="All Categories"
+              desktopClassName="sm:w-[550px] md:w-[600px] lg:max-w-[650px]"
+            >
+              <div className="mb-4 flex shrink-0 justify-end sm:justify-between">
+                <span className="hidden text-[11px] font-bold uppercase tracking-wider text-on-surface-variant sm:inline">
+                  Pick a category
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDraftCategory('')}
+                  className="font-sans text-[14px] font-bold text-primary hover:underline"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="relative mb-4 shrink-0">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
+                <input
+                  type="text"
+                  placeholder="Search categories"
+                  value={categorySearchQuery}
+                  onChange={(e) => setCategorySearchQuery(e.target.value)}
+                  className="w-full rounded-full border border-transparent bg-[#f1f4f9] py-3 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60 focus:border-primary/30"
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-y-3 px-1 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4">
+                {filteredCategoryLabels.map((cat) => (
+                  <label key={cat} className="group flex cursor-pointer items-center gap-3">
+                    <div className="relative flex items-center justify-center">
+                      <input
+                        type="radio"
+                        name="my-task-category"
+                        checked={draftCategory === cat}
+                        onChange={() => setDraftCategory(cat)}
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-outline-variant bg-white transition-all checked:border-primary checked:bg-primary"
+                      />
+                      <svg
+                        className="pointer-events-none absolute h-3 w-3 scale-0 text-white transition-transform peer-checked:scale-100"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center pt-2">
-                  <button
-                    onClick={() => setIsCategoryOpen(false)}
-                    className="text-primary font-bold font-sans text-[16px] font-normal leading-[24px] hover:underline px-4 py-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleApplyCategories}
-                    className="text-primary font-extrabold font-sans text-[16px] font-normal leading-[24px] hover:underline px-4 py-2"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Status Filter */}
-        <div className="relative flex-shrink-0" ref={statusRef}>
-          <div
-            onClick={() => {
-              setIsStatusOpen(!isStatusOpen);
-              setIsCategoryOpen(false);
-              setIsPriceOpen(false);
-              setIsSortOpen(false);
-            }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isStatusOpen ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
-          >
-            Status {currentFilters.status ? `(${STATUS_OPTIONS.find(s => s.value === currentFilters.status)?.label})` : ''}
-            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isStatusOpen ? 'rotate-180' : ''}`} />
+                    <span className="font-sans text-[15px] font-medium text-on-surface transition-colors group-hover:text-primary sm:text-[16px]">
+                      {cat}
+                    </span>
+                  </label>
+                ))}
+                {filteredCategoryLabels.length === 0 && (
+                  <p className="col-span-full py-6 text-center text-sm italic text-on-surface-variant sm:text-base">
+                    No categories found matching &quot;{categorySearchQuery}&quot;
+                  </p>
+                )}
+              </div>
+              <FilterPanelActions
+                onCancel={() => setIsCategoryOpen(false)}
+                onApply={handleApplyCategories}
+              />
+            </FilterDropdownPanel>
           </div>
 
-          <AnimatePresence>
-            {isStatusOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-full sm:w-[280px] md:w-[320px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-2 sm:p-3 cursor-default"
-                style={{ transformOrigin: 'top left' }}
+          {!useStatusTabs ? (
+            <div className="relative shrink-0" ref={statusRef}>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => togglePanel('status')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    togglePanel('status');
+                  }
+                }}
+                className={filterTriggerClass(Boolean(isStatusOpen || currentFilters.status))}
+              >
+                <span className="max-w-[6rem] truncate sm:max-w-none">
+                  {statusLabel ? statusLabel : 'Status'}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isStatusOpen ? 'rotate-180' : ''}`}
+                />
+              </div>
+
+              <FilterDropdownPanel
+                open={isStatusOpen}
+                onClose={() => setIsStatusOpen(false)}
+                anchorRef={statusRef}
+                title="Status"
+                desktopClassName="sm:w-[320px]"
               >
                 <div className="space-y-1">
                   <button
+                    type="button"
                     onClick={() => {
                       setDraftStatus(undefined);
                       onFilterChange({ ...currentFilters, status: undefined });
                       setIsStatusOpen(false);
                     }}
-                    className={`w-full text-left px-5 py-4 rounded-2xl font-semibold font-sans text-[16px] font-normal leading-[24px] transition-all ${
+                    className={`flex min-h-[48px] w-full items-center rounded-2xl px-4 py-3 text-left font-sans text-[15px] font-semibold transition-all sm:px-5 sm:py-4 sm:text-[16px] ${
                       !draftStatus ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
                     }`}
                   >
@@ -275,12 +337,13 @@ export default function FilterBar({ currentFilters, onFilterChange, isCompactSid
                     return (
                       <button
                         key={option.value}
+                        type="button"
                         onClick={() => {
-                          setDraftStatus(option.value as any);
-                          onFilterChange({ ...currentFilters, status: option.value as any });
+                          setDraftStatus(option.value);
+                          onFilterChange({ ...currentFilters, status: option.value });
                           setIsStatusOpen(false);
                         }}
-                        className={`w-full text-left px-5 py-4 rounded-2xl font-semibold font-sans text-[16px] font-normal leading-[24px] transition-all ${
+                        className={`flex min-h-[48px] w-full items-center rounded-2xl px-4 py-3 text-left font-sans text-[15px] font-semibold transition-all sm:px-5 sm:py-4 sm:text-[16px] ${
                           isSelected ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
                         }`}
                       >
@@ -289,146 +352,128 @@ export default function FilterBar({ currentFilters, onFilterChange, isCompactSid
                     );
                   })}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              </FilterDropdownPanel>
+            </div>
+          ) : null}
 
-        {/* Price Filter */}
-        <div className="relative flex-shrink-0" ref={priceRef}>
-          <div
-            onClick={() => {
-              setIsPriceOpen(!isPriceOpen);
-              setIsCategoryOpen(false);
-              setIsStatusOpen(false);
-              setIsSortOpen(false);
-            }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isPriceOpen ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
-          >
-            Any price
-            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isPriceOpen ? 'rotate-180' : ''}`} />
+          <div className="relative shrink-0" ref={priceRef}>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => togglePanel('price')}
+              className={filterTriggerClass(isPriceOpen || priceActive)}
+            >
+              <span className="max-w-[6.5rem] truncate sm:max-w-none">
+                {priceActive
+                  ? formatBudgetRange(
+                      currentFilters.budget_min ?? 0,
+                      currentFilters.budget_max ?? DEFAULT_BUDGET_MAX
+                    )
+                  : 'Any price'}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isPriceOpen ? 'rotate-180' : ''}`}
+              />
+            </div>
+
+            <FilterDropdownPanel
+              open={isPriceOpen}
+              onClose={() => setIsPriceOpen(false)}
+              anchorRef={priceRef}
+              title="Task price"
+              desktopClassName="sm:w-[400px]"
+            >
+              <div className="space-y-6">
+                <div className="text-center">
+                  <span className="text-xl font-bold text-[#000d45] sm:text-2xl">
+                    {formatBudgetRange(draftBudgetMin, draftBudgetMax)}
+                  </span>
+                </div>
+                <div className="relative h-2 rounded-full bg-[#f1f4f9]">
+                  <div
+                    className="absolute h-full rounded-full bg-primary"
+                    style={{
+                      left: `${(draftBudgetMin / DEFAULT_BUDGET_MAX) * 100}%`,
+                      right: `${100 - (draftBudgetMax / DEFAULT_BUDGET_MAX) * 100}%`,
+                    }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max={DEFAULT_BUDGET_MAX}
+                    value={draftBudgetMin}
+                    onChange={(e) =>
+                      setDraftBudgetMin(Math.min(parseFloat(e.target.value), draftBudgetMax - 100))
+                    }
+                    className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-primary"
+                    style={{ zIndex: 3 }}
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max={DEFAULT_BUDGET_MAX}
+                    value={draftBudgetMax}
+                    onChange={(e) =>
+                      setDraftBudgetMax(Math.max(parseFloat(e.target.value), draftBudgetMin + 100))
+                    }
+                    className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-primary"
+                    style={{ zIndex: 4 }}
+                  />
+                </div>
+                <FilterPanelActions
+                  onCancel={() => setIsPriceOpen(false)}
+                  onApply={handleApplyPrice}
+                />
+              </div>
+            </FilterDropdownPanel>
           </div>
 
-          <AnimatePresence>
-            {isPriceOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 mt-2 w-full sm:w-[350px] md:w-[400px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-4 sm:p-6 md:p-8 cursor-default"
-                style={{ transformOrigin: 'top left' }}
-              >
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-8">Task Price</h4>
-                    <div className="text-center mb-8">
-                      <span className="text-2xl font-bold text-[#000d45]">
-                        ${draftBudgetMin} - ${draftBudgetMax.toLocaleString()}
-                      </span>
-                    </div>
+          <div className="relative shrink-0" ref={sortRef}>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => togglePanel('sort')}
+              className={filterTriggerClass(Boolean(isSortOpen || sortLabel))}
+            >
+              <ArrowUpDown className="h-4 w-4 shrink-0" />
+              <span className="max-w-[5.5rem] truncate sm:max-w-none">{sortLabel || 'Sort'}</span>
+            </div>
 
-                    <div className="relative h-2 bg-[#f1f4f9] rounded-full mt-4">
-                      <div
-                        className="absolute h-full bg-primary rounded-full"
-                        style={{
-                          left: `${(draftBudgetMin / 10000) * 100}%`,
-                          right: `${100 - (draftBudgetMax / 10000) * 100}%`
-                        }}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="10000"
-                        value={draftBudgetMin}
-                        onChange={(e) => setDraftBudgetMin(Math.min(parseFloat(e.target.value), draftBudgetMax - 100))}
-                        className="absolute w-full h-full appearance-none bg-transparent pointer-events-auto cursor-pointer accent-primary"
-                        style={{ zIndex: 3 }}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="10000"
-                        value={draftBudgetMax}
-                        onChange={(e) => setDraftBudgetMax(Math.max(parseFloat(e.target.value), draftBudgetMin + 100))}
-                        className="absolute w-full h-full appearance-none bg-transparent pointer-events-auto cursor-pointer accent-primary"
-                        style={{ zIndex: 4 }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center pt-2">
+            <FilterDropdownPanel
+              open={isSortOpen}
+              onClose={() => setIsSortOpen(false)}
+              anchorRef={sortRef}
+              title="Sort by"
+              align="right"
+              desktopClassName="sm:w-[320px]"
+            >
+              <div className="space-y-1">
+                {[
+                  { id: 'newest' as const, label: 'Most recently posted', icon: Clock },
+                  { id: 'budget_high' as const, label: 'Highest price', icon: DollarSign },
+                  { id: 'budget_low' as const, label: 'Lowest price', icon: DollarSign },
+                ].map((option) => {
+                  const Icon = option.icon;
+                  const isSelected = (currentFilters.sort_by || 'newest') === option.id;
+                  return (
                     <button
-                      onClick={() => setIsPriceOpen(false)}
-                      className="text-primary font-bold font-sans text-[16px] font-normal leading-[24px] hover:underline px-4 py-2"
+                      key={option.id}
+                      type="button"
+                      onClick={() => handleSortChange(option.id)}
+                      className={`flex min-h-[48px] w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-sans text-[15px] font-semibold transition-all sm:gap-4 sm:px-5 sm:py-4 sm:text-[16px] ${
+                        isSelected ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
+                      }`}
                     >
-                      Cancel
+                      <Icon
+                        className={`h-5 w-5 shrink-0 ${isSelected ? 'text-[#000d45]' : 'text-on-surface-variant'}`}
+                      />
+                      {option.label}
                     </button>
-                    <button
-                      onClick={handleApplyPrice}
-                      className="text-primary font-extrabold font-sans text-[16px] font-normal leading-[24px] hover:underline px-4 py-2"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Sort */}
-        <div className="relative flex-shrink-0" ref={sortRef}>
-          <div
-            onClick={() => {
-              setIsSortOpen(!isSortOpen);
-              setIsCategoryOpen(false);
-              setIsStatusOpen(false);
-              setIsPriceOpen(false);
-            }}
-            className={`flex items-center gap-2 font-sans text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap ${
-              isSortOpen ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
-            }`}
-          >
-            <ArrowUpDown className="w-4 h-4" />
-            Sort
+                  );
+                })}
+              </div>
+            </FilterDropdownPanel>
           </div>
-
-          <AnimatePresence>
-            {isSortOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full right-0 mt-2 w-full sm:w-[280px] md:w-[320px] bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-outline-variant z-[300] p-2 sm:p-3 cursor-default"
-                style={{ transformOrigin: 'top right' }}
-              >
-                <div className="space-y-1">
-                  {[
-                    { id: 'newest' as const, label: 'Most recently posted', icon: Clock },
-                    { id: 'budget_high' as const, label: 'Highest price', icon: DollarSign },
-                    { id: 'budget_low' as const, label: 'Lowest price', icon: DollarSign },
-                  ].map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = currentFilters.sort_by === option.id;
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={() => handleSortChange(option.id)}
-                        className={`w-full text-left px-5 py-4 rounded-2xl font-semibold font-sans text-[16px] font-normal leading-[24px] transition-all flex items-center gap-4 ${
-                          isSelected ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
-                        }`}
-                      >
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-[#000d45]' : 'text-on-surface-variant'}`} />
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </div>

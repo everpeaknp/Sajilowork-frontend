@@ -36,16 +36,17 @@ type MenuItem = {
 const Menu = ({
   children,
   items,
-  activeIcon
+  activeIcon,
+  onNavigate,
 }: {
   children: React.ReactNode;
   items: MenuItem[];
   activeIcon?: React.ReactNode;
+  onNavigate?: () => void;
 }) => {
-  const [isOpened, setIsOpened] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   // Check if any submenu item is active (including query params)
   const isAnyItemActive = items.some(item => {
     const [itemPath, itemQuery] = item.href.split('?');
@@ -62,13 +63,19 @@ const Menu = ({
     return currentTab === itemTab;
   });
 
+  const [isOpened, setIsOpened] = useState(isAnyItemActive);
+
+  useEffect(() => {
+    if (isAnyItemActive) setIsOpened(true);
+  }, [isAnyItemActive]);
+
   return (
     <div>
       <button
         className={cn(
           "w-full flex items-center justify-between p-3 rounded-xl duration-150 font-bold transition-all",
           isOpened || isAnyItemActive
-            ? "bg-white/50 text-blue-950"
+            ? "bg-white text-blue-950 shadow-sm"
             : "text-gray-500 hover:bg-white hover:text-blue-950 hover:shadow-sm"
         )}
         onClick={() => setIsOpened((v) => !v)}
@@ -112,6 +119,7 @@ const Menu = ({
               <li key={idx}>
                 <Link
                   href={item.href}
+                  onClick={onNavigate}
                   className={cn(
                     "flex items-center gap-x-3 p-2.5 rounded-xl hover:bg-white hover:text-blue-950 duration-150 transition-colors",
                     isActive
@@ -133,10 +141,17 @@ const Menu = ({
   );
 };
 
-const Sidebar = () => {
+export type TaskerDashboardSidebarProps = {
+  mobileOpen?: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
+};
+
+const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSidebarProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+
+  const closeMobileNav = () => onMobileOpenChange?.(false);
 
   const navigation = [
     {
@@ -252,7 +267,12 @@ const Sidebar = () => {
     : 'Bronze Tier';
 
   return (
-    <nav className="fixed top-14 left-0 w-80 h-[calc(100vh-3.5rem)] border-r border-outline-variant bg-surface-low space-y-8 z-40 overflow-y-auto">
+    <nav
+      className={cn(
+        'fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-full max-w-full border-r border-outline-variant bg-white overflow-y-auto overscroll-contain shadow-xl transition-transform duration-300 ease-out lg:z-40 lg:w-80 lg:max-w-80 lg:bg-surface-low lg:translate-x-0 lg:shadow-none',
+        mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      )}
+    >
       <div className="flex flex-col h-full px-4 pt-4 pb-2">
         {/* User Profile Header */}
         <div className="h-24 flex items-center px-2 mb-4 bg-primary rounded-2xl shadow-lg shadow-blue-500/20">
@@ -311,7 +331,10 @@ const Sidebar = () => {
                       href="/tasker-dashboard/profile"
                       className="flex items-center gap-3 w-full p-2.5 text-left rounded-xl hover:bg-blue-50 hover:text-primary font-bold text-sm text-gray-600 transition-colors"
                       role="menuitem"
-                      onClick={() => setIsProfileActive(false)}
+                      onClick={() => {
+                        setIsProfileActive(false);
+                        closeMobileNav();
+                      }}
                     >
                       <User className="w-4 h-4" />
                       View Profile
@@ -339,6 +362,7 @@ const Sidebar = () => {
                 <li key={idx}>
                   <Link
                     href={item.href}
+                    onClick={closeMobileNav}
                     className={cn(
                       "flex items-center gap-x-3 text-gray-500 p-3 rounded-xl hover:bg-white hover:text-blue-950 hover:shadow-sm duration-150 transition-all",
                       isActive && "bg-white text-blue-950 shadow-sm"
@@ -363,6 +387,7 @@ const Sidebar = () => {
               <Menu
                 items={paymentNav}
                 activeIcon={<Wallet className="w-5 h-5" />}
+                onNavigate={closeMobileNav}
               >
                 Payments
               </Menu>
@@ -373,6 +398,7 @@ const Sidebar = () => {
                 <li key={`nav-${idx}`}>
                   <Link
                     href={item.href}
+                    onClick={closeMobileNav}
                     className={cn(
                       "flex items-center gap-x-3 text-gray-500 p-3 rounded-xl hover:bg-white hover:text-blue-950 hover:shadow-sm duration-150 transition-all",
                       isActive && "bg-white text-blue-950 shadow-sm"
@@ -403,6 +429,7 @@ const Sidebar = () => {
                   <li key={idx}>
                     <Link
                       href={item.href}
+                      onClick={closeMobileNav}
                       className={cn(
                         "flex items-center gap-x-3 text-gray-500 p-3 rounded-xl hover:bg-white hover:text-blue-950 hover:shadow-sm duration-150 transition-all",
                         isActive && "bg-white text-blue-950 shadow-sm"
@@ -418,6 +445,7 @@ const Sidebar = () => {
                 <Menu
                   items={settingsNav}
                   activeIcon={<SettingsIcon className="w-5 h-5" />}
+                  onNavigate={closeMobileNav}
                 >
                   Settings
                 </Menu>
@@ -438,10 +466,14 @@ const Sidebar = () => {
   );
 };
 
-export default function SidebarWrapper() {
+export default function SidebarWrapper(props: TaskerDashboardSidebarProps) {
   return (
-    <Suspense fallback={<div className="fixed top-14 left-0 w-80 h-[calc(100vh-3.5rem)] border-r border-outline-variant bg-surface-low z-40" />}>
-      <Sidebar />
+    <Suspense
+      fallback={
+        <div className="fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-full max-w-full border-r border-outline-variant bg-white lg:z-40 lg:w-80 lg:max-w-80 lg:bg-surface-low" />
+      }
+    >
+      <Sidebar {...props} />
     </Suspense>
   );
 }

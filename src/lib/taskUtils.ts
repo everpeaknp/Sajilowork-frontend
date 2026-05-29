@@ -1,4 +1,5 @@
-import { Task, PaginatedResponse } from '@/types';
+import { TOP_CATEGORIES } from '@/components/constants';
+import { Category, Task, PaginatedResponse } from '@/types';
 
 /** Status tabs on /my-tasks — matches API `task.status` (except `all`). */
 export type MyTasksFilterId =
@@ -52,6 +53,62 @@ export function extractTaskList(
   if (!data) return [];
   if (Array.isArray(data)) return data;
   return data.results ?? [];
+}
+
+/** Normalize DRF paginated or plain-array category responses */
+export function extractCategoryList(
+  data: PaginatedResponse<Category> | Category[] | null | undefined
+): Category[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  return data.results ?? [];
+}
+
+/** Flat category options for selects (parent + subcategories, deduped by id). */
+export function flattenCategoriesForSelect(
+  categories: Category[]
+): { id: string; name: string }[] {
+  const byId = new Map<string, string>();
+  for (const cat of categories) {
+    if (cat.id && cat.name?.trim()) byId.set(String(cat.id), cat.name.trim());
+    if (Array.isArray(cat.subcategories)) {
+      for (const sub of cat.subcategories) {
+        if (sub.id && sub.name?.trim()) byId.set(String(sub.id), sub.name.trim());
+      }
+    }
+  }
+  return [...byId.entries()]
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Flat, sorted category names for filter pickers (includes subcategories). */
+export function categoryFilterLabels(categories: Category[]): string[] {
+  const names: string[] = [];
+  for (const cat of categories) {
+    if (cat.name?.trim()) names.push(cat.name.trim());
+    if (Array.isArray(cat.subcategories)) {
+      for (const sub of cat.subcategories) {
+        if (sub.name?.trim()) names.push(sub.name.trim());
+      }
+    }
+  }
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+}
+
+/** Fallback labels when the categories API is empty or unavailable */
+export function getFallbackCategoryNames(): string[] {
+  const names = TOP_CATEGORIES.flatMap((group) => [group.title, ...group.links]);
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b));
+}
+
+export function getFallbackCategories(): Category[] {
+  return getFallbackCategoryNames().map((name, index) => ({
+    id: `fallback-${index}`,
+    name,
+    slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    is_active: true,
+  }));
 }
 
 /** Owner id from list (UUID string) or detail (nested user) serializers */

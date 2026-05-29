@@ -13,9 +13,9 @@ export default function DiscoverPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-white selection:bg-[#1161fe] selection:text-white font-body">
+    <div className="mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white font-body selection:bg-[#1161fe] selection:text-white">
       <Navbar />
-      <main>
+      <main className="pb-2 md:pb-0">
         <Hero
           onPostWithTitle={(title) => {
             router.push(`/post-task?title=${encodeURIComponent(title)}`);

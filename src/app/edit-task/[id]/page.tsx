@@ -31,12 +31,15 @@ export default function EditTaskPage() {
   const params = useParams();
   const taskId = params.id as string;
   const { isAuthenticated } = useAuth();
-  const { updateTask, isLoading } = useTaskStore();
+  const { updateTask, isLoading, fetchCategories, categories, categoriesLoaded } =
+    useTaskStore();
   
   const [activeStep, setActiveStep] = useState<StepId>('title-date');
   const [isLoadingTask, setIsLoadingTask] = useState(true);
   const [taskData, setTaskData] = useState<TaskData>({
     title: '',
+    categoryId: '',
+    categoryName: '',
     dateType: '',
     specificDate: '',
     beforeDate: '',
@@ -49,6 +52,10 @@ export default function EditTaskPage() {
     budgetAmount: 0,
     images: [],
   });
+
+  useEffect(() => {
+    void fetchCategories();
+  }, [fetchCategories]);
 
   // Load existing task data
   useEffect(() => {
@@ -78,8 +85,19 @@ export default function EditTaskPage() {
           ? 'remote' 
           : 'in-person';
 
+        const categoryId =
+          typeof task.category === 'object' && task.category?.id
+            ? String(task.category.id)
+            : '';
+        const categoryName =
+          typeof task.category === 'object' && task.category?.name
+            ? task.category.name
+            : task.category_name || '';
+
         setTaskData({
           title: task.title || '',
+          categoryId,
+          categoryName,
           dateType,
           specificDate,
           beforeDate,
@@ -179,6 +197,12 @@ export default function EditTaskPage() {
       return;
     }
 
+    if (!taskData.categoryId) {
+      toast.error('Please select a category');
+      setActiveStep('title-date');
+      return;
+    }
+
     if (!taskData.dateType) {
       toast.error('Please select when you need this done');
       setActiveStep('title-date');
@@ -214,6 +238,7 @@ export default function EditTaskPage() {
         budget_type: taskData.budgetType === 'total' ? 'fixed' : 'hourly',
         location_type: taskData.locationType === 'in-person' ? 'physical' : 'remote',
         work_type: taskData.locationType === 'in-person' ? 'in_person' : 'remote',
+        category: taskData.categoryId,
       };
 
       // Add location data for in-person tasks
@@ -264,7 +289,14 @@ export default function EditTaskPage() {
   const renderStep = () => {
     switch (activeStep) {
       case 'title-date':
-        return <TitleDateStep data={taskData} updateData={updateTaskData} />;
+        return (
+          <TitleDateStep
+            data={taskData}
+            updateData={updateTaskData}
+            categories={categories}
+            categoriesLoaded={categoriesLoaded}
+          />
+        );
       case 'location':
         return <LocationStep data={taskData} updateData={updateTaskData} />;
       case 'details':

@@ -54,10 +54,7 @@ const SECTIONS = [
 export default function CancellationPolicyContent() {
   return (
     <article className="min-w-0">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#000d45] mb-3">
-        Cancellation policy
-      </h1>
-      <p className="text-on-surface-variant text-sm sm:text-base md:text-lg leading-relaxed mb-8 md:mb-10">
+      <p className="mb-8 text-sm leading-relaxed text-[#6a719a] sm:mb-10 sm:text-base">
         This policy explains what happens when a task is cancelled on tasknepal, including fees,
         escrow refunds, and account moderation. Specific amounts may vary by task and are shown
         when you cancel.
@@ -66,8 +63,8 @@ export default function CancellationPolicyContent() {
       <div className="space-y-8 md:space-y-10">
         {SECTIONS.map((section) => (
           <section key={section.title}>
-            <h2 className="text-lg md:text-xl font-bold text-[#000d45] mb-3">{section.title}</h2>
-            <div className="space-y-3 text-on-surface-variant text-sm sm:text-base leading-relaxed">
+            <h2 className="mb-3 text-lg font-bold text-[#0b1442] md:text-xl">{section.title}</h2>
+            <div className="space-y-3 text-sm leading-relaxed text-[#384179] sm:text-base">
               {section.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
@@ -83,7 +80,7 @@ export default function CancellationPolicyContent() {
         ))}
       </div>
 
-      <p className="mt-10 md:mt-12 pt-6 border-t border-outline-variant text-xs sm:text-sm text-on-surface-variant">
+      <p className="mt-10 border-t border-gray-100 pt-6 text-xs text-[#6a719a] sm:mt-12 sm:text-sm">
         Last updated: May 2026. tasknepal may update this policy; continued use of the platform
         constitutes acceptance of the current version.
       </p>

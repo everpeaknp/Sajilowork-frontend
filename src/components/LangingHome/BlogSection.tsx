@@ -114,17 +114,17 @@ export default function BlogSection() {
     "bg-white rounded-3xl overflow-hidden border border-gray-100 transition-all group cursor-pointer block";
 
   return (
-    <section className="bg-[#E7F0FF] py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-12">
+    <section className="bg-[#E7F0FF] py-12 sm:py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
           <h2
-            className={`${landingHeadline} text-4xl sm:text-5xl text-[#0b1442] italic uppercase`}
+            className={`${landingHeadline} text-2xl uppercase italic text-[#0b1442] text-balance sm:text-4xl md:text-5xl`}
           >
             Tips and guides for your home
           </h2>
           <Link
             href="/blog"
-            className="hidden sm:flex items-center gap-2 bg-[#1161fe] text-white px-8 py-3 rounded-full font-semibold text-sm hover:scale-105 transition-all"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#1161fe] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 sm:w-auto sm:px-8"
           >
             View all articles <ChevronRight size={18} />
           </Link>
@@ -135,23 +135,23 @@ export default function BlogSection() {
             <Loader2 className="h-10 w-10 animate-spin text-[#1161fe]" aria-label="Loading articles" />
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
             {articles.map((article) => {
               const inner = (
                 <>
-                  <div className="h-56 overflow-hidden">
+                  <div className="h-44 overflow-hidden sm:h-56">
                     <img
                       src={article.img}
                       alt={article.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                   </div>
-                  <div className="p-8">
-                    <span className="text-[10px] font-semibold text-[#1161fe] uppercase tracking-[0.2em]">
+                  <div className="p-5 sm:p-8">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1161fe]">
                       {article.cat}
                     </span>
                     <h3
-                      className={`${landingHeadlineSm} text-2xl mt-3 mb-4 group-hover:text-[#1161fe] transition-colors leading-tight text-[#0b1442]`}
+                      className={`${landingHeadlineSm} mt-2 mb-3 text-lg leading-tight text-[#0b1442] transition-colors group-hover:text-[#1161fe] sm:mt-3 sm:mb-4 sm:text-2xl`}
                     >
                       {article.title}
                     </h3>

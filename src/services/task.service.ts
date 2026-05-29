@@ -208,7 +208,11 @@ export const taskService = {
   /**
    * Report task
    */
-  async reportTask(taskId: string, reason: string, description?: string): Promise<ApiResponse<void>> {
+  async reportTask(
+    taskId: string,
+    reason: string,
+    description?: string
+  ): Promise<ApiResponse<{ message?: string }>> {
     return apiClient.post(`/tasks/${taskId}/report/`, { reason, description });
   },
 

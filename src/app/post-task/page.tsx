@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Sidebar, STEPS, StepId } from '@/components//post-task/Sidebar';
+import { MobileStepProgress, Sidebar, STEPS, StepId } from '@/components/post-task/Sidebar';
 import { TitleDateStep, TaskData } from '@/components/post-task/TitleDateStep';
 import { LocationStep } from '@/components/post-task/LocationStep';
 import { DetailsStep } from '@/components/post-task/DetailsStep';
@@ -28,13 +28,16 @@ import {
   withNepalGeocodeQuery,
 } from '@/lib/nepalLocale';
 import { formatTimeSlotRequirement } from '@/lib/timeSlot';
+import { consumeSimilarTaskPrefill } from '@/lib/similarTask';
+import { flattenCategoriesForSelect } from '@/lib/taskUtils';
 
  
 export default function App() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, isCustomer, user } = useAuth();
-  const { createTask, isLoading } = useTaskStore();
+  const { createTask, isLoading, fetchCategories, categories, categoriesLoaded } =
+    useTaskStore();
   
   const [activeStep, setActiveStep] = useState<StepId>('title-date');
   const [attemptedNext, setAttemptedNext] = useState<Record<StepId, boolean>>({
@@ -45,6 +48,8 @@ export default function App() {
   });
   const [taskData, setTaskData] = useState<TaskData>({
     title: '',
+    categoryId: '',
+    categoryName: '',
     dateType: '', // No initial selection
     specificDate: '',
     beforeDate: '',
@@ -61,6 +66,10 @@ export default function App() {
   });
 
   const [budgetLimits, setBudgetLimits] = useState<{ min: number; max: number } | null>(null);
+
+  useEffect(() => {
+    void fetchCategories();
+  }, [fetchCategories]);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,11 +94,47 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const fromSimilar = searchParams.get('from') === 'similar';
+    if (fromSimilar) {
+      const prefill = consumeSimilarTaskPrefill();
+      if (prefill) {
+        setTaskData((prev) => ({
+          ...prev,
+          ...prefill,
+          images: [],
+        }));
+        return;
+      }
+    }
+
     const title = searchParams.get('title');
     if (title && title.trim()) {
       setTaskData((prev) => (prev.title ? prev : { ...prev, title: title.trim() }));
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!categoriesLoaded) return;
+    const categoryParam = searchParams.get('category')?.trim();
+    if (!categoryParam) return;
+
+    setTaskData((prev) => {
+      if (prev.categoryId) return prev;
+      const match = flattenCategoriesForSelect(categories).find(
+        (c) =>
+          c.name.toLowerCase() === categoryParam.toLowerCase() ||
+          c.id === categoryParam
+      );
+      if (!match) {
+        return { ...prev, categoryName: categoryParam };
+      }
+      return {
+        ...prev,
+        categoryId: match.id,
+        categoryName: match.name,
+      };
+    });
+  }, [categoriesLoaded, categories, searchParams]);
 
   const updateTaskData = (updates: Partial<TaskData>) => {
     setTaskData((prev) => ({ ...prev, ...updates }));
@@ -101,6 +146,7 @@ export default function App() {
         .string()
         .trim()
         .min(10, 'Must be at least 10 characters'),
+      categoryId: z.string().trim().min(1, 'Please select a category'),
       dateType: z.enum(['specific', 'before', 'flexible'], {
         errorMap: () => ({ message: 'Please select when you need this done' }),
       }),
@@ -294,6 +340,10 @@ export default function App() {
         tags: [],
       };
 
+      if (taskData.categoryId) {
+        apiTaskData.category = taskData.categoryId;
+      }
+
       // Add location data for in-person tasks
       if (taskData.locationType === 'in-person') {
         const rawLocation = taskData.location.trim();
@@ -416,6 +466,7 @@ export default function App() {
       // that field so the user is sent to the right place to fix it.
       const fieldToStep: Record<string, StepId> = {
         title: 'title-date',
+        category: 'title-date',
         due_date: 'title-date',
         address: 'location',
         city: 'location',
@@ -485,9 +536,12 @@ export default function App() {
           <TitleDateStep
             data={taskData}
             updateData={updateTaskData}
+            categories={categories}
+            categoriesLoaded={categoriesLoaded}
             showErrors={showErrors}
             errors={{
               title: errors.title,
+              categoryId: errors.categoryId,
               dateType: errors.dateType,
               specificDate: errors.specificDate,
               beforeDate: errors.beforeDate,
@@ -537,83 +591,85 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen bg-black/40 flex flex-col items-center justify-start"
+      className="fixed inset-0 z-50 flex flex-col bg-black/40 sm:static sm:z-auto sm:min-h-screen sm:items-center sm:justify-start sm:bg-[#eef1f6] md:py-8 lg:py-10"
       style={{ fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif' }}
     >
-      <div className="w-full flex-1 flex flex-col items-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-7xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-      {/* Header Container */}
-      <header className="w-full h-24 flex items-center justify-between px-6 md:px-10 sticky top-0 bg-white z-20 border-b border-outline-variant/60">
-        <div className="flex items-center">
-          <div className="text-[#0066ff] font-black text-[28px] tracking-tighter leading-none select-none">
-       tasknepal
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            // Always close the modal (not browser back)
-            window.location.href = '/discover';
-          }}
-          className="p-2 hover:bg-gray-100 rounded-full transition-all text-gray-400 hover:text-gray-800"
-        >
-          <X className="w-6 h-6 stroke-[2.5]" />
-        </button>
-      </header>
-
-      {/* Main Container */}
-      <div className="w-full flex flex-1 px-6 md:px-10">
-        {/* Left Sidebar */}
-        <Sidebar activeStep={activeStep} />
-
-        {/* Main Content Area */}
-        <main className="flex-1 flex flex-col pt-16 pl-20 pb-40">
-          <div className="w-full max-w-2xl">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeStep}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </main>
-      </div>
-
-      {/* Navigation - Sticky inside modal (prevents backdrop white haze) */}
-      <div className="sticky bottom-0 p-6 sm:p-8 flex justify-center bg-gradient-to-t from-white via-white/95 to-transparent z-10">
-        <div className="flex justify-center gap-4 w-full max-w-lg">
-          {currentStepIndex > 0 && (
+      <div className="flex h-full min-h-0 w-full flex-col sm:h-auto sm:min-h-[min(640px,calc(100dvh-4rem))] sm:max-h-none sm:px-4 md:px-6 lg:mx-auto lg:max-w-6xl lg:px-8 xl:max-w-7xl">
+        <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-white sm:min-h-[min(640px,calc(100dvh-4rem))] sm:rounded-3xl sm:shadow-2xl lg:min-h-[min(720px,calc(100dvh-5rem))]">
+          <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-outline-variant/60 bg-white px-4 sm:h-16 sm:px-6 md:h-20 md:px-8 lg:px-10">
+            <div className="text-xl font-black leading-none tracking-tighter text-[#0066ff] select-none sm:text-[26px] md:text-[28px]">
+              tasknepal
+            </div>
             <button
-              onClick={handleBack}
-              className="flex-1 bg-blue-50 hover:bg-blue-100 text-[#0066ff] font-bold py-4 px-8 rounded-full transition-all active:scale-95"
+              type="button"
+              onClick={() => {
+                window.location.href = '/discover';
+              }}
+              className="rounded-full p-2 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-800"
+              aria-label="Close"
             >
-              Back
+              <X className="h-6 w-6 stroke-[2.5]" />
             </button>
-          )}
-          <button
-            onClick={handleNext}
-            disabled={!canProceed || isLoading}
-            className={`${currentStepIndex > 0 ? 'flex-[1.5]' : 'w-full'} ${
-              !canProceed || isLoading
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-[#0066ff] hover:bg-[#0052cc] text-white shadow-xl shadow-[#0066ff]/25'
-            } font-bold py-4 px-8 rounded-full transition-all active:scale-95 flex items-center justify-center gap-2`}
-          >
-            {isLoading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Posting...
-              </>
-            ) : (
-              isBudgetStep ? 'Get quotes' : 'Next'
-            )}
-          </button>
-        </div>
-      </div>
+          </header>
+
+          <MobileStepProgress activeStep={activeStep} />
+
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+            <Sidebar activeStep={activeStep} />
+
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-8 sm:py-8 md:px-10 lg:px-12 lg:py-10 xl:px-14">
+                <div className="mx-auto w-full max-w-2xl pb-4 lg:max-w-3xl xl:max-w-[42rem]">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeStep}
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -12 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
+                    >
+                      {renderStep()}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </main>
+
+              <footer className="z-20 shrink-0 border-t border-gray-200 bg-white px-4 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-5 md:px-10 lg:px-12 lg:shadow-none xl:px-14">
+                <div className="mx-auto flex w-full max-w-lg justify-center gap-3 sm:max-w-xl sm:gap-4 lg:mx-0 lg:max-w-3xl lg:justify-end xl:max-w-[42rem]">
+                  {currentStepIndex > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="min-h-12 flex-1 rounded-full bg-blue-50 px-4 py-3.5 text-sm font-bold text-[#0066ff] transition-all active:scale-[0.98] hover:bg-blue-100 sm:min-h-[52px] sm:max-w-[200px] sm:text-base lg:flex-none lg:px-10"
+                    >
+                      Back
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canProceed || isLoading}
+                    className={`min-h-12 sm:min-h-[52px] ${currentStepIndex > 0 ? 'flex-[1.5] lg:flex-none lg:min-w-[220px]' : 'w-full lg:min-w-[280px]'} ${
+                      !canProceed || isLoading
+                        ? 'cursor-not-allowed bg-gray-200 text-gray-500'
+                        : 'bg-[#0066ff] text-white shadow-lg shadow-[#0066ff]/25 hover:bg-[#0052cc]'
+                    } flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-bold transition-all active:scale-[0.98] sm:text-base`}
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Posting...
+                      </>
+                    ) : isBudgetStep ? (
+                      'Get quotes'
+                    ) : (
+                      'Next'
+                    )}
+                  </button>
+                </div>
+              </footer>
+            </div>
+          </div>
         </div>
       </div>
     </div>

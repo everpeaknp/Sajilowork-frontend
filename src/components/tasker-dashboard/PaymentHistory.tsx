@@ -139,16 +139,16 @@ export default function PaymentHistory() {
       className="max-w-5xl space-y-8 pb-20"
     >
       <header className="space-y-6">
-        <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">
           Payment History
         </h1>
 
-        <div className="flex border-b border-gray-100">
+        <div className="no-scrollbar flex overflow-x-auto border-b border-gray-100">
           <button
             type="button"
             onClick={() => setActiveTab('earned')}
             className={cn(
-              'px-8 py-4 font-black transition-all relative',
+              'relative shrink-0 px-4 py-3 font-black transition-all sm:px-8 sm:py-4',
               activeTab === 'earned' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
             )}
           >
@@ -164,7 +164,7 @@ export default function PaymentHistory() {
             type="button"
             onClick={() => setActiveTab('outgoing')}
             className={cn(
-              'px-8 py-4 font-black transition-all relative',
+              'relative shrink-0 px-4 py-3 font-black transition-all sm:px-8 sm:py-4',
               activeTab === 'outgoing' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
             )}
           >
@@ -269,8 +269,8 @@ export default function PaymentHistory() {
                     key={transaction.id}
                     className="p-6 hover:bg-surface-low transition-colors"
                   >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                      <div className="flex min-w-0 items-center gap-4">
                         <div
                           className={cn(
                             'p-3 rounded-2xl shrink-0',
@@ -294,7 +294,7 @@ export default function PaymentHistory() {
                           </p>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
+                      <div className="shrink-0 text-left sm:text-right">
                         <p
                           className={cn(
                             'text-xl font-black',

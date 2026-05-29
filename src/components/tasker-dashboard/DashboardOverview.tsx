@@ -121,10 +121,10 @@ export default function DashboardOverview() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-10 max-w-4xl"
+      className="max-w-4xl space-y-8 sm:space-y-10"
     >
       <header className="space-y-2">
-        <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">
           My Tasker Dashboard
         </h1>
         {error && (
@@ -179,11 +179,11 @@ export default function DashboardOverview() {
         <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
           Your Current Tier
         </label>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
           <TierMedal tier={currentTier} />
           <div className="space-y-1">
-            <h2 className="text-3xl font-bold text-blue-950">{currentTier.name}</h2>
-            <p className="text-lg text-gray-600">
+            <h2 className="text-2xl font-bold text-blue-950 sm:text-3xl">{currentTier.name}</h2>
+            <p className="text-base text-gray-600 sm:text-lg">
               {currentTier.service_fee_percent}% service fee excl. GST
             </p>
           </div>
@@ -197,14 +197,14 @@ export default function DashboardOverview() {
             <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               Your Next Tier
             </label>
-            <div className="flex items-center gap-6 opacity-80">
+            <div className="flex flex-col items-start gap-4 opacity-80 sm:flex-row sm:items-center sm:gap-6">
               <TierMedal tier={nextTier} locked />
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-3xl font-bold text-blue-950">{nextTier.name}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl font-bold text-blue-950 sm:text-3xl">{nextTier.name}</h2>
                   <Lock className="w-6 h-6 text-blue-950" />
                 </div>
-                <p className="text-lg text-gray-600">
+                <p className="text-base text-gray-600 sm:text-lg">
                   {nextTier.service_fee_percent}% service fee excl. GST
                 </p>
               </div>
@@ -239,7 +239,7 @@ export default function DashboardOverview() {
               </span>
             </motion.div>
           </div>
-          <div className="flex justify-between text-xs font-medium text-gray-400 px-1">
+          <div className="flex flex-wrap justify-between gap-x-1 gap-y-2 px-1 text-[10px] font-medium text-gray-400 sm:text-xs">
             {milestones.map((milestone) => (
               <span
                 key={milestone.slug}

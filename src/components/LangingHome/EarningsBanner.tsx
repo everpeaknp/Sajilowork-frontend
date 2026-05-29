@@ -80,31 +80,31 @@ export default function EarningsBanner() {
   };
 
   return (
-    <section className="bg-white py-12 px-2 md:px-4">
-      <div className="bg-[#1161fe] text-white py-24 overflow-hidden relative rounded-t-[4rem]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-center mb-24">
+    <section className="bg-white px-2 py-8 sm:px-4 sm:py-12">
+      <div className="relative overflow-hidden rounded-t-[2rem] bg-[#1161fe] py-12 text-white sm:rounded-t-[3rem] sm:py-16 md:py-24 lg:rounded-t-[4rem]">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 grid items-center gap-10 lg:mb-24 lg:grid-cols-2 lg:gap-20">
             <div>
               <h2
-                className={`${landingHeadline} text-5xl sm:text-6xl mb-8 leading-tight italic uppercase`}
+                className={`${landingHeadline} mb-6 text-3xl uppercase italic leading-tight sm:mb-8 sm:text-5xl md:text-6xl`}
               >
                 Be your own boss
               </h2>
-              <div className="space-y-4 mb-10">
+              <div className="mb-8 space-y-3 sm:mb-10 sm:space-y-4">
                 {[
                   "Keep 100% of your tips.",
                   "Choose when and where you work.",
                   "Build your local reputation.",
                 ].map((text, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <CheckCircle2 size={24} className="text-white" />
-                    <span className="text-xl font-semibold tracking-tight">{text}</span>
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-white sm:h-6 sm:w-6" />
+                    <span className="text-base font-semibold tracking-tight sm:text-xl">{text}</span>
                   </div>
                 ))}
               </div>
               <Link
                 href="/signup?role=tasker"
-                className="inline-block bg-white text-[#1161fe] px-12 py-5 rounded-full font-semibold text-xl shadow-2xl shadow-black/20 hover:scale-105 transition-all active:scale-95 cursor-pointer"
+                className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-white px-8 py-4 text-center text-base font-semibold text-[#1161fe] shadow-2xl shadow-black/20 transition-all hover:scale-105 active:scale-95 sm:w-auto sm:px-12 sm:py-5 sm:text-xl"
               >
                 Become a Tasker
               </Link>
@@ -112,33 +112,33 @@ export default function EarningsBanner() {
 
             <Link
               href={spotlight.profileHref}
-              className="bg-white/10 backdrop-blur-md rounded-[3rem] p-10 border border-white/20 block hover:bg-white/15 transition-colors"
+              className="block rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md transition-colors hover:bg-white/15 sm:rounded-[2rem] sm:p-8 md:rounded-[3rem] md:p-10"
             >
-              <div className="flex items-center justify-between mb-10">
-                <div className="flex items-center gap-4">
+              <div className="mb-6 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 sm:gap-4">
                   <img
                     src={spotlight.avatar || IMAGES.TASKER_MARK}
                     alt={spotlight.name}
-                    className="w-20 h-20 rounded-full border-4 border-white shadow-xl object-cover"
+                    className="h-14 w-14 rounded-full border-4 border-white object-cover shadow-xl sm:h-20 sm:w-20"
                   />
-                  <div>
-                    <p className={`${landingHeadlineSm} text-3xl line-clamp-1`}>
+                  <div className="min-w-0">
+                    <p className={`${landingHeadlineSm} line-clamp-1 text-xl sm:text-3xl`}>
                       {spotlight.name}
                     </p>
-                    <p className="text-xs font-semibold uppercase tracking-widest opacity-70">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest opacity-70 sm:text-xs">
                       {spotlight.type}
                     </p>
                   </div>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-xs font-semibold opacity-70 mb-1 uppercase tracking-tighter">
+                <div className="shrink-0 sm:text-right">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-tighter opacity-70 sm:text-xs">
                     Weekly Earnings
                   </p>
-                  <p className={`${landingHeadline} text-4xl sm:text-5xl`}>{weeklyEarnings}</p>
+                  <p className={`${landingHeadline} text-2xl sm:text-5xl`}>{weeklyEarnings}</p>
                 </div>
               </div>
 
-              <div className="flex items-end gap-3 h-40">
+              <div className="flex h-28 items-end gap-2 sm:h-40 sm:gap-3">
                 {[40, 60, 50, 80, 100, 70, 90].map((h, i) => (
                   <div
                     key={i}
@@ -160,8 +160,8 @@ export default function EarningsBanner() {
             onMouseLeave={handleMouseLeave}
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
-            className={`flex gap-8 px-8 pb-10 overflow-x-auto no-scrollbar ${
-              isDragging ? "" : "snap-x"
+            className={`flex gap-4 overflow-x-auto px-4 pb-8 no-scrollbar sm:gap-8 sm:px-8 sm:pb-10 ${
+              isDragging ? "" : "snap-x snap-mandatory"
             } ${isDragging ? "cursor-grabbing" : "cursor-grab select-none"}`}
             style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
           >
@@ -169,24 +169,24 @@ export default function EarningsBanner() {
               <Link
                 key={tasker.id}
                 href={tasker.profileHref}
-                className="min-w-[90%] md:min-w-[850px] bg-white rounded-[2.5rem] p-8 md:p-10 text-[#0b1442] flex flex-col md:flex-row gap-10 snap-center hover:ring-2 hover:ring-white/40 transition-shadow"
+                className="flex min-w-[min(100%,340px)] snap-center flex-col gap-6 rounded-2xl bg-white p-5 text-[#0b1442] transition-shadow hover:ring-2 hover:ring-white/40 sm:min-w-[85%] sm:gap-8 sm:rounded-[2rem] sm:p-8 md:min-w-[850px] md:flex-row md:gap-10 md:rounded-[2.5rem] md:p-10"
               >
-                <div className="md:w-[320px] shrink-0">
+                <div className="mx-auto w-full max-w-[200px] shrink-0 sm:max-w-none md:w-[320px]">
                   <img
                     src={tasker.avatar}
                     alt={tasker.name}
-                    className="w-full aspect-[4/5] object-cover rounded-3xl"
+                    className="aspect-[4/5] w-full rounded-2xl object-cover sm:rounded-3xl"
                   />
                 </div>
 
-                <div className="flex-1 flex flex-col pt-2">
-                  <h3 className={`${landingHeadline} text-5xl mb-6 text-[#0b1442] italic`}>
+                <div className="flex flex-1 flex-col pt-0 sm:pt-2">
+                  <h3 className={`${landingHeadline} mb-4 text-2xl italic text-[#0b1442] sm:mb-6 sm:text-4xl md:text-5xl`}>
                     {tasker.name}
                   </h3>
 
-                  <div className="flex items-center gap-8 mb-8 flex-wrap">
-                    <div className="flex items-center gap-3">
-                      <span className={`${landingHeadlineSm} text-3xl text-[#0b1442]`}>
+                  <div className="mb-6 flex flex-wrap items-center gap-4 sm:mb-8 sm:gap-8">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className={`${landingHeadlineSm} text-xl text-[#0b1442] sm:text-3xl`}>
                         {tasker.rating}
                       </span>
                       <Star className="text-orange-500 fill-orange-500" size={24} />
@@ -196,8 +196,8 @@ export default function EarningsBanner() {
                         {tasker.totalRatings} ratings
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`${landingHeadlineSm} text-3xl text-[#0b1442]`}>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className={`${landingHeadlineSm} text-xl text-[#0b1442] sm:text-3xl`}>
                         {tasker.completionRate}%
                       </span>
                       <div className="text-[10px] leading-tight text-gray-400 font-medium">

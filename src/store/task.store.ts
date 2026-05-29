@@ -8,12 +8,17 @@ import { create } from 'zustand';
 import { Task, Category, SearchFilters, PaginatedResponse } from '@/types';
 import { taskService } from '@/services';
 import { buildTaskApiParams } from '@/lib/taskApiParams';
+import {
+  extractCategoryList,
+  getFallbackCategories,
+} from '@/lib/taskUtils';
 
 interface TaskState {
   // State
   tasks: Task[];
   currentTask: Task | null;
   categories: Category[];
+  categoriesLoaded: boolean;
   filters: SearchFilters;
   pagination: {
     count: number;
@@ -42,6 +47,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   currentTask: null,
   categories: [],
+  categoriesLoaded: false,
   filters: {},
   pagination: {
     count: 0,
@@ -324,12 +330,18 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   fetchCategories: async () => {
     try {
       const response = await taskService.getCategories();
-      
-      if (response.success) {
-        set({ categories: response.data });
+      let categories = response.success
+        ? extractCategoryList(response.data)
+        : [];
+
+      if (categories.length === 0) {
+        categories = getFallbackCategories();
       }
-    } catch (error: any) {
+
+      set({ categories, categoriesLoaded: true });
+    } catch (error: unknown) {
       console.error('Failed to fetch categories:', error);
+      set({ categories: getFallbackCategories(), categoriesLoaded: true });
     }
   },
 

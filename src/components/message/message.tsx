@@ -1,9 +1,18 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { RefreshCw, Send, Search, CheckCheck, Check, Loader2, Briefcase } from 'lucide-react';
+import {
+  RefreshCw,
+  Send,
+  Search,
+  CheckCheck,
+  Check,
+  Loader2,
+  Briefcase,
+  ChevronLeft,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import UserAvatar from '@/components/common/UserAvatar';
 import { chatService } from '@/services/chat.service';
@@ -630,11 +639,22 @@ export default function MessagesSection() {
   }, [selectedGroupSignature, findGroupBySignature, loadGroupMessages, loadConversations]);
 
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId) {
+      if (searchParams.get('conversation')) {
+        router.replace('/message', { scroll: false });
+      }
+      return;
+    }
     const current = searchParams.get('conversation');
     if (current === selectedId) return;
     router.replace(`/message?conversation=${selectedId}`, { scroll: false });
   }, [selectedId, searchParams, router]);
+
+  const handleBackToList = useCallback(() => {
+    setSelectedId(null);
+    setReplyConversationId(null);
+    loadedMessagesForRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (loadingConversations || resolvingBid || selectedId) return;
@@ -645,6 +665,8 @@ export default function MessagesSection() {
     ) {
       return;
     }
+    // On mobile, stay on the conversation list until the user picks a thread.
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
     const first = filteredGroups[0]?.latest;
     if (first?.id) setSelectedId(String(first.id));
   }, [loadingConversations, resolvingBid, selectedId, filteredGroups, searchParams]);
@@ -792,16 +814,26 @@ export default function MessagesSection() {
     setSelectedId(latestId);
   }, []);
 
+  const showMobileThread = Boolean(selectedId);
+
   return (
-    <div ref={containerRef} className="flex h-full overflow-hidden">
+    <div ref={containerRef} className="flex h-full min-h-0 overflow-hidden">
       <aside
-        style={{ width: sidebarWidth, minWidth: 200, maxWidth: 520 }}
-        className="flex flex-col bg-background border-r border-outline-variant shrink-0 overflow-hidden"
+        style={
+          {
+            ['--msg-sidebar-w' as string]: `${sidebarWidth}px`,
+          } as CSSProperties
+        }
+        className={`flex shrink-0 flex-col overflow-hidden border-r border-outline-variant bg-background ${
+          showMobileThread
+            ? 'max-lg:hidden lg:flex lg:w-[var(--msg-sidebar-w)] lg:min-w-[200px] lg:max-w-[520px]'
+            : 'w-full lg:w-[var(--msg-sidebar-w)] lg:min-w-[200px] lg:max-w-[520px]'
+        }`}
       >
-        <div className="p-4 border-b border-outline-variant">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-foreground">Messages</h2>
+        <div className="border-b border-outline-variant p-3 sm:p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex min-w-0 items-center gap-2">
+              <h2 className="text-base font-bold text-foreground sm:text-lg">Messages</h2>
               {totalUnread > 0 && (
                 <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
                   {totalUnread > 99 ? '99+' : totalUnread}
@@ -857,7 +889,7 @@ export default function MessagesSection() {
                   key={group.key}
                   type="button"
                   onClick={() => openPersonGroup(latestId)}
-                  className={`w-full text-left p-4 flex gap-3 transition-colors border-l-4 ${
+                  className={`flex w-full gap-3 border-l-4 p-3 text-left transition-colors active:bg-surface-container sm:p-4 ${
                     isSelected
                       ? 'bg-surface-container-low border-primary'
                       : 'hover:bg-surface-container-low border-transparent'
@@ -899,20 +931,32 @@ export default function MessagesSection() {
 
       <div
         onMouseDown={startResize}
-        className="w-1 shrink-0 bg-outline-variant hover:bg-primary active:bg-primary cursor-col-resize transition-colors group relative"
+        className="relative hidden w-1 shrink-0 cursor-col-resize bg-outline-variant transition-colors hover:bg-primary active:bg-primary lg:block"
         title="Drag to resize"
       />
 
-      <main className="flex-1 flex flex-col bg-background min-w-0 overflow-hidden">
+      <main
+        className={`min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background ${
+          showMobileThread ? 'flex' : 'hidden lg:flex'
+        }`}
+      >
         {!selectedId ? (
-          <div className="flex-1 flex items-center justify-center text-on-surface-variant text-sm">
+          <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-on-surface-variant">
             Select a conversation to start messaging
           </div>
         ) : (
           <>
-            <header className="border-b border-outline-variant px-6 py-3 shrink-0">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+            <header className="shrink-0 border-b border-outline-variant px-3 py-2.5 sm:px-6 sm:py-3">
+              <div className="flex items-center justify-between gap-2 sm:gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={handleBackToList}
+                    className="-ml-1 shrink-0 rounded-lg p-2 transition-colors hover:bg-surface-container-low lg:hidden"
+                    aria-label="Back to conversations"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-foreground" />
+                  </button>
                   <UserAvatar src={selectedAvatar} name={selectedName} size="md" />
                   <div className="min-w-0">
                     <h3 className="font-semibold text-foreground leading-tight truncate">
@@ -933,7 +977,7 @@ export default function MessagesSection() {
                   <button
                     type="button"
                     onClick={() => router.push(selectedTaskPath)}
-                    className="text-xs font-medium text-primary hover:underline shrink-0"
+                    className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/5 hover:underline sm:px-0 sm:py-0"
                   >
                     View task
                   </button>
@@ -941,7 +985,7 @@ export default function MessagesSection() {
               </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto p-6 bg-surface-container-low space-y-4 min-h-0">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-surface-container-low p-3 sm:space-y-4 sm:p-6">
               {loadingMessages ? (
                 <div className="flex justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -992,9 +1036,13 @@ export default function MessagesSection() {
                         size="sm"
                         className="shrink-0"
                       />
-                      <div className={`flex flex-col max-w-[70%] ${isMine ? 'items-end' : ''}`}>
+                      <div
+                        className={`flex max-w-[min(88%,20rem)] flex-col sm:max-w-[70%] ${
+                          isMine ? 'items-end' : ''
+                        }`}
+                      >
                         <div
-                          className={`px-4 py-2.5 rounded-2xl ${
+                          className={`rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 ${
                             isMine
                               ? 'bg-primary text-white rounded-tr-sm'
                               : 'bg-background text-foreground border border-outline-variant rounded-tl-sm'
@@ -1021,7 +1069,7 @@ export default function MessagesSection() {
               <div ref={messagesEndRef} />
             </div>
 
-            <footer className="p-4 border-t border-outline-variant shrink-0">
+            <footer className="shrink-0 border-t border-outline-variant p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
               {hasMultipleTasks && replyConversation && (
                 <p className="mb-2 text-xs text-on-surface-variant">
                   Replying in{' '}
@@ -1054,7 +1102,7 @@ export default function MessagesSection() {
                       canSendMessages ? 'Type a message...' : 'Messaging is closed for this task'
                     }
                     disabled={sending || !canSendMessages}
-                    className="w-full bg-transparent outline-none text-sm text-foreground placeholder-on-surface-variant disabled:cursor-not-allowed"
+                    className="w-full bg-transparent text-base outline-none text-foreground placeholder-on-surface-variant disabled:cursor-not-allowed sm:text-sm"
                   />
                 </div>
                 <button

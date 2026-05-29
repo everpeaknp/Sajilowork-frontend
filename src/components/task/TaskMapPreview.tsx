@@ -22,7 +22,7 @@ function hoursSincePosted(postedDate: Date): number {
 export default function TaskMapPreview({ task, onClose, onViewTask }: TaskMapPreviewProps) {
   return (
     <div
-      className="absolute inset-0 z-[40] flex items-center justify-center p-6 pointer-events-none"
+      className="absolute inset-0 z-[40] flex items-end justify-center p-3 pb-[7.5rem] pointer-events-none sm:items-center sm:p-6 sm:pb-6"
       aria-modal
       role="dialog"
       aria-labelledby="map-preview-title"

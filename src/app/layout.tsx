@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers";
+import MobileBottomNav from "@/components/common/MobileBottomNav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AuthProvider>
           {children}
+          <MobileBottomNav />
           <Toaster position="top-right" richColors />
         </AuthProvider>
       </body>

@@ -286,7 +286,7 @@ export default function Badges() {
               Trust & Safety
             </span>
           </div>
-          <h1 className="text-4xl font-black text-blue-950 uppercase tracking-tighter">
+          <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">
             Verified Badges
           </h1>
         </div>

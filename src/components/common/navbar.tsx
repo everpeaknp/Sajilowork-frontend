@@ -1,9 +1,21 @@
 "use client";
 
-import { Bell, MessageSquare, HelpCircle, Menu, X, PlusCircle, Settings, LogOut, LayoutDashboard, Briefcase } from 'lucide-react';
+import {
+  Bell,
+  MessageSquare,
+  HelpCircle,
+  Menu,
+  X,
+  PlusCircle,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+  Briefcase,
+} from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useTaskerDashboardNavOptional } from '@/context/TaskerDashboardNavContext';
 import { useAuth } from '@/hooks/useAuth';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -76,8 +88,25 @@ function getNotificationHref(notification: NotificationType): string {
   return '/my-tasks';
 }
 
+const mobileDropdownPanelClass =
+  'fixed left-3 right-3 top-[calc(3.5rem+0.5rem)] z-[10000] max-h-[min(70dvh,28rem)] overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 shadow-xl ring-1 ring-gray-900/5 animate-in fade-in slide-in-from-top-3 duration-200 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72';
+
+function MobileDropdownBackdrop({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      type="button"
+      className="fixed inset-0 top-14 z-[9998] bg-black/40 md:hidden"
+      aria-label="Close menu"
+      onClick={onClose}
+    />
+  );
+}
+
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
+  const taskerDashboardNav = useTaskerDashboardNavOptional();
+  const isTaskerDashboard = pathname.startsWith('/tasker-dashboard');
   const { user, isAuthenticated, logout } = useAuth();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -218,6 +247,22 @@ export default function Navbar() {
     }
   }, [messagesOpen, isAuthenticated, fetchConversations, fetchUnreadMessagesCount]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setNotificationsOpen(false);
+    setMessagesOpen(false);
+    setProfileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -316,16 +361,15 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-[9999] isolate w-full bg-white overflow-visible">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-[9999] isolate w-full border-b border-gray-100 bg-white">
+      <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
         {/* Left section: Logo & Primary Links */}
-        <div className="flex items-center space-x-8">
+        <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8 md:flex-none">
           <Link
             href={isAuthenticated ? '/discover' : '/'}
-            className="flex items-center space-x-1.5 focus:outline-none cursor-pointer"
+            className="flex shrink-0 items-center focus:outline-none cursor-pointer"
           >
-            {/* tasknepal brand logo */}
-            <span className="text-2xl font-black text-[#005fff] tracking-tight antialiased">
+            <span className="text-lg font-black tracking-tight text-[#005fff] antialiased sm:text-2xl">
               task<span className="text-[#03113c]">nepal</span>
             </span>
           </Link>
@@ -364,26 +408,26 @@ export default function Navbar() {
         </div>
 
         {/* Right section: Utilities Dashboard & Profile */}
-        <div className="flex items-center space-x-5">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-2 md:gap-5">
           {!isAuthenticated ? (
-            <>
+            <div className="hidden items-center gap-3 sm:flex">
               <Link
                 href="/signin"
-                className="text-sm font-semibold text-[#3c4a6b] hover:text-[#005fff] transition"
+                className="text-sm font-semibold text-[#3c4a6b] transition hover:text-[#005fff]"
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className="rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0047ff] shadow-sm"
+                className="rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0047ff]"
               >
                 Sign up
               </Link>
-            </>
+            </div>
           ) : (
             <>
               {/* Help button */}
-              <div className="hidden sm:flex items-center text-[#3c4a6b] hover:text-[#005fff] cursor-pointer text-sm font-medium space-x-1">
+              <div className="hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium text-[#3c4a6b] hover:text-[#005fff]">
                 <HelpCircle className="h-4.5 w-4.5" />
                 <span>Help</span>
               </div>
@@ -395,14 +439,15 @@ export default function Navbar() {
               >
                 <button
                   onClick={() => {
+                    setMobileMenuOpen(false);
                     setNotificationsOpen(!notificationsOpen);
                     setMessagesOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative p-2 rounded-full text-gray-600 hover:text-[#005fff] hover:bg-gray-100 transition focus:outline-none cursor-pointer"
+                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-[#005fff] focus:outline-none cursor-pointer sm:p-2"
                   aria-label="Notifications"
                 >
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-5 w-5 sm:h-5 sm:w-5" />
                   {unreadCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white ring-2 ring-white">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -412,7 +457,9 @@ export default function Navbar() {
 
                 {/* Notifications Menu Dropdown */}
                 {notificationsOpen && (
-                  <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl ring-1 ring-gray-900/5 z-[10000] animate-in fade-in slide-in-from-top-3 duration-200">
+                  <>
+                    <MobileDropdownBackdrop onClose={() => setNotificationsOpen(false)} />
+                    <div className={mobileDropdownPanelClass}>
                     <div className="flex items-center justify-between border-b border-gray-150 pb-2 mb-2">
                       <h4 className="text-sm font-bold text-gray-900">Notifications</h4>
                       <div className="flex items-center gap-1">
@@ -433,7 +480,7 @@ export default function Navbar() {
                         </button>
                       </div>
                     </div>
-                    <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <div className="max-h-[min(55dvh,18rem)] space-y-3 overflow-y-auto overscroll-contain pr-1 md:max-h-72">
                       {notificationsLoading ? (
                         <div className="text-center py-4 text-sm text-gray-500">Loading...</div>
                       ) : notifications.length === 0 ? (
@@ -447,16 +494,17 @@ export default function Navbar() {
                               !n.is_read ? 'bg-[#005fff]/5 border-l-2 border-[#005fff]' : 'hover:bg-gray-50'
                             }`}
                           >
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-start gap-2">
                               <span className="text-xs font-semibold text-gray-900">{n.title}</span>
-                              <span className="text-[10px] text-gray-500">{formatTimeAgo(n.created_at)}</span>
+                              <span className="shrink-0 text-[10px] text-gray-500">{formatTimeAgo(n.created_at)}</span>
                             </div>
-                            <p className="text-xs text-gray-600 mt-1 leading-snug">{n.message}</p>
+                            <p className="text-xs text-gray-600 mt-1 leading-snug line-clamp-3">{n.message}</p>
                           </div>
                         ))
                       )}
                     </div>
                   </div>
+                  </>
                 )}
               </div>
 
@@ -464,11 +512,13 @@ export default function Navbar() {
               <div className={`relative ${messagesOpen ? 'z-[10000]' : ''}`} ref={messagesRef}>
                 <button
                   onClick={() => {
+                    setMobileMenuOpen(false);
                     setMessagesOpen(!messagesOpen);
                     setNotificationsOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative p-2 rounded-full text-gray-600 hover:text-[#005fff] hover:bg-gray-100 transition focus:outline-none cursor-pointer"
+                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-[#005fff] focus:outline-none cursor-pointer sm:p-2"
+                  aria-label="Messages"
                 >
                   <MessageSquare className="h-5 w-5" />
                   {unreadMessagesCount > 0 && (
@@ -480,7 +530,9 @@ export default function Navbar() {
 
                 {/* Messages Dropdown */}
                 {messagesOpen && (
-                  <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl ring-1 ring-gray-900/5 z-[10000] animate-in fade-in slide-in-from-top-3 duration-200">
+                  <>
+                    <MobileDropdownBackdrop onClose={() => setMessagesOpen(false)} />
+                    <div className={mobileDropdownPanelClass}>
                     <div className="flex items-center justify-between border-b border-gray-150 pb-2 mb-2">
                       <h4 className="text-sm font-bold text-gray-900">Recent Chats</h4>
                       <button
@@ -490,7 +542,7 @@ export default function Navbar() {
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                    <div className="max-h-[min(55dvh,18rem)] space-y-3 overflow-y-auto overscroll-contain pr-1 md:max-h-72">
                       {conversationsLoading ? (
                         <div className="text-center py-4 text-sm text-gray-500">Loading...</div>
                       ) : conversations.length === 0 ? (
@@ -548,30 +600,41 @@ export default function Navbar() {
                       )}
                     </div>
                   </div>
+                  </>
                 )}
               </div>
 
-              {/* User Profile Avatar with Dropdown */}
+              {/* User Profile Avatar — mobile: go to dashboard; desktop: dropdown */}
               <div className={`relative ${profileMenuOpen ? 'z-[10000]' : ''}`} ref={profileRef}>
                 <button
+                  type="button"
                   onClick={() => {
-                    setProfileMenuOpen(!profileMenuOpen);
+                    setMobileMenuOpen(false);
                     setNotificationsOpen(false);
                     setMessagesOpen(false);
+
+                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                      setProfileMenuOpen(false);
+                      router.push('/tasker-dashboard');
+                      return;
+                    }
+
+                    setProfileMenuOpen(!profileMenuOpen);
                   }}
-                  className="flex items-center space-x-2 focus:outline-none"
+                  className="flex items-center rounded-full focus:outline-none"
+                  aria-label="Account menu"
                 >
                   <UserAvatar
                     src={user?.profile_image}
                     name={user ? `${user.first_name} ${user.last_name}` : 'User'}
-                    size="md"
-                    className="ring-2 ring-gray-100 hover:ring-[#005fff] transition cursor-pointer"
+                    size="sm"
+                    className="ring-2 ring-gray-100 transition hover:ring-[#005fff] cursor-pointer sm:!w-10 sm:!h-10"
                   />
                 </button>
 
-                {/* Profile Dropdown Menu */}
+                {/* Profile Dropdown Menu (desktop only) */}
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl ring-1 ring-gray-900/5 z-[10000] animate-in fade-in slide-in-from-top-3 duration-200">
+                  <div className="absolute right-0 mt-3 hidden w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-xl ring-1 ring-gray-900/5 animate-in fade-in slide-in-from-top-3 duration-200 md:block z-[10000]">
                     {/* User Info */}
                     <div className="px-3 py-3 border-b border-gray-100">
                       <p className="text-sm font-bold text-gray-900">
@@ -634,106 +697,82 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Mobile Hamburger Menu */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-600 hover:text-[#005fff] cursor-pointer"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          {/* Hamburger: tasker dashboard sidebar, or guest sign-in menu */}
+          {(!isAuthenticated || isTaskerDashboard) && (
+            <button
+              type="button"
+              onClick={() => {
+                if (isTaskerDashboard && taskerDashboardNav) {
+                  setMobileMenuOpen(false);
+                  setNotificationsOpen(false);
+                  setMessagesOpen(false);
+                  setProfileMenuOpen(false);
+                  taskerDashboardNav.toggleMobile();
+                  return;
+                }
+                const nextOpen = !mobileMenuOpen;
+                setMobileMenuOpen(nextOpen);
+                if (nextOpen) {
+                  setNotificationsOpen(false);
+                  setMessagesOpen(false);
+                  setProfileMenuOpen(false);
+                }
+              }}
+              className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-[#005fff] cursor-pointer md:hidden"
+              aria-label={
+                isTaskerDashboard && taskerDashboardNav?.mobileOpen
+                  ? 'Close dashboard menu'
+                  : isTaskerDashboard
+                    ? 'Open dashboard menu'
+                    : mobileMenuOpen
+                      ? 'Close menu'
+                      : 'Open menu'
+              }
+              aria-expanded={
+                isTaskerDashboard && taskerDashboardNav
+                  ? taskerDashboardNav.mobileOpen
+                  : mobileMenuOpen
+              }
+            >
+              {isTaskerDashboard && taskerDashboardNav ? (
+                taskerDashboardNav.mobileOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )
+              ) : mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Mobile Menu Panel */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white px-4 py-4 space-y-3">
-          {isAuthenticated ? (
-            <>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handlePostTaskClick();
-                }}
-                className="w-full flex items-center justify-center space-x-2 rounded-full bg-[#005fff] py-3 text-sm font-bold text-white cursor-pointer shadow-sm active:scale-95"
-              >
-                <PlusCircle className="h-4.5 w-4.5" />
-                <span>Post a task</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleBrowseTasksClick();
-                }}
-                className="w-full text-left font-semibold text-gray-700 py-2.5 border-b border-gray-50"
-              >
-                Browse tasks
-              </button>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleMyTasksClick();
-                }}
-                className="w-full text-left font-semibold text-gray-700 py-2.5 flex justify-between items-center border-b border-gray-50"
-              >
-                <span>My tasks</span>
-                {myTasksCount > 0 && !tasksLoading && (
-                  <span className="h-5 w-5 rounded-full bg-red-500 font-bold text-white text-[11px] flex items-center justify-center">
-                    {myTasksCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  router.push('/tasker-dashboard');
-                }}
-                className="w-full text-left font-semibold text-gray-700 py-2.5 border-b border-gray-50"
-              >
-                Dashboard
-              </button>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  router.push('/tasker-dashboard/settings');
-                }}
-                className="w-full text-left font-semibold text-gray-700 py-2.5 border-b border-gray-50"
-              >
-                Settings
-              </button>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleLogout();
-                }}
-                className="w-full text-left font-semibold text-red-600 py-2.5"
-              >
-                Sign out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/signin"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full block text-center py-3 text-sm font-semibold text-[#3c4a6b] border border-gray-200 rounded-full hover:bg-gray-50"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/signup"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full block text-center py-3 text-sm font-semibold text-white bg-[#005fff] rounded-full hover:bg-[#0047ff]"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
-        </div>
+      {/* Guest mobile menu only (signed-in users use icon shortcuts in the bar) */}
+      {mobileMenuOpen && !isAuthenticated && (
+        <nav
+          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white px-3 py-3 shadow-lg md:hidden sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          aria-label="Mobile navigation"
+        >
+          <div className="space-y-2">
+            <Link
+              href="/signin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full min-h-11 rounded-full border border-gray-200 py-3 text-center text-sm font-semibold text-[#3c4a6b] transition hover:bg-gray-50"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full min-h-11 rounded-full bg-[#005fff] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#0047ff]"
+            >
+              Sign up
+            </Link>
+          </div>
+        </nav>
       )}
     </header>
   );
