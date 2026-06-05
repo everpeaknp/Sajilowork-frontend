@@ -36,6 +36,8 @@ import { useAuth } from '@/hooks/useAuth';
 import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import {
   canSubmitOfferOnTask,
+  getBidTaskerProfileHref,
+  getQuestionAskerProfileHref,
   getTaskPosterId,
   getTaskPosterProfileSlug,
   getTaskPosterUser,
@@ -96,6 +98,28 @@ function getBidTaskerName(bid: Bid): string {
     t.full_name ||
     `${t.first_name || ''} ${t.last_name || ''}`.trim() ||
     'Tasker'
+  );
+}
+
+function ProfileNameLink({
+  href,
+  name,
+  className,
+}: {
+  href: string | null;
+  name: string;
+  className: string;
+}) {
+  if (!href) {
+    return <h4 className={className}>{name}</h4>;
+  }
+  return (
+    <Link
+      href={href}
+      className={`${className} hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm`}
+    >
+      {name}
+    </Link>
   );
 }
 
@@ -947,6 +971,7 @@ export default function TaskDetails({
                     <div className="space-y-4">
                       {bids.map((bid) => {
                         const taskerName = getBidTaskerName(bid);
+                        const taskerProfileHref = getBidTaskerProfileHref(bid);
                         const taskerImage = getMediaUrl(
                           bid.tasker && typeof bid.tasker === 'object'
                             ? bid.tasker.profile_image
@@ -967,12 +992,24 @@ export default function TaskDetails({
                             className="border border-outline-variant rounded-2xl p-4 md:p-6 hover:shadow-lg transition-all min-w-0 overflow-hidden"
                           >
                             <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
-                              <UserAvatar src={taskerImage} name={taskerName} size="lg" />
+                              {taskerProfileHref ? (
+                                <Link
+                                  href={taskerProfileHref}
+                                  className="shrink-0 rounded-full"
+                                  aria-label={`View ${taskerName}'s profile`}
+                                >
+                                  <UserAvatar src={taskerImage} name={taskerName} size="lg" />
+                                </Link>
+                              ) : (
+                                <UserAvatar src={taskerImage} name={taskerName} size="lg" />
+                              )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <h4 className="font-bold text-base md:text-lg text-[#000d45]">
-                                    {taskerName}
-                                  </h4>
+                                  <ProfileNameLink
+                                    href={taskerProfileHref}
+                                    name={taskerName}
+                                    className="font-bold text-base md:text-lg text-[#000d45]"
+                                  />
                                   {rating != null && Number(rating) > 0 && (
                                     <div className="flex items-center gap-1 text-amber-500">
                                       <Star className="w-4 h-4 fill-current" />
@@ -1110,6 +1147,7 @@ export default function TaskDetails({
                               `${q.user.first_name || ''} ${q.user.last_name || ''}`.trim()
                             : '') ||
                           'User';
+                        const askerProfileHref = getQuestionAskerProfileHref(q);
                         const askerImage = getMediaUrl(
                           q.asked_by_image ||
                             (q.user && typeof q.user === 'object' ? q.user.profile_image : undefined)
@@ -1121,12 +1159,24 @@ export default function TaskDetails({
                             className="border border-outline-variant rounded-2xl p-4 md:p-6 min-w-0 overflow-hidden"
                           >
                             <div className="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
-                              <UserAvatar src={askerImage} name={askerName} size="md" />
+                              {askerProfileHref ? (
+                                <Link
+                                  href={askerProfileHref}
+                                  className="shrink-0 rounded-full"
+                                  aria-label={`View ${askerName}'s profile`}
+                                >
+                                  <UserAvatar src={askerImage} name={askerName} size="md" />
+                                </Link>
+                              ) : (
+                                <UserAvatar src={askerImage} name={askerName} size="md" />
+                              )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <h4 className="font-bold text-sm md:text-base text-[#000d45]">
-                                    {askerName}
-                                  </h4>
+                                  <ProfileNameLink
+                                    href={askerProfileHref}
+                                    name={askerName}
+                                    className="font-bold text-sm md:text-base text-[#000d45]"
+                                  />
                                   {q.created_at && (
                                     <span className="text-[10px] md:text-xs text-on-surface-variant">
                                       {formatRelativeTime(q.created_at)}

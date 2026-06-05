@@ -1,5 +1,5 @@
 import { TOP_CATEGORIES } from '@/components/constants';
-import { Category, Task, PaginatedResponse } from '@/types';
+import { Category, Task, PaginatedResponse, User, TaskQuestion, Bid } from '@/types';
 
 /** Status tabs on /my-tasks — matches API `task.status` (except `all`). */
 export type MyTasksFilterId =
@@ -384,4 +384,32 @@ export function getTaskPosterProfileSlug(task: Task): string | null {
   const nested = getTaskPosterUser(task);
   if (nested?.username) return nested.username;
   return getTaskPosterId(task);
+}
+
+/** Slug for `/users/[slug]` from a user object or raw id. */
+export function getUserProfileSlug(user: User | string | null | undefined): string | null {
+  if (!user) return null;
+  if (typeof user === 'string') return user;
+  const username = user.username != null ? String(user.username).trim() : '';
+  if (username) return username;
+  return user.id ? String(user.id) : null;
+}
+
+export function getUserProfileHref(user: User | string | null | undefined): string | null {
+  const slug = getUserProfileSlug(user);
+  return slug ? `/users/${encodeURIComponent(slug)}` : null;
+}
+
+export function getBidTaskerProfileHref(bid: Bid): string | null {
+  return getUserProfileHref(bid.tasker);
+}
+
+export function getQuestionAskerProfileHref(question: TaskQuestion): string | null {
+  if (question.user && typeof question.user === 'object') {
+    return getUserProfileHref(question.user);
+  }
+  if (question.asked_by) {
+    return getUserProfileHref(question.asked_by);
+  }
+  return null;
 }

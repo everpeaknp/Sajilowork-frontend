@@ -17,11 +17,16 @@ import { formatNPR, formatTaskLocation, formatTaskLocationShort } from '@/lib/ne
 import { useAuthStore } from '@/store/auth.store';
 import {
   canSubmitOfferOnTask,
+  getAssignedTaskerId,
+  getTaskOwnerId,
   getTaskPosterProfileSlug,
   getTaskPosterId,
   getTaskPosterUser,
+  isCurrentUserAssignedTasker,
   isCurrentUserTaskOwner,
 } from '@/lib/taskUtils';
+import DisputeModal from '@/components/disputes/DisputeModal';
+import TaskReviewsSection from '@/components/reviews/TaskReviewsSection';
 import TaskPosterFollow from '@/components/users/TaskPosterFollow';
 import { bidService, extractBidList } from '@/services/bid.service';
 import { taskService } from '@/services/task.service';
@@ -94,8 +99,15 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
 
   const isOwner = isCurrentUserTaskOwner(task, user?.id);
+  const isAssignedTasker = isCurrentUserAssignedTasker(task, user?.id);
+  const canRaiseDispute =
+    Boolean(user) &&
+    (isOwner || isAssignedTasker) &&
+    ['assigned', 'in_progress', 'completed'].includes(task.status);
+  const disputeAgainstId = isOwner ? getAssignedTaskerId(task) : getTaskOwnerId(task);
   const lookup = taskLookupKey(task);
   const viewTask = detailTask ?? task;
 
@@ -546,6 +558,19 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
                   <Bell className="w-4 h-4 md:w-5 md:h-5 text-on-surface-variant shrink-0" />
                   <span className="font-semibold text-xs md:text-sm">Set up Alerts</span>
                 </button>
+                {canRaiseDispute && disputeAgainstId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!requireSignedIn('Please sign in to raise a dispute', '/task')) return;
+                      setShowDisputeModal(true);
+                    }}
+                    className="w-full px-4 md:px-6 py-2.5 md:py-3 text-left hover:bg-surface-dim rounded-xl transition-all flex items-center gap-2 md:gap-3 text-on-surface"
+                  >
+                    <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-amber-600 shrink-0" />
+                    <span className="font-semibold text-xs md:text-sm">Raise a dispute</span>
+                  </button>
+                )}
               </div>
             </motion.div>
           )}
@@ -1129,6 +1154,12 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
               )}
             </div>
 
+            {task.status === 'completed' && (
+              <div className="pt-6 md:pt-10 border-t border-outline-variant">
+                <TaskReviewsSection task={viewTask} />
+              </div>
+            )}
+
             {/* Cancellation Policy */}
             <div className="pt-6 md:pt-10 border-t border-outline-variant">
               <h3 className="text-lg md:text-xl font-bold text-[#000d45] mb-3 md:mb-4">Cancellation policy</h3>
@@ -1219,6 +1250,16 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
         suggestedKeyword={suggestTaskAlertKeyword(viewTask)}
         onSubmit={handleAlertKeywordSubmit}
       />
+
+      {disputeAgainstId && (
+        <DisputeModal
+          open={showDisputeModal}
+          onClose={() => setShowDisputeModal(false)}
+          taskId={String(task.id)}
+          againstUserId={disputeAgainstId}
+          taskTitle={task.title}
+        />
+      )}
     </motion.div>
   );
 }

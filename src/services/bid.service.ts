@@ -200,11 +200,10 @@ export const bidService = {
    * Upload bid attachment via the uploads API
    */
   async uploadBidAttachment(file: File): Promise<ApiResponse<{ url: string }>> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('file_type', inferUploadFileType(file.type));
-
-    const response = await apiClient.upload<{ file: string }>('/uploads/uploads/', formData);
+    const { uploadService } = await import('./upload.service');
+    const response = await uploadService.upload(file, {
+      file_type: inferUploadFileType(file.type) as 'image' | 'document' | 'video' | 'audio' | 'other',
+    });
     const filePath = response.data?.file;
 
     if (!filePath) {

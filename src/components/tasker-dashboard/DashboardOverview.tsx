@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -15,8 +15,10 @@ import {
   X,
 } from 'lucide-react';
 import { useTaskerStats } from '@/context/TaskerStatsContext';
+import { useAuth } from '@/hooks/useAuth';
 import { formatNPR } from '@/lib/nepalLocale';
-import type { TaskerTierInfo } from '@/services/dashboard.service';
+import type { TaskerTierInfo, UserStats } from '@/services/dashboard.service';
+import { walletService, type WalletBalance } from '@/services/wallet.service';
 
 const TIER_STYLES: Record<
   string,
@@ -84,9 +86,48 @@ function formatStatusLabel(status: string) {
   return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Reviews received (as reviewee) — not ratings the user gave to others. */
+function formatReceivedRating(
+  reviews: UserStats['reviews'] | undefined,
+  profileRating?: number | string | null
+): string {
+  const fromStats = reviews?.average_rating;
+  if (fromStats != null && fromStats > 0) {
+    return fromStats.toFixed(1);
+  }
+  const fromProfile = profileRating != null ? Number(profileRating) : NaN;
+  if (!Number.isNaN(fromProfile) && fromProfile > 0) {
+    return fromProfile.toFixed(1);
+  }
+  const received = reviews?.received;
+  if (received != null && received > 0 && fromStats != null) {
+    return fromStats.toFixed(1);
+  }
+  return 'New';
+}
+
 export default function DashboardOverview() {
   const { stats, loading, error } = useTaskerStats();
+  const { user } = useAuth();
   const [showTierHelp, setShowTierHelp] = useState(false);
+  const [wallet, setWallet] = useState<WalletBalance | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await walletService.getBalance();
+        if (!cancelled && res.success && res.data) {
+          setWallet(res.data);
+        }
+      } catch {
+        /* keep stats fallback */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -113,9 +154,16 @@ export default function DashboardOverview() {
     { slug: 'gold', name: 'Gold', min_earnings: 2650, service_fee_percent: 16 },
     { slug: 'platinum', name: 'Platinum', min_earnings: 5300, service_fee_percent: 14 },
   ];
-  const walletBalance = stats?.earnings?.wallet_balance ?? 0;
-  const currency = stats?.earnings?.currency ?? 'NPR';
+  const walletBalance = Number(
+    wallet?.available_balance ?? stats?.earnings?.wallet_balance ?? 0
+  );
+  const heldBalance = Number(wallet?.held_balance ?? 0);
+  const pendingBalance = Number(wallet?.pending_balance ?? 0);
+  const currency = wallet?.currency ?? stats?.earnings?.currency ?? 'NPR';
   const activeTasks = stats?.tasks?.active_list ?? [];
+  const taskActive =
+    stats?.role === 'tasker' ? (stats?.tasks?.active ?? 0) : undefined;
+  const taskCompleted = stats?.tasks?.completed ?? 0;
 
   return (
     <motion.div
@@ -157,7 +205,12 @@ export default function DashboardOverview() {
           <div>
             <p className="font-bold text-blue-950">My tasks</p>
             <p className="text-xs text-gray-500">
-              {stats?.tasks?.active ?? 0} active · {stats?.tasks?.completed ?? 0} completed
+              {taskActive ?? 0} active · {taskCompleted} completed
+              {stats?.role === 'customer' && taskCompleted > 0 && (
+                <span className="block text-[10px] text-amber-700 mt-0.5">
+                  Posted as customer — open My tasks for assigned work
+                </span>
+              )}
             </p>
           </div>
         </Link>
@@ -170,7 +223,14 @@ export default function DashboardOverview() {
           </div>
           <div>
             <p className="font-bold text-blue-950">{formatNPR(walletBalance)}</p>
-            <p className="text-xs text-gray-500">Wallet balance · {currency}</p>
+            <p className="text-xs text-gray-500">Available balance · {currency}</p>
+            {(heldBalance > 0 || pendingBalance > 0) && (
+              <p className="text-[10px] text-amber-700 mt-0.5 leading-snug">
+                {heldBalance > 0 && `${formatNPR(heldBalance)} in escrow`}
+                {heldBalance > 0 && pendingBalance > 0 && ' · '}
+                {pendingBalance > 0 && `${formatNPR(pendingBalance)} pending`}
+              </p>
+            )}
           </div>
         </Link>
       </section>
@@ -289,7 +349,7 @@ export default function DashboardOverview() {
                   Rating
                 </p>
                 <p className="text-2xl font-black text-blue-950 mt-1">
-                  {stats.reviews.average_rating?.toFixed(1) || 'N/A'}
+                  {formatReceivedRating(stats.reviews, user?.average_rating)}
                 </p>
               </div>
             )}

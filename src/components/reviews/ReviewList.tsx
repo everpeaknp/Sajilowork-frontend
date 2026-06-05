@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import ReviewCard from './ReviewCard';
 import { Loader2, Star, Filter, SortAsc } from 'lucide-react';
 import { Review } from '@/types';
+import { reviewService } from '@/services/review.service';
 
 interface ReviewListProps {
   userId?: string;
@@ -55,50 +56,48 @@ export function ReviewList({
       setLoading(true);
       setError(null);
 
-      // Build query params
-      const params = new URLSearchParams();
-      
-      if (userId) {
-        if (reviewType === 'received') {
-          params.append('reviewee', userId);
-        } else {
-          params.append('reviewer', userId);
-        }
-      }
-      
       if (taskId) {
-        params.append('task', taskId);
-      }
-      
-      if (filterRating) {
-        params.append('min_rating', filterRating.toString());
-      }
-      
-      // Sort
-      const sortField = sortBy === 'date' ? 'created_at' : 'overall_rating';
-      const sortPrefix = sortOrder === 'desc' ? '-' : '';
-      params.append('ordering', `${sortPrefix}${sortField}`);
-      
-      params.append('page', page.toString());
-      params.append('page_size', pageSize.toString());
-
-      const response = await fetch(`/api/reviews/?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch reviews');
+        const res = await reviewService.getTaskReviews(taskId);
+        if (!res.success || !res.data) {
+          throw new Error(res.message || 'Failed to fetch reviews');
+        }
+        let list = res.data.results ?? [];
+        if (filterRating) {
+          list = list.filter((r) => r.rating >= filterRating);
+        }
+        list = [...list].sort((a, b) => {
+          const field = sortBy === 'date' ? 'created_at' : 'rating';
+          const av = (a as Record<string, unknown>)[field] as string | number;
+          const bv = (b as Record<string, unknown>)[field] as string | number;
+          const cmp = av > bv ? 1 : av < bv ? -1 : 0;
+          return sortOrder === 'desc' ? -cmp : cmp;
+        });
+        setReviews(list);
+        setTotalCount(list.length);
+        setTotalPages(Math.max(1, Math.ceil(list.length / pageSize)));
+        return;
       }
 
-      const data = await response.json();
-      
-      setReviews(data.results || []);
-      setTotalCount(data.count || 0);
-      setTotalPages(Math.ceil((data.count || 0) / pageSize));
-    } catch (err: any) {
-      setError(err.message || 'Failed to load reviews');
+      if (userId) {
+        const res = await reviewService.getUserReviews(userId);
+        if (!res.success || !res.data) {
+          throw new Error(res.message || 'Failed to fetch reviews');
+        }
+        let list = res.data.results ?? [];
+        if (filterRating) {
+          list = list.filter((r) => r.rating >= filterRating);
+        }
+        setReviews(list.slice((page - 1) * pageSize, page * pageSize));
+        setTotalCount(list.length);
+        setTotalPages(Math.max(1, Math.ceil(list.length / pageSize)));
+        return;
+      }
+
+      setReviews([]);
+      setTotalCount(0);
+      setTotalPages(1);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load reviews');
     } finally {
       setLoading(false);
     }

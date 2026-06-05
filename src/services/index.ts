@@ -16,6 +16,11 @@ export { chatService } from './chat.service';
 export { categoryService } from './category.service';
 export { searchService } from './search.service';
 export { blogService } from './blog.service';
+export { rulesService } from './rules.service';
+export { walletService } from './wallet.service';
+export { disputeService } from './dispute.service';
+export { uploadService } from './upload.service';
+export { locationService } from './location.service';
 
 // Re-export API client and token manager for direct access
 export { apiClient, tokenManager } from '@/lib/api/client';

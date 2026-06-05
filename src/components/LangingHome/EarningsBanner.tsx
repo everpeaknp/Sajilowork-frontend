@@ -10,7 +10,6 @@ import {
   ensureLandingTaskers,
   LANDING_TASKER_MIN,
   mapUserToLandingTasker,
-  unwrapList,
   type LandingTaskerCard,
 } from "@/lib/landingHome";
 import { formatNPR } from "@/lib/nepalLocale";
@@ -30,13 +29,20 @@ export default function EarningsBanner() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await searchService.searchTaskers({
-          is_verified: true,
-          page_size: 6,
-          min_rating: 4,
-        });
-        if (cancelled || !res.success) return;
-        const list = unwrapList(res.data).map(mapUserToLandingTasker);
+        const data = await searchService.searchTaskers('', { page_size: 6 });
+        if (cancelled || !data?.results) return;
+        const results = Array.isArray(data.results) ? data.results : [];
+        const list = results.map((t) =>
+          mapUserToLandingTasker({
+            id: t.id,
+            first_name: t.first_name,
+            last_name: t.last_name,
+            bio: t.bio,
+            average_rating: t.average_rating,
+            total_reviews: t.total_reviews,
+            is_verified_tasker: t.is_verified_tasker,
+          } as import('@/types').User)
+        );
         if (list.length > 0) {
           const filled = ensureLandingTaskers(list, LANDING_TASKER_MIN);
           setTaskers(filled);

@@ -591,12 +591,10 @@ export default function App() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-black/40 sm:static sm:z-auto sm:min-h-screen sm:items-center sm:justify-start sm:bg-[#eef1f6] md:py-8 lg:py-10"
+      className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-white"
       style={{ fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif' }}
     >
-      <div className="flex h-full min-h-0 w-full flex-col sm:h-auto sm:min-h-[min(640px,calc(100dvh-4rem))] sm:max-h-none sm:px-4 md:px-6 lg:mx-auto lg:max-w-6xl lg:px-8 xl:max-w-7xl">
-        <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-white sm:min-h-[min(640px,calc(100dvh-4rem))] sm:rounded-3xl sm:shadow-2xl lg:min-h-[min(720px,calc(100dvh-5rem))]">
-          <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-outline-variant/60 bg-white px-4 sm:h-16 sm:px-6 md:h-20 md:px-8 lg:px-10">
+          <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-outline-variant/60 bg-white px-4 sm:h-16 sm:px-6 md:h-20 md:px-8 lg:px-10 xl:px-12">
             <div className="text-xl font-black leading-none tracking-tighter text-[#0066ff] select-none sm:text-[26px] md:text-[28px]">
               tasknepal
             </div>
@@ -618,8 +616,8 @@ export default function App() {
             <Sidebar activeStep={activeStep} />
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-8 sm:py-8 md:px-10 lg:px-12 lg:py-10 xl:px-14">
-                <div className="mx-auto w-full max-w-2xl pb-4 lg:max-w-3xl xl:max-w-[42rem]">
+              <main className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch] px-4 py-5 sm:px-8 sm:py-8 md:px-10 lg:px-12 lg:py-10 xl:px-16">
+                <div className="mx-auto w-full max-w-2xl pb-4 lg:max-w-3xl xl:max-w-4xl">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeStep}
@@ -634,8 +632,8 @@ export default function App() {
                 </div>
               </main>
 
-              <footer className="z-20 shrink-0 border-t border-gray-200 bg-white px-4 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-5 md:px-10 lg:px-12 lg:shadow-none xl:px-14">
-                <div className="mx-auto flex w-full max-w-lg justify-center gap-3 sm:max-w-xl sm:gap-4 lg:mx-0 lg:max-w-3xl lg:justify-end xl:max-w-[42rem]">
+              <footer className="z-20 shrink-0 border-t border-gray-200 bg-white px-4 py-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-5 md:px-10 lg:px-12 xl:px-16">
+                <div className="mx-auto flex w-full max-w-lg justify-center gap-3 sm:max-w-xl sm:gap-4 lg:mx-0 lg:max-w-3xl lg:justify-end xl:max-w-4xl">
                   {currentStepIndex > 0 && (
                     <button
                       type="button"
@@ -670,8 +668,6 @@ export default function App() {
               </footer>
             </div>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

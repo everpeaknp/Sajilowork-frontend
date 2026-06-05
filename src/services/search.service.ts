@@ -1,147 +1,111 @@
 /**
- * Search Service
- * 
- * Handles all search-related API calls
+ * Search Service — aligned with backend /api/v1/search/
  */
 
 import { apiClient } from '@/lib/api/client';
-import { 
-  SearchResult,
-  SearchFilters,
-  Task,
-  User,
-  Category,
-  ApiResponse,
-  PaginatedResponse 
-} from '@/types';
+import type { ApiResponse } from '@/types';
+
+export type SearchType = 'tasks' | 'taskers' | 'categories' | 'all';
+
+export interface SearchTaskResult {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  status: string;
+  budget: number;
+  budget_type?: string;
+  work_type?: string;
+  location?: string;
+  owner_name?: string;
+  category_name?: string;
+  category_slug?: string;
+  bid_count?: number;
+  created_at?: string;
+}
+
+export interface SearchTaskerResult {
+  id: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  tagline?: string;
+  bio?: string;
+  location?: string;
+  average_rating?: number;
+  total_reviews?: number;
+  is_verified_tasker?: boolean;
+}
+
+export interface SearchResponse<T = SearchTaskResult | SearchTaskerResult> {
+  query: string;
+  search_type: SearchType;
+  total_results: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: T[] | { tasks?: SearchTaskResult[]; taskers?: SearchTaskerResult[]; categories?: unknown[] };
+  suggestions?: string[];
+  related_searches?: string[];
+}
+
+export interface AutocompleteResponse {
+  suggestions: Array<string | { text?: string; query?: string; label?: string }>;
+  popular_searches?: string[];
+  categories?: unknown[];
+}
 
 export const searchService = {
-  /**
-   * Global search across tasks, taskers, and categories
-   */
-  async globalSearch(query: string, params?: {
-    page?: number;
-    page_size?: number;
-  }): Promise<ApiResponse<SearchResult>> {
-    return apiClient.get<SearchResult>('/search/', {
-      params: { query, ...params },
-    });
-  },
-
-  /**
-   * Search tasks with filters
-   */
-  async searchTasks(filters: SearchFilters): Promise<ApiResponse<PaginatedResponse<Task>>> {
-    return apiClient.get<PaginatedResponse<Task>>('/search/tasks/', {
-      params: filters,
-    });
-  },
-
-  /**
-   * Search taskers
-   */
-  async searchTaskers(params: {
+  async search(params: {
     query?: string;
+    search_type?: SearchType;
+    page?: number;
+    page_size?: number;
     category?: string;
-    location?: string;
+    min_budget?: number;
+    max_budget?: number;
+    work_type?: string;
+    sort_by?: string;
     min_rating?: number;
-    is_verified?: boolean;
-    page?: number;
-    page_size?: number;
-  }): Promise<ApiResponse<PaginatedResponse<User>>> {
-    return apiClient.get<PaginatedResponse<User>>('/search/taskers/', {
-      params,
+    verified_only?: boolean;
+  }): Promise<ApiResponse<SearchResponse>> {
+    return apiClient.get<SearchResponse>('/search/', { params });
+  },
+
+  async searchTasks(
+    query: string,
+    params?: Omit<Parameters<typeof searchService.search>[0], 'query' | 'search_type'>
+  ): Promise<SearchResponse<SearchTaskResult> | null> {
+    const res = await this.search({ query, search_type: 'tasks', ...params });
+    return res.success && res.data ? (res.data as SearchResponse<SearchTaskResult>) : null;
+  },
+
+  async searchTaskers(
+    query: string,
+    params?: Omit<Parameters<typeof searchService.search>[0], 'query' | 'search_type'>
+  ): Promise<SearchResponse<SearchTaskerResult> | null> {
+    const res = await this.search({ query, search_type: 'taskers', ...params });
+    return res.success && res.data ? (res.data as SearchResponse<SearchTaskerResult>) : null;
+  },
+
+  async getAutocomplete(
+    query: string,
+    searchType: SearchType | 'all' = 'all',
+    limit = 10
+  ): Promise<AutocompleteResponse | null> {
+    if (query.trim().length < 2) return { suggestions: [] };
+    const res = await apiClient.get<AutocompleteResponse>('/search/autocomplete/', {
+      params: { query, search_type: searchType, limit },
     });
+    return res.success && res.data ? res.data : null;
   },
 
-  /**
-   * Search categories
-   */
-  async searchCategories(query: string): Promise<ApiResponse<Category[]>> {
-    const response = await apiClient.get<PaginatedResponse<Category>>('/search/categories/', {
-      params: { query, page_size: 50 },
-    });
-    
-    return {
-      ...response,
-      data: response.data?.results || [],
-    };
+  async getTrendingSearches(limit = 10): Promise<ApiResponse<unknown[]>> {
+    return apiClient.get('/search/trending/', { params: { limit } });
   },
 
-  /**
-   * Get search suggestions (autocomplete)
-   */
-  async getSearchSuggestions(query: string, limit: number = 10): Promise<ApiResponse<string[]>> {
-    return apiClient.get<string[]>('/search/suggestions/', {
-      params: { query, limit },
-    });
-  },
-
-  /**
-   * Get trending searches
-   */
-  async getTrendingSearches(limit: number = 10): Promise<ApiResponse<string[]>> {
-    return apiClient.get<string[]>('/search/trending/', {
-      params: { limit },
-    });
-  },
-
-  /**
-   * Get recent searches for current user
-   */
-  async getRecentSearches(limit: number = 10): Promise<ApiResponse<string[]>> {
-    return apiClient.get<string[]>('/search/recent/', {
-      params: { limit },
-    });
-  },
-
-  /**
-   * Save search query
-   */
-  async saveSearch(query: string): Promise<ApiResponse<void>> {
-    return apiClient.post('/search/save/', { query });
-  },
-
-  /**
-   * Clear recent searches
-   */
-  async clearRecentSearches(): Promise<ApiResponse<void>> {
-    return apiClient.delete('/search/recent/');
-  },
-
-  /**
-   * Advanced task search with location
-   */
-  async searchTasksByLocation(params: {
-    latitude: number;
-    longitude: number;
-    radius?: number; // in kilometers
-    category?: string;
-    budget_min?: number;
-    budget_max?: number;
-    page?: number;
-    page_size?: number;
-  }): Promise<ApiResponse<PaginatedResponse<Task>>> {
-    return apiClient.get<PaginatedResponse<Task>>('/search/tasks/nearby/', {
-      params,
-    });
-  },
-
-  /**
-   * Search taskers by location
-   */
-  async searchTaskersByLocation(params: {
-    latitude: number;
-    longitude: number;
-    radius?: number; // in kilometers
-    category?: string;
-    min_rating?: number;
-    page?: number;
-    page_size?: number;
-  }): Promise<ApiResponse<PaginatedResponse<User>>> {
-    return apiClient.get<PaginatedResponse<User>>('/search/taskers/nearby/', {
-      params,
-    });
+  async clearSearchHistory(): Promise<ApiResponse<{ message?: string; count?: number }>> {
+    return apiClient.delete('/search/history/clear/');
   },
 };
 

@@ -9,6 +9,7 @@ import {
   shortenNominatimDisplayName,
   type NominatimPlace,
 } from '@/lib/nepalLocale';
+import { locationService, type City } from '@/services/location.service';
 
 export interface TaskData {
   title: string;
@@ -39,6 +40,7 @@ interface LocationStepProps {
 export const LocationStep: React.FC<LocationStepProps> = ({ data, updateData, showErrors, errors }) => {
   const [isDetecting, setIsDetecting] = useState(false);
   const [suggestions, setSuggestions] = useState<NominatimPlace[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
@@ -61,6 +63,23 @@ export const LocationStep: React.FC<LocationStepProps> = ({ data, updateData, sh
         longitude,
       });
       setSuggestions([]);
+      setCitySuggestions([]);
+      setShowSuggestions(false);
+      setHighlightIndex(-1);
+    },
+    [updateData]
+  );
+
+  const selectCity = useCallback(
+    (city: City) => {
+      const label = [city.name, city.state_name].filter(Boolean).join(', ');
+      updateData({
+        location: label,
+        latitude: city.latitude,
+        longitude: city.longitude,
+      });
+      setSuggestions([]);
+      setCitySuggestions([]);
       setShowSuggestions(false);
       setHighlightIndex(-1);
     },
@@ -88,13 +107,14 @@ export const LocationStep: React.FC<LocationStepProps> = ({ data, updateData, sh
       setIsSearching(true);
 
       try {
-        const results = await searchNominatimNepal(query, {
-          limit: 6,
-          signal: controller.signal,
-        });
+        const [results, cities] = await Promise.all([
+          searchNominatimNepal(query, { limit: 6, signal: controller.signal }),
+          locationService.searchCities({ query, country_code: 'NP', limit: 6 }),
+        ]);
         if (!controller.signal.aborted) {
           setSuggestions(results);
-          setShowSuggestions(results.length > 0);
+          setCitySuggestions(cities);
+          setShowSuggestions(results.length > 0 || cities.length > 0);
           setHighlightIndex(-1);
         }
       } catch {
@@ -320,13 +340,28 @@ export const LocationStep: React.FC<LocationStepProps> = ({ data, updateData, sh
                 )}
               </button>
 
-              {showSuggestions && suggestions.length > 0 && (
+              {showSuggestions && (citySuggestions.length > 0 || suggestions.length > 0) && (
                 <ul
                   id={suggestionsListId}
                   role="listbox"
                   data-location-suggestions
                   className="absolute left-0 right-0 top-full z-20 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-gray-100 bg-white py-2 shadow-lg shadow-gray-200/80"
                 >
+                  {citySuggestions.map((city) => (
+                    <li key={`city-${city.id}`} role="option">
+                      <button
+                        type="button"
+                        className="flex w-full items-start gap-3 px-4 py-3 text-left text-[15px] text-gray-700 transition-colors hover:bg-gray-50"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => selectCity(city)}
+                      >
+                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#0066ff]" />
+                        <span className="leading-snug">
+                          {[city.name, city.state_name].filter(Boolean).join(', ')}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
                   {suggestions.map((place, index) => (
                     <li key={place.place_id} role="option" aria-selected={index === highlightIndex}>
                       <button
