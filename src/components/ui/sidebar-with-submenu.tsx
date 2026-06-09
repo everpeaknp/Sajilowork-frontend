@@ -29,20 +29,20 @@ import { useTaskerStats } from '@/context/TaskerStatsContext';
 import { toast } from 'sonner';
 import { landingBody } from '@/components/LangingHome/landingTypography';
 
-const navText = 'text-[#000d45]';
+const navText = 'text-brand-dark';
 const navLabel = landingBody;
 const navItemBase =
   'flex items-center gap-x-3 rounded-lg p-3 transition-all duration-150';
-const navItemIdle = `${navText} font-medium hover:bg-primary/10 hover:text-primary`;
-const navItemActive = 'bg-primary/10 font-semibold text-primary';
+const navItemIdle = `${navText} font-medium hover:bg-brand-emerald/10 hover:text-brand-emerald`;
+const navItemActive = 'bg-brand-emerald/10 font-semibold text-brand-emerald';
 const subNavItemBase =
   'flex items-center gap-x-3 rounded-lg p-2.5 transition-colors duration-150';
-const subNavItemIdle = `${navText} font-medium hover:bg-primary/10 hover:text-primary`;
-const subNavItemActive = 'bg-primary/10 font-semibold text-primary';
+const subNavItemIdle = `${navText} font-medium hover:bg-brand-emerald/10 hover:text-brand-emerald`;
+const subNavItemActive = 'bg-brand-emerald/10 font-semibold text-brand-emerald';
 const menuParentBase =
   'flex w-full items-center justify-between rounded-lg p-3 transition-all duration-150';
-const menuParentIdle = `${navText} font-medium hover:bg-primary/10 hover:text-primary`;
-const menuParentActive = 'bg-primary/10 font-semibold text-primary';
+const menuParentIdle = `${navText} font-medium hover:bg-brand-emerald/10 hover:text-brand-emerald`;
+const menuParentActive = 'bg-brand-emerald/10 font-semibold text-brand-emerald';
 
 type MenuItem = {
   name: string;
@@ -102,7 +102,7 @@ const Menu = ({
           <div
             className={cn(
               'transition-colors',
-              isOpened || isAnyItemActive ? 'text-primary' : navText,
+              isOpened || isAnyItemActive ? 'text-brand-emerald' : navText,
             )}
           >
             {activeIcon}
@@ -112,7 +112,7 @@ const Menu = ({
         <ChevronDown
           className={cn(
             'h-4 w-4 duration-150',
-            isOpened || isAnyItemActive ? 'text-primary' : navText,
+            isOpened || isAnyItemActive ? 'text-brand-emerald' : navText,
             isOpened && 'rotate-180',
           )}
         />
@@ -120,7 +120,7 @@ const Menu = ({
       {isOpened && (
         <ul
           id="submenu"
-          className={cn(landingBody, 'mx-4 mt-1 space-y-1 border-l-2 border-primary/10 px-2 py-1 text-sm')}
+          className={cn(landingBody, 'mx-4 mt-1 space-y-1 border-l-2 border-brand-emerald/10 px-2 py-1 text-sm')}
         >
           {items.map((item, idx) => {
             const [itemPath, itemQuery] = item.href.split('?');
@@ -151,7 +151,7 @@ const Menu = ({
                   )}
                 >
                   {item.icon ? (
-                    <div className={cn('transition-colors', isActive ? 'text-primary' : navText)}>
+                    <div className={cn('transition-colors', isActive ? 'text-brand-emerald' : navText)}>
                       {item.icon}
                     </div>
                   ) : null}
@@ -299,7 +299,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
     >
       <div className="flex flex-col h-full px-4 pt-4 pb-2">
         {/* User Profile Header */}
-        <div className="h-24 flex items-center px-2 mb-4 bg-primary rounded-2xl shadow-lg shadow-blue-500/20">
+        <div className="h-24 flex items-center px-2 mb-4 bg-brand-emerald rounded-2xl shadow-lg shadow-brand-emerald/20">
           <div className="w-full flex items-center gap-x-3 px-2">
             <UserAvatar
               src={user?.profile_image}
@@ -312,7 +312,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
               <span className={cn(navLabel, 'block truncate text-sm font-medium text-white')}>
                 {userDisplayName}
               </span>
-              <span className={cn(landingBody, 'mt-px block text-xs font-medium text-blue-100')}>
+              <span className={cn(landingBody, 'mt-px block text-xs font-medium text-emerald-100')}>
                 {tierLabel}
               </span>
             </div>
@@ -343,12 +343,12 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
                       <p
                         className={cn(
                           navLabel,
-                          'text-[10px] font-medium uppercase tracking-[0.2em] text-[#000d45]/60',
+                          'text-[10px] font-medium uppercase tracking-[0.2em] text-brand-dark/60',
                         )}
                       >
                         Logged in as
                       </p>
-                      <p className={cn(navLabel, 'truncate text-sm font-medium text-[#000d45]')}>
+                      <p className={cn(navLabel, 'truncate text-sm font-medium text-brand-dark')}>
                         {userEmail}
                       </p>
                     </div>
@@ -356,7 +356,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
                       href="/tasker-dashboard/profile"
                       className={cn(
                         navLabel,
-                        'flex w-full items-center gap-3 rounded-lg p-2.5 text-left text-sm font-medium text-[#000d45] transition-colors hover:bg-primary/10 hover:text-primary',
+                        'flex w-full items-center gap-3 rounded-lg p-2.5 text-left text-sm font-medium text-brand-dark transition-colors hover:bg-brand-emerald/10 hover:text-brand-emerald',
                       )}
                       role="menuitem"
                       onClick={() => {
@@ -404,7 +404,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
                     <div
                       className={cn(
                         'transition-colors',
-                        isActive ? 'text-primary' : navText,
+                        isActive ? 'text-brand-emerald' : navText,
                       )}
                     >
                       {item.icon}
@@ -440,7 +440,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
                     <div
                       className={cn(
                         'transition-colors',
-                        isActive ? 'text-primary' : navText,
+                        isActive ? 'text-brand-emerald' : navText,
                       )}
                     >
                       {item.icon}
@@ -471,7 +471,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
                       <div
                         className={cn(
                           'transition-colors',
-                          isActive ? 'text-primary' : navText,
+                          isActive ? 'text-brand-emerald' : navText,
                         )}
                       >
                         {item.icon}
@@ -499,7 +499,7 @@ const Sidebar = ({ mobileOpen = false, onMobileOpenChange }: TaskerDashboardSide
           <button
             className={cn(
               navLabel,
-              'flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-4 text-sm font-medium text-white shadow-lg shadow-blue-500/10 transition-all hover:opacity-90 active:scale-[0.98]',
+              'flex w-full items-center justify-center gap-2 rounded-lg bg-brand-emerald py-4 text-sm font-medium text-white shadow-lg shadow-brand-emerald/10 transition-all hover:opacity-90 active:scale-[0.98]',
             )}
           >
             <HelpCircle className="h-5 w-5" />

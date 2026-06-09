@@ -257,7 +257,7 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
     >
       {isCheckingExistingBid ? (
         <div className="flex flex-col items-center justify-center py-14">
-          <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-brand-emerald mb-4" />
           <p className={offerModalSubtitle}>Checking your existing offers…</p>
         </div>
       ) : (
@@ -277,14 +277,14 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
           })}
           className="space-y-5"
         >
-          <div className={`${offerCard} border-primary/10`}>
-            <p className="font-formula font-bold text-[#000d45] text-base leading-snug line-clamp-2">
+          <div className={`${offerCard} border-brand-emerald/10`}>
+            <p className="font-formula font-bold text-brand-dark text-base leading-snug line-clamp-2">
               {task.title}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-body text-[#6a719a]">
               <span>
                 Budget{' '}
-                <span className="font-semibold text-[#000d45]">
+                <span className="font-semibold text-brand-dark">
                   {formatNPR(task.budget_amount)}
                 </span>
               </span>
@@ -362,7 +362,7 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
               <span className="font-normal text-[#6a719a]">(optional, max 5)</span>
             </label>
 
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#d8e0ef] px-4 py-4 transition-colors hover:border-primary/40 hover:bg-primary/[0.03]">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#d8e0ef] px-4 py-4 transition-colors hover:border-brand-emerald/40 hover:bg-brand-emerald/[0.03]">
               <Paperclip className="h-5 w-5 text-[#8a96b0]" />
               <span className="font-body text-sm font-medium text-[#5a6b8a]">
                 {isUploadingAttachment ? 'Uploading…' : 'Choose files'}
@@ -387,7 +387,7 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
                     <div className="flex min-w-0 items-center gap-3">
                       <FileText className="h-5 w-5 shrink-0 text-[#8a96b0]" />
                       <div className="min-w-0">
-                        <p className="truncate font-body text-sm font-semibold text-[#000d45]">
+                        <p className="truncate font-body text-sm font-semibold text-brand-dark">
                           {file.name}
                         </p>
                         <p className="font-body text-xs text-[#6a719a]">
@@ -417,18 +417,18 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
             <input
               type="checkbox"
               {...register('terms_accepted')}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#d8e0ef] text-primary focus:ring-primary/30"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#d8e0ef] text-brand-emerald focus:ring-brand-emerald/30"
             />
-            <div className="font-body text-sm text-[#000d45]/85 leading-relaxed">
+            <div className="font-body text-sm text-brand-dark/85 leading-relaxed">
               <p className="font-formula font-bold tracking-tight mb-1">Terms & conditions</p>
               <p>
                 By submitting this offer, I agree to complete the task if accepted and to the
                 platform&apos;s{' '}
-                <a href="/terms" className="font-semibold text-primary hover:underline">
+                <a href="/terms" className="font-semibold text-brand-emerald hover:underline">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="/privacy" className="font-semibold text-primary hover:underline">
+                <a href="/privacy" className="font-semibold text-brand-emerald hover:underline">
                   Privacy Policy
                 </a>
                 .
@@ -444,7 +444,7 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="flex-1 rounded-full border border-[#d8e0ef] px-5 py-3 font-body font-semibold text-[#000d45] hover:bg-[#f8f9fc] transition-colors disabled:opacity-50"
+              className="flex-1 rounded-full border border-[#d8e0ef] px-5 py-3 font-body font-semibold text-brand-dark hover:bg-[#f8f9fc] transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

@@ -7,7 +7,7 @@ import { CreditCard, Plus, CheckCircle2, Wallet, ArrowRight, ArrowDownLeft, Hist
 
 const fieldLabelClass = 'text-sm font-semibold text-gray-600';
 const fieldInputClass =
-  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-base font-semibold text-blue-950 outline-none transition-all placeholder:text-gray-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15';
+  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-base font-semibold text-brand-dark outline-none transition-all placeholder:text-gray-400 focus:border-brand-emerald focus:bg-white focus:ring-2 focus:ring-brand-emerald/15';
 import { cn } from '@/lib/utils';
 import { paymentService } from '@/services';
 import { PaymentMethodData } from '@/types';
@@ -749,10 +749,10 @@ export default function PaymentMethods() {
       <header className="space-y-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-1 w-10 bg-primary rounded-full" />
-            <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Financials</span>
+            <div className="h-1 w-10 bg-brand-emerald rounded-full" />
+            <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.3em]">Financials</span>
           </div>
-          <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">Payments</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tighter text-brand-dark sm:text-4xl">Payments</h1>
           <p className="text-gray-500 mt-2">Manage your funding sources and digital wallet.</p>
         </div>
 
@@ -762,7 +762,7 @@ export default function PaymentMethods() {
             onClick={() => setActiveTab('wallet')}
             className={cn(
               "px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2",
-              activeTab === 'wallet' ? "bg-white text-blue-950 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              activeTab === 'wallet' ? "bg-white text-brand-dark shadow-sm" : "text-gray-500 hover:text-gray-700"
             )}
           >
             <Wallet className="w-4 h-4" />
@@ -772,7 +772,7 @@ export default function PaymentMethods() {
             onClick={() => setActiveTab('methods')}
             className={cn(
               "px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2",
-              activeTab === 'methods' ? "bg-white text-blue-950 shadow-sm" : "text-gray-500 hover:text-gray-700"
+              activeTab === 'methods' ? "bg-white text-brand-dark shadow-sm" : "text-gray-500 hover:text-gray-700"
             )}
           >
             <CreditCard className="w-4 h-4" />
@@ -785,41 +785,41 @@ export default function PaymentMethods() {
         <div className="space-y-8">
           {walletLoading ? (
             <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <div className="w-16 h-16 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="text-gray-500 font-medium">Loading wallet data...</p>
             </div>
           ) : (
             <>
               {/* Wallet Card */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="relative overflow-hidden bg-blue-950 rounded-[40px] p-8 text-white shadow-2xl shadow-blue-900/40">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                <div className="relative overflow-hidden bg-brand-dark rounded-[40px] p-8 text-white shadow-2xl shadow-brand-dark/40">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-brand-emerald/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                   <div className="relative z-10 flex flex-col h-full justify-between gap-10">
                     <div className="flex items-center justify-between">
                       <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl">
-                        <Wallet className="w-8 h-8 text-primary" />
+                        <Wallet className="w-8 h-8 text-brand-emerald" />
                       </div>
                       <TrendingUp className="w-6 h-6 text-green-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-blue-200/60 uppercase tracking-widest mb-1">Available Balance</p>
+                      <p className="text-sm font-medium text-emerald-200/60 uppercase tracking-widest mb-1">Available Balance</p>
                       <p className="text-3xl font-black tracking-tighter sm:text-5xl">
                         {formatNPR(walletData?.available_balance ?? 0)}
                       </p>
                       <div className="mt-6 grid grid-cols-2 gap-4">
                         <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-200/50">Recharge Balance</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/50">Recharge Balance</p>
                           <p className="mt-1 text-xl font-black text-white">
                             {formatNPR(walletData?.recharge_balance ?? 0)}
                           </p>
-                          <p className="mt-0.5 text-[10px] text-blue-200/40">Total topped up</p>
+                          <p className="mt-0.5 text-[10px] text-emerald-200/40">Total topped up</p>
                         </div>
                         <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-200/50">Earned Balance</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/50">Earned Balance</p>
                           <p className="mt-1 text-xl font-black text-emerald-300">
                             {formatNPR(walletData?.earned_balance ?? 0)}
                           </p>
-                          <p className="mt-0.5 text-[10px] text-blue-200/40">From completed tasks</p>
+                          <p className="mt-0.5 text-[10px] text-emerald-200/40">From completed tasks</p>
                         </div>
                       </div>
                       {walletData &&
@@ -833,19 +833,19 @@ export default function PaymentMethods() {
                             </p>
                           )}
                           {Number(walletData.pending_balance ?? 0) > 0 && (
-                            <p className="text-xs text-blue-200/60">
+                            <p className="text-xs text-emerald-200/60">
                               Pending: {formatNPR(walletData.pending_balance ?? 0)}
                             </p>
                           )}
                           {Number(walletData.held_balance ?? 0) > 0 && (
-                            <p className="text-xs text-blue-200/60">
+                            <p className="text-xs text-emerald-200/60">
                               Held: {formatNPR(walletData.held_balance ?? 0)}
                             </p>
                           )}
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-bold text-blue-200/40">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-200/40">
                       <span className={cn(
                         "w-2 h-2 rounded-full",
                         walletData?.is_frozen ? "bg-red-400" : "bg-green-400 animate-pulse"
@@ -857,14 +857,14 @@ export default function PaymentMethods() {
 
                 <div className="flex flex-col justify-center gap-3 rounded-[32px] border border-gray-100 bg-white p-8 shadow-sm">
                   <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-blue-950">Quick actions</h3>
+                    <h3 className="text-lg font-bold text-brand-dark">Quick actions</h3>
                     <p className="text-sm text-gray-500">Recharge or withdraw from your wallet.</p>
                   </div>
                   <button
                     type="button"
                     onClick={openRechargeModal}
                     disabled={isRecharging || walletData?.is_frozen}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/20 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
                   >
                     {isRecharging ? (
                       <>
@@ -887,11 +887,11 @@ export default function PaymentMethods() {
                       walletData?.is_frozen ||
                       withdrawableBalance < 10
                     }
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 py-3.5 text-base font-semibold text-blue-950 transition-all hover:bg-gray-100 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-100 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
                   >
                     {isWithdrawing ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-blue-950 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-brand-dark border-t-transparent rounded-full animate-spin" />
                         Processing...
                       </>
                     ) : (
@@ -914,7 +914,7 @@ export default function PaymentMethods() {
                 createPortal(
                 <>
                   <div
-                    className="fixed inset-0 z-[10050] bg-blue-950/40 backdrop-blur-sm"
+                    className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
                     onClick={() => setShowWithdrawModal(false)}
                     aria-hidden
                   />
@@ -931,11 +931,11 @@ export default function PaymentMethods() {
                       <div className="shrink-0 px-6 pb-5 pt-6">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald">
                               <ArrowDownLeft className="h-5 w-5" />
                             </div>
                             <div>
-                              <h3 id="withdraw-modal-title" className="text-xl font-bold text-blue-950">
+                              <h3 id="withdraw-modal-title" className="text-xl font-bold text-brand-dark">
                                 Withdraw funds
                               </h3>
                               <p className="mt-1 text-sm text-gray-500">
@@ -954,7 +954,7 @@ export default function PaymentMethods() {
                         </div>
                         <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
                           <span className="text-sm text-gray-500">Available balance</span>
-                          <span className="text-lg font-bold text-blue-950">
+                          <span className="text-lg font-bold text-brand-dark">
                             {formatNPR(walletData?.available_balance ?? 0)}
                           </span>
                         </div>
@@ -1010,7 +1010,7 @@ export default function PaymentMethods() {
                               className={cn(
                                 'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
                                 withdrawMethod === 'esewa'
-                                  ? 'bg-white text-blue-950 shadow-sm'
+                                  ? 'bg-white text-brand-dark shadow-sm'
                                   : 'text-gray-500 hover:text-gray-700',
                                 esewaPaymentMethods.length === 0 && 'cursor-not-allowed opacity-40'
                               )}
@@ -1029,7 +1029,7 @@ export default function PaymentMethods() {
                               className={cn(
                                 'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
                                 withdrawMethod === 'bank_transfer'
-                                  ? 'bg-white text-blue-950 shadow-sm'
+                                  ? 'bg-white text-brand-dark shadow-sm'
                                   : 'text-gray-500 hover:text-gray-700'
                               )}
                             >
@@ -1055,11 +1055,11 @@ export default function PaymentMethods() {
                                     className={cn(
                                       'w-full rounded-xl border px-4 py-3 text-left transition-all',
                                       selectedEsewaMethodId === pm.id
-                                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                                        ? 'border-brand-emerald bg-brand-emerald/5 ring-1 ring-brand-emerald/20'
                                         : 'border-gray-200 bg-white hover:border-gray-300'
                                     )}
                                   >
-                                    <p className="font-semibold text-blue-950">
+                                    <p className="font-semibold text-brand-dark">
                                       {pm.esewa_account_name || 'eSewa account'}
                                     </p>
                                     <p className="mt-0.5 text-sm text-gray-500">{pm.esewa_phone_number}</p>
@@ -1105,8 +1105,8 @@ export default function PaymentMethods() {
                               <span>{formatNPR(withdrawFee)}</span>
                             </div>
                             <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
-                              <span className="font-semibold text-blue-950">You receive</span>
-                              <span className="text-lg font-bold text-primary">
+                              <span className="font-semibold text-brand-dark">You receive</span>
+                              <span className="text-lg font-bold text-brand-emerald">
                                 {formatNPR(withdrawNetAmount)}
                               </span>
                             </div>
@@ -1127,7 +1127,7 @@ export default function PaymentMethods() {
                             withdrawAmountValidation.amount === null ||
                             withdrawAmountValidation.error !== null
                           }
-                          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 active:scale-[0.99] disabled:bg-gray-300 disabled:shadow-none"
+                          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/25 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:bg-gray-300 disabled:shadow-none"
                         >
                           {isWithdrawing ? (
                             <>
@@ -1150,7 +1150,7 @@ export default function PaymentMethods() {
                 createPortal(
                 <>
                   <div
-                    className="fixed inset-0 z-[10050] bg-blue-950/40 backdrop-blur-sm"
+                    className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
                     onClick={() => setShowRechargeModal(false)}
                     aria-hidden
                   />
@@ -1162,11 +1162,11 @@ export default function PaymentMethods() {
                       <div className="shrink-0 px-6 pb-5 pt-6">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald">
                               <Wallet className="h-5 w-5" />
                             </div>
                             <div>
-                              <h3 className="text-xl font-bold text-blue-950">Recharge wallet</h3>
+                              <h3 className="text-xl font-bold text-brand-dark">Recharge wallet</h3>
                               <p className="mt-1 text-sm text-gray-500">Add funds to your balance</p>
                             </div>
                           </div>
@@ -1226,7 +1226,7 @@ export default function PaymentMethods() {
                           <button
                             type="button"
                             onClick={proceedRechargeViaWhatsAppFromModal}
-                            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3.5 text-base font-semibold text-blue-950 transition-all hover:bg-gray-50 active:scale-[0.99]"
+                            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-50 active:scale-[0.99]"
                           >
                             <MessageCircle className="h-5 w-5 text-[#25D366]" />
                             Request via WhatsApp
@@ -1253,7 +1253,7 @@ export default function PaymentMethods() {
                       <Zap className="h-4 w-4" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-blue-950">Recharge history</h3>
+                      <h3 className="text-base font-bold text-brand-dark">Recharge history</h3>
                       <p className="text-xs text-gray-500">Wallet top-ups and credits</p>
                     </div>
                   </div>
@@ -1279,7 +1279,7 @@ export default function PaymentMethods() {
                               {getTransactionIcon(transaction.transaction_type)}
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-blue-950">
+                              <p className="truncate text-sm font-semibold text-brand-dark">
                                 {getTransactionLabel(transaction.description)}
                               </p>
                               <p className="text-xs text-gray-400">{formatDate(transaction.created_at)}</p>
@@ -1306,11 +1306,11 @@ export default function PaymentMethods() {
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-brand-emerald">
                       <ArrowDownLeft className="h-4 w-4" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-blue-950">Withdrawal history</h3>
+                      <h3 className="text-base font-bold text-brand-dark">Withdrawal history</h3>
                       <p className="text-xs text-gray-500">Payout requests and status</p>
                     </div>
                   </div>
@@ -1332,11 +1332,11 @@ export default function PaymentMethods() {
                           className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-gray-50/80"
                         >
                           <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-brand-emerald">
                               <ArrowDownLeft className="h-4 w-4" />
                             </div>
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-blue-950">
+                              <p className="truncate text-sm font-semibold text-brand-dark">
                                 {getWithdrawalMethodLabel(withdrawal.withdrawal_method)}
                               </p>
                               <p className="text-xs text-gray-400">
@@ -1351,7 +1351,7 @@ export default function PaymentMethods() {
                             </div>
                           </div>
                           <div className="shrink-0 text-right">
-                            <p className="text-sm font-bold text-blue-950">
+                            <p className="text-sm font-bold text-brand-dark">
                               {formatNPR(withdrawal.amount ?? 0)}
                             </p>
                             <span
@@ -1376,20 +1376,20 @@ export default function PaymentMethods() {
         <div className="space-y-6">
           {loading ? (
             <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <div className="w-16 h-16 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="text-gray-500 font-medium">Loading payment methods...</p>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-blue-950">Linked payment methods</h3>
+                  <h3 className="text-lg font-bold text-brand-dark">Linked payment methods</h3>
                   <p className="text-sm text-gray-500">Accounts for payouts and withdrawals</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowLinkESewaModal(true)}
-                  className="rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
+                  className="rounded-xl bg-brand-emerald/10 px-4 py-2 text-sm font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/15"
                 >
                   Add
                 </button>
@@ -1399,9 +1399,9 @@ export default function PaymentMethods() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <button 
                     onClick={() => setShowLinkESewaModal(true)}
-                    className="p-8 rounded-[40px] border-2 border-dashed border-outline-variant hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-primary group"
+                    className="p-8 rounded-[40px] border-2 border-dashed border-outline-variant hover:border-brand-emerald hover:bg-brand-emerald/5 transition-all flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-brand-emerald group"
                   >
-                    <div className="p-4 rounded-full bg-surface-low group-hover:bg-primary/10 transition-colors">
+                    <div className="p-4 rounded-full bg-surface-low group-hover:bg-brand-emerald/10 transition-colors">
                       <Plus className="w-8 h-8" />
                     </div>
                     <div className="text-center">
@@ -1418,14 +1418,14 @@ export default function PaymentMethods() {
                   className={cn(
                     "relative space-y-5 overflow-hidden rounded-[28px] border p-6 transition-all",
                     method.is_default 
-                      ? "border-primary/40 bg-primary/5 shadow-sm" 
+                      ? "border-brand-emerald/40 bg-brand-emerald/5 shadow-sm" 
                       : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm"
                   )}
                 >
                   <div className="flex justify-between items-start relative z-10">
                     <div className={cn(
                       "p-3 rounded-2xl shadow-lg",
-                      method.is_default ? "bg-primary" : method.method_type === 'esewa' ? "bg-[#60bb46]" : "bg-gray-100"
+                      method.is_default ? "bg-brand-emerald" : method.method_type === 'esewa' ? "bg-[#60bb46]" : "bg-gray-100"
                     )}>
                       {method.method_type === 'esewa' ? (
                         <Wallet className={cn("w-8 h-8", method.is_default ? "text-white" : "text-white")} />
@@ -1434,7 +1434,7 @@ export default function PaymentMethods() {
                       )}
                     </div>
                     {method.is_default && (
-                      <div className="p-2 bg-primary rounded-full">
+                      <div className="p-2 bg-brand-emerald rounded-full">
                         <CheckCircle2 className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -1445,7 +1445,7 @@ export default function PaymentMethods() {
                     </p>
                     {method.method_type === 'esewa' ? (
                       <>
-                        <p className="text-2xl font-black text-blue-950 tracking-tight">
+                        <p className="text-2xl font-black text-brand-dark tracking-tight">
                           {method.esewa_phone_number && method.esewa_phone_number.length >= 4
                             ? `${method.esewa_phone_number.substring(0, 5)}****${method.esewa_phone_number.substring(method.esewa_phone_number.length - 2)}`
                             : method.esewa_account_name}
@@ -1456,7 +1456,7 @@ export default function PaymentMethods() {
                       </>
                     ) : (
                       <>
-                        <p className="text-2xl font-black text-blue-950 tracking-tight">
+                        <p className="text-2xl font-black text-brand-dark tracking-tight">
                           ****{method.last_four}
                         </p>
                         {method.method_type === 'card' && method.expiry_date && (
@@ -1469,11 +1469,11 @@ export default function PaymentMethods() {
                   </div>
                   <div className="pt-2 flex items-center justify-between relative z-10">
                     {method.is_default ? (
-                      <span className="text-xs font-black text-primary uppercase">Default Method</span>
+                      <span className="text-xs font-black text-brand-emerald uppercase">Default Method</span>
                     ) : (
                       <button 
                         onClick={() => handleSetDefault(method.id)}
-                        className="text-xs font-black text-blue-950 underline hover:text-primary"
+                        className="text-xs font-black text-brand-dark underline hover:text-brand-emerald"
                       >
                         Set as Default
                       </button>
@@ -1491,9 +1491,9 @@ export default function PaymentMethods() {
 
                   <button 
                     onClick={() => setShowLinkESewaModal(true)}
-                    className="p-8 rounded-[40px] border-2 border-dashed border-outline-variant hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-primary group"
+                    className="p-8 rounded-[40px] border-2 border-dashed border-outline-variant hover:border-brand-emerald hover:bg-brand-emerald/5 transition-all flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-brand-emerald group"
                   >
-                    <div className="p-4 rounded-full bg-surface-low group-hover:bg-primary/10 transition-colors">
+                    <div className="p-4 rounded-full bg-surface-low group-hover:bg-brand-emerald/10 transition-colors">
                       <Plus className="w-8 h-8" />
                     </div>
                     <div className="text-center">
@@ -1514,7 +1514,7 @@ export default function PaymentMethods() {
         createPortal(
         <>
           <div
-            className="fixed inset-0 z-[10050] bg-blue-950/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
             onClick={() => setShowLinkESewaModal(false)}
             aria-hidden
           />
@@ -1537,7 +1537,7 @@ export default function PaymentMethods() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-blue-950">Link eSewa</h3>
+                    <h3 className="text-xl font-bold text-brand-dark">Link eSewa</h3>
                     <p className="mt-1 text-sm text-gray-500">For withdrawals and payouts</p>
                   </div>
                 </div>

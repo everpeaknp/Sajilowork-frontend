@@ -22,7 +22,7 @@ export default function TrustAndSafetyPage() {
       <MarketingProse sections={[...TRUST_SAFETY_SECTIONS]} />
       <p className="mt-8 text-sm text-[#6a719a]">
         Read our{' '}
-        <Link href="/cancellation-policy" className="font-semibold text-[#1161fe] hover:underline">
+        <Link href="/cancellation-policy" className="font-semibold text-brand-emerald hover:underline">
           cancellation policy
         </Link>{' '}
         for refunds and dispute guidance.

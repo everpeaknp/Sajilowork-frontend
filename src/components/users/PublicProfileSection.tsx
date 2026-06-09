@@ -29,11 +29,11 @@ export default function PublicProfileSection({
       <div className="flex flex-col gap-1 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-end sm:justify-between sm:px-8">
         <div>
           {eyebrow ? (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-emerald">
               {eyebrow}
             </p>
           ) : null}
-          <h2 className="text-xl font-bold tracking-tight text-[#000d45] sm:text-2xl">{title}</h2>
+          <h2 className="text-xl font-bold tracking-tight text-brand-dark sm:text-2xl">{title}</h2>
           {description ? (
             <p className="mt-1 text-sm text-slate-500">{description}</p>
           ) : null}

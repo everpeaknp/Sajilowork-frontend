@@ -40,10 +40,10 @@ const TIER_STYLES: Record<
     border: 'border-orange-200',
   },
   silver: {
-    ring: 'from-primary/10 to-primary/20',
-    badge: 'bg-primary border-primary/20',
-    gradient: 'bg-primary/10',
-    border: 'border-primary/20',
+    ring: 'from-brand-emerald/10 to-brand-emerald/20',
+    badge: 'bg-brand-emerald border-brand-emerald/20',
+    gradient: 'bg-brand-emerald/10',
+    border: 'border-brand-emerald/20',
   },
   gold: {
     ring: 'from-amber-400/20 to-amber-600/20',
@@ -84,7 +84,7 @@ function TierMedal({
       <div className={`absolute bottom-0 w-full h-1/3 ${styles.gradient}`} />
       {locked && (
         <div className="absolute top-1 right-1 z-20 bg-white p-1 rounded-full shadow-sm">
-          <Lock className="w-4 h-4 text-blue-950" />
+          <Lock className="w-4 h-4 text-brand-dark" />
         </div>
       )}
     </div>
@@ -141,7 +141,7 @@ export default function DashboardOverview() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-brand-emerald" />
       </div>
     );
   }
@@ -184,12 +184,12 @@ export default function DashboardOverview() {
         <p
           className={cn(
             landingHeadlineSm,
-            'mb-2 text-[10px] uppercase tracking-[0.3em] text-primary',
+            'mb-2 text-[10px] uppercase tracking-[0.3em] text-brand-emerald',
           )}
         >
           Tasker hub
         </p>
-        <h1 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-4xl')}>
+        <h1 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-4xl')}>
           My tasker dashboard
         </h1>
         <p className={cn(landingBodyMuted, 'max-w-xl text-sm leading-relaxed')}>
@@ -205,25 +205,25 @@ export default function DashboardOverview() {
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link
           href="/task"
-          className="group flex items-center gap-3 p-4 rounded-2xl border border-outline-variant bg-white hover:border-primary/30 hover:shadow-sm transition-all"
+          className="group flex items-center gap-3 p-4 rounded-2xl border border-outline-variant bg-white hover:border-brand-emerald/30 hover:shadow-sm transition-all"
         >
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+          <div className="p-2.5 rounded-xl bg-brand-emerald/10 text-brand-emerald">
             <Search className="w-5 h-5" />
           </div>
           <div>
-            <p className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>Browse tasks</p>
+            <p className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>Browse tasks</p>
             <p className={cn(landingBodyMuted, 'text-xs')}>Find work near you</p>
           </div>
         </Link>
         <Link
           href="/my-tasks"
-          className="group flex items-center gap-3 p-4 rounded-2xl border border-outline-variant bg-white hover:border-primary/30 hover:shadow-sm transition-all"
+          className="group flex items-center gap-3 p-4 rounded-2xl border border-outline-variant bg-white hover:border-brand-emerald/30 hover:shadow-sm transition-all"
         >
           <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
             <Briefcase className="w-5 h-5" />
           </div>
           <div>
-            <p className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>My tasks</p>
+            <p className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>My tasks</p>
             <p className={cn(landingBodyMuted, 'text-xs')}>
               {taskActive ?? 0} active · {taskCompleted} completed
               {stats?.role === 'customer' && taskCompleted > 0 && (
@@ -236,13 +236,13 @@ export default function DashboardOverview() {
         </Link>
         <Link
           href="/tasker-dashboard/payments"
-          className="group flex items-center gap-3 p-4 rounded-2xl border border-outline-variant bg-white hover:border-primary/30 hover:shadow-sm transition-all"
+          className="group flex items-center gap-3 p-4 rounded-2xl border border-outline-variant bg-white hover:border-brand-emerald/30 hover:shadow-sm transition-all"
         >
           <div className="p-2.5 rounded-xl bg-violet-50 text-violet-600">
             <Wallet className="w-5 h-5" />
           </div>
           <div>
-            <p className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>
+            <p className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>
               {formatNPR(walletBalance)}
             </p>
             <p className={cn(landingBodyMuted, 'text-xs')}>Available balance · {currency}</p>
@@ -269,7 +269,7 @@ export default function DashboardOverview() {
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:gap-6">
           <TierMedal tier={currentTier} />
           <div className="space-y-1">
-            <h2 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-3xl')}>
+            <h2 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-3xl')}>
               {currentTier.name}
             </h2>
             <p className={cn(landingBodyMuted, 'text-base sm:text-lg')}>
@@ -295,10 +295,10 @@ export default function DashboardOverview() {
               <TierMedal tier={nextTier} locked />
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-3xl')}>
+                  <h2 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-3xl')}>
                     {nextTier.name}
                   </h2>
-                  <Lock className="h-6 w-6 text-[#000d45]" />
+                  <Lock className="h-6 w-6 text-brand-dark" />
                 </div>
                 <p className={cn(landingBodyMuted, 'text-base sm:text-lg')}>
                   {nextTier.service_fee_percent}% service fee excl. GST
@@ -310,15 +310,15 @@ export default function DashboardOverview() {
       )}
 
       <section className="space-y-4">
-        <h3 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>
+        <h3 className={cn(landingHeadline, 'text-xl text-brand-dark')}>
           Your earnings (last 30 days)
         </h3>
         {nextTier ? (
           <p className={cn(landingBodyMuted, 'text-sm leading-relaxed')}>
             Your earnings are{' '}
-            <span className={cn(landingHeadlineSm, 'text-[#000d45]')}>{formatNPR(amountToNext)}</span>{' '}
+            <span className={cn(landingHeadlineSm, 'text-brand-dark')}>{formatNPR(amountToNext)}</span>{' '}
             away from{' '}
-            <span className={cn(landingHeadlineSm, 'text-[#000d45]')}>{nextTier.name}</span> and
+            <span className={cn(landingHeadlineSm, 'text-brand-dark')}>{nextTier.name}</span> and
             lowering service fees.
           </p>
         ) : (
@@ -332,7 +332,7 @@ export default function DashboardOverview() {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${Math.max(nextTier ? 5 : 100, progress)}%` }}
-              className="h-full bg-primary flex items-center px-4 min-w-[4rem]"
+              className="h-full bg-brand-emerald flex items-center px-4 min-w-[4rem]"
             >
               <span className={cn(landingHeadlineSm, 'whitespace-nowrap text-sm text-white')}>
                 {formatNPR(earnings30d)}
@@ -373,7 +373,7 @@ export default function DashboardOverview() {
                   >
                     Total bids
                   </p>
-                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                     {stats.bids.total}
                   </p>
                 </div>
@@ -386,7 +386,7 @@ export default function DashboardOverview() {
                   >
                     Pending offers
                   </p>
-                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                     {stats.bids.pending ?? 0}
                   </p>
                 </div>
@@ -402,7 +402,7 @@ export default function DashboardOverview() {
                 >
                   Completed
                 </p>
-                <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                   {stats.tasks.completed}
                 </p>
               </div>
@@ -417,7 +417,7 @@ export default function DashboardOverview() {
                 >
                   Rating
                 </p>
-                <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                   {formatReceivedRating(stats.reviews, user?.average_rating)}
                 </p>
               </div>
@@ -429,12 +429,12 @@ export default function DashboardOverview() {
       {activeTasks.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>Active tasks</h3>
+            <h3 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Active tasks</h3>
             <Link
               href="/my-tasks"
               className={cn(
                 landingHeadlineSm,
-                'inline-flex items-center gap-1 text-sm text-primary hover:opacity-80',
+                'inline-flex items-center gap-1 text-sm text-brand-emerald hover:opacity-80',
               )}
             >
               View all
@@ -446,10 +446,10 @@ export default function DashboardOverview() {
               <li key={task.id}>
                 <Link
                   href={`/task/${task.slug}`}
-                  className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-outline-variant bg-white hover:border-primary/30 transition-colors"
+                  className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-outline-variant bg-white hover:border-brand-emerald/30 transition-colors"
                 >
                   <div className="min-w-0">
-                    <p className={cn(landingHeadlineSm, 'truncate text-sm text-[#000d45]')}>
+                    <p className={cn(landingHeadlineSm, 'truncate text-sm text-brand-dark')}>
                       {task.title}
                     </p>
                     <p className={cn(landingBodyMuted, 'text-sm')}>
@@ -472,7 +472,7 @@ export default function DashboardOverview() {
           onClick={() => setShowTierHelp(true)}
           className={cn(
             landingHeadlineSm,
-            'flex items-center gap-2 text-primary transition-colors hover:opacity-80',
+            'flex items-center gap-2 text-brand-emerald transition-colors hover:opacity-80',
           )}
         >
           <HelpCircle className="h-5 w-5" />
@@ -497,7 +497,7 @@ export default function DashboardOverview() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-4 mb-4">
-                <h4 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>How tiers work</h4>
+                <h4 className={cn(landingHeadline, 'text-xl text-brand-dark')}>How tiers work</h4>
                 <button
                   type="button"
                   onClick={() => setShowTierHelp(false)}
@@ -517,7 +517,7 @@ export default function DashboardOverview() {
                     key={milestone.slug}
                     className="flex items-center justify-between border-b border-gray-50 py-2 last:border-0"
                   >
-                    <span className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>
+                    <span className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>
                       {milestone.name}
                     </span>
                     <span className={cn(landingBodyMuted, 'text-sm')}>

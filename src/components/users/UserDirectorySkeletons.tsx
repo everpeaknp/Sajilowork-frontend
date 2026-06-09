@@ -4,7 +4,7 @@ export function UserDirectoryCardSkeleton({ className }: { className?: string })
   return (
     <article
       className={cn(
-        'flex min-h-[400px] animate-pulse flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-[#000d45] via-[#0c2860] to-[#1161fe] p-5 sm:p-6',
+        'flex min-h-[400px] animate-pulse flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald p-5 sm:p-6',
         className,
       )}
       aria-hidden

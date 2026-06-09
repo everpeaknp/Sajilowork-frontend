@@ -166,7 +166,7 @@ export default function FilterBar({
 
   const filterTriggerClass = (active: boolean) =>
     `flex min-h-[44px] touch-manipulation items-center gap-1.5 whitespace-nowrap ${landingBody} text-[13px] font-semibold transition-colors sm:gap-2 sm:min-h-0 ${
-      active ? 'text-[#2f6bff]' : 'text-black/70 hover:text-[#2f6bff]'
+      active ? 'text-brand-emerald' : 'text-black/70 hover:text-brand-emerald'
     }`;
 
   return (
@@ -230,7 +230,7 @@ export default function FilterBar({
                 <button
                   type="button"
                   onClick={() => setDraftCategory('')}
-                  className="font-body text-[14px] font-bold text-primary hover:underline"
+                  className="font-body text-[14px] font-bold text-brand-emerald hover:underline"
                 >
                   Clear all
                 </button>
@@ -242,7 +242,7 @@ export default function FilterBar({
                 <button
                   type="button"
                   onClick={() => setDraftCategory('')}
-                  className="font-body text-[14px] font-bold text-primary hover:underline"
+                  className="font-body text-[14px] font-bold text-brand-emerald hover:underline"
                 >
                   Clear all
                 </button>
@@ -266,7 +266,7 @@ export default function FilterBar({
                         name="category"
                         checked={draftCategory === cat}
                         onChange={() => setDraftCategory(cat)}
-                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-full bg-[#e8edf5] transition-all checked:bg-primary"
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-full bg-[#e8edf5] transition-all checked:bg-brand-emerald"
                       />
                       <svg
                         className="pointer-events-none absolute h-3 w-3 scale-0 text-white transition-transform peer-checked:scale-100"
@@ -278,7 +278,7 @@ export default function FilterBar({
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="font-body text-[15px] font-medium text-on-surface transition-colors group-hover:text-primary sm:text-[16px]">
+                    <span className="font-body text-[15px] font-medium text-on-surface transition-colors group-hover:text-brand-emerald sm:text-[16px]">
                       {cat}
                     </span>
                   </label>
@@ -341,7 +341,7 @@ export default function FilterBar({
                       onClick={() => setDraftWorkType(type)}
                       className={`rounded-xl py-2.5 font-body text-[13px] font-bold capitalize transition-all sm:py-3 sm:text-[14px] ${
                         draftWorkType === type
-                          ? 'bg-[#000d45] text-white'
+                          ? 'bg-brand-dark text-white'
                           : 'text-on-surface hover:bg-white/50'
                       }`}
                     >
@@ -359,7 +359,7 @@ export default function FilterBar({
                   placeholder="e.g. Kathmandu, Lalitpur"
                   value={draftLocation}
                   onChange={(e) => setDraftLocation(e.target.value)}
-                  className="w-full rounded-2xl bg-[#f1f4f9] px-4 py-3 font-semibold text-[#000d45] outline-none transition-all focus:bg-[#eef2f8] sm:px-6 sm:py-4"
+                  className="w-full rounded-2xl bg-[#f1f4f9] px-4 py-3 font-semibold text-brand-dark outline-none transition-all focus:bg-[#eef2f8] sm:px-6 sm:py-4"
                 />
               </div>
               <div>
@@ -367,7 +367,7 @@ export default function FilterBar({
                   <h4 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
                     Distance
                   </h4>
-                  <span className="font-bold text-[#000d45]">
+                  <span className="font-bold text-brand-dark">
                     {draftDistance >= 100 ? 'Any distance' : `${draftDistance} km`}
                   </span>
                 </div>
@@ -377,7 +377,7 @@ export default function FilterBar({
                   max="100"
                   value={draftDistance}
                   onChange={(e) => setDraftDistance(parseFloat(e.target.value))}
-                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[#f1f4f9] accent-primary"
+                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[#f1f4f9] accent-brand-emerald"
                 />
                 <p className="mt-2 text-xs text-on-surface-variant">
                   Uses your browser location when applied (for distance and “closest” sort).
@@ -421,13 +421,13 @@ export default function FilterBar({
           >
             <div className="space-y-6">
               <div className="text-center">
-                <span className={`${landingHeadlineSm} text-xl text-[#000d45] sm:text-2xl`}>
+                <span className={`${landingHeadlineSm} text-xl text-brand-dark sm:text-2xl`}>
                   {formatBudgetRange(draftBudgetMin, draftBudgetMax)}
                 </span>
               </div>
               <div className="relative mt-2 h-2 rounded-full bg-[#f1f4f9]">
                 <div
-                  className="absolute h-full rounded-full bg-primary"
+                  className="absolute h-full rounded-full bg-brand-emerald"
                   style={{
                     left: `${(draftBudgetMin / DEFAULT_BUDGET_MAX) * 100}%`,
                     right: `${100 - (draftBudgetMax / DEFAULT_BUDGET_MAX) * 100}%`,
@@ -441,7 +441,7 @@ export default function FilterBar({
                   onChange={(e) =>
                     setDraftBudgetMin(Math.min(parseFloat(e.target.value), draftBudgetMax - 100))
                   }
-                  className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-primary"
+                  className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-brand-emerald"
                   style={{ zIndex: 3 }}
                 />
                 <input
@@ -452,7 +452,7 @@ export default function FilterBar({
                   onChange={(e) =>
                     setDraftBudgetMax(Math.max(parseFloat(e.target.value), draftBudgetMin + 100))
                   }
-                  className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-primary"
+                  className="pointer-events-auto absolute h-full w-full cursor-pointer appearance-none bg-transparent accent-brand-emerald"
                   style={{ zIndex: 4 }}
                 />
               </div>
@@ -490,13 +490,13 @@ export default function FilterBar({
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="font-body text-[16px] font-bold text-[#000d45]">Open tasks only</p>
+                  <p className="font-body text-[16px] font-bold text-brand-dark">Open tasks only</p>
                   <p className="font-body text-[14px] text-on-surface-variant">Show only open tasks</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setDraftStatus(draftStatus === 'open' ? undefined : 'open')}
-                  className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'open' ? 'bg-primary' : 'bg-outline-variant'}`}
+                  className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'open' ? 'bg-brand-emerald' : 'bg-outline-variant'}`}
                 >
                   <div
                     className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${draftStatus === 'open' ? 'left-7' : 'left-1'}`}
@@ -505,13 +505,13 @@ export default function FilterBar({
               </div>
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="font-body text-[16px] font-bold text-[#000d45]">Assigned tasks only</p>
+                  <p className="font-body text-[16px] font-bold text-brand-dark">Assigned tasks only</p>
                   <p className="font-body text-[14px] text-on-surface-variant">Show only assigned tasks</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setDraftStatus(draftStatus === 'assigned' ? undefined : 'assigned')}
-                  className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'assigned' ? 'bg-primary' : 'bg-outline-variant'}`}
+                  className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'assigned' ? 'bg-brand-emerald' : 'bg-outline-variant'}`}
                 >
                   <div
                     className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${draftStatus === 'assigned' ? 'left-7' : 'left-1'}`}
@@ -564,11 +564,11 @@ export default function FilterBar({
                     type="button"
                     onClick={() => void handleSortChange(option.id)}
                     className={`flex min-h-[48px] w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-body text-[15px] font-semibold transition-all sm:gap-4 sm:px-5 sm:py-4 sm:text-[16px] ${
-                      isSelected ? 'bg-[#f1f4f9] text-[#000d45]' : 'text-[#000d45] hover:bg-[#f1f4f9]/50'
+                      isSelected ? 'bg-[#f1f4f9] text-brand-dark' : 'text-brand-dark hover:bg-[#f1f4f9]/50'
                     }`}
                   >
                     <Icon
-                      className={`h-5 w-5 shrink-0 ${isSelected ? 'text-[#000d45]' : 'text-on-surface-variant'}`}
+                      className={`h-5 w-5 shrink-0 ${isSelected ? 'text-brand-dark' : 'text-on-surface-variant'}`}
                     />
                     {option.label}
                   </button>
@@ -582,7 +582,7 @@ export default function FilterBar({
           <button
             type="button"
             onClick={handleClearAll}
-            className="min-h-[44px] shrink-0 touch-manipulation whitespace-nowrap font-body text-[13px] font-semibold text-primary hover:underline sm:min-h-0"
+            className="min-h-[44px] shrink-0 touch-manipulation whitespace-nowrap font-body text-[13px] font-semibold text-brand-emerald hover:underline sm:min-h-0"
           >
             Clear all
           </button>

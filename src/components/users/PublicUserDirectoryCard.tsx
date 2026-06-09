@@ -40,7 +40,7 @@ export default function PublicUserDirectoryCard({
       className={`group block h-full ${className}`}
       aria-label={`View ${headingName}'s profile`}
     >
-      <article className="relative flex h-full min-h-[400px] flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-[#000d45] via-[#0c2860] to-[#1161fe] text-white shadow-lg transition-shadow hover:shadow-xl">
+      <article className="relative flex h-full min-h-[400px] flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald text-white shadow-lg transition-shadow hover:shadow-xl">
         <div
           className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden
@@ -122,7 +122,7 @@ export default function PublicUserDirectoryCard({
             </div>
           </div>
 
-          <span className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#000d45] transition-colors group-hover:bg-white/95">
+          <span className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-brand-dark transition-colors group-hover:bg-white/95">
             View profile
             <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>

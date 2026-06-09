@@ -36,14 +36,14 @@ export default function FieldsList({
           verified={user?.is_verified_tasker}
         />
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[#000d45]">Profile picture</h3>
+          <h3 className="text-lg font-semibold text-brand-dark">Profile picture</h3>
         </div>
         {hasProfilePicture ? (
           <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white stroke-[3]" />
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-[#2f6bff] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-brand-emerald flex items-center justify-center shrink-0">
             <Plus className="w-4 h-4 text-white" />
           </div>
         )}
@@ -58,7 +58,7 @@ export default function FieldsList({
           <Calendar className="w-6 h-6 text-[#6b7c93]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[#000d45] mb-0.5">Date of birth</h3>
+          <h3 className="text-lg font-semibold text-brand-dark mb-0.5">Date of birth</h3>
           {hasDateOfBirth && user?.date_of_birth && (
             <p className="text-sm text-on-surface-variant">
               {new Date(user.date_of_birth).toLocaleDateString('en-NP', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -70,7 +70,7 @@ export default function FieldsList({
             <Check className="w-4 h-4 text-white stroke-[3]" />
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-[#2f6bff] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-brand-emerald flex items-center justify-center shrink-0">
             <Plus className="w-4 h-4 text-white" />
           </div>
         )}
@@ -85,7 +85,7 @@ export default function FieldsList({
           <Phone className="w-6 h-6 text-[#6b7c93]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[#000d45]">
+          <h3 className="text-lg font-semibold text-brand-dark">
             Verify your mobile <span className="text-sm text-on-surface-variant font-normal">(Optional)</span>
           </h3>
           {hasVerifiedPhone && user?.phone_number && (
@@ -97,7 +97,7 @@ export default function FieldsList({
             <Check className="w-4 h-4 text-white stroke-[3]" />
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-[#2f6bff] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-brand-emerald flex items-center justify-center shrink-0">
             <Plus className="w-4 h-4 text-white" />
           </div>
         )}
@@ -112,14 +112,14 @@ export default function FieldsList({
           <CreditCard className="w-6 h-6 text-[#6b7c93]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[#000d45]">Link your bank account</h3>
+          <h3 className="text-lg font-semibold text-brand-dark">Link your bank account</h3>
         </div>
         {hasBankAccount ? (
           <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 text-white stroke-[3]" />
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-[#2f6bff] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-brand-emerald flex items-center justify-center shrink-0">
             <Plus className="w-4 h-4 text-white" />
           </div>
         )}
@@ -134,7 +134,7 @@ export default function FieldsList({
           <MapPinIcon className="w-6 h-6 text-[#6b7c93]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[#000d45]">Add your billing address</h3>
+          <h3 className="text-lg font-semibold text-brand-dark">Add your billing address</h3>
           {hasBillingAddress && (user?.city || user?.address) && (
             <p className="text-sm text-on-surface-variant">
               {formatBillingAddressSummary({
@@ -152,7 +152,7 @@ export default function FieldsList({
             <Check className="w-4 h-4 text-white stroke-[3]" />
           </div>
         ) : (
-          <div className="w-7 h-7 rounded-full bg-[#2f6bff] flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-brand-emerald flex items-center justify-center shrink-0">
             <Plus className="w-4 h-4 text-white" />
           </div>
         )}

@@ -464,7 +464,7 @@ export default function App() {
                           key={task.id}
                           onClick={() => handleViewTask(String(task.slug || task.id))}
                           className={`rounded-full border-2 transition-all hover:scale-110 ${
-                            detailTaskId === (task.slug || task.id) ? 'border-primary shadow-lg' : 'border-outline-variant'
+                            detailTaskId === (task.slug || task.id) ? 'border-brand-emerald shadow-lg' : 'border-outline-variant'
                           }`}
                           title={task.title}
                         >
@@ -519,7 +519,7 @@ export default function App() {
                         </p>
                         <a
                           href="/post-task"
-                          className="px-6 py-2 bg-primary text-white rounded-full font-semibold hover:bg-primary/90 transition-colors"
+                          className="px-6 py-2 bg-brand-emerald text-white rounded-full font-semibold hover:bg-brand-emerald/90 transition-colors"
                         >
                           Post a Task
                         </a>
@@ -534,12 +534,12 @@ export default function App() {
             {!isCompactSidebar && (
               <div 
                 className={`absolute top-0 -right-1.5 w-3 h-full cursor-col-resize z-50 group flex items-center justify-center ${
-                  isResizing ? 'bg-primary/20' : 'hover:bg-primary/10'
+                  isResizing ? 'bg-brand-emerald/20' : 'hover:bg-brand-emerald/10'
                 }`}
                 onMouseDown={() => setIsResizing(true)}
               >
-                <div className={`w-0.5 h-12 rounded-full bg-outline-variant transition-colors group-hover:bg-primary ${
-                  isResizing ? 'bg-primary' : ''
+                <div className={`w-0.5 h-12 rounded-full bg-outline-variant transition-colors group-hover:bg-brand-emerald ${
+                  isResizing ? 'bg-brand-emerald' : ''
                 }`} />
               </div>
             )}
@@ -636,7 +636,7 @@ export default function App() {
                   </p>
                   <a
                     href="/post-task"
-                    className="rounded-full bg-primary px-6 py-2 font-semibold text-white hover:bg-primary/90"
+                    className="rounded-full bg-brand-emerald px-6 py-2 font-semibold text-white hover:bg-brand-emerald/90"
                   >
                     Post a Task
                   </a>

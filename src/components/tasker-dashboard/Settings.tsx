@@ -53,7 +53,7 @@ const AccordionItem = ({ title, icon: Icon, description, children, isOpen, onTog
   return (
     <div 
       className={`border border-gray-100 rounded-3xl transition-all duration-300 bg-white overflow-hidden mb-4 ${
-        isOpen ? "shadow-xl shadow-blue-900/5 border-blue-100" : "hover:border-blue-200"
+        isOpen ? "shadow-xl shadow-brand-dark/5 border-emerald-100" : "hover:border-emerald-200"
       }`}
     >
       <button 
@@ -63,19 +63,19 @@ const AccordionItem = ({ title, icon: Icon, description, children, isOpen, onTog
         <div className="flex items-center gap-5">
           <div 
             className={`p-3 rounded-2xl transition-colors ${
-              isOpen ? "bg-primary text-white" : "bg-surface-low text-gray-400"
+              isOpen ? "bg-brand-emerald text-white" : "bg-surface-low text-gray-400"
             }`}
           >
             <Icon className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-lg text-blue-950">{title}</h3>
+            <h3 className="font-bold text-lg text-brand-dark">{title}</h3>
             <p className="text-sm text-gray-500 font-medium">{description}</p>
           </div>
         </div>
         <div 
           className={`p-2 rounded-xl bg-gray-50 text-gray-400 transition-transform duration-300 ${
-            isOpen && "rotate-180 bg-blue-50 text-primary"
+            isOpen && "rotate-180 bg-emerald-50 text-brand-emerald"
           }`}
         >
           <ChevronDown className="w-5 h-5" />
@@ -353,7 +353,7 @@ export default function Settings() {
       <div className="bg-white p-6 rounded-3xl border border-outline-variant space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <p className="font-black text-blue-950 tracking-tight">{title}</p>
+            <p className="font-black text-brand-dark tracking-tight">{title}</p>
             <p className="text-sm text-gray-500 font-medium">{description}</p>
           </div>
           {badge}
@@ -384,7 +384,7 @@ export default function Settings() {
               </a>
             ) : null}
 
-            <label className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest bg-primary text-white hover:opacity-90 transition-all cursor-pointer">
+            <label className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest bg-brand-emerald text-white hover:opacity-90 transition-all cursor-pointer">
               <Upload className="w-4 h-4" />
               {uploading ? 'Uploading…' : doc?.document_url ? 'Replace' : 'Upload'}
               <input
@@ -518,10 +518,10 @@ export default function Settings() {
     >
       <header>
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-1 w-10 bg-primary rounded-full" />
-          <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Account Control</span>
+          <div className="h-1 w-10 bg-brand-emerald rounded-full" />
+          <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.3em]">Account Control</span>
         </div>
-        <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">Settings</h1>
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-brand-dark sm:text-4xl">Settings</h1>
         <p className="text-gray-500 mt-2">Personalize your account security, notifications, and verification status.</p>
       </header>
 
@@ -541,13 +541,13 @@ export default function Settings() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="New email address"
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-primary outline-none transition-all font-semibold"
+                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold"
               />
             </div>
             <button 
               onClick={handleUpdateEmail}
               disabled={loading}
-              className="bg-[#1161fe] text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-brand-emerald text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Updating...' : 'Verify & Update'}
             </button>
@@ -569,13 +569,13 @@ export default function Settings() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="+1 234 567 8900"
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-primary outline-none transition-all font-semibold"
+                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold"
               />
             </div>
             <button 
               onClick={handleUpdatePhone}
               disabled={loading}
-              className="bg-[#1161fe] text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-brand-emerald text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Updating...' : 'Send SMS Code'}
             </button>
@@ -590,12 +590,12 @@ export default function Settings() {
           onToggle={() => toggleSection('verify')}
         >
           <div className="space-y-6">
-            <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 flex items-center gap-4">
-              <div className="p-4 bg-white rounded-full shadow-sm text-primary shrink-0">
+            <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 flex items-center gap-4">
+              <div className="p-4 bg-white rounded-full shadow-sm text-brand-emerald shrink-0">
                 <Shield className="w-10 h-10" />
               </div>
               <div>
-                <h4 className="font-black text-blue-950 tracking-tight">Identity Trust Program</h4>
+                <h4 className="font-black text-brand-dark tracking-tight">Identity Trust Program</h4>
                 <p className="text-sm text-gray-600 font-medium mt-1">
                   Upload your documents here. Our admins review them in the dashboard and update your verification status.
                 </p>
@@ -620,10 +620,10 @@ export default function Settings() {
             )}
 
             <div className="p-5 bg-surface-low rounded-3xl border border-outline-variant flex items-start gap-4">
-              <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-brand-emerald shrink-0 mt-0.5" />
               <p className="text-sm text-gray-600 font-medium leading-relaxed">
-                Accepted formats: <span className="font-black text-blue-950">JPG/PNG/PDF</span>, max{' '}
-                <span className="font-black text-blue-950">5MB</span>. If a document is rejected, you’ll see the rejection reason here and can re-upload a corrected file.
+                Accepted formats: <span className="font-black text-brand-dark">JPG/PNG/PDF</span>, max{' '}
+                <span className="font-black text-brand-dark">5MB</span>. If a document is rejected, you’ll see the rejection reason here and can re-upload a corrected file.
               </p>
             </div>
           </div>
@@ -644,7 +644,7 @@ export default function Settings() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Current password" 
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-primary outline-none transition-all font-semibold" 
+                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold" 
               />
             </div>
             <div className="space-y-2">
@@ -654,13 +654,13 @@ export default function Settings() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Min 8 characters" 
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-primary outline-none transition-all font-semibold" 
+                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold" 
               />
             </div>
             <button 
               onClick={handleChangePassword}
               disabled={loading}
-              className="bg-[#1161fe] text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-brand-emerald text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Updating...' : 'Update Security'}
             </button>
@@ -677,7 +677,7 @@ export default function Settings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-bold text-blue-950">Global channel toggles</p>
+                <p className="font-bold text-brand-dark">Global channel toggles</p>
                 <p className="text-xs text-gray-500">
                   These apply to all notification types.
                 </p>
@@ -686,7 +686,7 @@ export default function Settings() {
                 type="button"
                 onClick={resetNotificationPrefs}
                 disabled={notificationPrefsLoading}
-                className="text-xs font-black text-gray-500 hover:text-blue-950 transition-colors disabled:opacity-50"
+                className="text-xs font-black text-gray-500 hover:text-brand-dark transition-colors disabled:opacity-50"
               >
                 Reset
               </button>
@@ -719,7 +719,7 @@ export default function Settings() {
                   return (
                     <div key={n.key} className="flex items-center justify-between py-4 group">
                       <div>
-                        <p className="font-bold text-blue-950 group-hover:text-primary transition-colors">
+                        <p className="font-bold text-brand-dark group-hover:text-brand-emerald transition-colors">
                           {n.label}
                         </p>
                         <p className="text-xs text-gray-500">{n.desc}</p>
@@ -733,7 +733,7 @@ export default function Settings() {
                           void setChannelForAll(n.key, next);
                         }}
                         className={`w-12 h-6 rounded-full relative transition-colors ${
-                          enabled ? 'bg-primary' : 'bg-gray-200'
+                          enabled ? 'bg-brand-emerald' : 'bg-gray-200'
                         }`}
                       >
                         <div
@@ -767,7 +767,7 @@ export default function Settings() {
 
             <div className="bg-gray-50 p-6 rounded-2xl border border-outline-variant space-y-4">
               <div className="flex items-center justify-between">
-                <p className="font-bold text-blue-950">Keyword alerts</p>
+                <p className="font-bold text-brand-dark">Keyword alerts</p>
                 <span className="text-xs font-bold text-gray-400">EVERY MATCH</span>
               </div>
 
@@ -779,14 +779,14 @@ export default function Settings() {
                     if (e.key === 'Enter') void addAlertKeyword();
                   }}
                   placeholder="Add keyword (e.g. Moving, IKEA)"
-                  className="flex-1 p-4 rounded-2xl bg-white border border-outline-variant focus:ring-2 focus:ring-primary outline-none transition-all font-semibold"
+                  className="flex-1 p-4 rounded-2xl bg-white border border-outline-variant focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold"
                   disabled={alertsLoading}
                 />
                 <button
                   type="button"
                   onClick={addAlertKeyword}
                   disabled={alertsLoading || !newAlertKeyword.trim()}
-                  className="bg-[#1161fe] text-white px-6 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-brand-emerald text-white px-6 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add
                 </button>
@@ -804,7 +804,7 @@ export default function Settings() {
                         key={String(k.id)}
                         type="button"
                         onClick={() => void removeAlertKeyword(String(k.id))}
-                        className="px-3 py-1.5 bg-white rounded-xl border border-gray-200 text-xs font-bold text-primary hover:bg-blue-50 transition-colors"
+                        className="px-3 py-1.5 bg-white rounded-xl border border-gray-200 text-xs font-bold text-brand-emerald hover:bg-emerald-50 transition-colors"
                         title="Remove keyword"
                       >
                         #{k.keyword} <span className="text-gray-400">×</span>

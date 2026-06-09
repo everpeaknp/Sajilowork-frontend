@@ -100,12 +100,12 @@ export default function TaskPosterFollow({
         {profileHref ? (
           <Link
             href={profileHref}
-            className="font-bold text-primary text-base md:text-lg truncate block hover:underline"
+            className="font-bold text-brand-emerald text-base md:text-lg truncate block hover:underline"
           >
             {posterName}
           </Link>
         ) : (
-          <p className="font-bold text-primary text-base md:text-lg truncate">{posterName}</p>
+          <p className="font-bold text-brand-emerald text-base md:text-lg truncate">{posterName}</p>
         )}
       </div>
       {posterId && !isOwnProfile && (
@@ -116,7 +116,7 @@ export default function TaskPosterFollow({
           className={`shrink-0 px-3 md:px-4 py-1.5 md:py-2 border-2 font-semibold text-xs md:text-sm rounded-full transition-all whitespace-nowrap disabled:opacity-60 ${
             isFollowing
               ? 'border-outline-variant text-on-surface-variant bg-surface-dim hover:bg-surface-variant/30'
-              : 'border-primary text-primary hover:bg-primary hover:text-white'
+              : 'border-brand-emerald text-brand-emerald hover:bg-brand-emerald hover:text-white'
           }`}
         >
           {followLoading ? '…' : isFollowing ? 'Following' : 'Follow'}

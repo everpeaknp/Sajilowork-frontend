@@ -42,10 +42,14 @@ function LinkedinIcon({ className }: { className?: string }) {
   );
 }
 
-export default function Footer() {
+type FooterProps = {
+  outerClassName?: string;
+};
+
+export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
   return (
-    <footer className="bg-white px-2 pt-3 sm:px-4 sm:pt-4">
-      <div className="overflow-hidden rounded-t-[1.75rem] bg-[#0b1442] text-white sm:rounded-t-[2.5rem] md:rounded-t-[3.5rem]">
+    <footer className={`${outerClassName} px-2 pt-3 sm:px-4 sm:pt-4`}>
+      <div className="overflow-hidden rounded-t-[1.75rem] bg-brand-dark text-white sm:rounded-t-[2.5rem] md:rounded-t-[3.5rem]">
         <div className="mx-auto max-w-7xl px-4 py-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-14 md:py-16 lg:px-8 lg:py-20">
           <div className="mb-10 grid gap-10 sm:mb-14 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
             <div className="min-w-0 lg:col-span-2">
@@ -62,7 +66,7 @@ export default function Footer() {
                   tasknepal
                 </span>
               </Link>
-              <p className="max-w-sm text-sm leading-relaxed text-gray-400 sm:text-base">
+              <p className="max-w-sm text-sm leading-relaxed text-white sm:text-base">
                 Connecting people who need tasks done with those who have the skills to do them.
                 Trusted by millions worldwide.
               </p>
@@ -71,7 +75,7 @@ export default function Footer() {
             <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 sm:gap-x-8 sm:gap-y-10 lg:col-span-3">
               {FOOTER_SECTIONS.map((section) => (
                 <div key={section.title} className="min-w-0">
-                  <h4 className="mb-3 text-sm font-bold sm:mb-4 sm:text-base md:mb-6 md:text-lg">
+                  <h4 className="mb-3 text-sm font-semibold text-white sm:mb-4 sm:text-base md:mb-6 md:text-lg">
                     {section.title}
                   </h4>
                   <ul className="space-y-2.5 sm:space-y-3 md:space-y-4">
@@ -79,7 +83,7 @@ export default function Footer() {
                       <li key={link.href}>
                         <Link
                           href={link.href}
-                          className="inline-block py-0.5 text-sm text-gray-400 transition-colors hover:text-white sm:text-[15px]"
+                          className="inline-block py-0.5 text-sm text-white transition-colors hover:text-white/80 sm:text-[15px]"
                         >
                           {link.label}
                         </Link>
@@ -98,13 +102,13 @@ export default function Footer() {
                   key={label}
                   href="#"
                   aria-label={label}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white sm:h-10 sm:w-10"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 hover:text-white/80 sm:h-10 sm:w-10"
                 >
                   <Icon className="h-5 w-5" />
                 </a>
               ))}
             </div>
-            <p className="max-w-[18rem] text-center text-xs leading-relaxed text-gray-500 sm:max-w-none sm:text-right sm:text-sm">
+            <p className="max-w-[18rem] text-center text-xs leading-relaxed text-white sm:max-w-none sm:text-right sm:text-sm">
               © {new Date().getFullYear()} tasknepal Marketplace. All rights reserved.
             </p>
           </div>

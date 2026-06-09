@@ -124,7 +124,7 @@ function ProfileNameLink({
   return (
     <Link
       href={href}
-      className={`${className} hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm`}
+      className={`${className} hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-emerald rounded-sm`}
     >
       {name}
     </Link>
@@ -725,7 +725,7 @@ export default function TaskDetails({
           onClick={() => setIsSidebarMoreOptionsOpen(!isSidebarMoreOptionsOpen)}
           className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-surface-dim rounded-2xl cursor-pointer hover:bg-surface-variant/20 transition-all group border border-transparent hover:border-outline-variant"
         >
-          <span className="font-bold text-sm md:text-base text-[#000d45]">More Options</span>
+          <span className="font-bold text-sm md:text-base text-brand-dark">More Options</span>
           <ChevronLeft
             className={`w-4 h-4 md:w-5 md:h-5 transition-transform shrink-0 ${isSidebarMoreOptionsOpen ? '-rotate-90' : 'rotate-90'}`}
           />
@@ -837,7 +837,7 @@ export default function TaskDetails({
                 <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-2">
                   Task Budget
                 </p>
-                <p className={`${landingHeadline} mb-4 break-words text-3xl text-[#000d45] sm:mb-6 sm:text-4xl md:mb-8 md:text-5xl lg:text-6xl`}>
+                <p className={`${landingHeadline} mb-4 break-words text-3xl text-brand-dark sm:mb-6 sm:text-4xl md:mb-8 md:text-5xl lg:text-6xl`}>
                   {formatNPR(task.price)}
                 </p>
 
@@ -846,7 +846,7 @@ export default function TaskDetails({
                     type="button"
                     onClick={() => void handleStartTask()}
                     disabled={isStartingWork || isCompleting}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4 disabled:opacity-60"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4 disabled:opacity-60"
                   >
                     {isStartingWork ? 'Starting…' : 'Start work'}
                   </button>
@@ -855,7 +855,7 @@ export default function TaskDetails({
                     type="button"
                     onClick={() => void handleConfirmWorkComplete()}
                     disabled={isStartingWork || isCompleting}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4 disabled:opacity-60"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4 disabled:opacity-60"
                   >
                     {isCompleting
                       ? 'Confirming…'
@@ -884,7 +884,7 @@ export default function TaskDetails({
                       }
                       setShowMakeOfferModal(true);
                     }}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4"
                   >
                     Make an offer
                   </button>
@@ -892,7 +892,7 @@ export default function TaskDetails({
                   <button
                     type="button"
                     onClick={() => router.push('/signin')}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4"
                   >
                     Sign in to make an offer
                   </button>
@@ -910,7 +910,7 @@ export default function TaskDetails({
                     type="button"
                     onClick={handleEdit}
                     disabled={isDeleting}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4 disabled:opacity-60"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4 disabled:opacity-60"
                   >
                     Edit task
                   </button>
@@ -937,7 +937,7 @@ export default function TaskDetails({
           <div className="flex-1 min-w-0 w-full space-y-5 sm:space-y-6 md:space-y-8 lg:space-y-10 order-last lg:order-first">
             <div className="pr-10 sm:pr-12">
               <TaskStatusTimeline status={currentStatus} className="mb-2 md:mb-3" />
-              <h1 className={`${landingHeadline} mb-2 break-words text-xl leading-tight text-[#000d45] sm:text-2xl md:text-3xl lg:text-4xl`}>
+              <h1 className={`${landingHeadline} mb-2 break-words text-xl leading-tight text-brand-dark sm:text-2xl md:text-3xl lg:text-4xl`}>
                 {displayTitle}
               </h1>
             </div>
@@ -951,13 +951,13 @@ export default function TaskDetails({
                   <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-1">
                     Location
                   </p>
-                  <p className="font-bold text-primary text-base md:text-lg">{task.location}</p>
+                  <p className="font-bold text-brand-emerald text-base md:text-lg">{task.location}</p>
                   {mapLink && (
                     <a
                       href={mapLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary font-bold text-xs md:text-sm hover:underline inline-flex items-center gap-1"
+                      className="text-brand-emerald font-bold text-xs md:text-sm hover:underline inline-flex items-center gap-1"
                     >
                       View map
                       <ExternalLink className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -974,7 +974,7 @@ export default function TaskDetails({
                   <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-1">
                     To be done on
                   </p>
-                  <p className="font-bold text-primary text-base md:text-lg">
+                  <p className="font-bold text-brand-emerald text-base md:text-lg">
                     {task.dueDate.toLocaleDateString('en-AU', {
                       weekday: 'short',
                       day: 'numeric',
@@ -993,7 +993,7 @@ export default function TaskDetails({
             </div>
 
             <div className="min-w-0 overflow-hidden">
-              <h2 className="text-xl md:text-2xl font-bold text-[#000d45] mb-3 md:mb-4">Details</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-brand-dark mb-3 md:mb-4">Details</h2>
               <p
                 className={`text-on-surface-variant leading-relaxed text-sm sm:text-base md:text-lg ${USER_TEXT_CLASS}`}
               >
@@ -1003,7 +1003,7 @@ export default function TaskDetails({
 
             {imageAttachments.length > 0 && (
               <div className="min-w-0 overflow-hidden">
-                <h3 className="text-lg md:text-xl font-bold text-[#000d45] mb-3">Images</h3>
+                <h3 className="text-lg md:text-xl font-bold text-brand-dark mb-3">Images</h3>
                 <div className="flex flex-wrap gap-3">
                   {imageAttachments.map((a: any) => {
                     const imageUrl = getMediaUrl(a.file_url);
@@ -1035,8 +1035,8 @@ export default function TaskDetails({
                   onClick={() => setActiveTab('offers')}
                   className={`flex-1 min-w-0 px-4 sm:px-8 md:px-12 py-2 md:py-3 rounded-full font-bold text-sm md:text-base transition-all ${
                     activeTab === 'offers'
-                      ? 'bg-[#000d45] text-white shadow-lg'
-                      : 'bg-transparent text-[#000d45]/70 hover:bg-[#fff3bf] hover:text-[#000d45]'
+                      ? 'bg-brand-dark text-white shadow-lg'
+                      : 'bg-transparent text-brand-dark/70 hover:bg-[#fff3bf] hover:text-brand-dark'
                   }`}
                 >
                   Offers
@@ -1046,8 +1046,8 @@ export default function TaskDetails({
                   onClick={() => setActiveTab('questions')}
                   className={`flex-1 min-w-0 px-4 sm:px-8 md:px-12 py-2 md:py-3 rounded-full font-bold text-sm md:text-base transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
                     activeTab === 'questions'
-                      ? 'bg-[#000d45] text-white shadow-lg'
-                      : 'bg-transparent text-[#000d45]/70 hover:bg-[#fff3bf] hover:text-[#000d45]'
+                      ? 'bg-brand-dark text-white shadow-lg'
+                      : 'bg-transparent text-brand-dark/70 hover:bg-[#fff3bf] hover:text-brand-dark'
                   }`}
                 >
                   Questions{' '}
@@ -1061,7 +1061,7 @@ export default function TaskDetails({
                 <div className="space-y-4 md:space-y-6">
                   {loadingBids ? (
                     <div className="flex justify-center py-12">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                      <Loader2 className="w-8 h-8 animate-spin text-brand-emerald" />
                     </div>
                   ) : bids.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
@@ -1069,7 +1069,7 @@ export default function TaskDetails({
                         className="mb-4 h-24 w-24 stroke-[1.25] text-surface-variant md:mb-6 md:h-32 md:w-32"
                         aria-hidden
                       />
-                      <h3 className="text-xl md:text-2xl font-bold text-[#000d45] mb-2">No offers yet</h3>
+                      <h3 className="text-xl md:text-2xl font-bold text-brand-dark mb-2">No offers yet</h3>
                       <p className="text-on-surface-variant text-base md:text-lg max-w-md">
                         Your task is live. Offers will appear here when taskers respond.
                       </p>
@@ -1125,7 +1125,7 @@ export default function TaskDetails({
                                   <ProfileNameLink
                                     href={taskerProfileHref}
                                     name={taskerName}
-                                    className="font-bold text-base md:text-lg text-[#000d45]"
+                                    className="font-bold text-base md:text-lg text-brand-dark"
                                   />
                                   {rating != null && Number(rating) > 0 && (
                                     <div className="flex items-center gap-1 text-amber-500">
@@ -1154,7 +1154,7 @@ export default function TaskDetails({
                                 </div>
                               </div>
                               <div className="text-left sm:text-right w-full sm:w-auto">
-                                <p className="text-2xl md:text-3xl font-bold text-[#000d45]">
+                                <p className="text-2xl md:text-3xl font-bold text-brand-dark">
                                   {formatNPR(bid.amount)}
                                 </p>
                               </div>
@@ -1197,7 +1197,7 @@ export default function TaskDetails({
                                       !canAcceptOfferWithWallet(bid))
                                   }
                                   onClick={() => handleAcceptBid(bid)}
-                                  className="w-full py-2 md:py-3 bg-primary text-white font-bold text-sm md:text-base rounded-full hover:bg-primary/90 transition-all disabled:opacity-60"
+                                  className="w-full py-2 md:py-3 bg-brand-emerald text-white font-bold text-sm md:text-base rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-60"
                                 >
                                   {acceptingBidId === bid.id ? 'Accepting…' : 'Accept offer'}
                                 </button>
@@ -1221,7 +1221,7 @@ export default function TaskDetails({
                                   }
                                   router.push(`/message?bid=${bid.id}&tasker=${taskerId}`);
                                 }}
-                                className="w-full py-2 md:py-3 border-2 border-primary text-primary font-bold text-sm md:text-base rounded-full hover:bg-primary/5 transition-all"
+                                className="w-full py-2 md:py-3 border-2 border-brand-emerald text-brand-emerald font-bold text-sm md:text-base rounded-full hover:bg-brand-emerald/5 transition-all"
                               >
                                 Message
                               </button>
@@ -1243,13 +1243,13 @@ export default function TaskDetails({
                   )}
 
                   <div className="space-y-3 md:space-y-4">
-                    <h3 className="font-bold text-lg md:text-xl text-[#000d45]">
+                    <h3 className="font-bold text-lg md:text-xl text-brand-dark">
                       Previous questions ({questions.length})
                     </h3>
 
                     {loadingQuestions ? (
                       <div className="flex justify-center py-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <Loader2 className="w-8 h-8 animate-spin text-brand-emerald" />
                       </div>
                     ) : questions.length === 0 ? (
                       <p className="text-on-surface-variant text-sm md:text-base">
@@ -1306,7 +1306,7 @@ export default function TaskDetails({
                                   <ProfileNameLink
                                     href={askerProfileHref}
                                     name={askerName}
-                                    className="font-bold text-sm md:text-base text-[#000d45]"
+                                    className="font-bold text-sm md:text-base text-brand-dark"
                                   />
                                   {q.created_at && (
                                     <span className="text-[10px] md:text-xs text-on-surface-variant">
@@ -1331,7 +1331,7 @@ export default function TaskDetails({
                                   />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                      <h4 className="font-bold text-xs md:text-sm text-[#000d45]">
+                                      <h4 className="font-bold text-xs md:text-sm text-brand-dark">
                                         {task.user.name}
                                       </h4>
                                       {q.answered_at && (
@@ -1348,7 +1348,7 @@ export default function TaskDetails({
                               </div>
                             ) : task.canEdit ? (
                               <div className="ml-4 sm:ml-8 md:ml-16 mt-3 md:mt-4 min-w-0">
-                                <p className="text-xs md:text-sm font-semibold text-[#000d45] mb-2">
+                                <p className="text-xs md:text-sm font-semibold text-brand-dark mb-2">
                                   Your reply
                                 </p>
                                 <div className="relative">
@@ -1361,7 +1361,7 @@ export default function TaskDetails({
                                       }))
                                     }
                                     placeholder="Write your answer..."
-                                    className="w-full min-h-[88px] md:min-h-[100px] p-3 md:p-4 pr-14 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-primary transition-all text-on-surface text-sm md:text-base"
+                                    className="w-full min-h-[88px] md:min-h-[100px] p-3 md:p-4 pr-14 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-brand-emerald transition-all text-on-surface text-sm md:text-base"
                                   />
                                   <button
                                     type="button"
@@ -1370,7 +1370,7 @@ export default function TaskDetails({
                                       submittingAnswerId === q.id
                                     }
                                     onClick={() => handleAnswerQuestion(q.id)}
-                                    className="absolute bottom-3 right-3 p-2 md:p-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="absolute bottom-3 right-3 p-2 md:p-2.5 bg-brand-emerald text-white rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Post reply"
                                   >
                                     {submittingAnswerId === q.id ? (
@@ -1406,7 +1406,7 @@ export default function TaskDetails({
             </div>
 
             <div className="pt-6 md:pt-10 border-t border-outline-variant">
-              <h3 className="text-lg md:text-xl font-bold text-[#000d45] mb-3 md:mb-4">
+              <h3 className="text-lg md:text-xl font-bold text-brand-dark mb-3 md:mb-4">
                 Cancellation policy
               </h3>
               <p className="text-on-surface-variant text-sm md:text-lg mb-3 md:mb-4">
@@ -1417,7 +1417,7 @@ export default function TaskDetails({
                 href="/cancellation-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary font-bold text-sm md:text-lg hover:underline inline-block"
+                className="text-brand-emerald font-bold text-sm md:text-lg hover:underline inline-block"
               >
                 Learn more
               </Link>
@@ -1432,7 +1432,7 @@ export default function TaskDetails({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex items-center gap-2 text-primary font-bold hover:bg-primary/5 px-4 md:px-6 py-2 md:py-3 rounded-xl transition-all text-sm md:text-base shrink-0"
+                  className="flex items-center gap-2 text-brand-emerald font-bold hover:bg-brand-emerald/5 px-4 md:px-6 py-2 md:py-3 rounded-xl transition-all text-sm md:text-base shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                   <span>Back</span>
@@ -1442,7 +1442,7 @@ export default function TaskDetails({
                   aria-label={`${viewsCount} views on this task`}
                 >
                   <Eye className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
-                  <span className="font-semibold text-[#000d45]">
+                  <span className="font-semibold text-brand-dark">
                     {loadingDetailTask && !detailTask && !apiTask
                       ? '…'
                       : viewsCount.toLocaleString()}

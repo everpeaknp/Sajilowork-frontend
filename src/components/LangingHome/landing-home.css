@@ -28,17 +28,22 @@
   font-display: swap;
 }
 
-/* Home + discover: Manrope body, Outfit/PP Formula headlines */
-.landing-page,
-.discover-page {
+/* Home: Manrope body, Outfit/PP Formula headlines */
+.landing-page {
   font-family: var(--font-stack-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .landing-page :where(h1, h2, h3, h4),
-.discover-page :where(h1, h2, h3, h4),
-.landing-page .font-formula,
-.discover-page .font-formula {
+.landing-page .font-formula {
   font-family: var(--font-stack-formula);
+}
+
+/* Discover: DM Sans (mockup __DM_Sans_88fdc4) */
+.__DM_Sans_88fdc4,
+.discover-page {
+  font-family: var(--font-dm-sans), "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

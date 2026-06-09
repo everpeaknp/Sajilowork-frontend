@@ -361,6 +361,11 @@ export default function Navbar() {
     router.push('/my-tasks');
   };
 
+  const isJobsActive = pathname === '/jobs' || pathname.startsWith('/jobs/');
+  const isProjectsActive =
+    pathname === '/projects' || pathname.startsWith('/projects/');
+  const isServicesActive =
+    pathname === '/services' || pathname.startsWith('/services/');
   const isBrowseTasksActive =
     pathname === '/task' ||
     (pathname.startsWith('/task/') && !pathname.startsWith('/tasker-dashboard'));
@@ -373,7 +378,7 @@ export default function Navbar() {
     cn(
       landingBody,
       'text-sm font-semibold tracking-tight transition cursor-pointer',
-      active ? 'text-[#005fff]' : 'text-[#3c4a6b] hover:text-[#005fff]'
+      active ? 'text-brand-emerald' : 'text-neutral-600 hover:text-brand-emerald'
     );
 
   const formatTimeAgo = (dateString?: string) => {
@@ -398,22 +403,47 @@ export default function Navbar() {
             href={isAuthenticated ? '/discover' : '/'}
             className="flex shrink-0 items-center focus:outline-none cursor-pointer"
           >
-            <span className={`${landingHeadline} text-lg text-[#005fff] sm:text-2xl`}>
-              task<span className="text-[#03113c]">nepal</span>
+            <span className={`${landingHeadline} text-lg text-brand-emerald sm:text-2xl`}>
+              task<span className="text-brand-dark">nepal</span>
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          {isAuthenticated && (
-            <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-5 lg:space-x-6">
+            {isAuthenticated && (
               <button
                 onClick={handlePostTaskClick}
-                className={`${landingBody} rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-[#0047ff] cursor-pointer inline-flex items-center gap-1.5 active:scale-95`}
+                className={`${landingBody} rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald cursor-pointer inline-flex items-center gap-1.5 active:scale-95`}
               >
                 <PlusCircle className="h-4 w-4" />
                 Post a task
               </button>
+            )}
 
+            <Link
+              href="/jobs"
+              className={navLinkClass(isJobsActive)}
+              aria-current={isJobsActive ? 'page' : undefined}
+            >
+              Jobs
+            </Link>
+            <Link
+              href="/projects"
+              className={navLinkClass(isProjectsActive)}
+              aria-current={isProjectsActive ? 'page' : undefined}
+            >
+              Projects
+            </Link>
+            <Link
+              href="/services"
+              className={navLinkClass(isServicesActive)}
+              aria-current={isServicesActive ? 'page' : undefined}
+            >
+              Services
+            </Link>
+
+            {isAuthenticated && (
+              <>
               <button
                 type="button"
                 onClick={handleBrowseTasksClick}
@@ -445,8 +475,9 @@ export default function Navbar() {
               >
                 Browse members
               </button>
-            </nav>
-          )}
+              </>
+            )}
+          </nav>
         </div>
 
         {/* Right section: Utilities Dashboard & Profile */}
@@ -455,13 +486,13 @@ export default function Navbar() {
             <div className="hidden items-center gap-3 sm:flex">
               <Link
                 href="/signin"
-                className={`${landingBody} text-sm font-semibold tracking-tight text-[#3c4a6b] transition hover:text-[#005fff]`}
+                className={`${landingBody} text-sm font-semibold tracking-tight text-neutral-600 transition hover:text-brand-emerald`}
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className={`${landingBody} rounded-full bg-[#005fff] px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-[#0047ff]`}
+                className={`${landingBody} rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald`}
               >
                 Sign up
               </Link>
@@ -469,7 +500,7 @@ export default function Navbar() {
           ) : (
             <>
               {/* Help button */}
-              <div className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-[#3c4a6b] hover:text-[#005fff]`}>
+              <div className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald`}>
                 <HelpCircle className="h-4.5 w-4.5" />
                 <span>Help</span>
               </div>
@@ -486,7 +517,7 @@ export default function Navbar() {
                     setMessagesOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-[#005fff] focus:outline-none cursor-pointer sm:p-2"
+                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer sm:p-2"
                   aria-label="Notifications"
                 >
                   <Bell className="h-5 w-5 sm:h-5 sm:w-5" />
@@ -509,7 +540,7 @@ export default function Navbar() {
                           <button
                             type="button"
                             onClick={() => void markAllNotificationsRead()}
-                            className="text-[10px] font-semibold text-[#005fff] hover:underline cursor-pointer px-1"
+                            className="text-[10px] font-semibold text-brand-emerald hover:underline cursor-pointer px-1"
                           >
                             Mark all read
                           </button>
@@ -533,7 +564,7 @@ export default function Navbar() {
                             key={n.id}
                             onClick={() => handleNotificationClick(n)}
                             className={`p-2.5 rounded-lg transition-colors cursor-pointer text-left ${
-                              !n.is_read ? 'bg-[#005fff]/5' : 'hover:bg-gray-50'
+                              !n.is_read ? 'bg-brand-emerald/10' : 'hover:bg-gray-50'
                             }`}
                           >
                             <div className="flex justify-between items-start gap-2">
@@ -561,7 +592,7 @@ export default function Navbar() {
                     setNotificationsOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-[#005fff] focus:outline-none cursor-pointer sm:p-2"
+                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer sm:p-2"
                   aria-label="Messages"
                 >
                   <MessageSquare className="h-5 w-5" />
@@ -608,7 +639,7 @@ export default function Navbar() {
                                 key={convId}
                                 onClick={() => openConversation(convId)}
                                 className={`flex items-start space-x-3 p-2 rounded-xl min-h-[4.5rem] transition-colors cursor-pointer text-left ${
-                                  hasUnread ? 'bg-[#005fff]/5' : 'hover:bg-gray-50'
+                                  hasUnread ? 'bg-brand-emerald/10' : 'hover:bg-gray-50'
                                 }`}
                               >
                                 <UserAvatar
@@ -640,7 +671,7 @@ export default function Navbar() {
                               setMessagesOpen(false);
                               router.push('/message');
                             }}
-                            className="w-full text-center text-xs font-bold text-[#005fff] hover:underline pt-2 cursor-pointer"
+                            className="w-full text-center text-xs font-bold text-brand-emerald hover:underline pt-2 cursor-pointer"
                           >
                             View all messages
                           </button>
@@ -776,7 +807,7 @@ export default function Navbar() {
                   setProfileMenuOpen(false);
                 }
               }}
-              className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-[#005fff] cursor-pointer md:hidden"
+              className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald cursor-pointer md:hidden"
               aria-label={
                 isTaskerDashboard && taskerDashboardNav?.mobileOpen
                   ? 'Close dashboard menu'
@@ -816,16 +847,37 @@ export default function Navbar() {
         >
           <div className="space-y-2">
             <Link
+              href="/jobs"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight transition hover:bg-gray-50 ${isJobsActive ? 'text-brand-emerald' : 'text-neutral-600'}`}
+            >
+              Jobs
+            </Link>
+            <Link
+              href="/projects"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight transition hover:bg-gray-50 ${isProjectsActive ? 'text-brand-emerald' : 'text-neutral-600'}`}
+            >
+              Projects
+            </Link>
+            <Link
+              href="/services"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight transition hover:bg-gray-50 ${isServicesActive ? 'text-brand-emerald' : 'text-neutral-600'}`}
+            >
+              Services
+            </Link>
+            <Link
               href="/signin"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight text-[#3c4a6b] transition hover:bg-gray-50`}
+              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50`}
             >
               Sign in
             </Link>
             <Link
               href="/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full bg-[#005fff] py-3 text-center text-sm font-semibold tracking-tight text-white transition hover:bg-[#0047ff]`}
+              className={`${landingBody} block w-full min-h-11 rounded-full bg-brand-dark py-3 text-center text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald`}
             >
               Sign up
             </Link>

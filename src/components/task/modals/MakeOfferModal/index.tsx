@@ -352,7 +352,7 @@ export default function MakeOfferModal({ isOpen, onClose, task, onBidSuccess }: 
                   <button
                     type="button"
                     onClick={handleBidCancel}
-                    className="text-primary font-semibold hover:underline"
+                    className="text-brand-emerald font-semibold hover:underline"
                   >
                     Go back
                   </button>
@@ -450,8 +450,8 @@ export default function MakeOfferModal({ isOpen, onClose, task, onBidSuccess }: 
                   disabled={!allFieldsCompleted}
                   className={`w-full py-4 font-bold text-lg rounded-full transition-all ${
                     allFieldsCompleted 
-                      ? 'bg-primary text-white hover:bg-primary/90 cursor-pointer' 
-                      : 'bg-[#e8ecf4] text-[#2f6bff] cursor-not-allowed opacity-60'
+                      ? 'bg-brand-emerald text-white hover:bg-brand-emerald/90 cursor-pointer' 
+                      : 'bg-[#e8ecf4] text-brand-emerald cursor-not-allowed opacity-60'
                   }`}
                 >
                   Continue

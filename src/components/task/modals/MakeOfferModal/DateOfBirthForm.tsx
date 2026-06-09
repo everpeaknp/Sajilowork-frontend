@@ -21,13 +21,13 @@ export default function DateOfBirthForm({
     <>
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-primary font-bold mb-6 hover:underline"
+        className="flex items-center gap-2 text-brand-emerald font-bold mb-6 hover:underline"
       >
         <ChevronLeft className="w-5 h-5" />
         Back
       </button>
 
-      <h3 className="text-2xl font-bold text-[#000d45] mb-2">Date of birth</h3>
+      <h3 className="text-2xl font-bold text-brand-dark mb-2">Date of birth</h3>
       <p className="text-sm text-on-surface-variant mb-6">
         You must be 18 or older to use tasknepal
       </p>
@@ -38,13 +38,13 @@ export default function DateOfBirthForm({
           value={dateOfBirth}
           onChange={(e) => onChange(e.target.value)}
           max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-          className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface"
+          className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface"
         />
 
         <button
           onClick={onSubmit}
           disabled={!dateOfBirth || isLoading}
-          className="w-full py-3 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-brand-emerald text-white font-bold rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Saving...' : 'Save'}
         </button>

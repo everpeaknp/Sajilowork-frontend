@@ -53,7 +53,7 @@ function statusTextClass(status: string): string {
       return 'text-white';
     case 'assigned':
     case 'in_progress':
-      return 'text-blue-100';
+      return 'text-emerald-100';
     case 'completed':
       return 'text-purple-200';
     case 'cancelled':
@@ -103,7 +103,7 @@ export default function TaskCard({
             }
           : undefined
       }
-      className={`relative flex min-w-0 w-full cursor-pointer flex-col rounded-2xl bg-gradient-to-br from-[#000d45] via-[#0c2860] to-[#1161fe] p-4 text-white shadow-lg transition-all group sm:p-5 ${cardSurfaceClass} ${className}`.trim()}
+      className={`relative flex min-w-0 w-full cursor-pointer flex-col rounded-2xl bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald p-4 text-white shadow-lg transition-all group sm:p-5 ${cardSurfaceClass} ${className}`.trim()}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-30"

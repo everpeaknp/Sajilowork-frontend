@@ -118,13 +118,13 @@ export default function BillingAddressForm({
     <>
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-primary font-bold mb-6 hover:underline"
+        className="flex items-center gap-2 text-brand-emerald font-bold mb-6 hover:underline"
       >
         <ChevronLeft className="w-5 h-5" />
         Back
       </button>
 
-      <h3 className="text-2xl font-bold text-[#000d45] mb-2">Add billing address</h3>
+      <h3 className="text-2xl font-bold text-brand-dark mb-2">Add billing address</h3>
       <p className="text-sm text-on-surface-variant mb-6">
         This address will be used for billing and invoices in Nepal
       </p>
@@ -140,13 +140,13 @@ export default function BillingAddressForm({
               value={streetAddress}
               onChange={(e) => onStreetAddressChange(e.target.value)}
               placeholder="e.g. Thamel, Ward 26 or House 12, Kalimati"
-              className="w-full px-4 py-3 pr-12 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface"
+              className="w-full px-4 py-3 pr-12 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface"
             />
             <button
               type="button"
               onClick={handleDetectLocation}
               disabled={isDetecting || isLoading}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary/80 disabled:text-on-surface-variant disabled:cursor-not-allowed transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-emerald hover:text-brand-emerald/80 disabled:text-on-surface-variant disabled:cursor-not-allowed transition-colors"
               title="Detect my location"
               aria-label="Detect my location"
             >
@@ -173,7 +173,7 @@ export default function BillingAddressForm({
               value={city}
               onChange={(e) => onCityChange(e.target.value)}
               placeholder="Kathmandu"
-              className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface"
+              className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface"
             />
           </div>
 
@@ -188,7 +188,7 @@ export default function BillingAddressForm({
               placeholder="44600"
               maxLength={5}
               inputMode="numeric"
-              className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface"
+              className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface"
             />
           </div>
         </div>
@@ -200,7 +200,7 @@ export default function BillingAddressForm({
           <select
             value={state}
             onChange={(e) => onStateChange(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface bg-white appearance-none cursor-pointer"
+            className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface bg-white appearance-none cursor-pointer"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
               backgroundRepeat: 'no-repeat',
@@ -231,7 +231,7 @@ export default function BillingAddressForm({
         <button
           onClick={onSubmit}
           disabled={!streetAddress || !city || !postcode || !state || isLoading || isDetecting}
-          className="w-full py-3 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-brand-emerald text-white font-bold rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Saving...' : 'Save address'}
         </button>

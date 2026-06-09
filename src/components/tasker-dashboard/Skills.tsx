@@ -118,7 +118,7 @@ const TagInput = ({
       className={cn(
         landingBody,
         'flex min-h-[56px] cursor-text flex-wrap items-center gap-2 rounded-2xl border border-outline-variant bg-white p-3 transition-all',
-        'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15',
+        'focus-within:border-brand-emerald focus-within:ring-2 focus-within:ring-brand-emerald/15',
       )}
     >
       {tags.map((tag, index) => (
@@ -130,7 +130,7 @@ const TagInput = ({
             'inline-flex min-h-[36px] items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium',
             isVerified(tag)
               ? 'border border-green-200 bg-green-50 text-green-800'
-              : 'border border-outline-variant/80 bg-surface-low text-[#000d45]',
+              : 'border border-outline-variant/80 bg-surface-low text-brand-dark',
           )}
         >
           {isVerified(tag) ? (
@@ -156,7 +156,7 @@ const TagInput = ({
         placeholder={tags.length === 0 ? placeholder : 'Add more…'}
         className={cn(
           landingBody,
-          'min-w-[160px] flex-1 bg-transparent px-2 py-2 text-sm font-medium text-[#000d45] outline-none placeholder:text-gray-400',
+          'min-w-[160px] flex-1 bg-transparent px-2 py-2 text-sm font-medium text-brand-dark outline-none placeholder:text-gray-400',
         )}
       />
     </div>
@@ -551,12 +551,12 @@ export default function Skills() {
           <p
             className={cn(
               landingHeadlineSm,
-              'mb-2 text-[10px] uppercase tracking-[0.3em] text-primary',
+              'mb-2 text-[10px] uppercase tracking-[0.3em] text-brand-emerald',
             )}
           >
             Professional profile
           </p>
-          <h1 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-4xl')}>
+          <h1 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-4xl')}>
             Your skills
           </h1>
           <p className={cn(landingBodyMuted, 'mt-2 max-w-xl text-sm leading-relaxed')}>
@@ -570,7 +570,7 @@ export default function Skills() {
           disabled={saving}
           className={cn(
             landingBody,
-            'hidden shrink-0 items-center gap-2 rounded-2xl bg-[#1161fe] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex',
+            'hidden shrink-0 items-center gap-2 rounded-2xl bg-brand-emerald px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex',
           )}
         >
           {saving ? (
@@ -601,12 +601,12 @@ export default function Skills() {
                   >
                     Profile strength
                   </p>
-                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                     {profileStrength}%
                   </p>
                 </div>
                 <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald"
                   aria-hidden
                 >
                   <Briefcase className="h-6 w-6" />
@@ -614,7 +614,7 @@ export default function Skills() {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-surface-low">
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  className="h-full rounded-full bg-brand-emerald transition-all duration-500"
                   style={{ width: `${profileStrength}%` }}
                 />
               </div>
@@ -641,11 +641,11 @@ export default function Skills() {
                         className={cn(
                           'flex w-full min-h-[48px] items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all',
                           isActive
-                            ? 'bg-primary text-white shadow-md shadow-primary/20'
-                            : 'text-[#000d45] hover:bg-surface-low',
+                            ? 'bg-brand-emerald text-white shadow-md shadow-brand-emerald/20'
+                            : 'text-brand-dark hover:bg-surface-low',
                         )}
                       >
-                        <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-white' : 'text-primary')} />
+                        <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'text-white' : 'text-brand-emerald')} />
                         <span className="min-w-0 flex-1">
                           <span className={cn(landingHeadlineSm, 'block text-sm')}>
                             {item.label}
@@ -691,11 +691,11 @@ export default function Skills() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <Briefcase className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>
                   What are you good at?
                 </h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
@@ -722,11 +722,11 @@ export default function Skills() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <Route className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>
                   How do you get around?
                 </h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
@@ -750,7 +750,7 @@ export default function Skills() {
                       selected
                         ? verified
                           ? 'border-green-500 bg-green-50 text-green-800 shadow-md shadow-green-500/10'
-                          : 'border-primary bg-blue-50 text-primary shadow-md shadow-primary/10'
+                          : 'border-brand-emerald bg-emerald-50 text-brand-emerald shadow-md shadow-brand-emerald/10'
                         : 'border-outline-variant/60 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-600',
                     )}
                   >
@@ -780,11 +780,11 @@ export default function Skills() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <Globe className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>
                   Languages
                 </h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
@@ -805,11 +805,11 @@ export default function Skills() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <GraduationCap className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>
                   Qualifications
                 </h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
@@ -830,11 +830,11 @@ export default function Skills() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <History className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>
                   Work experience
                 </h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
@@ -857,7 +857,7 @@ export default function Skills() {
               disabled={saving}
               className={cn(
                 landingBody,
-                'inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#1161fe] px-8 py-4 text-base font-semibold text-white shadow-xl shadow-primary/30 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto',
+                'inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald px-8 py-4 text-base font-semibold text-white shadow-xl shadow-brand-emerald/30 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto',
               )}
             >
               {saving ? (

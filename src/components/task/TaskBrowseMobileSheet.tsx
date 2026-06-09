@@ -133,7 +133,7 @@ export default function TaskBrowseMobileSheet({
               onClick={() => onSnapChange('map')}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-bold transition-all ${
                 snap === 'map'
-                  ? 'bg-white text-[#000d45] shadow-sm'
+                  ? 'bg-white text-brand-dark shadow-sm'
                   : 'text-on-surface-variant'
               }`}
             >
@@ -145,7 +145,7 @@ export default function TaskBrowseMobileSheet({
               onClick={() => onSnapChange('list')}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-bold transition-all ${
                 snap === 'list'
-                  ? 'bg-white text-[#000d45] shadow-sm'
+                  ? 'bg-white text-brand-dark shadow-sm'
                   : 'text-on-surface-variant'
               }`}
             >

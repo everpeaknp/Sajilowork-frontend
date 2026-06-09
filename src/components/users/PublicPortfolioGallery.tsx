@@ -33,10 +33,10 @@ export default function PublicPortfolioGallery({ items, embedded = false }: Publ
               />
             ) : (
               <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
-                <div className="rounded-xl bg-white p-3 text-primary shadow-sm">
+                <div className="rounded-xl bg-white p-3 text-brand-emerald shadow-sm">
                   <FileText className="h-8 w-8" />
                 </div>
-                <p className="max-w-full truncate text-center text-xs font-semibold text-[#000d45]">
+                <p className="max-w-full truncate text-center text-xs font-semibold text-brand-dark">
                   {item.title}
                 </p>
               </div>
@@ -57,7 +57,7 @@ export default function PublicPortfolioGallery({ items, embedded = false }: Publ
                 href={fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute right-2 top-2 rounded-lg bg-white/95 p-1.5 text-primary shadow opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute right-2 top-2 rounded-lg bg-white/95 p-1.5 text-brand-emerald shadow opacity-0 transition-opacity group-hover:opacity-100"
                 aria-label={`Open ${item.title}`}
               >
                 <ExternalLink className="h-4 w-4" />

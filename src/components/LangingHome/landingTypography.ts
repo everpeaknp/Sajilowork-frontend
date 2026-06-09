@@ -26,3 +26,17 @@ export const landingPageRoot =
 /** Inherited Manrope body + Formula/Outfit on semantic headings */
 export const landingPageTypo =
   `${landingBody} [&_h1]:font-formula [&_h1]:font-black [&_h1]:tracking-tight [&_h2]:font-formula [&_h2]:font-extrabold [&_h2]:tracking-tight [&_h3]:font-formula [&_h3]:font-bold [&_h3]:tracking-tight [&_h4]:font-formula [&_h4]:font-semibold [&_h4]:tracking-tight`;
+
+/** Discover page — DM Sans (matches mockup __DM_Sans_88fdc4), moderate weights */
+export const discoverDmSans = "__DM_Sans_88fdc4";
+
+export const discoverHeadline = `${discoverDmSans} font-semibold tracking-tight`;
+
+export const discoverBody = `${discoverDmSans} font-normal`;
+
+export const discoverMedium = `${discoverDmSans} font-medium`;
+
+export const discoverPageRoot = `${discoverDmSans} discover-page antialiased`;
+
+export const discoverPageTypo =
+  `${discoverBody} [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_h4]:font-medium`;

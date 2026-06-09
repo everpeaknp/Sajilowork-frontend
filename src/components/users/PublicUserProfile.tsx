@@ -190,7 +190,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
       <div className="flex min-h-screen flex-col bg-slate-100">
         <Navbar />
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <Loader2 className="h-10 w-10 animate-spin text-brand-emerald" />
         </div>
       </div>
     );
@@ -201,12 +201,12 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
       <div className="flex min-h-screen flex-col bg-slate-100">
         <Navbar />
         <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
-          <h1 className="mb-2 text-2xl font-bold text-[#000d45]">Profile not found</h1>
+          <h1 className="mb-2 text-2xl font-bold text-brand-dark">Profile not found</h1>
           <p className="mb-6 text-slate-600">{error}</p>
           <button
             type="button"
             onClick={() => router.push('/task')}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-semibold text-white"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-emerald px-5 py-2.5 font-semibold text-white"
           >
             <ChevronLeft className="h-4 w-4" />
             Browse tasks
@@ -264,7 +264,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         {/* Hero */}
-        <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#000d45] via-[#0c2860] to-[#1161fe] text-white shadow-lg">
+        <header className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald text-white shadow-lg">
           <div
             className="pointer-events-none absolute inset-0 opacity-30"
             aria-hidden
@@ -277,7 +277,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
           {isOwnProfile ? (
             <Link
               href="/tasker-dashboard/profile"
-              className="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#000d45] shadow-sm transition-colors hover:bg-white/95 sm:right-6 sm:top-6 sm:px-5 sm:py-2.5"
+              className="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-dark shadow-sm transition-colors hover:bg-white/95 sm:right-6 sm:top-6 sm:px-5 sm:py-2.5"
             >
               <Pencil className="h-4 w-4" />
               Edit profile
@@ -334,7 +334,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
                   className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors ${
                     isFollowing
                       ? 'bg-white/15 text-white ring-1 ring-white/30 hover:bg-white/20'
-                      : 'bg-white text-[#000d45] hover:bg-white/95'
+                      : 'bg-white text-brand-dark hover:bg-white/95'
                   }`}
                 >
                   <UserPlus className="h-4 w-4" />
@@ -401,7 +401,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
                 <li key={link.href} className="shrink-0">
                   <a
                     href={link.href}
-                    className="inline-block rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white hover:text-[#000d45]"
+                    className="inline-block rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-white hover:text-brand-emerald"
                   >
                     {link.label}
                   </a>
@@ -433,7 +433,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
             >
               {postedTasksLoading ? (
                 <div className="flex items-center justify-center py-10">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <Loader2 className="h-8 w-8 animate-spin text-brand-emerald" />
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -489,7 +489,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
                 <button
                   type="button"
                   onClick={() => setShowAllReviews(true)}
-                  className="text-sm font-semibold text-primary hover:underline"
+                  className="text-sm font-semibold text-brand-emerald hover:underline"
                 >
                   View all
                 </button>
@@ -509,7 +509,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
               <button
                 type="button"
                 onClick={() => setShowAllReviews(true)}
-                className="mt-4 w-full rounded-xl border border-slate-200 py-3 text-sm font-semibold text-primary hover:bg-primary/5"
+                className="mt-4 w-full rounded-xl border border-slate-200 py-3 text-sm font-semibold text-brand-emerald hover:bg-brand-emerald/5"
               >
                 Show all {reviews.length} reviews
               </button>
@@ -525,7 +525,7 @@ export default function PublicUserProfile({ slug }: PublicUserProfileProps) {
                   {transportLabels.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full bg-white px-3 py-1 text-sm font-medium text-[#000d45] ring-1 ring-slate-200"
+                      className="rounded-full bg-white px-3 py-1 text-sm font-medium text-brand-dark ring-1 ring-slate-200"
                     >
                       {tag}
                     </span>
@@ -552,9 +552,9 @@ function SkillTag({ skill, verifiedStyle }: { skill: UserSkill; verifiedStyle?: 
           ? `inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ${
               verified
                 ? 'bg-emerald-50 text-emerald-900 ring-emerald-200'
-                : 'bg-slate-50 text-[#000d45] ring-slate-200'
+                : 'bg-slate-50 text-brand-dark ring-slate-200'
             }`
-          : 'rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-[#000d45] ring-1 ring-slate-200/80'
+          : 'rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-brand-dark ring-1 ring-slate-200/80'
       }
     >
       {verifiedStyle ? (
@@ -580,7 +580,7 @@ function SkillGroup({
   if (!skills.length) return null;
   return (
     <div>
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#000d45]">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-brand-dark">
         <Briefcase className="h-4 w-4 text-slate-400" />
         {title}
       </h3>
@@ -628,7 +628,7 @@ function ReviewCard({ review }: { review: PublicProfileReview }) {
           verified={review.reviewer?.is_verified_tasker}
         />
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-[#000d45]">{reviewerName}</p>
+          <p className="font-semibold text-brand-dark">{reviewerName}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-0.5 text-amber-600">
               <Star className="h-3.5 w-3.5 fill-current" />

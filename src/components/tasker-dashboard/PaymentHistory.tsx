@@ -139,7 +139,7 @@ export default function PaymentHistory() {
       className="max-w-5xl space-y-8 pb-20"
     >
       <header className="space-y-6">
-        <h1 className="text-2xl font-black uppercase tracking-tighter text-blue-950 sm:text-4xl">
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-brand-dark sm:text-4xl">
           Payment History
         </h1>
 
@@ -149,14 +149,14 @@ export default function PaymentHistory() {
             onClick={() => setActiveTab('earned')}
             className={cn(
               'relative shrink-0 px-4 py-3 font-black transition-all sm:px-8 sm:py-4',
-              activeTab === 'earned' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
+              activeTab === 'earned' ? 'text-brand-emerald' : 'text-gray-400 hover:text-gray-600'
             )}
           >
             Earned
             {activeTab === 'earned' && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute bottom-0 left-0 w-full h-1 bg-primary"
+                className="absolute bottom-0 left-0 w-full h-1 bg-brand-emerald"
               />
             )}
           </button>
@@ -165,14 +165,14 @@ export default function PaymentHistory() {
             onClick={() => setActiveTab('outgoing')}
             className={cn(
               'relative shrink-0 px-4 py-3 font-black transition-all sm:px-8 sm:py-4',
-              activeTab === 'outgoing' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
+              activeTab === 'outgoing' ? 'text-brand-emerald' : 'text-gray-400 hover:text-gray-600'
             )}
           >
             Outgoing
             {activeTab === 'outgoing' && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute bottom-0 left-0 w-full h-1 bg-primary"
+                className="absolute bottom-0 left-0 w-full h-1 bg-brand-emerald"
               />
             )}
           </button>
@@ -181,9 +181,9 @@ export default function PaymentHistory() {
 
       <div className="flex flex-col md:flex-row md:items-center gap-4 bg-white p-6 rounded-3xl border border-outline-variant shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-blue-950">Showing</span>
+          <span className="text-sm font-bold text-brand-dark">Showing</span>
           <div className="flex gap-2">
-            <span className="px-4 py-2 bg-surface-low text-blue-950 rounded-xl font-bold text-sm border border-primary/10">
+            <span className="px-4 py-2 bg-surface-low text-brand-dark rounded-xl font-bold text-sm border border-brand-emerald/10">
               {activeTab === 'earned' ? 'Task earnings' : 'Task payments'}
             </span>
           </div>
@@ -194,7 +194,7 @@ export default function PaymentHistory() {
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
               {summaryLabel}
             </p>
-            <p className="text-2xl font-black text-blue-950">
+            <p className="text-2xl font-black text-brand-dark">
               {formatNPR(displayTotalAmount, { showCode: currency !== 'NPR' })}
             </p>
           </div>
@@ -202,7 +202,7 @@ export default function PaymentHistory() {
           <button
             type="button"
             onClick={fetchPayments}
-            className="p-3 bg-surface-low text-blue-950 rounded-xl hover:bg-white border border-transparent hover:border-outline-variant transition-all"
+            className="p-3 bg-surface-low text-brand-dark rounded-xl hover:bg-white border border-transparent hover:border-outline-variant transition-all"
             title="Refresh"
           >
             <Search className="w-5 h-5" />
@@ -217,7 +217,7 @@ export default function PaymentHistory() {
           </p>
           <button
             type="button"
-            className="text-primary font-bold text-sm hover:underline flex items-center gap-2 opacity-50 cursor-not-allowed"
+            className="text-brand-emerald font-bold text-sm hover:underline flex items-center gap-2 opacity-50 cursor-not-allowed"
             disabled
           >
             <Calendar className="w-4 h-4" />
@@ -228,7 +228,7 @@ export default function PaymentHistory() {
         {loading ? (
           <section className="bg-white min-h-[400px] rounded-3xl border border-outline-variant shadow-sm flex items-center justify-center">
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-16 h-16 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-gray-500 font-medium">Loading transactions...</p>
             </div>
           </section>
@@ -238,7 +238,7 @@ export default function PaymentHistory() {
               <Inbox className="w-10 h-10 text-gray-300" />
             </div>
             <div className="max-w-sm space-y-4">
-              <h3 className="text-xl font-bold text-blue-950">{emptyTitle}</h3>
+              <h3 className="text-xl font-bold text-brand-dark">{emptyTitle}</h3>
               <p className="text-gray-500 font-medium">{emptyBody}</p>
               <div className="pt-4">
                 <button
@@ -246,7 +246,7 @@ export default function PaymentHistory() {
                   onClick={() => {
                     window.location.href = activeTab === 'earned' ? '/task' : '/post-task';
                   }}
-                  className="bg-primary text-white px-10 py-4 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-all active:scale-95"
+                  className="bg-brand-emerald text-white px-10 py-4 rounded-2xl font-black text-lg shadow-xl shadow-brand-emerald/20 hover:scale-105 transition-all active:scale-95"
                 >
                   {activeTab === 'earned' ? 'Browse tasks' : 'Post a task'}
                 </button>
@@ -286,7 +286,7 @@ export default function PaymentHistory() {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <h4 className="font-bold text-blue-950 truncate">
+                          <h4 className="font-bold text-brand-dark truncate">
                             {transaction.title}
                           </h4>
                           <p className="text-sm text-gray-500 font-medium">
@@ -298,7 +298,7 @@ export default function PaymentHistory() {
                         <p
                           className={cn(
                             'text-xl font-black',
-                            isEarned ? 'text-green-700' : 'text-blue-950'
+                            isEarned ? 'text-green-700' : 'text-brand-dark'
                           )}
                         >
                           {isEarned ? '+' : '−'}
@@ -325,7 +325,7 @@ export default function PaymentHistory() {
                                 ? 'bg-green-100 text-green-700'
                                 : transaction.status === 'held'
                                   ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-blue-100 text-blue-700'
+                                  : 'bg-emerald-100 text-emerald-700'
                               : transaction.status === 'failed'
                                 ? 'bg-red-100 text-red-700'
                                 : 'bg-gray-100 text-gray-700'
@@ -344,7 +344,7 @@ export default function PaymentHistory() {
       </div>
 
       <footer className="pt-10 border-t border-outline-variant">
-        <div className="flex items-center gap-3 p-4 bg-surface-low text-primary rounded-2xl border border-primary/10">
+        <div className="flex items-center gap-3 p-4 bg-surface-low text-brand-emerald rounded-2xl border border-brand-emerald/10">
           <Info className="w-5 h-5 shrink-0" />
           <p className="text-sm font-semibold">
             <span className="font-black">Earned</span> shows money you received after completing

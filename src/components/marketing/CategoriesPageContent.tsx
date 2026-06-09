@@ -46,7 +46,7 @@ export default function CategoriesPageContent() {
     <div className="min-w-0">
       <p className="mb-8 text-sm leading-relaxed text-[#6a719a] sm:mb-10 sm:text-base">
         Browse popular services in Nepal. Select a category to post a task or{' '}
-        <Link href="/discover" className="font-semibold text-[#1161fe] hover:underline">
+        <Link href="/discover" className="font-semibold text-brand-emerald hover:underline">
           explore all services
         </Link>
         .
@@ -55,7 +55,7 @@ export default function CategoriesPageContent() {
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
         {columns.map((group) => (
           <div key={group.title} className="min-w-0">
-            <h2 className={`${landingHeadlineSm} mb-4 text-base text-[#0b1442] sm:text-lg`}>
+            <h2 className={`${landingHeadlineSm} mb-4 text-base text-brand-dark sm:text-lg`}>
               {group.title}
             </h2>
             <ul className="space-y-2.5">
@@ -63,7 +63,7 @@ export default function CategoriesPageContent() {
                 <li key={`${group.title}-${link.label}`}>
                   <Link
                     href={link.href}
-                    className="text-sm text-[#384179] transition-colors hover:text-[#1161fe] sm:text-[15px]"
+                    className="text-sm text-[#384179] transition-colors hover:text-brand-emerald sm:text-[15px]"
                   >
                     {link.label}
                   </Link>

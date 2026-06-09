@@ -53,7 +53,7 @@ export default function TaskDetailPage() {
         <Navbar />
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <div className="w-12 h-12 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin mx-auto" />
             <p className="mt-4 text-on-surface-variant font-medium">Loading task…</p>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function TaskDetailPage() {
             <button
               type="button"
               onClick={() => router.push('/task')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full font-semibold hover:bg-primary/90"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-emerald text-white rounded-full font-semibold hover:bg-brand-emerald/90"
             >
               <ChevronLeft className="w-4 h-4" />
               Back to browse tasks

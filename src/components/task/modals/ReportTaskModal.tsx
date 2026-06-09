@@ -68,7 +68,7 @@ export default function ReportTaskModal({
             {/* Modal Content */}
             <div className="px-10 py-10">
               <div className="mb-6">
-                <h2 className="text-3xl font-bold text-[#000d45] mb-2">What would you like to report?</h2>
+                <h2 className="text-3xl font-bold text-brand-dark mb-2">What would you like to report?</h2>
                 <p className="text-on-surface-variant text-sm">Please give us more information regarding this report</p>
               </div>
 
@@ -78,7 +78,7 @@ export default function ReportTaskModal({
                   <select
                     value={reportCategory}
                     onChange={(e) => setReportCategory(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface bg-white appearance-none cursor-pointer"
+                    className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface bg-white appearance-none cursor-pointer"
                     style={{
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
                       backgroundRepeat: 'no-repeat',
@@ -102,7 +102,7 @@ export default function ReportTaskModal({
                     value={reportComment}
                     onChange={(e) => setReportComment(e.target.value)}
                     placeholder="Comment (required)"
-                    className="w-full min-h-[140px] px-4 py-3 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-primary transition-all text-on-surface"
+                    className="w-full min-h-[140px] px-4 py-3 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-brand-emerald transition-all text-on-surface"
                   />
                 </div>
               </div>
@@ -119,7 +119,7 @@ export default function ReportTaskModal({
                 <button
                   onClick={handleSubmit}
                   disabled={!reportCategory || !reportComment.trim() || isSubmitting}
-                  className="flex-1 py-3 bg-[#2f6bff] text-white font-semibold rounded-full hover:bg-[#2f6bff]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                  className="flex-1 py-3 bg-brand-emerald text-white font-semibold rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>

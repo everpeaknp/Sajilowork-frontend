@@ -42,7 +42,7 @@ export default function TrustSecurity() {
               className="h-[280px] w-full rounded-2xl object-cover shadow-2xl sm:h-[420px] sm:rounded-[28px] md:h-[520px] lg:h-[560px]"
             />
             {/* Overlay decoration */}
-            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-[#03113c]/30 to-transparent sm:rounded-[28px]" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-t from-brand-dark/30 to-transparent sm:rounded-[28px]" />
           </div>
 
           <motion.div
@@ -52,11 +52,11 @@ export default function TrustSecurity() {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="absolute -bottom-4 right-2 z-20 flex items-center gap-3 rounded-2xl border border-outline-variant/70 bg-white/95 p-4 shadow-[0_28px_70px_-22px_rgba(0,0,0,0.25)] backdrop-blur-md sm:-bottom-7 sm:-right-6 sm:gap-4 sm:rounded-3xl sm:p-7"
           >
-            <div className="rounded-xl bg-primary/10 p-2.5 text-primary sm:rounded-2xl sm:p-3.5">
+            <div className="rounded-xl bg-brand-emerald/10 p-2.5 text-brand-emerald sm:rounded-2xl sm:p-3.5">
               <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.5} />
             </div>
             <div>
-              <p className={`${landingHeadlineSm} text-base leading-tight text-[#061257] sm:text-2xl`}>
+              <p className={`${landingHeadlineSm} text-base leading-tight text-brand-dark sm:text-2xl`}>
                 100% Verified
               </p>
               <p className={`${landingBodyMuted} mt-1 text-[11px]`}>
@@ -66,7 +66,7 @@ export default function TrustSecurity() {
           </motion.div>
 
           {/* Floating abstract element */}
-          <div className="absolute -top-10 -left-10 w-56 h-56 bg-primary/10 rounded-full blur-3xl -z-10" />
+          <div className="absolute -top-10 -left-10 w-56 h-56 bg-brand-emerald/10 rounded-full blur-3xl -z-10" />
         </motion.div>
 
         <div className="space-y-6 sm:space-y-8">
@@ -76,14 +76,14 @@ export default function TrustSecurity() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className={`${landingHeadlineSm} mb-3 block text-[11px] uppercase tracking-widest text-primary`}>
+            <span className={`${landingHeadlineSm} mb-3 block text-[11px] uppercase tracking-widest text-brand-emerald`}>
               Trust & safety
             </span>
             <h2
               className={`${landingHeadline} text-2xl leading-[1.1] tracking-[-0.03em] text-balance sm:text-4xl md:text-[40px]`}
             >
               Trust and safety features <br className="hidden sm:block" />
-              <span className="text-[#384179]">for your protection</span>
+              <span className="text-brand-dark/70">for your protection</span>
             </h2>
             <p className={`${landingBodyMuted} mt-3 max-w-xl text-[13px] leading-relaxed sm:text-sm`}>
               Payments are protected, profiles are verified, and support is always available—so you can post with confidence.
@@ -101,11 +101,11 @@ export default function TrustSecurity() {
                 className="group rounded-2xl border border-outline-variant/70 bg-white p-5 sm:p-6 shadow-[0_10px_30px_-22px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_44px_-26px_rgba(0,0,0,0.35)] transition-shadow"
               >
                 <div className="flex items-start gap-4">
-                  <div className="mt-0.5 bg-primary/10 text-primary p-3 rounded-2xl shrink-0 transition-colors group-hover:bg-primary group-hover:text-white">
+                  <div className="mt-0.5 bg-brand-emerald/10 text-brand-emerald p-3 rounded-2xl shrink-0 transition-colors group-hover:bg-brand-emerald group-hover:text-white">
                     {item.icon}
                   </div>
                   <div className="min-w-0">
-                    <h4 className={`${landingHeadlineSm} text-lg sm:text-xl text-[#061257]`}>
+                    <h4 className={`${landingHeadlineSm} text-lg sm:text-xl text-brand-dark`}>
                       {item.title}
                     </h4>
                     <p className={`${landingBodyMuted} mt-1 max-w-xl text-[13px] leading-relaxed sm:text-sm`}>
@@ -125,7 +125,7 @@ export default function TrustSecurity() {
           >
             <Link
               href="/cancellation-policy"
-              className={`${landingBody} inline-flex min-h-11 w-full items-center justify-center rounded-full bg-[#061257] px-7 py-3 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-primary active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:w-auto sm:text-sm`}
+              className={`${landingBody} inline-flex min-h-11 w-full items-center justify-center rounded-full bg-brand-dark px-7 py-3 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-brand-emerald active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-emerald/40 sm:w-auto sm:text-sm`}
             >
               Learn about safety
             </Link>

@@ -12,7 +12,7 @@ import {
   Hammer,
 } from 'lucide-react';
 import { CATEGORIES } from './mockData';
-import { landingBody, landingHeadline } from '@/components/LangingHome/landingTypography';
+import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
 import FeatureCarousel, { type FeatureCarouselItem } from '@/components/ui/feature-carousel';
 
 interface CategoryCarouselProps {
@@ -49,10 +49,10 @@ export default function CategoryCarousel({ onSelectCategory }: CategoryCarouselP
     <section className="w-full bg-white py-8 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
         <div className="mx-auto mb-6 max-w-2xl sm:mb-8">
-          <h2 className={`${landingHeadline} text-lg text-[#03113c] sm:text-2xl`}>
+          <h2 className={`${discoverHeadline} text-lg text-[#03113c] sm:text-2xl`}>
             Our top categories
           </h2>
-          <p className={`${landingBody} mt-2 text-xs font-medium text-gray-600 sm:text-sm`}>
+          <p className={`${discoverBody} mt-2 text-xs text-gray-600 sm:text-sm`}>
             Find the exact help you need on tasknepal right now.
           </p>
         </div>

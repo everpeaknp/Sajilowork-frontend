@@ -24,6 +24,9 @@
   /* Runtime font stacks (next/font vars live on <html>) */
   --font-stack-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-stack-formula: var(--font-outfit), "PP Formula", ui-sans-serif, system-ui, sans-serif;
+  --brand-emerald: #45a874;
+  --brand-dark: #193e32;
+  --brand-light-bg: #f4f8f6;
 }
 
 @theme inline {
@@ -51,6 +54,22 @@
   /* Tailwind font-* utilities → marketing stacks */
   --font-formula: var(--font-stack-formula);
   --font-body: var(--font-stack-body);
+  --color-brand-emerald: var(--brand-emerald);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-light-bg: var(--brand-light-bg);
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
 }
 
 @media (prefers-color-scheme: dark) {

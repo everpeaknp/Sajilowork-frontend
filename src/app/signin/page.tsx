@@ -96,18 +96,18 @@ export default function SignInPage() {
         >
           {/* Logo */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-[#000d45] mb-2">Welcome back</h2>
+            <h2 className="text-3xl font-bold text-brand-dark mb-2">Welcome back</h2>
             <p className="text-on-surface-variant">Sign in to your account</p>
           </div>
 
         {/* Sign In Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 border border-outline-variant">
-          <h2 className="text-3xl font-bold text-[#000d45] mb-6">Sign In</h2>
+          <h2 className="text-3xl font-bold text-brand-dark mb-6">Sign In</h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email Input */}
             <div>
-              <label className="block text-sm font-semibold text-[#000d45] mb-2">
+              <label className="block text-sm font-semibold text-brand-dark mb-2">
                 Email address
               </label>
               <div className="relative">
@@ -119,7 +119,7 @@ export default function SignInPage() {
                   className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                     errors.email 
                       ? 'border-red-500 focus:border-red-500' 
-                      : 'border-outline-variant focus:border-primary'
+                      : 'border-outline-variant focus:border-brand-emerald'
                   }`}
                 />
               </div>
@@ -130,7 +130,7 @@ export default function SignInPage() {
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-semibold text-[#000d45] mb-2">
+              <label className="block text-sm font-semibold text-brand-dark mb-2">
                 Password
               </label>
               <div className="relative">
@@ -142,13 +142,13 @@ export default function SignInPage() {
                   className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                     errors.password 
                       ? 'border-red-500 focus:border-red-500' 
-                      : 'border-outline-variant focus:border-primary'
+                      : 'border-outline-variant focus:border-brand-emerald'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-brand-emerald transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -164,11 +164,11 @@ export default function SignInPage() {
                 <input
                   type="checkbox"
                   {...register('remember')}
-                  className="w-4 h-4 rounded border-2 border-outline-variant text-primary focus:ring-2 focus:ring-primary/20"
+                  className="w-4 h-4 rounded border-2 border-outline-variant text-brand-emerald focus:ring-2 focus:ring-brand-emerald/20"
                 />
                 <span className="text-sm text-on-surface-variant">Remember me</span>
               </label>
-              <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:underline">
+              <Link href="/forgot-password" className="text-sm font-semibold text-brand-emerald hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -177,7 +177,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-primary text-white font-bold text-lg rounded-full hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-brand-emerald text-white font-bold text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -208,7 +208,7 @@ export default function SignInPage() {
           {/* Sign Up Link */}
           <p className="text-center mt-6 text-on-surface-variant">
             Don't have an account?{' '}
-            <Link href="/signup" className="font-bold text-primary hover:underline">
+            <Link href="/signup" className="font-bold text-brand-emerald hover:underline">
               Sign up
             </Link>
           </p>

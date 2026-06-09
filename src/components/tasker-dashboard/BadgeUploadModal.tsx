@@ -140,7 +140,7 @@ export default function BadgeUploadModal({
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[10050] bg-blue-950/50 backdrop-blur-sm"
+        className="fixed inset-0 z-[10050] bg-brand-dark/50 backdrop-blur-sm"
         onClick={handleClose}
         aria-hidden
       />
@@ -159,7 +159,7 @@ export default function BadgeUploadModal({
               <div className="min-w-0 pr-2">
                 <h2
                   id="badge-upload-title"
-                  className="text-xl font-black text-blue-950 uppercase tracking-tight"
+                  className="text-xl font-black text-brand-dark uppercase tracking-tight"
                 >
                   {title}
                 </h2>
@@ -192,7 +192,7 @@ export default function BadgeUploadModal({
                     type="text"
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 font-medium text-blue-950 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 font-medium text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-emerald/30"
                     placeholder="e.g. HVAC Certification, Gas Fitter Licence"
                     disabled={submitting}
                     maxLength={100}
@@ -206,7 +206,7 @@ export default function BadgeUploadModal({
                     value={customDescription}
                     onChange={(e) => setCustomDescription(e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 font-medium text-blue-950 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 font-medium text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-emerald/30 resize-none"
                     placeholder="What does this licence cover?"
                     disabled={submitting}
                     maxLength={500}
@@ -223,7 +223,7 @@ export default function BadgeUploadModal({
                 type="text"
                 value={documentNumber}
                 onChange={(e) => setDocumentNumber(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl border border-gray-200 font-medium text-blue-950 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full px-4 py-3 rounded-2xl border border-gray-200 font-medium text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-emerald/30"
                 placeholder="e.g. EC-12345"
                 disabled={submitting}
               />
@@ -244,10 +244,10 @@ export default function BadgeUploadModal({
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={submitting}
-                className="w-full flex flex-col items-center justify-center gap-3 p-6 sm:p-8 rounded-3xl border-2 border-dashed border-gray-200 hover:border-primary/40 hover:bg-blue-50/50 transition-colors"
+                className="w-full flex flex-col items-center justify-center gap-3 p-6 sm:p-8 rounded-3xl border-2 border-dashed border-gray-200 hover:border-brand-emerald/40 hover:bg-emerald-50/50 transition-colors"
               >
-                <Upload className="w-8 h-8 text-primary" />
-                <span className="text-sm font-bold text-blue-950 text-center px-2 break-all">
+                <Upload className="w-8 h-8 text-brand-emerald" />
+                <span className="text-sm font-bold text-brand-dark text-center px-2 break-all">
                   {file ? file.name : 'Choose JPG, PNG, WebP, or PDF'}
                 </span>
                 <span className="text-xs text-gray-400 font-medium">Max 10MB</span>
@@ -271,7 +271,7 @@ export default function BadgeUploadModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting || !file}
-                className="flex-1 px-6 py-4 rounded-2xl bg-[#1161fe] text-white font-black text-sm uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
+                className="flex-1 px-6 py-4 rounded-2xl bg-brand-emerald text-white font-black text-sm uppercase tracking-widest hover:opacity-90 disabled:opacity-50"
               >
                 {submitting ? 'Uploading…' : 'Submit for review'}
               </button>

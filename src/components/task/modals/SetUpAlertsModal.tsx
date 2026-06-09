@@ -75,7 +75,7 @@ export default function SetUpAlertsModal({
               <div className="px-8 py-10 sm:px-10">
                 <h2
                   id="setup-alerts-title"
-                  className="text-2xl sm:text-3xl font-bold text-[#000d45] mb-2"
+                  className="text-2xl sm:text-3xl font-bold text-brand-dark mb-2"
                 >
                   Set up task alerts
                 </h2>
@@ -93,7 +93,7 @@ export default function SetUpAlertsModal({
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="e.g. cleaning, moving, plumbing"
-                  className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-primary transition-all text-on-surface"
+                  className="w-full px-4 py-3 border-2 border-outline-variant rounded-xl focus:outline-none focus:border-brand-emerald transition-all text-on-surface"
                 />
                 <p className="mt-2 text-xs text-on-surface-variant">
                   Up to 64 characters. You can manage alerts in your dashboard settings.
@@ -112,7 +112,7 @@ export default function SetUpAlertsModal({
                     type="button"
                     onClick={handleSubmit}
                     disabled={!keyword.trim() || isSubmitting}
-                    className="flex-1 py-3 bg-[#2f6bff] text-white font-semibold rounded-full hover:bg-[#2f6bff]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                    className="flex-1 py-3 bg-brand-emerald text-white font-semibold rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <>

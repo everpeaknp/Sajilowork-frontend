@@ -51,7 +51,7 @@ export default function PublicLicenceBadges({ badges, embedded = false }: Public
             {badgeIcon(badge.badge_type)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-[#000d45]">{badge.name}</p>
+            <p className="font-semibold text-brand-dark">{badge.name}</p>
             {badge.description ? (
               <p className="mt-0.5 text-sm text-slate-600 line-clamp-2">{badge.description}</p>
             ) : null}

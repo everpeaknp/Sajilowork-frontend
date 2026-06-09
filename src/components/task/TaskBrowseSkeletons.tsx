@@ -4,7 +4,7 @@ export function TaskCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex w-full animate-pulse flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-[#000d45] via-[#0c2860] to-[#1161fe] p-4 sm:p-5',
+        'relative flex w-full animate-pulse flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald p-4 sm:p-5',
         className,
       )}
       aria-hidden

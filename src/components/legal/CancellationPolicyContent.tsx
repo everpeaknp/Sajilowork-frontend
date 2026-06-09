@@ -63,7 +63,7 @@ export default function CancellationPolicyContent() {
       <div className="space-y-8 md:space-y-10">
         {SECTIONS.map((section) => (
           <section key={section.title}>
-            <h2 className="mb-3 text-lg font-bold text-[#0b1442] md:text-xl">{section.title}</h2>
+            <h2 className="mb-3 text-lg font-bold text-brand-dark md:text-xl">{section.title}</h2>
             <div className="space-y-3 text-sm leading-relaxed text-[#384179] sm:text-base">
               {section.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

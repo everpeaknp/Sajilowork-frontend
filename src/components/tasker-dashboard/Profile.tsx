@@ -50,7 +50,7 @@ const SECTION_NAV: {
 ];
 
 const inputClass =
-  'w-full rounded-2xl border border-outline-variant bg-white px-4 py-3.5 text-sm font-medium text-[#000d45] outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10';
+  'w-full rounded-2xl border border-outline-variant bg-white px-4 py-3.5 text-sm font-medium text-brand-dark outline-none transition focus:border-brand-emerald/40 focus:ring-2 focus:ring-brand-emerald/10';
 const inputDisabledClass =
   'w-full cursor-not-allowed rounded-2xl border border-outline-variant bg-surface-low px-4 py-3.5 text-sm font-medium text-[#6a719a] outline-none';
 const CITY_MAX_LENGTH = 100;
@@ -466,12 +466,12 @@ export default function Profile() {
           <p
             className={cn(
               landingHeadlineSm,
-              'mb-2 text-[10px] uppercase tracking-[0.3em] text-primary',
+              'mb-2 text-[10px] uppercase tracking-[0.3em] text-brand-emerald',
             )}
           >
             Public presence
           </p>
-          <h1 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-4xl')}>
+          <h1 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-4xl')}>
             Your profile
           </h1>
           <p className={cn(landingBodyMuted, 'mt-2 max-w-xl text-sm leading-relaxed')}>
@@ -487,7 +487,7 @@ export default function Profile() {
               rel="noopener noreferrer"
               className={cn(
                 landingHeadlineSm,
-                'inline-flex items-center gap-2 text-sm text-primary transition hover:opacity-80',
+                'inline-flex items-center gap-2 text-sm text-brand-emerald transition hover:opacity-80',
               )}
             >
               View public profile
@@ -501,7 +501,7 @@ export default function Profile() {
               }
               className={cn(
                 landingBodyMuted,
-                'inline-flex items-center gap-2 text-sm transition hover:text-[#000d45]',
+                'inline-flex items-center gap-2 text-sm transition hover:text-brand-dark',
               )}
             >
               View public profile
@@ -514,7 +514,7 @@ export default function Profile() {
             disabled={saving}
             className={cn(
               landingBody,
-              'inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1161fe] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+              'inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-emerald px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
             )}
           >
             {saving ? (
@@ -556,18 +556,18 @@ export default function Profile() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={saving}
-                    className="absolute -bottom-2 -right-2 rounded-2xl bg-primary p-3 text-white shadow-lg transition hover:scale-105 active:scale-95 disabled:opacity-50"
+                    className="absolute -bottom-2 -right-2 rounded-2xl bg-brand-emerald p-3 text-white shadow-lg transition hover:scale-105 active:scale-95 disabled:opacity-50"
                   >
                     <Camera className="h-5 w-5" />
                   </button>
                 </div>
-                <h2 className={cn(landingHeadline, 'mt-4 text-lg text-[#000d45]')}>
+                <h2 className={cn(landingHeadline, 'mt-4 text-lg text-brand-dark')}>
                   {displayName}
                 </h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>{profile.email}</p>
                 {profile.location ? (
-                  <p className={cn(landingBody, 'mt-1 flex items-center justify-center gap-1 text-xs text-[#000d45]')}>
-                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                  <p className={cn(landingBody, 'mt-1 flex items-center justify-center gap-1 text-xs text-brand-dark')}>
+                    <MapPin className="h-3.5 w-3.5 text-brand-emerald" />
                     {profile.location}
                   </p>
                 ) : null}
@@ -588,12 +588,12 @@ export default function Profile() {
                   >
                     Profile strength
                   </p>
-                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                     {profileCompletion.percent}%
                   </p>
                 </div>
                 <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald"
                   aria-hidden
                 >
                   <UserIcon className="h-6 w-6" />
@@ -601,7 +601,7 @@ export default function Profile() {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-surface-low">
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  className="h-full rounded-full bg-brand-emerald transition-all duration-500"
                   style={{ width: `${profileCompletion.percent}%` }}
                 />
               </div>
@@ -629,14 +629,14 @@ export default function Profile() {
                         className={cn(
                           'flex w-full min-h-[48px] items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all',
                           isActive
-                            ? 'bg-primary text-white shadow-md shadow-primary/20'
-                            : 'text-[#000d45] hover:bg-surface-low',
+                            ? 'bg-brand-emerald text-white shadow-md shadow-brand-emerald/20'
+                            : 'text-brand-dark hover:bg-surface-low',
                         )}
                       >
                         <Icon
                           className={cn(
                             'h-4 w-4 shrink-0',
-                            isActive ? 'text-white' : 'text-primary',
+                            isActive ? 'text-white' : 'text-brand-emerald',
                           )}
                         />
                         <span className="min-w-0 flex-1">
@@ -677,11 +677,11 @@ export default function Profile() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+              <div className="rounded-2xl bg-brand-emerald/10 p-3 text-brand-emerald">
                 <UserIcon className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>Identity details</h2>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Identity details</h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
                   Your name, location, and how members can find you.
                 </p>
@@ -690,8 +690,8 @@ export default function Profile() {
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div className="space-y-2">
-                <label className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>
-                  First name <span className="text-primary">*</span>
+                <label className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>
+                  First name <span className="text-brand-emerald">*</span>
                 </label>
                 <input
                   type="text"
@@ -703,8 +703,8 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <label className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>
-                  Last name <span className="text-primary">*</span>
+                <label className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>
+                  Last name <span className="text-brand-emerald">*</span>
                 </label>
                 <input
                   type="text"
@@ -716,7 +716,7 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <label className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>Location</label>
+                <label className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>Location</label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6a719a]" />
                   <input
@@ -737,7 +737,7 @@ export default function Profile() {
 
               <div className="space-y-2">
                 <label
-                  className={cn(landingHeadlineSm, 'flex items-center gap-2 text-sm text-[#000d45]')}
+                  className={cn(landingHeadlineSm, 'flex items-center gap-2 text-sm text-brand-dark')}
                 >
                   Email
                   <span className="inline-flex items-center gap-1 rounded-full bg-surface-low px-2 py-0.5 text-[10px] font-medium text-[#6a719a]">
@@ -761,7 +761,7 @@ export default function Profile() {
                   To change your email, go to{' '}
                   <Link
                     href="/tasker-dashboard/settings?tab=email"
-                    className="font-semibold text-primary hover:underline"
+                    className="font-semibold text-brand-emerald hover:underline"
                   >
                     Settings → Email
                   </Link>
@@ -770,7 +770,7 @@ export default function Profile() {
               </div>
 
               <div className="space-y-2">
-                <label className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>PAN number</label>
+                <label className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>PAN number</label>
                 <div className="relative">
                   <CreditCard className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6a719a]" />
                   <input
@@ -786,7 +786,7 @@ export default function Profile() {
 
               <div className="space-y-2">
                 <label
-                  className={cn(landingHeadlineSm, 'flex items-center gap-2 text-sm text-[#000d45]')}
+                  className={cn(landingHeadlineSm, 'flex items-center gap-2 text-sm text-brand-dark')}
                 >
                   Username
                   {!usernameCanChange ? (
@@ -831,7 +831,7 @@ export default function Profile() {
                       href={`/users/${encodeURIComponent(profile.username.trim())}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold text-primary hover:underline"
+                      className="font-semibold text-brand-emerald hover:underline"
                     >
                       /users/{profile.username.trim()}
                     </Link>
@@ -843,9 +843,9 @@ export default function Profile() {
 
               <div className="space-y-2 md:col-span-2">
                 <label
-                  className={cn(landingHeadlineSm, 'flex items-center gap-2 text-sm text-[#000d45]')}
+                  className={cn(landingHeadlineSm, 'flex items-center gap-2 text-sm text-brand-dark')}
                 >
-                  <Cake className="h-4 w-4 text-primary" />
+                  <Cake className="h-4 w-4 text-brand-emerald" />
                   Birthday
                 </label>
                 <input
@@ -864,11 +864,11 @@ export default function Profile() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+              <div className="rounded-2xl bg-brand-emerald/10 p-3 text-brand-emerald">
                 <Info className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>About me</h2>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>About me</h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
                   A short bio helps customers understand your experience and style.
                 </p>
@@ -889,11 +889,11 @@ export default function Profile() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+              <div className="rounded-2xl bg-brand-emerald/10 p-3 text-brand-emerald">
                 <Target className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>Your goal</h2>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Your goal</h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
                   What brings you to TaskNepal?
                 </p>
@@ -934,7 +934,7 @@ export default function Profile() {
               disabled={saving}
               className={cn(
                 landingBody,
-                'inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1161fe] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+                'inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-emerald px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
               {saving ? (
@@ -988,14 +988,14 @@ export default function Profile() {
               </button>
             </div>
             <div className="space-y-2">
-              <h3 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>Delete account?</h3>
+              <h3 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Delete account?</h3>
               <p className={cn(landingBodyMuted, 'text-sm leading-relaxed')}>
                 This action cannot be undone. All your data will be permanently deleted.
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>
+              <label className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>
                 Enter your password to confirm
               </label>
               <input
@@ -1018,7 +1018,7 @@ export default function Profile() {
                 disabled={deleting}
                 className={cn(
                   landingHeadlineSm,
-                  'flex-1 rounded-2xl bg-surface-low px-6 py-3 text-sm text-[#000d45] transition hover:bg-outline-variant/30 disabled:opacity-50',
+                  'flex-1 rounded-2xl bg-surface-low px-6 py-3 text-sm text-brand-dark transition hover:bg-outline-variant/30 disabled:opacity-50',
                 )}
               >
                 Cancel

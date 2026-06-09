@@ -68,10 +68,10 @@ const createPriceIcon = (price: number) => {
   return L.divIcon({
     className: 'custom-div-icon',
     html: `<div class="flex flex-col items-center group">
-      <div class="bg-primary text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg border-2 border-white whitespace-nowrap transform group-hover:scale-110 transition-transform">
+      <div class="bg-brand-emerald text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg border-2 border-white whitespace-nowrap transform group-hover:scale-110 transition-transform">
         ${label}
       </div>
-      <div class="w-3 h-3 bg-primary rounded-full -mt-1 border-2 border-white shadow-sm"></div>
+      <div class="w-3 h-3 bg-brand-emerald rounded-full -mt-1 border-2 border-white shadow-sm"></div>
     </div>`,
     iconSize: [60, 40],
     iconAnchor: [30, 40],
@@ -227,7 +227,7 @@ function MapToolbar({
               }}
               className={`px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                 layerId === id
-                  ? 'bg-primary text-white'
+                  ? 'bg-brand-emerald text-white'
                   : 'text-on-surface hover:bg-surface-dim'
               }`}
             >
@@ -275,7 +275,7 @@ function MapToolbar({
               type="button"
               onClick={() => void handleGeolocate()}
               disabled={locating}
-              className="flex h-10 w-10 items-center justify-center text-primary transition-colors hover:bg-surface-dim disabled:opacity-60"
+              className="flex h-10 w-10 items-center justify-center text-brand-emerald transition-colors hover:bg-surface-dim disabled:opacity-60"
               title="Show my location"
               aria-label="Show my location"
             >
@@ -516,7 +516,7 @@ export default function MapView({
   if (!isClient) {
     return (
       <div className="w-full h-full min-h-[300px] flex items-center justify-center bg-surface-dim">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

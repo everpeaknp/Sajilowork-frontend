@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Manrope, Outfit } from "next/font/google";
+import { DM_Sans, Geist, Geist_Mono, Manrope, Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
@@ -28,6 +28,12 @@ const outfit = Outfit({
   weight: ["700", "800", "900"],
 });
 
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "tasknepal - Get Things Done",
   description: "Connect with skilled taskers to get your tasks done quickly and efficiently",
@@ -43,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${outfit.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${outfit.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>

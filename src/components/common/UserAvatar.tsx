@@ -99,7 +99,7 @@ export default function UserAvatar({
       }`}
     >
       <div
-        className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary/80 to-primary ${className}`}
+        className={`${sizeClasses[size]} rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald ${className}`}
       >
         {canShowImage ? (
           <img

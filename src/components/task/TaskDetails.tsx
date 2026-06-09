@@ -548,7 +548,7 @@ export default function TaskDetails({
           onClick={() => setIsSidebarMoreOptionsOpen(!isSidebarMoreOptionsOpen)}
           className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-surface-dim rounded-2xl cursor-pointer hover:bg-surface-variant/20 transition-all group border border-transparent hover:border-outline-variant"
         >
-          <span className="font-bold text-sm md:text-base text-[#000d45]">More Options</span>
+          <span className="font-bold text-sm md:text-base text-brand-dark">More Options</span>
           <ChevronLeft
             className={`w-4 h-4 md:w-5 md:h-5 transition-transform shrink-0 ${isSidebarMoreOptionsOpen ? '-rotate-90' : 'rotate-90'}`}
           />
@@ -654,7 +654,7 @@ export default function TaskDetails({
                 <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-2">
                   Task Budget
                 </p>
-                <p className={`${landingHeadline} mb-4 break-words text-3xl text-[#000d45] sm:mb-6 sm:text-4xl md:mb-8 md:text-5xl lg:text-6xl`}>
+                <p className={`${landingHeadline} mb-4 break-words text-3xl text-brand-dark sm:mb-6 sm:text-4xl md:mb-8 md:text-5xl lg:text-6xl`}>
                   {formatNPR(task.budget_amount)}
                 </p>
                 {canSubmitOfferOnTask(task, user?.id) ? (
@@ -662,14 +662,14 @@ export default function TaskDetails({
                     <button
                       type="button"
                       disabled
-                      className="w-full py-3 md:py-3.5 bg-blue-600 text-white font-bold text-base md:text-lg rounded-full border border-blue-700 shadow-sm mb-4 cursor-not-allowed"
+                      className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full border border-brand-dark shadow-sm mb-4 cursor-not-allowed"
                     >
                       Offer sent
                     </button>
                   ) : (
                   <button
                     onClick={() => setShowMakeOfferModal(true)}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4"
                   >
                     Make an offer
                   </button>
@@ -685,7 +685,7 @@ export default function TaskDetails({
                 ) : (
                   <button
                     onClick={() => (window.location.href = '/signin')}
-                    className="w-full py-3 md:py-3.5 bg-primary text-white font-bold text-base md:text-lg rounded-full hover:bg-primary/90 transition-all shadow-md active:scale-95 mb-4"
+                    className="w-full py-3 md:py-3.5 bg-brand-emerald text-white font-bold text-base md:text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-md active:scale-95 mb-4"
                   >
                     Sign in to make an offer
                   </button>
@@ -715,7 +715,7 @@ export default function TaskDetails({
                   Open
                 </span>
                 <span className={`px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider ${
-                  task.status === 'assigned' ? 'bg-blue-100 text-blue-700' : 'text-on-surface-variant opacity-30'
+                  task.status === 'assigned' ? 'bg-emerald-100 text-emerald-700' : 'text-on-surface-variant opacity-30'
                 }`}>
                   Assigned
                 </span>
@@ -725,7 +725,7 @@ export default function TaskDetails({
                   Completed
                 </span>
               </div>
-              <h1 className={`${landingHeadline} mb-2 break-words text-xl leading-tight text-[#000d45] sm:text-2xl md:text-3xl lg:text-4xl`}>
+              <h1 className={`${landingHeadline} mb-2 break-words text-xl leading-tight text-brand-dark sm:text-2xl md:text-3xl lg:text-4xl`}>
                 {displayTitle}
               </h1>
             </div>
@@ -740,7 +740,7 @@ export default function TaskDetails({
                   <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-1">
                     Location
                   </p>
-                  <p className="font-bold text-primary text-base md:text-lg">
+                  <p className="font-bold text-brand-emerald text-base md:text-lg">
                     {formatTaskLocationShort(task)}
                   </p>
                   {(() => {
@@ -772,7 +772,7 @@ export default function TaskDetails({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary font-bold text-xs md:text-sm hover:underline inline-flex items-center gap-1"
+                        className="text-brand-emerald font-bold text-xs md:text-sm hover:underline inline-flex items-center gap-1"
                       >
                         View map
                         <ExternalLink className="w-3 h-3 md:w-3.5 md:h-3.5" />
@@ -790,7 +790,7 @@ export default function TaskDetails({
                   <p className="text-[10px] md:text-[11px] font-bold text-on-surface-variant tracking-wider uppercase mb-1">
                     To be done on
                   </p>
-                  <p className="font-bold text-primary text-base md:text-lg">
+                  <p className="font-bold text-brand-emerald text-base md:text-lg">
                     {task.due_date ? new Date(task.due_date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Flexible'}
                   </p>
                   {timeSlot ? (
@@ -804,7 +804,7 @@ export default function TaskDetails({
 
             {/* Details */}
             <div className="min-w-0 overflow-hidden">
-              <h2 className="text-xl md:text-2xl font-bold text-[#000d45] mb-3 md:mb-4">Details</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-brand-dark mb-3 md:mb-4">Details</h2>
               <p className={`text-on-surface-variant leading-relaxed text-sm sm:text-base md:text-lg ${USER_TEXT_CLASS}`}>
                 {viewTask.description}
               </p>
@@ -812,7 +812,7 @@ export default function TaskDetails({
 
             {attachments.length > 0 && (
               <div className="min-w-0 overflow-hidden">
-                <h3 className="text-lg md:text-xl font-bold text-[#000d45] mb-3">Images</h3>
+                <h3 className="text-lg md:text-xl font-bold text-brand-dark mb-3">Images</h3>
                 <div className="flex flex-wrap gap-3">
                   {attachments.map((a) => {
                     const imageUrl = getMediaUrl(a.file_url);
@@ -844,8 +844,8 @@ export default function TaskDetails({
                   onClick={() => setActiveTab('offers')}
                   className={`flex-1 min-w-0 px-4 sm:px-8 md:px-12 py-2 md:py-3 rounded-full font-bold text-sm md:text-base transition-all ${
                     activeTab === 'offers' 
-                      ? 'bg-[#000d45] text-white shadow-lg' 
-                      : 'bg-transparent text-[#000d45]/70 hover:bg-[#fff3bf] hover:text-[#000d45]'
+                      ? 'bg-brand-dark text-white shadow-lg' 
+                      : 'bg-transparent text-brand-dark/70 hover:bg-[#fff3bf] hover:text-brand-dark'
                   }`}
                 >
                   Offers
@@ -854,8 +854,8 @@ export default function TaskDetails({
                   onClick={() => setActiveTab('questions')}
                   className={`flex-1 min-w-0 px-4 sm:px-8 md:px-12 py-2 md:py-3 rounded-full font-bold text-sm md:text-base transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
                     activeTab === 'questions' 
-                      ? 'bg-[#000d45] text-white shadow-lg' 
-                      : 'bg-transparent text-[#000d45]/70 hover:bg-[#fff3bf] hover:text-[#000d45]'
+                      ? 'bg-brand-dark text-white shadow-lg' 
+                      : 'bg-transparent text-brand-dark/70 hover:bg-[#fff3bf] hover:text-brand-dark'
                   }`}
                 >
                   Questions{' '}
@@ -870,11 +870,11 @@ export default function TaskDetails({
                 <div className="space-y-4 md:space-y-6">
                   {loadingBids ? (
                     <div className="flex justify-center py-12">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                      <Loader2 className="w-8 h-8 animate-spin text-brand-emerald" />
                     </div>
                   ) : !user && (task.bid_count || task.bids_count || 0) > 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 md:py-12 text-center">
-                      <h3 className="text-xl md:text-2xl font-bold text-[#000d45] mb-2">
+                      <h3 className="text-xl md:text-2xl font-bold text-brand-dark mb-2">
                         {task.bid_count || task.bids_count} offer
                         {(task.bid_count || task.bids_count) === 1 ? '' : 's'} on this task
                       </h3>
@@ -884,7 +884,7 @@ export default function TaskDetails({
                       <button
                         type="button"
                         onClick={() => router.push('/signin')}
-                        className="px-6 py-2.5 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition-colors"
+                        className="px-6 py-2.5 bg-brand-emerald text-white font-bold rounded-full hover:bg-brand-emerald/90 transition-colors"
                       >
                         Sign in to view offers
                       </button>
@@ -895,7 +895,7 @@ export default function TaskDetails({
                         className="mb-4 h-24 w-24 stroke-[1.25] text-surface-variant md:mb-6 md:h-32 md:w-32"
                         aria-hidden
                       />
-                      <h3 className="text-xl md:text-2xl font-bold text-[#000d45] mb-2">No offers yet</h3>
+                      <h3 className="text-xl md:text-2xl font-bold text-brand-dark mb-2">No offers yet</h3>
                       <p className="text-on-surface-variant text-base md:text-lg">
                         {canSubmitOfferOnTask(task, user?.id)
                           ? 'Make the first offer and get ahead of the competition!'
@@ -939,7 +939,7 @@ export default function TaskDetails({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <h4 className="font-bold text-base md:text-lg text-[#000d45]">
+                                  <h4 className="font-bold text-base md:text-lg text-brand-dark">
                                     {taskerName}
                                   </h4>
                                   {rating != null && Number(rating) > 0 && (
@@ -967,7 +967,7 @@ export default function TaskDetails({
                                 </div>
                               </div>
                               <div className="text-left sm:text-right w-full sm:w-auto">
-                                <p className="text-2xl md:text-3xl font-bold text-[#000d45]">
+                                <p className="text-2xl md:text-3xl font-bold text-brand-dark">
                                   {formatNPR(bid.amount)}
                                 </p>
                               </div>
@@ -989,7 +989,7 @@ export default function TaskDetails({
                                 type="button"
                                 disabled={acceptingBidId === bid.id}
                                 onClick={() => handleAcceptBid(bid)}
-                                className="w-full py-2 md:py-3 bg-primary text-white font-bold text-sm md:text-base rounded-full hover:bg-primary/90 transition-all disabled:opacity-60"
+                                className="w-full py-2 md:py-3 bg-brand-emerald text-white font-bold text-sm md:text-base rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-60"
                               >
                                 {acceptingBidId === bid.id ? 'Accepting…' : 'Accept offer'}
                               </button>
@@ -1012,7 +1012,7 @@ export default function TaskDetails({
                                   }
                                   router.push(`/message?bid=${bid.id}&tasker=${taskerId}`);
                                 }}
-                                className="w-full py-2 md:py-3 border-2 border-primary text-primary font-bold text-sm md:text-base rounded-full hover:bg-primary/5 transition-all"
+                                className="w-full py-2 md:py-3 border-2 border-brand-emerald text-brand-emerald font-bold text-sm md:text-base rounded-full hover:bg-brand-emerald/5 transition-all"
                               >
                                 Message
                               </button>
@@ -1031,7 +1031,7 @@ export default function TaskDetails({
                   {/* Ask — taskers / visitors only */}
                   {!isOwner && (
                     <div className="border border-outline-variant rounded-2xl p-4 md:p-6 min-w-0 overflow-hidden">
-                      <h3 className="font-bold text-base md:text-lg text-[#000d45] mb-3 md:mb-4">Ask a question</h3>
+                      <h3 className="font-bold text-base md:text-lg text-brand-dark mb-3 md:mb-4">Ask a question</h3>
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 md:p-4 mb-3 md:mb-4 flex items-start gap-2 md:gap-3 min-w-0">
                         <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-amber-600 shrink-0 mt-0.5" />
                         <p className={`text-xs md:text-sm text-amber-900 ${USER_TEXT_CLASS}`}>
@@ -1043,13 +1043,13 @@ export default function TaskDetails({
                           value={questionText}
                           onChange={(e) => setQuestionText(e.target.value)}
                           placeholder="Type your question here..."
-                          className="w-full min-h-[100px] md:min-h-[120px] p-3 md:p-4 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-primary transition-all text-on-surface text-sm md:text-base"
+                          className="w-full min-h-[100px] md:min-h-[120px] p-3 md:p-4 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-brand-emerald transition-all text-on-surface text-sm md:text-base"
                         />
                         <button
                           type="button"
                           disabled={!questionText.trim() || submittingQuestion}
                           onClick={handleAskQuestion}
-                          className="absolute bottom-3 right-3 md:bottom-4 md:right-4 p-2 md:p-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="absolute bottom-3 right-3 md:bottom-4 md:right-4 p-2 md:p-3 bg-brand-emerald text-white rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {submittingQuestion ? (
                             <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
@@ -1069,13 +1069,13 @@ export default function TaskDetails({
 
                   {/* Existing Questions */}
                   <div className="space-y-3 md:space-y-4">
-                    <h3 className="font-bold text-lg md:text-xl text-[#000d45]">
+                    <h3 className="font-bold text-lg md:text-xl text-brand-dark">
                       Previous questions ({questions.length})
                     </h3>
 
                     {loadingQuestions ? (
                       <div className="flex justify-center py-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <Loader2 className="w-8 h-8 animate-spin text-brand-emerald" />
                       </div>
                     ) : questions.length === 0 ? (
                       <p className="text-on-surface-variant text-sm md:text-base">
@@ -1115,7 +1115,7 @@ export default function TaskDetails({
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <h4 className="font-bold text-sm md:text-base text-[#000d45]">
+                                  <h4 className="font-bold text-sm md:text-base text-brand-dark">
                                     {askerName}
                                   </h4>
                                   {q.created_at && (
@@ -1143,7 +1143,7 @@ export default function TaskDetails({
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                      <h4 className="font-bold text-xs md:text-sm text-[#000d45]">
+                                      <h4 className="font-bold text-xs md:text-sm text-brand-dark">
                                         {posterName}
                                       </h4>
                                       {q.answered_at && (
@@ -1160,7 +1160,7 @@ export default function TaskDetails({
                               </div>
                             ) : isOwner ? (
                               <div className="ml-4 sm:ml-8 md:ml-16 mt-3 md:mt-4 min-w-0">
-                                <p className="text-xs md:text-sm font-semibold text-[#000d45] mb-2">
+                                <p className="text-xs md:text-sm font-semibold text-brand-dark mb-2">
                                   Your reply
                                 </p>
                                 <div className="relative">
@@ -1173,7 +1173,7 @@ export default function TaskDetails({
                                       }))
                                     }
                                     placeholder="Write your answer..."
-                                    className="w-full min-h-[88px] md:min-h-[100px] p-3 md:p-4 pr-14 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-primary transition-all text-on-surface text-sm md:text-base"
+                                    className="w-full min-h-[88px] md:min-h-[100px] p-3 md:p-4 pr-14 border-2 border-outline-variant rounded-xl resize-none focus:outline-none focus:border-brand-emerald transition-all text-on-surface text-sm md:text-base"
                                   />
                                   <button
                                     type="button"
@@ -1182,7 +1182,7 @@ export default function TaskDetails({
                                       submittingAnswerId === q.id
                                     }
                                     onClick={() => handleAnswerQuestion(q.id)}
-                                    className="absolute bottom-3 right-3 p-2 md:p-2.5 bg-primary text-white rounded-full hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="absolute bottom-3 right-3 p-2 md:p-2.5 bg-brand-emerald text-white rounded-full hover:bg-brand-emerald/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Post reply"
                                   >
                                     {submittingAnswerId === q.id ? (
@@ -1215,7 +1215,7 @@ export default function TaskDetails({
 
             {/* Cancellation Policy */}
             <div className="pt-6 md:pt-10 border-t border-outline-variant">
-              <h3 className="text-lg md:text-xl font-bold text-[#000d45] mb-3 md:mb-4">Cancellation policy</h3>
+              <h3 className="text-lg md:text-xl font-bold text-brand-dark mb-3 md:mb-4">Cancellation policy</h3>
               <p className="text-on-surface-variant text-sm md:text-lg mb-3 md:mb-4">
                 If you are responsible for cancelling this task, a Cancellation Fee will be deducted from your next payment payout(s).
               </p>
@@ -1223,7 +1223,7 @@ export default function TaskDetails({
                 href="/cancellation-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary font-bold text-sm md:text-lg hover:underline inline-block"
+                className="text-brand-emerald font-bold text-sm md:text-lg hover:underline inline-block"
               >
                 Learn more
               </Link>
@@ -1238,7 +1238,7 @@ export default function TaskDetails({
               <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-6">
                 <button 
                   onClick={onClose}
-                  className="flex items-center gap-2 text-primary font-bold hover:bg-primary/5 px-4 md:px-6 py-2 md:py-3 rounded-xl transition-all text-sm md:text-base"
+                  className="flex items-center gap-2 text-brand-emerald font-bold hover:bg-brand-emerald/5 px-4 md:px-6 py-2 md:py-3 rounded-xl transition-all text-sm md:text-base"
                 >
                   <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                   <span>Back</span>
@@ -1248,7 +1248,7 @@ export default function TaskDetails({
                   aria-label={`${viewsCount} views on this task`}
                 >
                   <Eye className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
-                  <span className="font-semibold text-[#000d45]">
+                  <span className="font-semibold text-brand-dark">
                     {loadingDetailTask && !detailTask ? '…' : viewsCount.toLocaleString()}
                   </span>
                   <span>{viewsCount === 1 ? 'view' : 'views'}</span>

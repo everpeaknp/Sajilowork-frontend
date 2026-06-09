@@ -135,7 +135,7 @@ export default function ServiceFeatures() {
           <div className="space-y-4 sm:space-y-6">
             {STEPS.map((text, i) => (
               <div key={i} className="flex items-start gap-3 sm:gap-4">
-                <div className="mt-0.5 shrink-0 rounded-full bg-[#1161fe]/10 p-1 text-[#1161fe] sm:mt-1">
+                <div className="mt-0.5 shrink-0 rounded-full bg-brand-emerald/10 p-1 text-brand-emerald sm:mt-1">
                   <CheckCircle2 size={20} />
                 </div>
                 <p className={`${landingBodyMuted} text-base leading-relaxed sm:text-lg`}>{text}</p>
@@ -148,7 +148,7 @@ export default function ServiceFeatures() {
               <motion.span
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`${landingBody} flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-[#1161fe] px-8 py-4 text-base font-semibold text-white shadow-xl shadow-[#1161fe]/25 transition-all hover:bg-blue-600 sm:inline-flex sm:px-10 sm:py-5 sm:text-lg`}
+                className={`${landingBody} flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full bg-brand-emerald px-8 py-4 text-base font-semibold text-white shadow-xl shadow-brand-emerald/25 transition-all hover:bg-brand-dark sm:inline-flex sm:px-10 sm:py-5 sm:text-lg`}
               >
                 Post your task
               </motion.span>
@@ -178,7 +178,7 @@ export default function ServiceFeatures() {
               <Link
                 key={`${cat.name}-${i}`}
                 href={cat.name === "More" ? cat.href : postTaskHref(cat.name)}
-                className="group/card flex min-h-[88px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl bg-[#eef4ff]/50 p-4 shadow-sm transition-all hover:bg-[#1161fe] hover:text-white sm:min-h-0 sm:gap-3 sm:rounded-2xl sm:p-6"
+                className="group/card flex min-h-[88px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl bg-emerald-50/50 p-4 shadow-sm transition-all hover:bg-brand-emerald hover:text-white sm:min-h-0 sm:gap-3 sm:rounded-2xl sm:p-6"
               >
                 <div className="text-gray-400 group-hover/card:text-white transition-colors">
                   {cat.name === "More" ? <Plus size={28} /> : iconForCategory(cat.name)}

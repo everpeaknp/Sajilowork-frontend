@@ -48,7 +48,7 @@ export default function CategoryDirectory() {
           <h2 className={`${landingHeadline} text-2xl sm:text-4xl`}>Top Categories</h2>
           <Link
             href="/discover"
-            className={`${landingBody} text-sm font-semibold text-[#1161fe] hover:underline`}
+            className={`${landingBody} text-sm font-semibold text-brand-emerald hover:underline`}
           >
             Explore all services →
           </Link>
@@ -62,7 +62,7 @@ export default function CategoryDirectory() {
                   <li key={`${group.title}-${link.label}`}>
                     <Link
                       href={link.href}
-                      className={`${landingBody} text-sm text-gray-500 transition-colors hover:text-[#1161fe]`}
+                      className={`${landingBody} text-sm text-gray-500 transition-colors hover:text-brand-emerald`}
                     >
                       {link.label}
                     </Link>

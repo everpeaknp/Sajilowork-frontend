@@ -7,11 +7,11 @@ import { landingBody, landingBodyMuted, landingHeadline, landingHeadlineSm } fro
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#005fff] via-[#0047ff] to-[#03113c] pt-16 pb-8 text-white sm:pb-10 md:pb-12">
-      {/* Decorative background visual ambient circles and polygons (match Discover hero) */}
-      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-sky-400 via-indigo-500 to-transparent opacity-20" />
-      <div className="pointer-events-none absolute top-1/4 right-0 hidden h-48 w-48 animate-pulse rounded-full bg-cyan-400 opacity-10 mix-blend-screen blur-3xl filter sm:block sm:h-64 sm:w-64" />
-      <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-blue-500 opacity-15 mix-blend-screen blur-3xl filter sm:h-72 sm:w-72" />
+    <section className="relative overflow-hidden bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald pt-16 pb-8 text-white sm:pb-10 md:pb-12">
+      {/* Decorative background visual ambient circles */}
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-300/40 via-brand-emerald/20 to-transparent opacity-30" />
+      <div className="pointer-events-none absolute top-1/4 right-0 hidden h-48 w-48 animate-pulse rounded-full bg-emerald-400 opacity-10 mix-blend-screen blur-3xl filter sm:block sm:h-64 sm:w-64" />
+      <div className="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-brand-emerald opacity-15 mix-blend-screen blur-3xl filter sm:h-72 sm:w-72" />
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-16">
           <motion.div
@@ -25,7 +25,7 @@ export default function Hero() {
               Get Anything Done
             </h1>
 
-            <p className={`${landingBody} mt-4 max-w-xl text-sm leading-relaxed font-medium text-blue-100/90 sm:mt-5 sm:text-base md:text-lg`}>
+            <p className={`${landingBody} mt-4 max-w-xl text-sm leading-relaxed font-medium text-emerald-100/90 sm:mt-5 sm:text-base md:text-lg`}>
               The ultimate marketplace to outsource tasks, find local services, and reclaim your time. From cleaning to coding, we've got you covered.
             </p>
 
@@ -40,7 +40,7 @@ export default function Hero() {
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-4">
               <Link
                 href="/post-task"
-                className={`${landingBody} inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-center text-sm font-bold text-[#061257] shadow-xl shadow-black/10 transition-all hover:bg-white/95 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:w-auto sm:px-8 sm:py-4 sm:text-base`}
+                className={`${landingBody} inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-center text-sm font-bold text-brand-dark shadow-xl shadow-black/10 transition-all hover:bg-white/95 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:w-auto sm:px-8 sm:py-4 sm:text-base`}
               >
                 Post a task for free
               </Link>
@@ -67,7 +67,7 @@ export default function Hero() {
                 className="relative aspect-[4/3] w-full rounded-2xl border border-white/15 object-cover shadow-2xl sm:aspect-square sm:rounded-[2.5rem]"
               />
               <div className="absolute bottom-3 left-3 rounded-xl bg-white px-3 py-2 shadow-2xl sm:-bottom-6 sm:left-6 sm:rounded-2xl sm:px-4 sm:py-3">
-                <p className={`${landingHeadlineSm} text-[10px] text-[#061257] sm:text-xs`}>100% Verified</p>
+                <p className={`${landingHeadlineSm} text-[10px] text-brand-dark sm:text-xs`}>100% Verified</p>
                 <p className={`${landingBodyMuted} mt-0.5 text-[10px] sm:text-[11px]`}>Trust & safety first</p>
               </div>
             </div>
@@ -76,7 +76,7 @@ export default function Hero() {
       </div>
 
       {/* Decorative accent */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[#1161fe]/10 to-transparent blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-brand-emerald/10 to-transparent blur-3xl pointer-events-none"></div>
     </section>
   );
 }

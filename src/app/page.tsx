@@ -14,7 +14,7 @@ import HomeAuthRedirect from "@/app/_components/HomeAuthRedirect";
 export default function Home() {
   return (
     <div
-      className={`${landingPageRoot} ${landingPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white selection:bg-[#1161fe] selection:text-white`}
+      className={`${landingPageRoot} ${landingPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white selection:bg-brand-emerald selection:text-white`}
     >
       <HomeAuthRedirect />
       <Navbar />

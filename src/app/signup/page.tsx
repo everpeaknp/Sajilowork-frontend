@@ -113,7 +113,7 @@ function SignUpForm() {
         >
           {/* Logo */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-[#000d45] mb-2">Create your account</h2>
+            <h2 className="text-3xl font-bold text-brand-dark mb-2">Create your account</h2>
             <p className="text-on-surface-variant">Get started with tasknepal</p>
           </div>
 
@@ -123,7 +123,7 @@ function SignUpForm() {
               {/* Name Inputs */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-[#000d45] mb-2">
+                  <label className="block text-sm font-semibold text-brand-dark mb-2">
                     First name
                   </label>
                   <div className="relative">
@@ -135,7 +135,7 @@ function SignUpForm() {
                       className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                         errors.first_name 
                           ? 'border-red-500 focus:border-red-500' 
-                          : 'border-outline-variant focus:border-primary'
+                          : 'border-outline-variant focus:border-brand-emerald'
                       }`}
                     />
                   </div>
@@ -144,7 +144,7 @@ function SignUpForm() {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-[#000d45] mb-2">
+                  <label className="block text-sm font-semibold text-brand-dark mb-2">
                     Last name
                   </label>
                   <div className="relative">
@@ -156,7 +156,7 @@ function SignUpForm() {
                       className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                         errors.last_name 
                           ? 'border-red-500 focus:border-red-500' 
-                          : 'border-outline-variant focus:border-primary'
+                          : 'border-outline-variant focus:border-brand-emerald'
                       }`}
                     />
                   </div>
@@ -168,7 +168,7 @@ function SignUpForm() {
 
               {/* Email Input */}
             <div>
-              <label className="block text-sm font-semibold text-[#000d45] mb-2">
+              <label className="block text-sm font-semibold text-brand-dark mb-2">
                 Email address
               </label>
               <div className="relative">
@@ -180,7 +180,7 @@ function SignUpForm() {
                   className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                     errors.email 
                       ? 'border-red-500 focus:border-red-500' 
-                      : 'border-outline-variant focus:border-primary'
+                      : 'border-outline-variant focus:border-brand-emerald'
                   }`}
                 />
               </div>
@@ -191,7 +191,7 @@ function SignUpForm() {
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-semibold text-[#000d45] mb-2">
+              <label className="block text-sm font-semibold text-brand-dark mb-2">
                 Password
               </label>
               <div className="relative">
@@ -203,13 +203,13 @@ function SignUpForm() {
                   className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                     errors.password 
                       ? 'border-red-500 focus:border-red-500' 
-                      : 'border-outline-variant focus:border-primary'
+                      : 'border-outline-variant focus:border-brand-emerald'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-brand-emerald transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -221,7 +221,7 @@ function SignUpForm() {
 
             {/* Confirm Password Input */}
             <div>
-              <label className="block text-sm font-semibold text-[#000d45] mb-2">
+              <label className="block text-sm font-semibold text-brand-dark mb-2">
                 Confirm password
               </label>
               <div className="relative">
@@ -233,13 +233,13 @@ function SignUpForm() {
                   className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                     errors.password_confirm 
                       ? 'border-red-500 focus:border-red-500' 
-                      : 'border-outline-variant focus:border-primary'
+                      : 'border-outline-variant focus:border-brand-emerald'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-brand-emerald transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -251,7 +251,7 @@ function SignUpForm() {
 
             {/* Role Selection */}
             <div>
-              <label className="block text-sm font-semibold text-[#000d45] mb-2">
+              <label className="block text-sm font-semibold text-brand-dark mb-2">
                 I want to
               </label>
               <select
@@ -259,7 +259,7 @@ function SignUpForm() {
                 className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                   errors.role 
                     ? 'border-red-500 focus:border-red-500' 
-                    : 'border-outline-variant focus:border-primary'
+                    : 'border-outline-variant focus:border-brand-emerald'
                 }`}
               >
                 <option value="customer">Post tasks and hire taskers</option>
@@ -272,7 +272,7 @@ function SignUpForm() {
 
             {/* Password Requirements */}
             <div className="bg-surface-dim/30 rounded-xl p-4">
-              <p className="text-sm font-semibold text-[#000d45] mb-2">Password must contain:</p>
+              <p className="text-sm font-semibold text-brand-dark mb-2">Password must contain:</p>
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm text-on-surface-variant">
                   <CheckCircle className={`w-4 h-4 ${password?.length >= 8 ? 'text-green-500' : 'text-gray-300'}`} />
@@ -299,15 +299,15 @@ function SignUpForm() {
                 <input
                   type="checkbox"
                   {...register('terms_accepted')}
-                  className="w-5 h-5 mt-0.5 rounded border-2 border-outline-variant text-primary focus:ring-2 focus:ring-primary/20"
+                  className="w-5 h-5 mt-0.5 rounded border-2 border-outline-variant text-brand-emerald focus:ring-2 focus:ring-brand-emerald/20"
                 />
                 <span className="text-sm text-on-surface-variant">
                   I agree to the{' '}
-                  <Link href="/terms" className="font-semibold text-primary hover:underline">
+                  <Link href="/terms" className="font-semibold text-brand-emerald hover:underline">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="font-semibold text-primary hover:underline">
+                  <Link href="/privacy" className="font-semibold text-brand-emerald hover:underline">
                     Privacy Policy
                   </Link>
                 </span>
@@ -321,7 +321,7 @@ function SignUpForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-primary text-white font-bold text-lg rounded-full hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-brand-emerald text-white font-bold text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
@@ -361,7 +361,7 @@ function SignUpForm() {
           {/* Sign In Link */}
           <p className="text-center mt-6 text-on-surface-variant">
             Already have an account?{' '}
-            <Link href="/signin" className="font-bold text-primary hover:underline">
+            <Link href="/signin" className="font-bold text-brand-emerald hover:underline">
               Sign in
             </Link>
           </p>
@@ -380,7 +380,7 @@ export default function SignUpPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-emerald"></div>
       </div>
     }>
       <SignUpForm />

@@ -120,7 +120,7 @@ export default function UserDirectory() {
                     setPage(1);
                   }}
                   placeholder="Name, username, bio, or city…"
-                  className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-[#005fff] focus:ring-2 focus:ring-[#005fff]/20"
+                  className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/20"
                 />
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function UserDirectory() {
                   setPage(1);
                 }}
                 placeholder="e.g. Kathmandu"
-                className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm shadow-sm outline-none transition focus:border-[#005fff] focus:ring-2 focus:ring-[#005fff]/20"
+                className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm shadow-sm outline-none transition focus:border-brand-emerald focus:ring-2 focus:ring-brand-emerald/20"
               />
             </div>
 
@@ -220,7 +220,7 @@ export default function UserDirectory() {
                   setVerifiedOnly(e.target.checked);
                   setPage(1);
                 }}
-                className="h-4 w-4 rounded border-gray-300 text-[#005fff] focus:ring-[#005fff]"
+                className="h-4 w-4 rounded border-gray-300 text-brand-emerald focus:ring-brand-emerald"
               />
               Verified taskers only
             </label>
@@ -268,7 +268,7 @@ export default function UserDirectory() {
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-[#005fff] hover:text-[#005fff] disabled:opacity-40"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-brand-emerald hover:text-brand-emerald disabled:opacity-40"
             >
               Previous
             </button>
@@ -277,7 +277,7 @@ export default function UserDirectory() {
               type="button"
               disabled={users.length < 24}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-[#005fff] hover:text-[#005fff] disabled:opacity-40"
+              className="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-brand-emerald hover:text-brand-emerald disabled:opacity-40"
             >
               Next
             </button>

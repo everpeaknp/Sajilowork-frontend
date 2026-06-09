@@ -37,7 +37,7 @@ export const MOCK_TASKS: Task[] = [
     description: "Mow the lawn in the front yard and trim the edges. Also need some weeding done in the small flower bed near the porch. Clippings can be put in our green bin.",
     hasOffers: false,
     isAssigned: false,
-    statusColor: "bg-blue-500",
+    statusColor: "bg-brand-emerald",
     user: {
       name: "Sarah J.",
       avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",

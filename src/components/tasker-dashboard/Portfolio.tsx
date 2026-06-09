@@ -283,12 +283,12 @@ export default function Portfolio() {
         <p
           className={cn(
             landingHeadlineSm,
-            'mb-2 text-[10px] uppercase tracking-[0.3em] text-primary',
+            'mb-2 text-[10px] uppercase tracking-[0.3em] text-brand-emerald',
           )}
         >
           Professional profile
         </p>
-        <h1 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-4xl')}>Portfolio</h1>
+        <h1 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-4xl')}>Portfolio</h1>
         <p className={cn(landingBodyMuted, 'mt-2 max-w-xl text-sm leading-relaxed')}>
           Show off your best work. Uploads are reviewed by our team before they appear on your
           public profile.
@@ -297,11 +297,11 @@ export default function Portfolio() {
 
       <section className="rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8">
         <div className="mb-6 flex items-start gap-4">
-          <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+          <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
             <Upload className="size-6" />
           </div>
           <div>
-            <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>Upload portfolio items</h2>
+            <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Upload portfolio items</h2>
             <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
               Select files first, then confirm upload when you are ready.
             </p>
@@ -309,12 +309,12 @@ export default function Portfolio() {
         </div>
 
         <div className="space-y-5">
-          <div className="flex gap-4 rounded-2xl border border-primary/10 bg-surface-low/60 p-4">
-            <AlertCircle className="size-5 shrink-0 text-primary" aria-hidden />
+          <div className="flex gap-4 rounded-2xl border border-brand-emerald/10 bg-surface-low/60 p-4">
+            <AlertCircle className="size-5 shrink-0 text-brand-emerald" aria-hidden />
             <p className={cn(landingBodyMuted, 'text-sm leading-relaxed')}>
-              Up to <span className="font-semibold text-[#000d45]">{MAX_ITEMS}</span> items.
-              Formats: <span className="font-semibold text-[#000d45]">JPG, PNG, PDF, TXT</span>{' '}
-              (max <span className="font-semibold text-[#000d45]">5MB</span> each). Avoid personal
+              Up to <span className="font-semibold text-brand-dark">{MAX_ITEMS}</span> items.
+              Formats: <span className="font-semibold text-brand-dark">JPG, PNG, PDF, TXT</span>{' '}
+              (max <span className="font-semibold text-brand-dark">5MB</span> each). Avoid personal
               details you do not want shared publicly.
             </p>
           </div>
@@ -336,7 +336,7 @@ export default function Portfolio() {
               disabled={uploading || atLimit}
               className={cn(
                 landingBody,
-                'flex min-h-[52px] flex-1 cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-outline-variant bg-white px-4 transition-colors hover:border-primary/40 hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50',
+                'flex min-h-[52px] flex-1 cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-outline-variant bg-white px-4 transition-colors hover:border-brand-emerald/40 hover:bg-brand-emerald/5 disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
               <FileText className="size-5 shrink-0 text-gray-400" aria-hidden />
@@ -355,7 +355,7 @@ export default function Portfolio() {
               disabled={uploading || atLimit}
               className={cn(
                 landingBody,
-                'inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-2xl border border-outline-variant bg-white px-6 text-sm font-semibold text-[#000d45] transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-50',
+                'inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-2xl border border-outline-variant bg-white px-6 text-sm font-semibold text-brand-dark transition hover:bg-surface-low disabled:cursor-not-allowed disabled:opacity-50',
               )}
             >
               Select files
@@ -365,7 +365,7 @@ export default function Portfolio() {
           {pendingFiles.length > 0 ? (
             <div className="space-y-4 rounded-2xl border border-outline-variant bg-surface-low/40 p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className={cn(landingHeadlineSm, 'text-sm text-[#000d45]')}>
+                <p className={cn(landingHeadlineSm, 'text-sm text-brand-dark')}>
                   Ready to upload ({pendingFiles.length})
                 </p>
                 <button
@@ -391,7 +391,7 @@ export default function Portfolio() {
                       key={`${file.name}-${file.size}-${index}`}
                       className="flex items-center gap-4 rounded-2xl border border-outline-variant/70 bg-white p-3"
                     >
-                      <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-50 text-primary">
+                      <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-50 text-brand-emerald">
                         {preview ? (
                           <img
                             src={preview}
@@ -403,7 +403,7 @@ export default function Portfolio() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={cn(landingHeadlineSm, 'truncate text-sm text-[#000d45]')}>
+                        <p className={cn(landingHeadlineSm, 'truncate text-sm text-brand-dark')}>
                           {file.name}
                         </p>
                         <p className={cn(landingBodyMuted, 'text-xs')}>
@@ -434,7 +434,7 @@ export default function Portfolio() {
                   disabled={uploading}
                   className={cn(
                     landingBody,
-                    'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#1161fe] px-8 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50',
+                    'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-brand-emerald px-8 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50',
                   )}
                 >
                   {uploading ? (
@@ -460,10 +460,10 @@ export default function Portfolio() {
           <h2
             className={cn(
               landingHeadline,
-              'flex items-center gap-3 text-xl text-[#000d45]',
+              'flex items-center gap-3 text-xl text-brand-dark',
             )}
           >
-            <ImageIcon className="size-6 text-primary" aria-hidden />
+            <ImageIcon className="size-6 text-brand-emerald" aria-hidden />
             Your items
           </h2>
           <span
@@ -478,7 +478,7 @@ export default function Portfolio() {
 
         {loading ? (
           <div className="rounded-[32px] border border-outline-variant bg-white py-16 text-center shadow-sm">
-            <Loader2 className="mx-auto mb-4 size-10 animate-spin text-primary" aria-hidden />
+            <Loader2 className="mx-auto mb-4 size-10 animate-spin text-brand-emerald" aria-hidden />
             <p className={cn(landingBodyMuted, 'text-sm')}>Loading portfolio…</p>
           </div>
         ) : portfolio.length === 0 ? (
@@ -498,7 +498,7 @@ export default function Portfolio() {
               disabled={atLimit}
               className={cn(
                 landingBody,
-                'mt-6 inline-flex min-h-[48px] items-center justify-center rounded-2xl bg-[#1161fe] px-8 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 disabled:opacity-50',
+                'mt-6 inline-flex min-h-[48px] items-center justify-center rounded-2xl bg-brand-emerald px-8 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 disabled:opacity-50',
               )}
             >
               Select files
@@ -524,13 +524,13 @@ export default function Portfolio() {
                       />
                     ) : (
                       <div className="flex flex-col items-center gap-4 p-6">
-                        <div className="rounded-2xl bg-white p-5 text-primary shadow-sm">
+                        <div className="rounded-2xl bg-white p-5 text-brand-emerald shadow-sm">
                           <FileText className="size-10" />
                         </div>
                         <span
                           className={cn(
                             landingHeadlineSm,
-                            'max-w-[180px] truncate text-center text-sm text-[#000d45]',
+                            'max-w-[180px] truncate text-center text-sm text-brand-dark',
                           )}
                         >
                           {item.title}
@@ -549,7 +549,7 @@ export default function Portfolio() {
                             href={item.file}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="pointer-events-auto rounded-xl bg-white p-2.5 text-primary shadow-lg transition hover:scale-105"
+                            className="pointer-events-auto rounded-xl bg-white p-2.5 text-brand-emerald shadow-lg transition hover:scale-105"
                             aria-label="Open file"
                           >
                             <ExternalLink className="size-5" />
@@ -581,7 +581,7 @@ export default function Portfolio() {
                   </div>
 
                   <div className="border-t border-outline-variant/50 bg-white px-4 py-3 sm:hidden">
-                    <p className={cn(landingHeadlineSm, 'truncate text-xs text-[#000d45]')}>
+                    <p className={cn(landingHeadlineSm, 'truncate text-xs text-brand-dark')}>
                       {item.title}
                     </p>
                     <div className="mt-2 flex items-center justify-between gap-2">
@@ -592,7 +592,7 @@ export default function Portfolio() {
                             href={item.file}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary"
+                            className="text-brand-emerald"
                             aria-label="Open file"
                           >
                             <ExternalLink className="size-4" />
@@ -621,11 +621,11 @@ export default function Portfolio() {
                 className={cn(
                   'flex aspect-square flex-col items-center justify-center gap-3 rounded-[28px]',
                   'border-2 border-dashed border-outline-variant text-gray-400 transition',
-                  'hover:border-primary hover:bg-primary/5 hover:text-primary',
+                  'hover:border-brand-emerald hover:bg-brand-emerald/5 hover:text-brand-emerald',
                   'disabled:cursor-not-allowed disabled:opacity-50',
                 )}
               >
-                <div className="rounded-full bg-surface-low p-4 transition group-hover:bg-primary/10">
+                <div className="rounded-full bg-surface-low p-4 transition group-hover:bg-brand-emerald/10">
                   <Plus className="size-8" />
                 </div>
                 <span className={cn(landingHeadlineSm, 'text-sm')}>Add item</span>

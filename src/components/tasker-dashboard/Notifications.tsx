@@ -172,7 +172,7 @@ function getIconStyles(type: string) {
     case 'payment_received':
     case 'payment_sent':
     case 'payout_processed':
-      return 'bg-primary/10 text-primary ring-primary/15';
+      return 'bg-brand-emerald/10 text-brand-emerald ring-brand-emerald/15';
     case 'review_received':
     case 'review_response':
       return 'bg-amber-50 text-amber-600 ring-amber-100';
@@ -333,10 +333,10 @@ export default function Notifications() {
       <header className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <p className={cn(landingHeadlineSm, 'text-[10px] uppercase tracking-[0.3em] text-primary')}>
+            <p className={cn(landingHeadlineSm, 'text-[10px] uppercase tracking-[0.3em] text-brand-emerald')}>
               Activity
             </p>
-            <h1 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-4xl')}>
+            <h1 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-4xl')}>
               Notifications
             </h1>
             <p className={cn(landingBodyMuted, 'max-w-md text-sm leading-relaxed')}>
@@ -347,7 +347,7 @@ export default function Notifications() {
             href="/tasker-dashboard/settings?tab=notifications"
             className={cn(
               landingBody,
-              'inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-outline-variant bg-white px-4 py-2.5 text-sm font-semibold text-[#000d45] transition-colors hover:border-primary/30 hover:text-primary',
+              'inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-outline-variant bg-white px-4 py-2.5 text-sm font-semibold text-brand-dark transition-colors hover:border-brand-emerald/30 hover:text-brand-emerald',
             )}
           >
             <Settings className="h-4 w-4" />
@@ -366,13 +366,13 @@ export default function Notifications() {
               className={cn(
                 landingBody,
                 'relative rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
-                filter === tab ? 'text-white' : 'text-[#6a719a] hover:text-[#000d45]',
+                filter === tab ? 'text-white' : 'text-[#6a719a] hover:text-brand-dark',
               )}
             >
               {filter === tab && (
                 <motion.span
                   layoutId="notificationFilter"
-                  className="absolute inset-0 rounded-lg bg-primary shadow-sm"
+                  className="absolute inset-0 rounded-lg bg-brand-emerald shadow-sm"
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
@@ -382,7 +382,7 @@ export default function Notifications() {
                   <span
                     className={cn(
                       'rounded-full px-1.5 py-0.5 text-[10px] font-bold',
-                      filter === 'unread' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary',
+                      filter === 'unread' ? 'bg-white/20 text-white' : 'bg-brand-emerald/10 text-brand-emerald',
                     )}
                   >
                     {unreadCount}
@@ -400,7 +400,7 @@ export default function Notifications() {
               onClick={markAllAsRead}
               className={cn(
                 landingBody,
-                'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/5',
+                'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/5',
               )}
             >
               <CheckCheck className="h-4 w-4" />
@@ -411,7 +411,7 @@ export default function Notifications() {
             type="button"
             onClick={() => fetchNotifications({ silent: true })}
             disabled={refreshing}
-            className="inline-flex items-center justify-center rounded-xl border border-outline-variant p-2.5 text-[#000d45] transition-colors hover:border-primary/30 hover:text-primary disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-xl border border-outline-variant p-2.5 text-brand-dark transition-colors hover:border-brand-emerald/30 hover:text-brand-emerald disabled:opacity-50"
             title="Refresh"
             aria-label="Refresh notifications"
           >
@@ -428,10 +428,10 @@ export default function Notifications() {
             {filter === 'unread' ? (
               <BellOff className="h-8 w-8 text-[#6a719a]" />
             ) : (
-              <Bell className="h-8 w-8 text-primary/40" />
+              <Bell className="h-8 w-8 text-brand-emerald/40" />
             )}
           </div>
-          <h2 className={cn(landingHeadlineSm, 'mt-5 text-lg text-[#000d45]')}>
+          <h2 className={cn(landingHeadlineSm, 'mt-5 text-lg text-brand-dark')}>
             {filter === 'unread' ? 'No unread notifications' : 'Nothing here yet'}
           </h2>
           <p className={cn(landingBodyMuted, 'mx-auto mt-2 max-w-sm text-sm')}>
@@ -445,7 +445,7 @@ export default function Notifications() {
               onClick={() => setFilter('all')}
               className={cn(
                 landingBody,
-                'mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90',
+                'mt-6 inline-flex items-center gap-2 rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90',
               )}
             >
               View all notifications
@@ -456,7 +456,7 @@ export default function Notifications() {
               href="/task"
               className={cn(
                 landingBody,
-                'mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90',
+                'mt-6 inline-flex items-center gap-2 rounded-full bg-brand-emerald px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90',
               )}
             >
               Browse tasks
@@ -487,13 +487,13 @@ export default function Notifications() {
                         className={cn(
                           'group relative flex gap-3 rounded-2xl border bg-white p-4 transition-all sm:gap-4 sm:p-5',
                           notification.is_read
-                            ? 'border-outline-variant hover:border-primary/20 hover:shadow-sm'
-                            : 'border-primary/25 bg-primary/[0.03] shadow-sm shadow-primary/5',
+                            ? 'border-outline-variant hover:border-brand-emerald/20 hover:shadow-sm'
+                            : 'border-brand-emerald/25 bg-brand-emerald/[0.03] shadow-sm shadow-brand-emerald/5',
                         )}
                       >
                         {!notification.is_read ? (
                           <span
-                            className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-primary"
+                            className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-brand-emerald"
                             aria-hidden
                           />
                         ) : null}
@@ -517,8 +517,8 @@ export default function Notifications() {
                               <h3
                                 className={cn(
                                   landingHeadlineSm,
-                                  'line-clamp-1 text-sm text-[#000d45] sm:text-base',
-                                  !notification.is_read && 'text-[#000d45]',
+                                  'line-clamp-1 text-sm text-brand-dark sm:text-base',
+                                  !notification.is_read && 'text-brand-dark',
                                 )}
                               >
                                 {notification.title}
@@ -543,7 +543,7 @@ export default function Notifications() {
                             <span
                               className={cn(
                                 landingBody,
-                                'mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100',
+                                'mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-emerald opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100',
                               )}
                             >
                               Open
@@ -557,7 +557,7 @@ export default function Notifications() {
                             <button
                               type="button"
                               onClick={() => markAsRead(notification.id)}
-                              className="rounded-lg p-2 text-[#6a719a] transition-colors hover:bg-primary/5 hover:text-primary"
+                              className="rounded-lg p-2 text-[#6a719a] transition-colors hover:bg-brand-emerald/5 hover:text-brand-emerald"
                               title="Mark as read"
                               aria-label="Mark as read"
                             >

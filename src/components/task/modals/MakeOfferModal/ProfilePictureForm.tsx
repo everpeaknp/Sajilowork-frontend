@@ -22,13 +22,13 @@ export default function ProfilePictureForm({
     <>
       <button
         onClick={onBack}
-        className="flex items-center gap-2 text-primary font-bold mb-6 hover:underline"
+        className="flex items-center gap-2 text-brand-emerald font-bold mb-6 hover:underline"
       >
         <ChevronLeft className="w-5 h-5" />
         Back
       </button>
 
-      <h3 className="text-2xl font-bold text-[#000d45] mb-6">Profile picture</h3>
+      <h3 className="text-2xl font-bold text-brand-dark mb-6">Profile picture</h3>
 
       <div className="flex flex-col items-center mb-6">
         <div className="relative mb-4">
@@ -46,7 +46,7 @@ export default function ProfilePictureForm({
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
-            className="absolute bottom-0 right-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-all disabled:opacity-50"
+            className="absolute bottom-0 right-0 w-10 h-10 bg-brand-emerald text-white rounded-full flex items-center justify-center hover:bg-brand-emerald/90 transition-all disabled:opacity-50"
           >
             <Plus className="w-5 h-5" />
           </button>
@@ -68,7 +68,7 @@ export default function ProfilePictureForm({
       </div>
 
       {isLoading && (
-        <div className="text-center text-primary font-semibold">
+        <div className="text-center text-brand-emerald font-semibold">
           Uploading...
         </div>
       )}

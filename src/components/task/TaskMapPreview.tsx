@@ -75,7 +75,7 @@ export default function TaskMapPreview({
               <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">
                 EARN
               </span>
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#000d45] truncate max-w-full px-1">
+              <span className="text-2xl sm:text-3xl font-extrabold text-brand-dark truncate max-w-full px-1">
                 {formatNPR(task.price)}
               </span>
             </div>
@@ -84,7 +84,7 @@ export default function TaskMapPreview({
           <div className="space-y-1 mb-6 sm:mb-8 min-w-0">
             <h4
               id="map-preview-title"
-              className="text-lg font-bold text-[#000d45] leading-tight line-clamp-3 break-words [overflow-wrap:anywhere]"
+              className="text-lg font-bold text-brand-dark leading-tight line-clamp-3 break-words [overflow-wrap:anywhere]"
             >
               {task.title}
             </h4>
@@ -102,7 +102,7 @@ export default function TaskMapPreview({
             </div>
             <p className="text-on-surface-variant text-sm break-words [overflow-wrap:anywhere]">
               Posted by{' '}
-              <span className="text-primary font-bold break-words [overflow-wrap:anywhere]">
+              <span className="text-brand-emerald font-bold break-words [overflow-wrap:anywhere]">
                 {task.user.name}.
               </span>{' '}
               about {hoursSincePosted(task.postedDate)} hours ago
@@ -112,7 +112,7 @@ export default function TaskMapPreview({
           <button
             type="button"
             onClick={onViewTask}
-            className="w-full py-2 text-primary font-bold text-lg hover:underline transition-all text-center"
+            className="w-full py-2 text-brand-emerald font-bold text-lg hover:underline transition-all text-center"
           >
             View Task
           </button>

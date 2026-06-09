@@ -67,12 +67,12 @@ export default function TaskFeed() {
   return (
     <section className="overflow-x-hidden bg-white py-8 sm:py-10 md:py-12">
       <div className="mx-auto mb-6 max-w-7xl px-4 text-center sm:mb-8 sm:px-6 lg:px-8">
-        <h2 className={`${landingHeadline} mb-3 text-2xl text-[#0b1442] text-balance sm:mb-4 sm:text-4xl md:text-5xl lg:text-6xl`}>
+        <h2 className={`${landingHeadline} mb-3 text-2xl text-brand-dark text-balance sm:mb-4 sm:text-4xl md:text-5xl lg:text-6xl`}>
           See what others are getting done
         </h2>
         <Link
           href={browseTasksHref(activeCategory ?? undefined)}
-          className={`${landingBody} mb-4 inline-block text-sm font-semibold text-[#1161fe] hover:underline sm:mb-6`}
+          className={`${landingBody} mb-4 inline-block text-sm font-semibold text-brand-emerald hover:underline sm:mb-6`}
         >
           Browse all open tasks →
         </Link>
@@ -83,12 +83,12 @@ export default function TaskFeed() {
               type="button"
               onClick={() => setActiveCategory(null)}
               className={`${landingBody} relative shrink-0 pb-3 text-sm font-bold transition-colors ${
-                activeCategory === null ? "text-[#0b1442]" : "text-[#384179] hover:text-[#1161fe]"
+                activeCategory === null ? "text-brand-dark" : "text-brand-dark/70 hover:text-brand-emerald"
               }`}
             >
               All tasks
               {activeCategory === null && (
-                <span className="absolute bottom-0 left-0 w-full h-[3px] bg-[#1161fe] z-10" />
+                <span className="absolute bottom-0 left-0 w-full h-[3px] bg-brand-emerald z-10" />
               )}
             </button>
             {tabCategories.map((cat) => {
@@ -99,12 +99,12 @@ export default function TaskFeed() {
                   type="button"
                   onClick={() => setActiveCategory(cat)}
                   className={`${landingBody} relative shrink-0 pb-3 text-sm font-bold transition-colors ${
-                    active ? "text-[#0b1442]" : "text-[#384179] hover:text-[#1161fe]"
+                    active ? "text-brand-dark" : "text-brand-dark/70 hover:text-brand-emerald"
                   }`}
                 >
                   {cat}
                   {active && (
-                    <span className="absolute bottom-0 left-0 w-full h-[3px] bg-[#1161fe] z-10" />
+                    <span className="absolute bottom-0 left-0 w-full h-[3px] bg-brand-emerald z-10" />
                   )}
                 </button>
               );
@@ -165,16 +165,16 @@ function TaskCard({ task }: { task: LandingTaskCard }) {
   return (
     <Link
       href={href}
-      className="group/card inline-flex h-[200px] w-[min(85vw,300px)] shrink-0 cursor-pointer flex-col justify-between whitespace-normal rounded-2xl bg-[#f0f5ff] p-5 text-left transition-all hover:shadow-lg hover:ring-2 hover:ring-[#1161fe]/20 sm:h-[220px] sm:w-[340px] sm:p-6"
+      className="group/card inline-flex h-[200px] w-[min(85vw,300px)] shrink-0 cursor-pointer flex-col justify-between whitespace-normal rounded-2xl bg-emerald-50 p-5 text-left transition-all hover:shadow-lg hover:ring-2 hover:ring-brand-emerald/20 sm:h-[220px] sm:w-[340px] sm:p-6"
     >
       <div>
         <div className="flex justify-between items-start mb-4">
           <div className="space-y-1 min-w-0 pr-2">
-            <span className={`${landingHeadlineSm} text-[10px] tracking-widest text-[#384179] uppercase opacity-70`}>
+            <span className={`${landingHeadlineSm} text-[10px] tracking-widest text-brand-dark/70 uppercase opacity-70`}>
               {task.category}
             </span>
             <h3
-              className={`${landingHeadlineSm} text-xl text-[#0b1442] leading-tight line-clamp-2`}
+              className={`${landingHeadlineSm} text-xl text-brand-dark leading-tight line-clamp-2`}
             >
               {task.task}
             </h3>
@@ -190,11 +190,11 @@ function TaskCard({ task }: { task: LandingTaskCard }) {
       <div className="flex justify-between items-end">
         <div className="bg-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm border border-gray-100">
           <Star size={14} className="text-orange-500 fill-orange-500" />
-          <span className={`${landingBody} text-xs font-semibold text-[#0b1442]`}>
+          <span className={`${landingBody} text-xs font-semibold text-brand-dark`}>
             {task.rating > 0 ? `${task.rating} Stars` : "New"}
           </span>
         </div>
-        <span className={`${landingHeadlineSm} text-2xl text-[#0b1442]`}>{task.price}</span>
+        <span className={`${landingHeadlineSm} text-2xl text-brand-dark`}>{task.price}</span>
       </div>
     </Link>
   );

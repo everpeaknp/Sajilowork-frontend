@@ -144,7 +144,7 @@ function PrimaryBtn({
       disabled={disabled}
       className={cn(
         landingBody,
-        'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#1161fe] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-brand-emerald px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
       )}
     >
       {children}
@@ -158,7 +158,7 @@ function PrimaryLink({ href, children }: { href: string; children: React.ReactNo
       href={href}
       className={cn(
         landingBody,
-        'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#1161fe] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.98]',
+        'inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-brand-emerald px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25 transition hover:opacity-90 active:scale-[0.98]',
       )}
     >
       {children}
@@ -182,7 +182,7 @@ function GhostBtn({
       disabled={disabled}
       className={cn(
         landingBody,
-        'text-sm font-semibold text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50',
+        'text-sm font-semibold text-brand-emerald hover:underline disabled:cursor-not-allowed disabled:opacity-50',
       )}
     >
       {children}
@@ -203,10 +203,10 @@ interface BadgeItemProps {
 function BadgeItem({ icon, title, description, status, statusLabel, footer, action }: BadgeItemProps) {
   return (
     <div className="flex flex-col gap-6 rounded-[24px] border border-outline-variant/70 bg-surface-low/30 p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-6">
-      <div className="rounded-2xl bg-blue-50 p-4 text-primary">{icon}</div>
+      <div className="rounded-2xl bg-emerald-50 p-4 text-brand-emerald">{icon}</div>
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-3">
-          <h3 className={cn(landingHeadline, 'text-lg text-[#000d45]')}>{title}</h3>
+          <h3 className={cn(landingHeadline, 'text-lg text-brand-dark')}>{title}</h3>
           <StatusChip status={status} label={statusLabel} />
         </div>
         <p className={cn(landingBodyMuted, 'text-sm leading-relaxed')}>{description}</p>
@@ -465,7 +465,7 @@ export default function Badges() {
           href={record.verification_document}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(landingBody, 'text-sm font-semibold text-primary hover:underline')}
+          className={cn(landingBody, 'text-sm font-semibold text-brand-emerald hover:underline')}
         >
           View document
         </a>
@@ -504,12 +504,12 @@ export default function Badges() {
         <p
           className={cn(
             landingHeadlineSm,
-            'mb-2 text-[10px] uppercase tracking-[0.3em] text-primary',
+            'mb-2 text-[10px] uppercase tracking-[0.3em] text-brand-emerald',
           )}
         >
           Trust & safety
         </p>
-        <h1 className={cn(landingHeadline, 'text-2xl text-[#000d45] sm:text-4xl')}>
+        <h1 className={cn(landingHeadline, 'text-2xl text-brand-dark sm:text-4xl')}>
           Verified badges
         </h1>
         <p className={cn(landingBodyMuted, 'mt-2 max-w-xl text-sm leading-relaxed')}>
@@ -532,12 +532,12 @@ export default function Badges() {
                   >
                     Trust score
                   </p>
-                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-[#000d45]')}>
+                  <p className={cn(landingHeadline, 'mt-1 text-2xl text-brand-dark')}>
                     {trustProgress.percent}%
                   </p>
                 </div>
                 <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary"
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald"
                   aria-hidden
                 >
                   <ShieldCheck className="h-6 w-6" />
@@ -545,7 +545,7 @@ export default function Badges() {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-surface-low">
                 <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
+                  className="h-full rounded-full bg-brand-emerald transition-all duration-500"
                   style={{ width: `${trustProgress.percent}%` }}
                 />
               </div>
@@ -573,14 +573,14 @@ export default function Badges() {
                         className={cn(
                           'flex w-full min-h-[48px] items-center gap-3 rounded-2xl px-4 py-3 text-left transition-all',
                           isActive
-                            ? 'bg-primary text-white shadow-md shadow-primary/20'
-                            : 'text-[#000d45] hover:bg-surface-low',
+                            ? 'bg-brand-emerald text-white shadow-md shadow-brand-emerald/20'
+                            : 'text-brand-dark hover:bg-surface-low',
                         )}
                       >
                         <Icon
                           className={cn(
                             'h-4 w-4 shrink-0',
-                            isActive ? 'text-white' : 'text-primary',
+                            isActive ? 'text-white' : 'text-brand-emerald',
                           )}
                         />
                         <span className="min-w-0 flex-1">
@@ -624,7 +624,7 @@ export default function Badges() {
               <Lock className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" aria-hidden />
               <p className={cn(landingBodyMuted, 'text-xs leading-relaxed')}>
                 Documents are encrypted and reviewed only for verification.{' '}
-                <button type="button" className="font-semibold text-primary hover:underline">
+                <button type="button" className="font-semibold text-brand-emerald hover:underline">
                   Trust center
                 </button>
               </p>
@@ -638,11 +638,11 @@ export default function Badges() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>ID & account</h2>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>ID & account</h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
                   Identity and payment verification customers look for first.
                 </p>
@@ -682,7 +682,7 @@ export default function Badges() {
                       href="/tasker-dashboard/methods"
                       className={cn(
                         landingBody,
-                        'text-sm font-semibold text-primary hover:underline',
+                        'text-sm font-semibold text-brand-emerald hover:underline',
                       )}
                     >
                       Manage methods
@@ -717,7 +717,7 @@ export default function Badges() {
                       href="/tasker-dashboard/profile"
                       className={cn(
                         landingBody,
-                        'text-sm font-semibold text-primary hover:underline',
+                        'text-sm font-semibold text-brand-emerald hover:underline',
                       )}
                     >
                       View profile
@@ -737,11 +737,11 @@ export default function Badges() {
             className="scroll-mt-28 rounded-[32px] border border-outline-variant bg-white p-6 shadow-sm sm:p-8"
           >
             <div className="mb-6 flex items-start gap-4">
-              <div className="rounded-2xl bg-blue-50 p-3 text-primary">
+              <div className="rounded-2xl bg-emerald-50 p-3 text-brand-emerald">
                 <BadgeCheck className="h-6 w-6" />
               </div>
               <div>
-                <h2 className={cn(landingHeadline, 'text-xl text-[#000d45]')}>Licence badges</h2>
+                <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Licence badges</h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
                   Trade licences and certifications that prove your qualifications.
                 </p>
@@ -794,7 +794,7 @@ export default function Badges() {
                           rel="noopener noreferrer"
                           className={cn(
                             landingBody,
-                            'text-sm font-semibold text-primary hover:underline',
+                            'text-sm font-semibold text-brand-emerald hover:underline',
                           )}
                         >
                           View document
@@ -813,13 +813,13 @@ export default function Badges() {
               <button
                 type="button"
                 onClick={() => openUploadModal('custom_licence', 'custom')}
-                className="group flex w-full flex-col gap-5 rounded-[24px] border-2 border-dashed border-primary/25 bg-blue-50/30 p-5 text-left transition hover:border-primary/50 sm:flex-row sm:items-center sm:gap-8 sm:p-6"
+                className="group flex w-full flex-col gap-5 rounded-[24px] border-2 border-dashed border-brand-emerald/25 bg-emerald-50/30 p-5 text-left transition hover:border-brand-emerald/50 sm:flex-row sm:items-center sm:gap-8 sm:p-6"
               >
-                <div className="rounded-2xl bg-white p-4 text-primary shadow-sm transition group-hover:scale-105">
+                <div className="rounded-2xl bg-white p-4 text-brand-emerald shadow-sm transition group-hover:scale-105">
                   <Plus className="h-8 w-8" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-2">
-                  <h3 className={cn(landingHeadline, 'text-lg text-[#000d45]')}>
+                  <h3 className={cn(landingHeadline, 'text-lg text-brand-dark')}>
                     Add custom licence badge
                   </h3>
                   <p className={cn(landingBodyMuted, 'text-sm leading-relaxed')}>
@@ -830,7 +830,7 @@ export default function Badges() {
                 <span
                   className={cn(
                     landingBody,
-                    'inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-2xl bg-[#1161fe] px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25',
+                    'inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-2xl bg-brand-emerald px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-emerald/25',
                   )}
                 >
                   Upload
@@ -849,7 +849,7 @@ export default function Badges() {
           )}
           role="status"
         >
-          <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden />
+          <Loader2 className="h-4 w-4 animate-spin text-brand-emerald" aria-hidden />
           Submitting {submitting.replace(/_/g, ' ')}…
         </p>
       ) : null}

@@ -216,7 +216,7 @@ export default function MyTasksPage() {
           {activeStatus === 'all' && !hasActiveFilters(searchFilters) && (
             <a
               href="/post-task"
-              className="rounded-full bg-primary px-6 py-2 font-semibold text-white hover:bg-primary/90"
+              className="rounded-full bg-brand-emerald px-6 py-2 font-semibold text-white hover:bg-brand-emerald/90"
             >
               Post Your First Task
             </a>
@@ -332,7 +332,7 @@ export default function MyTasksPage() {
                           key={task.id}
                           onClick={() => handleSelectTask(taskId)}
                           className={`rounded-full border-2 transition-all hover:scale-110 ${
-                            isSelected ? 'border-primary shadow-lg' : 'border-outline-variant'
+                            isSelected ? 'border-brand-emerald shadow-lg' : 'border-outline-variant'
                           }`}
                           title={`${formatTaskDisplayTitle(task.title || 'Untitled Task')} — ${poster.name}`}
                         >
@@ -360,12 +360,12 @@ export default function MyTasksPage() {
             {!isCompactSidebar && (
               <div 
                 className={`absolute top-0 -right-1.5 w-3 h-full cursor-col-resize z-50 group flex items-center justify-center ${
-                  isResizing ? 'bg-primary/20' : 'hover:bg-primary/10'
+                  isResizing ? 'bg-brand-emerald/20' : 'hover:bg-brand-emerald/10'
                 }`}
                 onMouseDown={() => setIsResizing(true)}
               >
-                <div className={`w-0.5 h-12 rounded-full bg-outline-variant transition-colors group-hover:bg-primary ${
-                  isResizing ? 'bg-primary' : ''
+                <div className={`w-0.5 h-12 rounded-full bg-outline-variant transition-colors group-hover:bg-brand-emerald ${
+                  isResizing ? 'bg-brand-emerald' : ''
                 }`} />
               </div>
             )}

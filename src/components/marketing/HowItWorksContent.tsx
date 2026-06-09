@@ -36,7 +36,7 @@ export default function HowItWorksContent() {
           href="https://www.airtasker.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-semibold text-[#1161fe] hover:underline"
+          className="font-semibold text-brand-emerald hover:underline"
         >
           Airtasker
         </a>
@@ -47,13 +47,13 @@ export default function HowItWorksContent() {
         {STEPS.map((item) => (
           <li
             key={item.step}
-            className="flex gap-4 rounded-2xl border border-gray-100 bg-[#f8faff] p-5 sm:gap-5 sm:p-6"
+            className="flex gap-4 rounded-2xl border border-gray-100 bg-brand-light-bg p-5 sm:gap-5 sm:p-6"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1161fe] text-sm font-bold text-white">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-emerald text-sm font-bold text-white">
               {item.step}
             </span>
             <div className="min-w-0">
-              <h2 className="text-base font-bold text-[#0b1442] sm:text-lg">{item.title}</h2>
+              <h2 className="text-base font-bold text-brand-dark sm:text-lg">{item.title}</h2>
               <p className="mt-2 text-sm leading-relaxed text-[#6a719a] sm:text-base">{item.body}</p>
             </div>
           </li>
@@ -68,7 +68,7 @@ export default function HowItWorksContent() {
       />
 
       <section className="mt-12 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:mt-16 sm:p-8">
-        <h2 className="text-lg font-bold text-[#0b1442] sm:text-xl">Earn money as a Tasker</h2>
+        <h2 className="text-lg font-bold text-brand-dark sm:text-xl">Earn money as a Tasker</h2>
         <p className="mt-2 text-sm text-[#6a719a] sm:text-base">
           Whether you are handy around the home or offer professional services, find your next job on
           tasknepal.
@@ -76,14 +76,14 @@ export default function HowItWorksContent() {
         <ul className="mt-4 space-y-3">
           {FOR_TASKERS.map((line) => (
             <li key={line} className="flex items-start gap-3 text-sm text-[#384179] sm:text-base">
-              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#1161fe]" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-emerald" aria-hidden />
               {line}
             </li>
           ))}
         </ul>
         <Link
           href="/signup?role=tasker"
-          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-[#1161fe] px-6 py-2.5 text-sm font-semibold text-[#1161fe] transition hover:bg-[#eef4ff]"
+          className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-brand-emerald px-6 py-2.5 text-sm font-semibold text-brand-dark transition hover:bg-brand-light-bg"
         >
           Become a Tasker
         </Link>

@@ -118,13 +118,13 @@ export default function BlogSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
           <h2
-            className={`${landingHeadline} text-2xl uppercase italic text-[#0b1442] text-balance sm:text-4xl md:text-5xl`}
+            className={`${landingHeadline} text-2xl uppercase italic text-brand-dark text-balance sm:text-4xl md:text-5xl`}
           >
             Tips and guides for your home
           </h2>
           <Link
             href="/blog"
-            className={`${landingBody} inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#1161fe] px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 sm:w-auto sm:px-8`}
+            className={`${landingBody} inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-brand-emerald px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-105 sm:w-auto sm:px-8`}
           >
             View all articles <ChevronRight size={18} />
           </Link>
@@ -132,7 +132,7 @@ export default function BlogSection() {
 
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="h-10 w-10 animate-spin text-[#1161fe]" aria-label="Loading articles" />
+            <Loader2 className="h-10 w-10 animate-spin text-brand-emerald" aria-label="Loading articles" />
           </div>
         ) : (
           <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
@@ -147,15 +147,15 @@ export default function BlogSection() {
                     />
                   </div>
                   <div className="p-5 sm:p-8">
-                    <span className={`${landingHeadlineSm} text-[10px] uppercase tracking-[0.2em] text-[#1161fe]`}>
+                    <span className={`${landingHeadlineSm} text-[10px] uppercase tracking-[0.2em] text-brand-emerald`}>
                       {article.cat}
                     </span>
                     <h3
-                      className={`${landingHeadlineSm} mt-2 mb-3 text-lg leading-tight text-[#0b1442] transition-colors group-hover:text-[#1161fe] sm:mt-3 sm:mb-4 sm:text-2xl`}
+                      className={`${landingHeadlineSm} mt-2 mb-3 text-lg leading-tight text-brand-dark transition-colors group-hover:text-brand-emerald sm:mt-3 sm:mb-4 sm:text-2xl`}
                     >
                       {article.title}
                     </h3>
-                    <p className={`${landingBody} text-sm font-medium leading-relaxed text-[#384179] opacity-90`}>
+                    <p className={`${landingBody} text-sm font-medium leading-relaxed text-brand-dark/70 opacity-90`}>
                       {article.desc}
                     </p>
                   </div>
