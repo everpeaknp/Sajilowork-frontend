@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { formatNPR } from '@/lib/nepalLocale';
 import { USER_PROFILE_UPDATED, notifyUserProfileUpdated } from '@/lib/userProfileSync';
 import { useAuthStore } from '@/store/auth.store';
+import DeleteConfirmModal from '@/app/dashboard/DeleteConfirmModal';
 
 interface WalletData {
   id: string;
@@ -118,6 +119,7 @@ export default function PaymentMethods() {
   const [customWithdrawAmount, setCustomWithdrawAmount] = useState<string>('');
   const [withdrawAmountError, setWithdrawAmountError] = useState<string | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [deletePaymentMethodId, setDeletePaymentMethodId] = useState<string | null>(null);
   const [withdrawMethod, setWithdrawMethod] = useState<'esewa' | 'bank_transfer'>('esewa');
   const [selectedEsewaMethodId, setSelectedEsewaMethodId] = useState<string>('');
   const [withdrawFee, setWithdrawFee] = useState<number | null>(null);
@@ -240,19 +242,32 @@ export default function PaymentMethods() {
     }
   };
 
-  const handleDeletePaymentMethod = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this payment method?')) {
-      return;
-    }
+  const requestDeletePaymentMethod = (id: string) => {
+    setDeletePaymentMethodId(id);
+  };
+
+  const confirmDeletePaymentMethod = async () => {
+    if (!deletePaymentMethodId) return;
+
+    const id = deletePaymentMethodId;
+    setDeletePaymentMethodId(null);
 
     try {
       await paymentService.deletePaymentMethod(id);
-      setPaymentMethods(paymentMethods.filter(pm => pm.id !== id));
+      setPaymentMethods((prev) => prev.filter((pm) => pm.id !== id));
+      if (selectedEsewaMethodId === id) {
+        setSelectedEsewaMethodId('');
+      }
       toast.success('Payment method deleted successfully');
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete payment method');
     }
   };
+
+  const deletePaymentMethodTarget = useMemo(
+    () => paymentMethods.find((pm) => pm.id === deletePaymentMethodId) ?? null,
+    [paymentMethods, deletePaymentMethodId],
+  );
 
   const handleSetDefault = async (id: string) => {
     try {
@@ -1479,7 +1494,8 @@ export default function PaymentMethods() {
                       </button>
                     )}
                     <button 
-                      onClick={() => handleDeletePaymentMethod(method.id)}
+                      type="button"
+                      onClick={() => requestDeletePaymentMethod(method.id)}
                       className="text-xs font-black text-red-500 hover:text-red-700 flex items-center gap-1"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -1607,6 +1623,26 @@ export default function PaymentMethods() {
         </>,
         document.body
       )}
+
+      <DeleteConfirmModal
+        open={deletePaymentMethodId !== null}
+        onClose={() => setDeletePaymentMethodId(null)}
+        onConfirm={confirmDeletePaymentMethod}
+        title="Delete payment method?"
+        description={
+          deletePaymentMethodTarget
+            ? `Remove ${
+                deletePaymentMethodTarget.method_type === 'esewa'
+                  ? deletePaymentMethodTarget.esewa_account_name ||
+                    deletePaymentMethodTarget.esewa_phone_number ||
+                    'this eSewa account'
+                  : deletePaymentMethodTarget.method_type === 'card'
+                    ? `card ending in ${deletePaymentMethodTarget.last_four || '****'}`
+                    : 'this linked account'
+              } from your wallet? This cannot be undone.`
+            : 'This linked account will be removed from payouts and withdrawals. This cannot be undone.'
+        }
+      />
     </motion.div>
   );
 }

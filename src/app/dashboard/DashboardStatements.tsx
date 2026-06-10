@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import {
-  Plus,
   Search,
   ChevronLeft,
   ChevronRight,
@@ -116,15 +115,8 @@ export default function DashboardStatements() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [selectedStatement, setSelectedStatement] = useState<Statement | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
   const [currentPage, setCurrentPage] = useState(2);
-
-  const [newDetail, setNewDetail] = useState('Figma Mobile Dashboard Design Prototyping');
-  const [newPrice, setNewPrice] = useState('829');
-  const [newType, setNewType] = useState('Service Purchased');
-
-  const [statements, setStatements] = useState<Statement[]>(buildStatements);
+  const [statements] = useState<Statement[]>(buildStatements);
 
   const totalNetIncome = statements.reduce((accum, st) => accum + st.priceVal, 0);
 
@@ -139,7 +131,7 @@ export default function DashboardStatements() {
     return textMatch && st.type === filterType;
   });
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredStatements.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
 
@@ -154,30 +146,6 @@ export default function DashboardStatements() {
         : 'bg-transparent text-black hover:text-[#52C47F]'
     }`;
 
-  const handleCreateStatementSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!newDetail.trim() || !newPrice) return;
-
-    const priceNum = Math.abs(parseInt(newPrice, 10)) || 829;
-    const formattedPrice = `$${priceNum}`;
-
-    const newStmt: Statement = {
-      id: `stmt-user-${Date.now()}`,
-      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      type: newType,
-      detail: newDetail,
-      price: formattedPrice,
-      priceVal: priceNum,
-      amount: formattedPrice,
-    };
-
-    setStatements((prev) => [newStmt, ...prev]);
-    setIsModalOpen(false);
-    setCurrentPage(1);
-    setSuccessMsg('Statement added successfully! Values updated.');
-    setTimeout(() => setSuccessMsg(''), 4000);
-  };
-
   return (
     <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
       <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
@@ -188,47 +156,20 @@ export default function DashboardStatements() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col items-center gap-3 sm:flex-row md:w-auto">
-          <div className="relative flex w-full items-center rounded-xl border border-neutral-200/80 bg-white px-3.5 shadow-sm sm:w-[260px]">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search Statements"
-              className="w-full border-0 bg-transparent py-3 text-xs font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
-            />
-            <Search className="ml-1.5 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-5 py-3 text-xs font-medium text-white transition-all hover:bg-neutral-800 active:bg-black sm:w-auto"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Add Transaction</span>
-          </button>
+        <div className="relative flex w-full items-center rounded-xl border border-neutral-200/80 bg-white px-3.5 shadow-sm sm:w-[260px] md:w-auto">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search Statements"
+            className="w-full border-0 bg-transparent py-3 text-xs font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+          />
+          <Search className="ml-1.5 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} />
         </div>
       </div>
-
-      {successMsg ? (
-        <div className="animate-in slide-in-from-bottom-2 mx-auto mb-6 flex max-w-7xl items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-medium text-emerald-800 shadow-sm duration-300">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-            <span>{successMsg}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setSuccessMsg('')}
-            className="rounded p-1 text-emerald-600 hover:bg-emerald-100"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ) : null}
 
       <div className="mx-auto mb-8 grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
@@ -420,95 +361,6 @@ export default function DashboardStatements() {
           </div>
         ) : null}
       </div>
-
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close add transaction modal"
-            onClick={() => setIsModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 w-full max-w-md space-y-6 rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-3.5">
-              <h3 className="text-lg font-bold text-neutral-900">Register New Statement</h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateStatementSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
-                  Transaction Type
-                </label>
-                <select
-                  value={newType}
-                  onChange={(e) => setNewType(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-[#52C47F]"
-                >
-                  <option value="Service Purchased">Service Purchased</option>
-                  <option value="Hourly Contract">Hourly Contract</option>
-                  <option value="Milestone Released">Milestone Released</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
-                  Detailed Description
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  value={newDetail}
-                  onChange={(e) => setNewDetail(e.target.value)}
-                  placeholder="e.g. Design website UI UX in Adobe XD or Figma"
-                  className="w-full rounded-xl border border-neutral-200 bg-white p-3 text-sm font-normal outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
-                  Value / Pricing (USD)
-                </label>
-                <div className="flex items-center rounded-xl border border-neutral-200 px-4">
-                  <span className="font-bold text-neutral-400">$</span>
-                  <input
-                    type="number"
-                    required
-                    min={1}
-                    value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
-                    placeholder="829"
-                    className="w-full border-0 bg-transparent py-3 pl-1.5 text-sm font-semibold text-neutral-800 outline-none focus:ring-0"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Close
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  Confirm Entry
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
 
       {selectedStatement ? (
         <div className="animate-in fade-in fixed inset-0 z-[100] flex items-center justify-center p-4 duration-300">

@@ -1,8 +1,106 @@
 'use client';
 
-import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react';
-import { Trash2, ArrowUpRight, X, ChevronUp, User, CheckCircle2, Plus, Pencil } from 'lucide-react';
-import { authService } from '@/services';
+import { useState, useEffect, useRef, type FormEvent, type ChangeEvent, type ElementType, type ReactNode } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Trash2,
+  ArrowUpRight,
+  X,
+  ChevronUp,
+  ChevronDown,
+  User,
+  CheckCircle2,
+  Plus,
+  Pencil,
+  Bike,
+  Car,
+  Monitor,
+  Scooter,
+  Truck,
+  PersonStanding,
+  BadgeCheck,
+  Sparkles,
+  GraduationCap,
+  Briefcase,
+  Award,
+  type LucideIcon,
+} from 'lucide-react';
+import DashboardLicenceBadges from '@/app/dashboard/DashboardLicenceBadges';
+import DeleteConfirmModal from '@/app/dashboard/DeleteConfirmModal';
+import ProfileFormModal, {
+  profileModalFieldLabelClass,
+  profileModalInputClass,
+  profileModalTextareaClass,
+} from '@/app/dashboard/ProfileFormModal';
+
+type ProfileDeleteTarget =
+  | { kind: 'avatar' }
+  | { kind: 'education'; id: string }
+  | { kind: 'experience'; id: string }
+  | { kind: 'award'; id: string };
+
+type ProfileAccordionItemProps = {
+  title: string;
+  icon: ElementType;
+  description: string;
+  children: ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+};
+
+function ProfileAccordionItem({
+  title,
+  icon: Icon,
+  description,
+  children,
+  isOpen,
+  onToggle,
+}: ProfileAccordionItemProps) {
+  return (
+    <div
+      className={`mb-3 overflow-hidden rounded-xl border transition-all duration-300 ${
+        isOpen
+          ? 'border-[#52C47F]/40 bg-white shadow-sm'
+          : 'border-neutral-200/90 bg-neutral-50/50 hover:border-neutral-300 hover:bg-white'
+      }`}
+    >
+      <button type="button" onClick={onToggle} className="flex w-full items-center justify-between p-5 text-left outline-none sm:p-6">
+        <div className="flex items-center gap-4 sm:gap-5">
+          <div
+            className={`rounded-xl p-3 transition-colors ${
+              isOpen ? 'bg-[#52C47F] text-white' : 'bg-neutral-100 text-neutral-400'
+            }`}
+          >
+            <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-neutral-900 sm:text-lg">{title}</h3>
+            <p className="text-sm text-neutral-500">{description}</p>
+          </div>
+        </div>
+        <div
+          className={`rounded-lg p-2 transition-transform duration-300 ${
+            isOpen ? 'rotate-180 bg-emerald-50 text-[#52C47F]' : 'bg-neutral-50 text-neutral-400'
+          }`}
+        >
+          <ChevronDown className="h-5 w-5" />
+        </div>
+      </button>
+      <AnimatePresence>
+        {isOpen ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
+            <div className="border-t border-neutral-100 p-5 pt-0 sm:p-6">{children}</div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 const STORAGE_KEY = 'freeio_user_profile_data';
 const SKILLS_STORAGE_KEY = 'freeio_user_skills_data';
@@ -128,6 +226,8 @@ const DEFAULT_SKILLS: SkillRow[] = [
   { skill: 'Video Editor', point: '75' },
 ];
 
+const OTHER_SKILL_OPTION = 'Other…';
+
 const SKILL_OPTIONS = [
   'Select',
   'Designer',
@@ -137,9 +237,43 @@ const SKILL_OPTIONS = [
   'Writer',
   'Marketing',
   'SEO Specialist',
+  OTHER_SKILL_OPTION,
 ];
 
+const EMPTY_SKILL_ROW: SkillRow = { skill: 'Select', point: '70' };
+
+const isPredefinedSkill = (skill: string) =>
+  SKILL_OPTIONS.includes(skill) && skill !== 'Select' && skill !== OTHER_SKILL_OPTION;
+
+function getSkillSelectOptions(row: SkillRow): string[] {
+  const predefined = SKILL_OPTIONS.filter((option) => option !== 'Select');
+  const custom =
+    row.skill && !isPredefinedSkill(row.skill) && row.skill !== OTHER_SKILL_OPTION ? [row.skill] : [];
+  return ['Select', ...predefined.filter((option) => option !== OTHER_SKILL_OPTION), ...custom, OTHER_SKILL_OPTION];
+}
+
+function getSkillSelectValue(row: SkillRow): string {
+  if (!row.skill || row.skill === 'Select') return 'Select';
+  if (isPredefinedSkill(row.skill) || row.skill === OTHER_SKILL_OPTION) return row.skill;
+  return OTHER_SKILL_OPTION;
+}
+
 const POINT_OPTIONS = ['Select', '50', '60', '70', '75', '80', '85', '90', '95', '100'];
+
+type TransportOption = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+const TRANSPORT_OPTIONS: TransportOption[] = [
+  { id: 'Bicycle', label: 'Bicycle', icon: Bike },
+  { id: 'Car', label: 'Car', icon: Car },
+  { id: 'Online', label: 'Online', icon: Monitor },
+  { id: 'Scooter', label: 'Scooter', icon: Scooter },
+  { id: 'Truck', label: 'Truck', icon: Truck },
+  { id: 'Walking', label: 'Walking', icon: PersonStanding },
+];
 
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&h=300&fit=crop';
@@ -174,6 +308,7 @@ export default function DashboardProfile() {
   const [language, setLanguage] = useState('Select');
   const [languageLevel, setLanguageLevel] = useState('Select');
   const [description, setDescription] = useState('');
+  const [transport, setTransport] = useState<string[]>([]);
   const [avatar, setAvatar] = useState<string>(DEFAULT_AVATAR);
   const [skills, setSkills] = useState<SkillRow[]>(DEFAULT_SKILLS);
   const [education, setEducation] = useState<EducationEntry[]>(DEFAULT_EDUCATION);
@@ -188,13 +323,15 @@ export default function DashboardProfile() {
   const [isAwardModalOpen, setIsAwardModalOpen] = useState(false);
   const [editingAward, setEditingAward] = useState<AwardEntry | null>(null);
   const [awardForm, setAwardForm] = useState(EMPTY_AWARD_FORM);
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProfileDeleteTarget | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const toggleSection = (id: string) => {
+    setOpenSection((prev) => (prev === id ? null : id));
+  };
 
   useEffect(() => {
     try {
@@ -216,6 +353,9 @@ export default function DashboardProfile() {
       if (parsed.languageLevel !== undefined) setLanguageLevel(parsed.languageLevel);
       if (parsed.description !== undefined) setDescription(parsed.description);
       if (parsed.avatar !== undefined) setAvatar(parsed.avatar);
+      if (Array.isArray(parsed.transport)) {
+        setTransport(parsed.transport.filter((item): item is string => typeof item === 'string'));
+      }
     } catch (e) {
       console.warn('Could not load stored profile', e);
     }
@@ -297,6 +437,7 @@ export default function DashboardProfile() {
       language,
       languageLevel,
       description,
+      transport,
       avatar,
     };
 
@@ -323,6 +464,22 @@ export default function DashboardProfile() {
 
   const updateSkillRow = (index: number, field: keyof SkillRow, value: string) => {
     setSkills((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  };
+
+  const addSkillRow = () => {
+    setSkills((prev) => [...prev, { ...EMPTY_SKILL_ROW }]);
+  };
+
+  const removeSkillRow = (index: number) => {
+    setSkills((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSkillSelectChange = (index: number, value: string) => {
+    if (value === OTHER_SKILL_OPTION) {
+      updateSkillRow(index, 'skill', OTHER_SKILL_OPTION);
+      return;
+    }
+    updateSkillRow(index, 'skill', value);
   };
 
   const handleEducationSave = (e: FormEvent) => {
@@ -354,8 +511,8 @@ export default function DashboardProfile() {
     setIsEducationModalOpen(true);
   };
 
-  const handleDeleteEducation = (id: string) => {
-    setEducation((prev) => prev.filter((entry) => entry.id !== id));
+  const requestDeleteEducation = (id: string) => {
+    setDeleteTarget({ kind: 'education', id });
   };
 
   const handleEducationFormSubmit = (e: FormEvent) => {
@@ -410,8 +567,8 @@ export default function DashboardProfile() {
     setIsExperienceModalOpen(true);
   };
 
-  const handleDeleteExperience = (id: string) => {
-    setExperience((prev) => prev.filter((entry) => entry.id !== id));
+  const requestDeleteExperience = (id: string) => {
+    setDeleteTarget({ kind: 'experience', id });
   };
 
   const handleExperienceFormSubmit = (e: FormEvent) => {
@@ -466,8 +623,8 @@ export default function DashboardProfile() {
     setIsAwardModalOpen(true);
   };
 
-  const handleDeleteAward = (id: string) => {
-    setAwards((prev) => prev.filter((entry) => entry.id !== id));
+  const requestDeleteAward = (id: string) => {
+    setDeleteTarget({ kind: 'award', id });
   };
 
   const handleAwardFormSubmit = (e: FormEvent) => {
@@ -491,50 +648,6 @@ export default function DashboardProfile() {
     setIsAwardModalOpen(false);
     setEditingAward(null);
     setAwardForm(EMPTY_AWARD_FORM);
-  };
-
-  const handleChangePassword = async (e: FormEvent) => {
-    e.preventDefault();
-
-    if (!oldPassword || !newPassword || !confirmNewPassword) {
-      triggerToast('Please fill in all password fields.');
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      triggerToast('New password must be at least 8 characters.');
-      return;
-    }
-
-    if (newPassword !== confirmNewPassword) {
-      triggerToast('New password and confirmation do not match.');
-      return;
-    }
-
-    if (oldPassword === newPassword) {
-      triggerToast('New password must be different from your old password.');
-      return;
-    }
-
-    try {
-      setIsChangingPassword(true);
-      const response = await authService.changePassword(oldPassword, newPassword);
-
-      if (response.success) {
-        setOldPassword('');
-        setNewPassword('');
-        setConfirmNewPassword('');
-        triggerToast('Your password has been changed successfully!');
-      } else {
-        triggerToast(response.message || 'Failed to change password. Please try again.');
-      }
-    } catch (error) {
-      console.error('Failed to change password', error);
-      const message = error instanceof Error ? error.message : 'Failed to change password. Please try again.';
-      triggerToast(message);
-    } finally {
-      setIsChangingPassword(false);
-    }
   };
 
   const handleUploadClick = () => fileInputRef.current?.click();
@@ -564,7 +677,46 @@ export default function DashboardProfile() {
     triggerToast('Profile picture deleted.');
   };
 
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.kind === 'avatar') {
+      handleDeleteAvatar();
+    } else if (deleteTarget.kind === 'education') {
+      setEducation((prev) => prev.filter((entry) => entry.id !== deleteTarget.id));
+      triggerToast('Education entry deleted.');
+    } else if (deleteTarget.kind === 'experience') {
+      setExperience((prev) => prev.filter((entry) => entry.id !== deleteTarget.id));
+      triggerToast('Work experience entry deleted.');
+    } else if (deleteTarget.kind === 'award') {
+      setAwards((prev) => prev.filter((entry) => entry.id !== deleteTarget.id));
+      triggerToast('Award entry deleted.');
+    }
+
+    setDeleteTarget(null);
+  };
+
+  const deleteModalTitle =
+    deleteTarget?.kind === 'avatar'
+      ? 'Delete profile image?'
+      : deleteTarget?.kind === 'education'
+        ? 'Delete education entry?'
+        : deleteTarget?.kind === 'experience'
+          ? 'Delete work experience?'
+          : deleteTarget?.kind === 'award'
+            ? 'Delete award?'
+            : 'Are you sure you want to delete?';
+
+  const deleteModalDescription =
+    deleteTarget?.kind === 'avatar'
+      ? 'Do you really want to remove your profile image? This process cannot be undone.'
+      : 'Do you really want to delete this record? This process cannot be undone.';
+
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const toggleTransport = (id: string) => {
+    setTransport((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  };
 
   return (
     <div className="animate-in fade-in relative -mx-4 -my-6 min-h-screen bg-[#f0efec] px-4 py-4 font-sans text-black duration-300 sm:-mx-6 sm:px-6 sm:py-4 md:-mx-8 md:px-8">
@@ -596,14 +748,15 @@ export default function DashboardProfile() {
         </div>
       ) : null}
 
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 border-b border-neutral-100 pb-5">
-          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900" id="profile-details-label">
-            Profile Details
-          </h2>
-        </div>
-
-        <form onSubmit={handleSave} className="space-y-8">
+      <div className="mx-auto mb-8 max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        <ProfileAccordionItem
+          title="Profile Details"
+          icon={User}
+          description={username || tagline || 'Update your public profile information'}
+          isOpen={openSection === 'profile'}
+          onToggle={() => toggleSection('profile')}
+        >
+        <form onSubmit={handleSave} className="space-y-8 pt-4">
           <div className="flex flex-col items-start gap-6 pb-2 sm:flex-row sm:items-center" id="avatar-section">
             <div className="relative">
               <div className="flex h-[100px] w-[100px] items-center justify-center overflow-hidden rounded-full border-2 border-pink-100 bg-pink-50 shadow-sm">
@@ -632,7 +785,7 @@ export default function DashboardProfile() {
 
                 <button
                   type="button"
-                  onClick={handleDeleteAvatar}
+                  onClick={() => setDeleteTarget({ kind: 'avatar' })}
                   className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-3.5 text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
                   title="Remove profile image"
                 >
@@ -819,6 +972,38 @@ export default function DashboardProfile() {
             </div>
           </div>
 
+          <div className="space-y-4 border-t border-neutral-100 pt-6">
+            <div>
+              <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+                How do you get around?
+              </label>
+              <p className="mt-1 text-sm text-neutral-400">Select every option that applies to you.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
+              {TRANSPORT_OPTIONS.map((option) => {
+                const selected = transport.includes(option.id);
+                const Icon = option.icon;
+
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => toggleTransport(option.id)}
+                    aria-pressed={selected}
+                    className={`flex min-h-[96px] flex-col items-center justify-center gap-2.5 rounded-xl border-2 px-3 py-4 transition-all duration-200 ${
+                      selected
+                        ? 'border-[#52C47F] bg-emerald-50 text-[#1D3E35] shadow-md shadow-[#52C47F]/10'
+                        : 'border-neutral-200/90 bg-white text-neutral-400 hover:border-neutral-300 hover:text-neutral-600'
+                    }`}
+                  >
+                    <Icon className={`h-6 w-6 ${selected ? 'text-[#52C47F]' : ''}`} strokeWidth={2} />
+                    <span className="text-xs font-semibold tracking-wide">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="space-y-3 border-t border-neutral-100 pt-4">
             <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Introduce Yourself</label>
             <textarea
@@ -840,84 +1025,133 @@ export default function DashboardProfile() {
             </button>
           </div>
         </form>
-      </div>
+        </ProfileAccordionItem>
 
-      <div className="mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 border-b border-neutral-100 pb-5">
-          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900" id="skills-section-label">
-            Skills
-          </h2>
-        </div>
+        <ProfileAccordionItem
+          title="Licence badges"
+          icon={BadgeCheck}
+          description="Upload trade licences and certifications"
+          isOpen={openSection === 'licences'}
+          onToggle={() => toggleSection('licences')}
+        >
+          <div className="pt-4">
+            <DashboardLicenceBadges embedded />
+          </div>
+        </ProfileAccordionItem>
 
-        <form onSubmit={handleSkillsSave} className="space-y-6">
-          {skills.map((row, index) => (
-            <div key={`skill-row-${index}`} className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-              <div className="relative space-y-2">
-                <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
-                  Skills {index + 1}
-                </label>
-                <select
-                  value={row.skill}
-                  onChange={(e) => updateSkillRow(index, 'skill', e.target.value)}
-                  className={selectClass}
-                  style={SELECT_CHEVRON_STYLE}
+        <ProfileAccordionItem
+          title="Skills"
+          icon={Sparkles}
+          description={`${skills.length} skill ${skills.length === 1 ? 'entry' : 'entries'}`}
+          isOpen={openSection === 'skills'}
+          onToggle={() => toggleSection('skills')}
+        >
+        <form onSubmit={handleSkillsSave} className="space-y-6 pt-4">
+          {skills.length === 0 ? (
+            <p className="pb-2 text-sm text-neutral-400">No skills yet. Click Add Skill to get started.</p>
+          ) : (
+            skills.map((row, index) => {
+              const showCustomSkillInput =
+                getSkillSelectValue(row) === OTHER_SKILL_OPTION || (!isPredefinedSkill(row.skill) && row.skill !== 'Select');
+
+              return (
+                <div
+                  key={`skill-row-${index}`}
+                  className="grid grid-cols-1 gap-x-8 gap-y-6 border-b border-neutral-100 pb-6 last:border-b-0 last:pb-0 md:grid-cols-[1fr_1fr_auto]"
                 >
-                  {SKILL_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="relative space-y-2">
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+                      Skill {index + 1}
+                    </label>
+                    <select
+                      value={getSkillSelectValue(row)}
+                      onChange={(e) => handleSkillSelectChange(index, e.target.value)}
+                      className={selectClass}
+                      style={SELECT_CHEVRON_STYLE}
+                    >
+                      {getSkillSelectOptions(row).map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    {showCustomSkillInput ? (
+                      <input
+                        type="text"
+                        value={row.skill === OTHER_SKILL_OPTION ? '' : row.skill}
+                        onChange={(e) => updateSkillRow(index, 'skill', e.target.value)}
+                        placeholder="Enter skill name"
+                        className={inputClass}
+                      />
+                    ) : null}
+                  </div>
 
-              <div className="relative space-y-2">
-                <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Point</label>
-                <select
-                  value={row.point}
-                  onChange={(e) => updateSkillRow(index, 'point', e.target.value)}
-                  className={selectClass}
-                  style={SELECT_CHEVRON_STYLE}
-                >
-                  {POINT_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="relative space-y-2">
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Point</label>
+                    <select
+                      value={row.point}
+                      onChange={(e) => updateSkillRow(index, 'point', e.target.value)}
+                      className={selectClass}
+                      style={SELECT_CHEVRON_STYLE}
+                    >
+                      {POINT_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-end pb-1 md:justify-end">
+                    <button
+                      type="button"
+                      onClick={() => removeSkillRow(index)}
+                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-2.5 text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
+                      title="Remove skill"
+                      aria-label={`Remove skill ${index + 1}`}
+                    >
+                      <Trash2 className="h-[17px] w-[17px]" strokeWidth={2.2} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+
+          <div className="space-y-4 border-t border-neutral-100 pt-6">
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={addSkillRow}
+                className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
+                  <Plus className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Add Skill
+              </button>
             </div>
-          ))}
-
-          <div className="flex items-center justify-between pt-2">
-            <button
-              type="submit"
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
-            >
-              <span>Save</span>
-              <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </button>
+            <div className="flex items-center justify-between">
+              <button
+                type="submit"
+                className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
+              >
+                <span>Save</span>
+                <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
         </form>
-      </div>
+        </ProfileAccordionItem>
 
-      <div className="mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 flex items-center justify-between border-b border-neutral-100 pb-5">
-          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900" id="education-section-label">
-            Education
-          </h2>
-          <button
-            type="button"
-            onClick={openAddEducation}
-            className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-            </span>
-            Add Education
-          </button>
-        </div>
-
-        <form onSubmit={handleEducationSave}>
+        <ProfileAccordionItem
+          title="Education"
+          icon={GraduationCap}
+          description={`${education.length} education ${education.length === 1 ? 'entry' : 'entries'}`}
+          isOpen={openSection === 'education'}
+          onToggle={() => toggleSection('education')}
+        >
+        <form onSubmit={handleEducationSave} className="pt-4">
           {education.length === 0 ? (
             <p className="pb-6 text-sm text-neutral-400">No education entries yet. Click Add Education to get started.</p>
           ) : (
@@ -959,7 +1193,7 @@ export default function DashboardProfile() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDeleteEducation(entry.id)}
+                          onClick={() => requestDeleteEducation(entry.id)}
                           className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-2.5 text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
                           title="Delete education"
                         >
@@ -973,123 +1207,40 @@ export default function DashboardProfile() {
             </div>
           )}
 
-          <div className="flex items-center justify-between border-t border-neutral-100 pt-6">
-            <button
-              type="submit"
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
-            >
-              <span>Save</span>
-              <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {isEducationModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close education modal"
-            onClick={() => setIsEducationModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-              <h3 className="text-lg font-bold text-neutral-900">
-                {editingEducation ? 'Edit Education' : 'Add Education'}
-              </h3>
+          <div className="space-y-4 border-t border-neutral-100 pt-6">
+            <div className="flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => setIsEducationModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
+                onClick={openAddEducation}
+                className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
               >
-                <X className="h-5 w-5" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
+                  <Plus className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Add Education
               </button>
             </div>
-
-            <form onSubmit={handleEducationFormSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Year Range</label>
-                <input
-                  value={educationForm.yearRange}
-                  onChange={(e) => setEducationForm((f) => ({ ...f, yearRange: e.target.value }))}
-                  placeholder="2012 – 2014"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Degree</label>
-                <input
-                  required
-                  value={educationForm.degree}
-                  onChange={(e) => setEducationForm((f) => ({ ...f, degree: e.target.value }))}
-                  placeholder="Bachelors in Fine Arts"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Institution</label>
-                <input
-                  required
-                  value={educationForm.institution}
-                  onChange={(e) => setEducationForm((f) => ({ ...f, institution: e.target.value }))}
-                  placeholder="Modern College"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Description</label>
-                <textarea
-                  value={educationForm.description}
-                  onChange={(e) => setEducationForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="Description"
-                  rows={4}
-                  className="min-h-[120px] w-full rounded-xl border border-neutral-200/90 bg-white p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsEducationModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  {editingEducation ? 'Save Changes' : 'Add Entry'}
-                </button>
-              </div>
-            </form>
+            <div className="flex items-center justify-between">
+              <button
+                type="submit"
+                className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
+              >
+                <span>Save</span>
+                <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
-        </div>
-      ) : null}
+        </form>
+        </ProfileAccordionItem>
 
-      <div className="mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 flex items-center justify-between border-b border-neutral-100 pb-5">
-          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900" id="experience-section-label">
-            Work &amp; Experience
-          </h2>
-          <button
-            type="button"
-            onClick={openAddExperience}
-            className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-            </span>
-            Add Experience
-          </button>
-        </div>
-
-        <form onSubmit={handleExperienceSave}>
+        <ProfileAccordionItem
+          title="Work & Experience"
+          icon={Briefcase}
+          description={`${experience.length} experience ${experience.length === 1 ? 'entry' : 'entries'}`}
+          isOpen={openSection === 'experience'}
+          onToggle={() => toggleSection('experience')}
+        >
+        <form onSubmit={handleExperienceSave} className="pt-4">
           {experience.length === 0 ? (
             <p className="pb-6 text-sm text-neutral-400">
               No experience entries yet. Click Add Experience to get started.
@@ -1133,7 +1284,7 @@ export default function DashboardProfile() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDeleteExperience(entry.id)}
+                          onClick={() => requestDeleteExperience(entry.id)}
                           className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-2.5 text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
                           title="Delete experience"
                         >
@@ -1147,125 +1298,42 @@ export default function DashboardProfile() {
             </div>
           )}
 
-          <div className="flex items-center justify-between border-t border-neutral-100 pt-6">
-            <button
-              type="submit"
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
-            >
-              <span>Save</span>
-              <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {isExperienceModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close experience modal"
-            onClick={() => setIsExperienceModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-              <h3 className="text-lg font-bold text-neutral-900">
-                {editingExperience ? 'Edit Experience' : 'Add Experience'}
-              </h3>
+          <div className="space-y-4 border-t border-neutral-100 pt-6">
+            <div className="flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => setIsExperienceModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
+                onClick={openAddExperience}
+                className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
               >
-                <X className="h-5 w-5" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
+                  <Plus className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Add Experience
               </button>
             </div>
-
-            <form onSubmit={handleExperienceFormSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Year Range</label>
-                <input
-                  value={experienceForm.yearRange}
-                  onChange={(e) => setExperienceForm((f) => ({ ...f, yearRange: e.target.value }))}
-                  placeholder="2012 – 2014"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Job Title</label>
-                <input
-                  required
-                  value={experienceForm.title}
-                  onChange={(e) => setExperienceForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="UX Designer"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Company</label>
-                <input
-                  required
-                  value={experienceForm.company}
-                  onChange={(e) => setExperienceForm((f) => ({ ...f, company: e.target.value }))}
-                  placeholder="Dropbox"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Description</label>
-                <textarea
-                  value={experienceForm.description}
-                  onChange={(e) => setExperienceForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="Description"
-                  rows={4}
-                  className="min-h-[120px] w-full rounded-xl border border-neutral-200/90 bg-white p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsExperienceModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  {editingExperience ? 'Save Changes' : 'Add Entry'}
-                </button>
-              </div>
-            </form>
+            <div className="flex items-center justify-between">
+              <button
+                type="submit"
+                className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
+              >
+                <span>Save</span>
+                <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
-        </div>
-      ) : null}
+        </form>
+        </ProfileAccordionItem>
 
-      <div className="mx-auto mt-6 max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 flex items-center justify-between border-b border-neutral-100 pb-5">
-          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900" id="awards-section-label">
-            Awards
-          </h2>
-          <button
-            type="button"
-            onClick={openAddAward}
-            className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
-              <Plus className="h-4 w-4" strokeWidth={2.5} />
-            </span>
-            Add Awards
-          </button>
-        </div>
-
-        <form onSubmit={handleAwardsSave}>
+        <ProfileAccordionItem
+          title="Awards"
+          icon={Award}
+          description={`${awards.length} award ${awards.length === 1 ? 'entry' : 'entries'}`}
+          isOpen={openSection === 'awards'}
+          onToggle={() => toggleSection('awards')}
+        >
+        <form onSubmit={handleAwardsSave} className="pt-4">
           {awards.length === 0 ? (
-            <p className="pb-6 text-sm text-neutral-400">No awards yet. Click Add Awards to get started.</p>
+            <p className="pb-6 text-sm text-neutral-400">No awards yet. Click Add Award to get started.</p>
           ) : (
             <div className="space-y-10">
               {awards.map((entry) => (
@@ -1286,7 +1354,7 @@ export default function DashboardProfile() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeleteAward(entry.id)}
+                        onClick={() => requestDeleteAward(entry.id)}
                         className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-2.5 text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
                         title="Delete award"
                       >
@@ -1306,177 +1374,196 @@ export default function DashboardProfile() {
             </div>
           )}
 
-          <div className="flex items-center justify-between border-t border-neutral-100 pt-6">
-            <button
-              type="submit"
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
-            >
-              <span>Save</span>
-              <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="mx-auto mb-8 mt-6 max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 border-b border-neutral-100 pb-5">
-          <h2 className="text-[17px] font-semibold tracking-tight text-neutral-900" id="change-password-section-label">
-            Change password
-          </h2>
-        </div>
-
-        <form onSubmit={handleChangePassword} className="space-y-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-8">
-            <label
-              htmlFor="old-password"
-              className="shrink-0 text-[15px] font-semibold leading-tight text-neutral-900 sm:w-52"
-            >
-              Old Password
-            </label>
-            <input
-              id="old-password"
-              type="password"
-              autoComplete="current-password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              placeholder="********"
-              className={`${inputClass} w-full max-w-xs text-neutral-800`}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-8">
-            <label
-              htmlFor="new-password"
-              className="shrink-0 text-[15px] font-semibold leading-tight text-neutral-900 sm:w-52"
-            >
-              New Password
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              autoComplete="new-password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="********"
-              className={`${inputClass} w-full max-w-2xl text-neutral-800`}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-8">
-            <label
-              htmlFor="confirm-new-password"
-              className="shrink-0 text-[15px] font-semibold leading-tight text-neutral-900 sm:w-52"
-            >
-              Confirm New Password
-            </label>
-            <input
-              id="confirm-new-password"
-              type="password"
-              autoComplete="new-password"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              placeholder="********"
-              className={`${inputClass} w-full max-w-2xl text-neutral-800`}
-            />
-          </div>
-
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={isChangingPassword}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <span>{isChangingPassword ? 'Changing...' : 'Change Password'}</span>
-              <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {isAwardModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close award modal"
-            onClick={() => setIsAwardModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-              <h3 className="text-lg font-bold text-neutral-900">{editingAward ? 'Edit Award' : 'Add Award'}</h3>
+          <div className="space-y-4 border-t border-neutral-100 pt-6">
+            <div className="flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => setIsAwardModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
+                onClick={openAddAward}
+                className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c]"
               >
-                <X className="h-5 w-5" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFF5F4] text-[#F87171]">
+                  <Plus className="h-4 w-4" strokeWidth={2.5} />
+                </span>
+                Add Award
               </button>
             </div>
-
-            <form onSubmit={handleAwardFormSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Year Range</label>
-                <input
-                  value={awardForm.yearRange}
-                  onChange={(e) => setAwardForm((f) => ({ ...f, yearRange: e.target.value }))}
-                  placeholder="2012 – 2014"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Award Title</label>
-                <input
-                  required
-                  value={awardForm.title}
-                  onChange={(e) => setAwardForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="UI UX Design"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Issuer</label>
-                <input
-                  required
-                  value={awardForm.issuer}
-                  onChange={(e) => setAwardForm((f) => ({ ...f, issuer: e.target.value }))}
-                  placeholder="Udemy"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Description</label>
-                <textarea
-                  value={awardForm.description}
-                  onChange={(e) => setAwardForm((f) => ({ ...f, description: e.target.value }))}
-                  placeholder="Description"
-                  rows={4}
-                  className="min-h-[120px] w-full rounded-xl border border-neutral-200/90 bg-white p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsAwardModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  {editingAward ? 'Save Changes' : 'Add Entry'}
-                </button>
-              </div>
-            </form>
+            <div className="flex items-center justify-between">
+              <button
+                type="submit"
+                className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] active:translate-y-px active:bg-[#349655]"
+              >
+                <span>Save</span>
+                <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
+        </form>
+        </ProfileAccordionItem>
+      </div>
+
+      <ProfileFormModal
+        open={isEducationModalOpen}
+        title={editingEducation ? 'Edit Education' : 'Add Education'}
+        description="Add schools, degrees, and study details to show clients your academic background."
+        onClose={() => setIsEducationModalOpen(false)}
+        onSubmit={handleEducationFormSubmit}
+        submitLabel={editingEducation ? 'Save Changes' : 'Add Entry'}
+      >
+        <div>
+          <label className={profileModalFieldLabelClass}>Year Range</label>
+          <input
+            value={educationForm.yearRange}
+            onChange={(e) => setEducationForm((f) => ({ ...f, yearRange: e.target.value }))}
+            placeholder="2012 – 2014"
+            className={profileModalInputClass}
+          />
         </div>
-      ) : null}
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Degree</label>
+          <input
+            required
+            value={educationForm.degree}
+            onChange={(e) => setEducationForm((f) => ({ ...f, degree: e.target.value }))}
+            placeholder="Bachelors in Fine Arts"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Institution</label>
+          <input
+            required
+            value={educationForm.institution}
+            onChange={(e) => setEducationForm((f) => ({ ...f, institution: e.target.value }))}
+            placeholder="Modern College"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Description</label>
+          <textarea
+            value={educationForm.description}
+            onChange={(e) => setEducationForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Description"
+            rows={4}
+            className={profileModalTextareaClass}
+          />
+        </div>
+      </ProfileFormModal>
+
+      <ProfileFormModal
+        open={isExperienceModalOpen}
+        title={editingExperience ? 'Edit Experience' : 'Add Experience'}
+        description="Add roles, companies, and highlights from your professional work history."
+        onClose={() => setIsExperienceModalOpen(false)}
+        onSubmit={handleExperienceFormSubmit}
+        submitLabel={editingExperience ? 'Save Changes' : 'Add Entry'}
+      >
+        <div>
+          <label className={profileModalFieldLabelClass}>Year Range</label>
+          <input
+            value={experienceForm.yearRange}
+            onChange={(e) => setExperienceForm((f) => ({ ...f, yearRange: e.target.value }))}
+            placeholder="2012 – 2014"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Job Title</label>
+          <input
+            required
+            value={experienceForm.title}
+            onChange={(e) => setExperienceForm((f) => ({ ...f, title: e.target.value }))}
+            placeholder="UX Designer"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Company</label>
+          <input
+            required
+            value={experienceForm.company}
+            onChange={(e) => setExperienceForm((f) => ({ ...f, company: e.target.value }))}
+            placeholder="Dropbox"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Description</label>
+          <textarea
+            value={experienceForm.description}
+            onChange={(e) => setExperienceForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Description"
+            rows={4}
+            className={profileModalTextareaClass}
+          />
+        </div>
+      </ProfileFormModal>
+
+      <ProfileFormModal
+        open={isAwardModalOpen}
+        title={editingAward ? 'Edit Award' : 'Add Award'}
+        description="Add certifications, awards, and recognitions you have earned."
+        onClose={() => setIsAwardModalOpen(false)}
+        onSubmit={handleAwardFormSubmit}
+        submitLabel={editingAward ? 'Save Changes' : 'Add Entry'}
+      >
+        <div>
+          <label className={profileModalFieldLabelClass}>Year Range</label>
+          <input
+            value={awardForm.yearRange}
+            onChange={(e) => setAwardForm((f) => ({ ...f, yearRange: e.target.value }))}
+            placeholder="2012 – 2014"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Award Title</label>
+          <input
+            required
+            value={awardForm.title}
+            onChange={(e) => setAwardForm((f) => ({ ...f, title: e.target.value }))}
+            placeholder="UI UX Design"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Issuer</label>
+          <input
+            required
+            value={awardForm.issuer}
+            onChange={(e) => setAwardForm((f) => ({ ...f, issuer: e.target.value }))}
+            placeholder="Udemy"
+            className={profileModalInputClass}
+          />
+        </div>
+
+        <div>
+          <label className={profileModalFieldLabelClass}>Description</label>
+          <textarea
+            value={awardForm.description}
+            onChange={(e) => setAwardForm((f) => ({ ...f, description: e.target.value }))}
+            placeholder="Description"
+            rows={4}
+            className={profileModalTextareaClass}
+          />
+        </div>
+      </ProfileFormModal>
+
+      <DeleteConfirmModal
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title={deleteModalTitle}
+        description={deleteModalDescription}
+      />
 
       {showScrollTop ? (
         <button

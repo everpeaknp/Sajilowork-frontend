@@ -2,110 +2,24 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, ArrowRight, Star, Search as SearchIcon, ChevronDown } from 'lucide-react';
+import { Search as SearchIcon, ChevronDown } from 'lucide-react';
 import {
   discoverBody,
   discoverHeadline,
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
-import { formatNPR } from '@/lib/nepalLocale';
-
-interface Freelancer {
-  id: string;
-  name: string;
-  role: string;
-  rating: number;
-  reviews: number;
-  rate: number;
-  avatar: string;
-  tags: string[];
-  location: string;
-  availableNow: boolean;
-}
-
-const FREELANCERS_DATA: Freelancer[] = [
-  {
-    id: 'f1',
-    name: 'Elena Rostova',
-    role: 'UI/UX Designer',
-    rating: 4.9,
-    reviews: 142,
-    rate: 2500,
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
-    tags: ['Figma', 'Mobile UI', 'Web Performance', 'Designer'],
-    location: 'Kathmandu',
-    availableNow: true,
-  },
-  {
-    id: 'f2',
-    name: 'Rajesh Kumar',
-    role: 'React Web Developer',
-    rating: 5.0,
-    reviews: 218,
-    rate: 3200,
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
-    tags: ['React', 'TypeScript', 'Next.js', 'Web', 'Developer'],
-    location: 'Lalitpur',
-    availableNow: true,
-  },
-  {
-    id: 'f3',
-    name: 'Marcus Thorne',
-    role: 'Senior Frontend Engineer',
-    rating: 4.8,
-    reviews: 93,
-    rate: 3800,
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
-    tags: ['Vite', 'TailwindCSS', 'Node.js', 'Senior', 'Engineer'],
-    location: 'Bhaktapur',
-    availableNow: false,
-  },
-  {
-    id: 'f4',
-    name: 'Amélie Laurent',
-    role: 'iOS Swift Developer',
-    rating: 4.9,
-    reviews: 76,
-    rate: 3400,
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150',
-    tags: ['SwiftUI', 'CoreData', 'Combine', 'IOS', 'Developer'],
-    location: 'Pokhara',
-    availableNow: true,
-  },
-  {
-    id: 'f5',
-    name: 'Sven Gieler',
-    role: 'PHP Laravel Architect',
-    rating: 4.7,
-    reviews: 112,
-    rate: 2800,
-    avatar:
-      'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150',
-    tags: ['PHP', 'Laravel', 'MySQL', 'Web', 'Developer'],
-    location: 'Kathmandu',
-    availableNow: true,
-  },
-];
-
-const POPULAR_TAGS = ['Designer', 'Developer', 'Web', 'IOS', 'PHP', 'Senior', 'Engineer'];
 
 const SUGGESTIONS_DATABASE = [
-  'UI/UX Designer',
-  'React Web Developer',
+  'Website Designer',
+  'React Developer',
   'WordPress Specialist',
-  'iOS Swift Developer',
-  'PHP Laravel Architect',
+  'Mobile App Developer',
+  'PHP Laravel Developer',
   'Senior Frontend Engineer',
-  'Senior Backend Engineer',
+  'UI/UX Designer',
   'Graphic Designer',
-  'Logo Branding specialist',
-  'Mobile App Developer (Flutter/React Native)',
-  'SEO & Content Strategist',
-  'AI & Machine Learning Engineer',
+  'SEO Specialist',
+  'Content Writer',
 ];
 
 const LOCATION_OPTIONS = [
@@ -130,8 +44,6 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
   const [locationQuery, setLocationQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [lastSearch, setLastSearch] = useState('');
 
   useEffect(() => {
     if (!query.trim()) {
@@ -139,38 +51,22 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
       return;
     }
     const filtered = SUGGESTIONS_DATABASE.filter((item) =>
-      item.toLowerCase().includes(query.toLowerCase())
+      item.toLowerCase().includes(query.toLowerCase()),
     ).slice(0, 5);
     setSuggestions(filtered);
   }, [query]);
 
   const performSearch = (selectedQuery: string, selectedLoc: string) => {
-    const combinedQuery = selectedLoc
-      ? `${selectedQuery} in ${selectedLoc}`.trim()
-      : selectedQuery;
-
     setQuery(selectedQuery);
     setLocationQuery(selectedLoc);
-    setLastSearch(combinedQuery || 'Design & Creative');
-    setHasSearched(true);
     setIsFocused(false);
     onSearchSubmit?.(selectedQuery, selectedLoc);
+    document.getElementById('custom-job-board-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     performSearch(query, locationQuery);
-  };
-
-  const handleTagClick = (tag: string) => {
-    performSearch(tag, locationQuery);
-  };
-
-  const clearSearch = () => {
-    setHasSearched(false);
-    setQuery('');
-    setLocationQuery('');
-    onSearchSubmit?.('', '');
   };
 
   return (
@@ -189,7 +85,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
               id="job-search"
               type="text"
               className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2.5 text-sm text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base`}
-              placeholder="What are you looking for?"
+              placeholder="Search jobs by title, skill, or company"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
@@ -237,7 +133,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
                 <div
                   className={`${discoverMedium} px-3 py-1 text-xs uppercase tracking-wider text-neutral-400`}
                 >
-                  Matching talented skills
+                  Suggested job searches
                 </div>
                 {suggestions.map((item) => (
                   <button
@@ -255,91 +151,16 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
           )}
         </AnimatePresence>
       </form>
-
-      <div className={`${discoverBody} mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs opacity-90`}>
-        <span className="mr-1 font-normal leading-relaxed text-neutral-500">Popular Searches:</span>
-        <div className="flex flex-wrap items-center gap-x-1.5">
-          {POPULAR_TAGS.map((tag, idx) => (
-            <React.Fragment key={tag}>
-              <button
-                type="button"
-                onClick={() => handleTagClick(tag)}
-                className={`${discoverMedium} cursor-pointer text-xs text-neutral-600 underline underline-offset-2 transition-all duration-200 hover:text-black`}
-              >
-                {tag}
-              </button>
-              {idx < POPULAR_TAGS.length - 1 && <span className="mr-0.5 text-neutral-400">,</span>}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {hasSearched && (
-          <motion.div
-            className="relative z-20 mt-5 flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-3.5 text-[#1D3E35]"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1D3E35]/10 text-[#1D3E35]">
-                <Sparkles className="h-4 w-4 animate-pulse" />
-              </div>
-              <p className={`${discoverBody} text-xs sm:text-sm`}>
-                Found top-rated professionals for{' '}
-                <span className={`${discoverMedium}`}>&quot;{lastSearch}&quot;</span>!
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={clearSearch}
-              className={`${discoverMedium} cursor-pointer text-xs text-neutral-500 underline transition-colors hover:text-black`}
-            >
-              Clear filter
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
 
 interface JobHeroProps {
   className?: string;
+  onSearchSubmit?: (query: string, location: string) => void;
 }
 
-export default function JobHero({ className = '' }: JobHeroProps) {
-  const [activeSearch, setActiveSearch] = useState('');
-  const [filteredFreelancers, setFilteredFreelancers] = useState<Freelancer[]>(FREELANCERS_DATA);
-
-  const handleSearchSubmit = (query: string, location: string = '') => {
-    const active = query && location ? `${query} (${location})` : query || location;
-    setActiveSearch(active);
-
-    if (!query.trim() && !location.trim()) {
-      setFilteredFreelancers(FREELANCERS_DATA);
-      return;
-    }
-
-    const searchLow = query.toLowerCase();
-    const locLow = location.toLowerCase();
-
-    setFilteredFreelancers(
-      FREELANCERS_DATA.filter((freelancer) => {
-        const matchSearch =
-          !query.trim() ||
-          freelancer.name.toLowerCase().includes(searchLow) ||
-          freelancer.role.toLowerCase().includes(searchLow) ||
-          freelancer.tags.some((tag) => tag.toLowerCase().includes(searchLow));
-        const matchLoc =
-          !location.trim() || freelancer.location.toLowerCase().includes(locLow);
-        return matchSearch && matchLoc;
-      })
-    );
-  };
-
+export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps) {
   return (
     <section className={`select-none bg-white px-4 pb-12 pt-8 sm:px-6 lg:px-8 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
@@ -402,7 +223,7 @@ export default function JobHero({ className = '' }: JobHeroProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <SearchBox onSearchSubmit={handleSearchSubmit} />
+                <SearchBox onSearchSubmit={onSearchSubmit} />
               </motion.div>
             </div>
 
@@ -420,137 +241,6 @@ export default function JobHero({ className = '' }: JobHeroProps) {
             </div>
           </div>
         </div>
-
-        <AnimatePresence>
-          {activeSearch && (
-            <motion.div
-              className="mt-14 border-t border-neutral-100 pt-10"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 30 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-            >
-              <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                <div>
-                  <h3 className={`${discoverHeadline} text-xl text-neutral-800`}>
-                    Available Qualified Matches
-                  </h3>
-                  <p className={`${discoverBody} mt-1 text-sm text-neutral-500`}>
-                    Showing matches for{' '}
-                    <span className={`${discoverMedium} text-[#1D3E35]`}>
-                      &quot;{activeSearch}&quot;
-                    </span>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleSearchSubmit('', '')}
-                  className={`${discoverMedium} flex cursor-pointer items-center gap-1.5 text-sm text-[#1D3E35] transition-opacity hover:opacity-80`}
-                >
-                  Clear search filters
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-
-              {filteredFreelancers.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredFreelancers.map((f, index) => (
-                    <motion.div
-                      key={f.id}
-                      className="flex flex-col justify-between rounded-xl border border-neutral-200/50 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md"
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ delay: index * 0.08 }}
-                      whileHover={{ y: -3 }}
-                    >
-                      <div>
-                        <div className="mb-4 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={f.avatar}
-                              alt={f.name}
-                              className="h-12 w-12 rounded-full border border-neutral-100 object-cover"
-                              referrerPolicy="no-referrer"
-                            />
-                            <div>
-                              <h4
-                                className={`${discoverHeadline} flex items-center gap-1.5 text-base leading-tight text-neutral-800`}
-                              >
-                                {f.name}
-                                {f.availableNow && (
-                                  <span
-                                    className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500"
-                                    title="Available now"
-                                  />
-                                )}
-                              </h4>
-                              <span className={`${discoverBody} text-xs text-neutral-400`}>
-                                {f.location}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div
-                            className={`${discoverMedium} flex items-center gap-1 rounded-lg bg-neutral-50 px-2.5 py-1 text-sm text-neutral-700`}
-                          >
-                            <Star className="h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
-                            {f.rating}
-                          </div>
-                        </div>
-
-                        <p className={`${discoverHeadline} mb-3 text-base text-[#1D3E35]`}>
-                          {f.role}
-                        </p>
-
-                        <div className="mb-5 flex flex-wrap gap-1.5">
-                          {f.tags.map((t) => (
-                            <span
-                              key={t}
-                              className={`${discoverBody} rounded-md border border-neutral-100 bg-neutral-50 px-2.5 py-1 text-xs text-neutral-600`}
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="mt-2 flex items-center justify-between border-t border-neutral-100 pt-4">
-                        <div>
-                          <span className={`${discoverBody} block text-xs text-neutral-400`}>
-                            Starting rate
-                          </span>
-                          <span className={`${discoverHeadline} text-lg text-neutral-800`}>
-                            {formatNPR(f.rate)}/hr
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          className={`${discoverMedium} cursor-pointer rounded-lg bg-[#1D3E35] px-4 py-2.5 text-xs text-white transition-colors duration-200 hover:bg-neutral-900 sm:text-sm`}
-                        >
-                          Apply/Inquire
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <motion.div
-                  className="rounded-xl border border-dashed border-neutral-200 bg-white p-12 text-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <p className={`${discoverMedium} mb-2 text-neutral-500`}>
-                    No qualified listings match that search query.
-                  </p>
-                  <p className={`${discoverBody} text-xs text-neutral-400`}>
-                    Try searching for &quot;Designer&quot;, &quot;Developer&quot;, &quot;Web&quot;,
-                    &quot;IOS&quot;, or &quot;Engineer&quot;.
-                  </p>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </section>
   );

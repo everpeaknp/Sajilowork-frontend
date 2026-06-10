@@ -8,7 +8,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { DashboardTab } from './DashboardSidebar';
+import { usePathname, useRouter } from 'next/navigation';
+import { getDashboardHref, tabFromPathname, type DashboardTab } from './dashboardTabs';
+
+export type { DashboardTab };
 
 type DashboardTabContextValue = {
   activeTab: DashboardTab;
@@ -21,8 +24,17 @@ type DashboardTabContextValue = {
 const DashboardTabContext = createContext<DashboardTabContextValue | null>(null);
 
 export function DashboardTabProvider({ children }: { children: ReactNode }) {
-  const [activeTab, setActiveTab] = useState<DashboardTab>('dashboard');
+  const pathname = usePathname();
+  const router = useRouter();
+  const activeTab = tabFromPathname(pathname);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const setActiveTab = useCallback(
+    (tab: DashboardTab) => {
+      router.push(getDashboardHref(tab));
+    },
+    [router],
+  );
 
   const toggleMobile = useCallback(() => {
     setMobileOpen((open) => !open);
@@ -36,7 +48,7 @@ export function DashboardTabProvider({ children }: { children: ReactNode }) {
       setMobileOpen,
       toggleMobile,
     }),
-    [activeTab, mobileOpen, toggleMobile],
+    [activeTab, mobileOpen, setActiveTab, toggleMobile],
   );
 
   return <DashboardTabContext.Provider value={value}>{children}</DashboardTabContext.Provider>;

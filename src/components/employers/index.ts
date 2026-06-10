@@ -14,5 +14,11 @@ export {
   EMPLOYER_TEAM_SIZES,
   EMPLOYER_SORT_OPTIONS,
 } from './employerData';
-export { getEmployerSlug, findEmployerBySlug, getEmployerProfilePath } from './employerSlug';
+export {
+  getEmployerSlug,
+  findEmployerBySlug,
+  findEmployerByCompanyName,
+  getEmployerProfilePath,
+  getEmployerProfilePathByCompanyName,
+} from './employerSlug';
 export { renderCompanyLogo, GreenSparkSparkle } from './employerLogos';

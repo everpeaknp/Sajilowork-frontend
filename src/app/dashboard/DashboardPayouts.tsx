@@ -121,23 +121,24 @@ function StatusBadge({ status }: { status: PayoutStatus }) {
 
 export default function DashboardPayouts() {
   const [payouts, setPayouts] = useState<Payout[]>(buildPayouts);
-  const [currentPage, setCurrentPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAmount, setNewAmount] = useState('1800');
   const [newMethod, setNewMethod] = useState('Paypal');
   const [newStatus, setNewStatus] = useState<'Pending Orange' | 'Pending Blue'>('Pending Orange');
   const [successNote, setSuccessNote] = useState<string | null>(null);
 
-  const itemsPerPage = 3;
-  const totalPages = 20;
+  const itemsPerPage = 10;
+  const totalPages = Math.max(1, Math.ceil(payouts.length / itemsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfLastItem = activePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentPayouts = payouts.slice(indexOfFirstItem, indexOfLastItem);
 
   const pageButtonClass = (page: number) =>
     `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-sm transition-all ${
-      currentPage === page
+      activePage === page
         ? 'bg-[#52C47F] font-semibold text-white shadow-sm'
         : 'bg-transparent font-normal text-black hover:text-[#52C47F]'
     }`;
@@ -235,7 +236,7 @@ export default function DashboardPayouts() {
             <button
               type="button"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
+              disabled={activePage === 1}
               className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
             >
               <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
@@ -267,7 +268,7 @@ export default function DashboardPayouts() {
             <button
               type="button"
               onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
+              disabled={activePage === totalPages}
               className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
             >
               <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
@@ -275,7 +276,7 @@ export default function DashboardPayouts() {
           </div>
 
           <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-            1 – 20 of 300+ property available
+            {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, payouts.length)} of {payouts.length} payouts
           </div>
         </div>
       </div>

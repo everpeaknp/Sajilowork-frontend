@@ -1,3 +1,10 @@
 export { default as JobHero } from './JobHero';
 export { default as JobList } from './JobList';
+export { default as JobAbout } from './JobAbout';
+export { default as JobKeyResponsibilities } from './JobKeyResponsibilities';
+export { default as JobRelatedJobs } from './JobRelatedJobs';
+export { default as JobWorkExperience } from './JobWorkExperience';
+export { default as JobProfileHero } from './JobProfileHero';
+export { default as SingleJobPage } from './SingleJobPage';
 export type { Job } from './jobListData';
+export { findJobBySlug, getJobDetailPath, getJobSlug } from './jobSlug';

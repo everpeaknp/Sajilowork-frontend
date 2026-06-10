@@ -1,3 +1,15 @@
 export { default as Hero } from './Hero';
 export { default as ProjectList } from './ProjectList';
+export { default as ProjectProfileHero } from './ProjectProfileHero';
+export { default as ProjectAbout } from './ProjectAbout';
+export { default as ProjectSidebar } from './ProjectSidebar';
+export { default as ProjectSkillsRequired } from './ProjectSkillsRequired';
+export { default as ProjectProposals } from './ProjectProposals';
+export { default as ProjectSendProposal } from './ProjectSendProposal';
+export { default as ProjectReviews } from './ProjectReviews';
+export { default as ProjectQuestions } from './ProjectQuestions';
+export { default as SingleProjectPage } from './SingleProjectPage';
 export type { Project } from './projectListData';
+export { buildProjectReviews, buildProjectQuestions } from './projectListData';
+export type { ProjectReviewItem, ProjectQuestionItem } from './projectListData';
+export { getProjectDetailPath, getProjectSlug, findProjectBySlug } from './projectSlug';

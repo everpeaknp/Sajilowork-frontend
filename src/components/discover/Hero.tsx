@@ -1,12 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles,
-  ArrowRight,
-  Star,
   CheckCircle2,
   Search as SearchIcon,
   ThumbsUp,
@@ -16,88 +13,6 @@ import {
   discoverHeadline,
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
-import { formatNPR } from '@/lib/nepalLocale';
-
-interface TaskerProfile {
-  id: string;
-  name: string;
-  role: string;
-  rating: number;
-  reviews: number;
-  rate: number;
-  avatar: string;
-  tags: string[];
-  location: string;
-  availableNow: boolean;
-}
-
-const TASKERS_DATA: TaskerProfile[] = [
-  {
-    id: 't1',
-    name: 'Sunita Gurung',
-    role: 'Home Cleaning Specialist',
-    rating: 4.9,
-    reviews: 142,
-    rate: 1200,
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
-    tags: ['Cleaning', 'Deep clean', 'End of lease', 'Kathmandu'],
-    location: 'Kathmandu',
-    availableNow: true,
-  },
-  {
-    id: 't2',
-    name: 'Rajesh Kumar',
-    role: 'Furniture Moving & Packing',
-    rating: 5.0,
-    reviews: 218,
-    rate: 1500,
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
-    tags: ['Moving', 'Packing', 'Furniture', 'Loader'],
-    location: 'Lalitpur',
-    availableNow: true,
-  },
-  {
-    id: 't3',
-    name: 'Marcus Thapa',
-    role: 'Handyman & Repairs',
-    rating: 4.8,
-    reviews: 93,
-    rate: 1800,
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
-    tags: ['Handyman', 'Repairs', 'Mounting', 'Fixtures'],
-    location: 'Bhaktapur',
-    availableNow: false,
-  },
-  {
-    id: 't4',
-    name: 'Amélie Shrestha',
-    role: 'Garden & Outdoor Care',
-    rating: 4.9,
-    reviews: 76,
-    rate: 1100,
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150',
-    tags: ['Gardening', 'Lawn', 'Trimming', 'Outdoor'],
-    location: 'Pokhara',
-    availableNow: true,
-  },
-  {
-    id: 't5',
-    name: 'Sven Rai',
-    role: 'Electrician & Wiring',
-    rating: 4.7,
-    reviews: 112,
-    rate: 2000,
-    avatar:
-      'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=150',
-    tags: ['Electrician', 'Wiring', 'Repairs', 'Home'],
-    location: 'Kathmandu',
-    availableNow: true,
-  },
-];
 
 const POPULAR_TAGS = ['Cleaning', 'Moving', 'Handyman', 'Repairs', 'Gardening', 'Electrician'];
 
@@ -117,20 +32,17 @@ const SUGGESTIONS_DATABASE = [
 ];
 
 interface HeroProps {
-  onPostWithTitle: (title: string) => void;
+  onSearchSubmit?: (query: string) => void;
 }
 
 interface SearchBoxProps {
   onSearchSubmit?: (query: string) => void;
-  onPostWithTitle?: (title: string) => void;
 }
 
-function SearchBox({ onSearchSubmit, onPostWithTitle }: SearchBoxProps) {
+function SearchBox({ onSearchSubmit }: SearchBoxProps) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [lastSearch, setLastSearch] = useState('');
 
   useEffect(() => {
     if (!query.trim()) {
@@ -144,9 +56,8 @@ function SearchBox({ onSearchSubmit, onPostWithTitle }: SearchBoxProps) {
   }, [query]);
 
   const performSearch = (selectedQuery: string) => {
+    if (!selectedQuery.trim()) return;
     setQuery(selectedQuery);
-    setLastSearch(selectedQuery);
-    setHasSearched(true);
     setIsFocused(false);
     onSearchSubmit?.(selectedQuery);
   };
@@ -159,7 +70,6 @@ function SearchBox({ onSearchSubmit, onPostWithTitle }: SearchBoxProps) {
 
   const handleTagClick = (tag: string) => {
     performSearch(tag);
-    onPostWithTitle?.(tag);
   };
 
   return (
@@ -250,38 +160,6 @@ function SearchBox({ onSearchSubmit, onPostWithTitle }: SearchBoxProps) {
           ))}
         </div>
           </div>
-
-      <AnimatePresence>
-        {hasSearched && (
-          <motion.div
-            className="mt-6 flex items-center justify-between gap-3 rounded-2xl border border-brand-emerald/20 bg-brand-emerald/5 p-4"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-emerald/10 text-brand-emerald">
-                <Sparkles className="h-4 w-4 animate-pulse" />
-              </div>
-              <p className={`${discoverBody} text-sm font-medium text-neutral-700`}>
-                Found top-rated taskers for{' '}
-                <span className="font-medium text-brand-dark">&quot;{lastSearch}&quot;</span>!
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setHasSearched(false);
-                setQuery('');
-              }}
-              className={`${discoverMedium} cursor-pointer text-xs text-neutral-400 underline transition-colors hover:text-brand-dark`}
-            >
-              Clear
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -486,29 +364,7 @@ function GraphicSection() {
   );
 }
 
-export default function Hero({ onPostWithTitle }: HeroProps) {
-  const router = useRouter();
-  const [activeSearch, setActiveSearch] = useState('');
-  const [filteredTaskers, setFilteredTaskers] = useState<TaskerProfile[]>(TASKERS_DATA);
-
-  const handleSearchSubmit = (query: string) => {
-    setActiveSearch(query);
-    if (!query.trim()) {
-      setFilteredTaskers(TASKERS_DATA);
-      return;
-    }
-
-    const searchLow = query.toLowerCase();
-    const filtered = TASKERS_DATA.filter((tasker) => {
-      return (
-        tasker.name.toLowerCase().includes(searchLow) ||
-        tasker.role.toLowerCase().includes(searchLow) ||
-        tasker.tags.some((tag) => tag.toLowerCase().includes(searchLow))
-      );
-    });
-    setFilteredTaskers(filtered);
-  };
-
+export default function Hero({ onSearchSubmit }: HeroProps) {
   return (
     <section className="relative flex min-h-[calc(100vh-64px)] flex-col justify-start overflow-hidden bg-white px-6 pb-0 pt-4 sm:px-8 sm:pt-6 lg:px-12 lg:pt-8 xl:px-16">
       <div
@@ -544,10 +400,7 @@ export default function Hero({ onPostWithTitle }: HeroProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <SearchBox
-                onSearchSubmit={handleSearchSubmit}
-                onPostWithTitle={onPostWithTitle}
-              />
+              <SearchBox onSearchSubmit={onSearchSubmit} />
             </motion.div>
           </div>
 
@@ -555,140 +408,6 @@ export default function Hero({ onPostWithTitle }: HeroProps) {
             <GraphicSection />
           </div>
         </div>
-
-        <AnimatePresence>
-          {activeSearch && (
-            <motion.div
-              className="mt-20 border-t border-neutral-200/60 pt-12"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-            >
-              <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                <div>
-                  <h3 className={`${discoverHeadline} text-2xl text-brand-dark`}>
-                    Available verified taskers
-                  </h3>
-                  <p className={`${discoverBody} mt-1 text-sm text-neutral-500`}>
-                    Showing matches for{' '}
-                    <span className="font-medium text-brand-dark">&quot;{activeSearch}&quot;</span>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleSearchSubmit('')}
-                  className={`${discoverMedium} flex cursor-pointer items-center gap-1.5 text-sm text-brand-emerald transition-colors hover:text-brand-dark`}
-                >
-                  Clear filter and show all
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-
-              {filteredTaskers.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredTaskers.map((tasker, index) => (
-                    <motion.div
-                      key={tasker.id}
-                      className="flex flex-col justify-between rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-sm transition-all duration-350 hover:border-brand-emerald/30 hover:shadow-xl"
-                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ delay: index * 0.08 }}
-                      whileHover={{ y: -4 }}
-                    >
-                      <div>
-                        <div className="mb-4 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={tasker.avatar}
-                              alt={tasker.name}
-                              className="h-12 w-12 rounded-full border border-neutral-100 object-cover"
-                              referrerPolicy="no-referrer"
-                            />
-                            <div>
-                              <h4
-                                className={`${discoverMedium} flex items-center gap-1.5 text-base leading-tight text-neutral-800`}
-                              >
-                                {tasker.name}
-                                {tasker.availableNow && (
-                                  <span
-                                    className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500"
-                                    title="Available now"
-                                  />
-                                )}
-                              </h4>
-                              <span className={`${discoverBody} text-xs font-medium text-neutral-400`}>
-                                {tasker.location}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className={`${discoverMedium} flex items-center gap-1 rounded-lg bg-neutral-50 px-2.5 py-1 text-sm text-neutral-700`}>
-                            <Star className="h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
-                            <span>{tasker.rating}</span>
-                          </div>
-                        </div>
-
-                        <p className={`${discoverMedium} mb-3 text-base text-[#134937]`}>
-                          {tasker.role}
-                        </p>
-
-                        <div className="mb-5 flex flex-wrap gap-1.5">
-                          {tasker.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className={`${discoverBody} rounded-lg border border-neutral-200/50 bg-brand-light-bg px-2.5 py-1 text-xs font-medium text-neutral-600`}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="mt-2 flex items-center justify-between border-t border-neutral-100 pt-4">
-                        <div>
-                          <span className={`${discoverBody} block text-xs font-medium text-neutral-400`}>
-                            Starting rate
-                          </span>
-                          <span className={`${discoverMedium} text-lg text-neutral-800`}>
-                            {formatNPR(tasker.rate)}/hr
-                    </span>
-                        </div>
-                          <button
-                            type="button"
-                          onClick={() => router.push('/users')}
-                          className={`${discoverMedium} cursor-pointer rounded-xl bg-brand-dark px-4 py-2.5 text-xs text-white transition-colors duration-200 hover:bg-brand-emerald sm:text-sm`}
-                        >
-                          View taskers
-                          </button>
-                      </div>
-                    </motion.div>
-                      ))}
-                  </div>
-              ) : (
-                <motion.div
-                  className="rounded-2xl border border-dashed border-neutral-200 bg-white p-12 text-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <p className={`${discoverBody} mb-2 font-medium text-neutral-500`}>
-                    No taskers match that query yet.
-                  </p>
-                  <p className={`${discoverBody} text-xs text-neutral-400`}>
-                    Try Cleaning, Moving, Handyman, Repairs, or post your task to get offers.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => onPostWithTitle(activeSearch)}
-                    className={`${discoverMedium} mt-4 cursor-pointer rounded-full bg-brand-dark px-5 py-2.5 text-sm text-white hover:bg-brand-emerald`}
-                  >
-                    Post this task
-                  </button>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
         </div>
       </section>
   );

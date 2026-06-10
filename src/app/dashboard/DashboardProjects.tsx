@@ -1,9 +1,12 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProjectTable from './ProjectTable';
-import type { Project } from './types';
+import DashboardCreateProject, { createProjectFromForm, type CreateProjectFormData } from './DashboardCreateProject';
+import type { FormUploadsPayload, Project } from './types';
+import DeleteConfirmModal from './DeleteConfirmModal';
+import { resolveAttachmentUploads } from './uploadUtils';
 
 type ProjectStatus = Project['status'];
 
@@ -155,31 +158,37 @@ function buildInitialProjects(): Project[] {
   return list;
 }
 
-const EMPTY_FORM = {
-  title: '',
-  location: 'London, UK',
-  postedTime: '',
-  receivedCount: '0',
-  category: 'Web Development',
-  typeCost: '$100 - $150/Hour',
-  costVal: '100',
-  status: 'Active' as ProjectStatus,
-};
+type ProjectsView = 'list' | 'create' | 'edit';
+
+function projectToFormData(project: Project): Partial<CreateProjectFormData> {
+  const normalizedLocation = project.location.trim();
+  const isRemote = normalizedLocation.toLowerCase() === 'remote';
+  const priceType = project.typeCost.toLowerCase().includes('hour') ? 'Hourly' : 'Fixed Price';
+
+  return {
+    title: project.title,
+    category: project.category,
+    cost: String(project.costVal),
+    priceType,
+    locationType: isRemote ? 'remote' : 'in-person',
+    location: isRemote ? 'Remote' : normalizedLocation,
+  };
+}
 
 export default function DashboardProjects() {
   const [projects, setProjects] = useState<Project[]>(buildInitialProjects);
   const [activeSubTab, setActiveSubTab] = useState<ProjectStatus>('Active');
-  const [currentPage, setCurrentPage] = useState(2);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [view, setView] = useState<ProjectsView>('list');
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
 
   const filteredProjects = useMemo(
     () => projects.filter((project) => project.status === activeSubTab),
     [projects, activeSubTab],
   );
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredProjects.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
 
@@ -195,60 +204,55 @@ export default function DashboardProjects() {
         : 'bg-transparent text-black hover:text-[#52C47F]'
     }`;
 
-  const openAddModal = () => {
+  const closeFormPage = () => {
+    setView('list');
     setEditingProject(null);
-    setForm(EMPTY_FORM);
-    setIsModalOpen(true);
   };
 
-  const openEditModal = (project: Project) => {
+  const openCreatePage = () => {
+    setEditingProject(null);
+    setView('create');
+  };
+
+  const openEditPage = (project: Project) => {
     setEditingProject(project);
-    setForm({
-      title: project.title,
-      location: project.location,
-      postedTime: project.postedTime,
-      receivedCount: String(project.receivedCount),
-      category: project.category,
-      typeCost: project.typeCost,
-      costVal: String(project.costVal),
-      status: project.status,
-    });
-    setIsModalOpen(true);
+    setView('edit');
   };
 
-  const handleDelete = (id: string) => {
-    setProjects((prev) => prev.filter((project) => project.id !== id));
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim()) return;
-
+  const handleCreateSubmit = (data: CreateProjectFormData, uploads: FormUploadsPayload) => {
+    const attachments = resolveAttachmentUploads(uploads.attachmentFiles, uploads.keptAttachments);
     const payload: Project = {
-      id: editingProject?.id ?? `proj-${Date.now()}`,
-      title: form.title.trim(),
-      location: form.location.trim() || 'Remote',
-      postedTime:
-        form.postedTime.trim() ||
-        new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      receivedCount: Math.max(0, parseInt(form.receivedCount, 10) || 0),
-      category: form.category.trim(),
-      typeCost: form.typeCost.trim(),
-      costVal: Number(form.costVal) || 0,
-      status: form.status,
+      id: `proj-${Date.now()}`,
+      ...createProjectFromForm(data),
+      attachments: attachments.length ? attachments : undefined,
+    };
+    setProjects((prev) => [payload, ...prev]);
+    setActiveSubTab(payload.status);
+    setCurrentPage(1);
+    closeFormPage();
+  };
+
+  const handleEditSubmit = (data: CreateProjectFormData, uploads: FormUploadsPayload) => {
+    if (!editingProject) return;
+
+    const attachments = resolveAttachmentUploads(uploads.attachmentFiles, uploads.keptAttachments);
+    const payload: Project = {
+      id: editingProject.id,
+      ...createProjectFromForm(data),
+      attachments: attachments.length ? attachments : undefined,
+      status: editingProject.status,
+      postedTime: editingProject.postedTime,
+      receivedCount: editingProject.receivedCount,
     };
 
-    if (editingProject) {
-      setProjects((prev) => prev.map((project) => (project.id === editingProject.id ? payload : project)));
-    } else {
-      setProjects((prev) => [payload, ...prev]);
-      setActiveSubTab(payload.status);
-    }
+    setProjects((prev) => prev.map((project) => (project.id === editingProject.id ? payload : project)));
+    closeFormPage();
+  };
 
-    setIsModalOpen(false);
-    setEditingProject(null);
-    setForm(EMPTY_FORM);
-    setCurrentPage(1);
+  const confirmDelete = () => {
+    if (deleteTargetId === null) return;
+    setProjects((prev) => prev.filter((project) => project.id !== deleteTargetId));
+    setDeleteTargetId(null);
   };
 
   const subTabClass = (tab: ProjectStatus) =>
@@ -257,6 +261,23 @@ export default function DashboardProjects() {
         ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
         : 'text-neutral-400 hover:text-neutral-900'
     }`;
+
+  if (view === 'create') {
+    return <DashboardCreateProject mode="create" onBack={closeFormPage} onSubmit={handleCreateSubmit} />;
+  }
+
+  if (view === 'edit' && editingProject) {
+    return (
+      <DashboardCreateProject
+        key={editingProject.id}
+        mode="edit"
+        initialData={projectToFormData(editingProject)}
+        initialAttachments={editingProject.attachments ?? []}
+        onBack={closeFormPage}
+        onSubmit={handleEditSubmit}
+      />
+    );
+  }
 
   return (
     <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
@@ -272,7 +293,7 @@ export default function DashboardProjects() {
 
         <button
           type="button"
-          onClick={openAddModal}
+          onClick={openCreatePage}
           className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.99]"
         >
           <Plus className="h-4 w-4" />
@@ -302,9 +323,9 @@ export default function DashboardProjects() {
         <ProjectTable
           projects={paginatedProjects}
           activeSubTab={activeSubTab}
-          onEdit={openEditModal}
-          onDelete={handleDelete}
-          onAddClick={openAddModal}
+          onEdit={openEditPage}
+          onDelete={setDeleteTargetId}
+          onAddClick={openCreatePage}
         />
 
         {filteredProjects.length > 0 ? (
@@ -370,140 +391,11 @@ export default function DashboardProjects() {
         ) : null}
       </div>
 
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close project modal"
-            onClick={() => setIsModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-              <h3 className="text-lg font-bold text-neutral-900">
-                {editingProject ? 'Edit Project' : 'Post New Project'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Project Title</label>
-                <input
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="Food Delivery Mobile App"
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Location</label>
-                  <input
-                    value={form.location}
-                    onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                    placeholder="London, UK"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Status</label>
-                  <select
-                    value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ProjectStatus }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  >
-                    {STATUS_TABS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Posted Date</label>
-                  <input
-                    value={form.postedTime}
-                    onChange={(e) => setForm((f) => ({ ...f, postedTime: e.target.value }))}
-                    placeholder="April 9, 2023"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Proposals Received</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={form.receivedCount}
-                    onChange={(e) => setForm((f) => ({ ...f, receivedCount: e.target.value }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Category</label>
-                  <input
-                    value={form.category}
-                    onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                    placeholder="Mobile Development"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Cost Value</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={form.costVal}
-                    onChange={(e) => setForm((f) => ({ ...f, costVal: e.target.value }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Type/Cost</label>
-                <input
-                  value={form.typeCost}
-                  onChange={(e) => setForm((f) => ({ ...f, typeCost: e.target.value }))}
-                  placeholder="$100 - $150/Hour"
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  {editingProject ? 'Save Changes' : 'Publish Project'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+      <DeleteConfirmModal
+        open={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

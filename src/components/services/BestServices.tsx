@@ -1,140 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Star, Heart, ArrowLeft, ArrowRight } from 'lucide-react';
 import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
+import { ALL_SERVICES } from './serviceListData';
+import { getServiceAuthorProfilePath, getServiceDetailPath } from './serviceSlug';
 
-interface ServiceCard {
-  id: string;
-  category: string;
-  title: string;
-  rating: number;
-  reviews: number;
-  image: string;
-  author: {
-    name: string;
-    avatar: string;
-    online: boolean;
-  };
-  startingPrice: number;
-}
-
-const BEST_SERVICES_DATA: ServiceCard[] = [
-  {
-    id: 'best-1',
-    category: 'Web & App Design',
-    title: 'I will design modern websites in figma or sketch platform',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Wanda Runo',
-      avatar:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 8500,
-  },
-  {
-    id: 'best-2',
-    category: 'Art & Illustration',
-    title: 'I will create modern flat design illustration elements',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Ali Tufan',
-      avatar:
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 6500,
-  },
-  {
-    id: 'best-3',
-    category: 'Design & Creative',
-    title: 'I will build a fully responsive design in HTML, CSS layout',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Wanda Runo',
-      avatar:
-        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 7200,
-  },
-  {
-    id: 'best-4',
-    category: 'Web & App Design',
-    title: 'I will do mobile app development for iOS and Android devices',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Wanda Runo',
-      avatar:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 12000,
-  },
-  {
-    id: 'best-5',
-    category: 'Web & App Design',
-    title: 'I will design modern websites in figma or adobe high fidelity',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1581291518655-9523c932edcf?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Emma Watson',
-      avatar:
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 9000,
-  },
-  {
-    id: 'best-6',
-    category: 'Writing & Translation',
-    title: 'I will proofread and edit articles with professional precision',
-    rating: 4.95,
-    reviews: 142,
-    image:
-      'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Marcus Thorne',
-      avatar:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
-      online: false,
-    },
-    startingPrice: 3500,
-  },
-  {
-    id: 'best-7',
-    category: 'Digital Marketing',
-    title: 'I will execute cohesive organic brand campaigns on social media',
-    rating: 4.78,
-    reviews: 35,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Ali Tufan',
-      avatar:
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 4200,
-  },
-];
+const BEST_SERVICES_DATA = ALL_SERVICES.slice(0, 7);
 
 const PAGINATION_DOTS = [0, 1, 2];
 
@@ -231,7 +106,10 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                   key={card.id}
                   className="group flex w-full flex-shrink-0 flex-col justify-between overflow-hidden rounded-none border border-neutral-300 bg-white transition-all duration-300 sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)]"
                 >
-                  <div className="relative aspect-[1.18/1] w-full flex-shrink-0 overflow-hidden bg-neutral-100">
+                  <Link
+                    href={getServiceDetailPath(card)}
+                    className="relative block aspect-[1.18/1] w-full flex-shrink-0 overflow-hidden bg-neutral-100"
+                  >
                     <img
                       src={card.image}
                       alt={card.title}
@@ -252,7 +130,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                         strokeWidth={2.5}
                       />
                     </button>
-                  </div>
+                  </Link>
 
                   <div className="flex flex-1 flex-col justify-between p-5 sm:p-6">
                     <div>
@@ -260,10 +138,13 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                         {card.category}
                       </span>
 
-                      <h3
-                        className={`${discoverBody} mb-2.5 line-clamp-2 text-sm font-normal leading-snug text-[#131118] transition-colors group-hover:text-[#52C47F] sm:text-[15px]`}
-                      >
-                        {card.title}
+                      <h3 className={`${discoverBody} mb-2.5 line-clamp-2 text-sm font-normal leading-snug sm:text-[15px]`}>
+                        <Link
+                          href={getServiceDetailPath(card)}
+                          className="text-[#131118] transition-colors hover:text-[#52C47F]"
+                        >
+                          {card.title}
+                        </Link>
                       </h3>
 
                       <div className="mt-1 flex items-center gap-1 text-[13px] text-neutral-500">
@@ -274,7 +155,11 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                     </div>
 
                     <div className="mt-5 flex items-center justify-between border-t border-neutral-300 pt-4">
-                      <div className="flex min-w-0 items-center gap-1.5">
+                      <Link
+                        href={getServiceAuthorProfilePath(card)}
+                        className="flex min-w-0 items-center gap-1.5 transition-opacity hover:opacity-80"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <div className="relative h-[26px] w-[26px] flex-shrink-0 overflow-hidden rounded-full border border-neutral-200/60">
                           <img
                             src={card.author.avatar}
@@ -286,7 +171,8 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                             <span className="absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full bg-[#43b06d] ring-1 ring-white" />
                           )}
                         </div>
-                      </div>
+                        <span className="truncate text-xs font-normal text-neutral-500">{card.author.name}</span>
+                      </Link>
 
                       <div className="flex-shrink-0 text-right">
                         <span className="mb-0.5 block text-[10px] font-normal leading-none text-neutral-400">

@@ -1,17 +1,15 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Check,
-  X,
-  Sparkles,
-  Send,
   AlertCircle,
-  Briefcase,
   MapPin,
   FileText,
   ArrowUpRight,
@@ -23,6 +21,8 @@ import {
   generateMockProjects,
   locationDisplay,
 } from './projectListData';
+import { getEmployerProfilePathByCompanyName } from '@/components/employers/employerSlug';
+import { getProjectDetailPath } from './projectSlug';
 
 const CustomLogo: React.FC<{
   type: Project['companyIconType'];
@@ -149,7 +149,18 @@ const SORT_OPTIONS = [
   { value: 'duration-low', label: 'Urgent Jobs' },
 ];
 
-export default function ProjectList() {
+interface ProjectListProps {
+  searchQuery?: string;
+  searchLocation?: string;
+  onClearSearch?: () => void;
+}
+
+export default function ProjectList({
+  searchQuery = '',
+  searchLocation = '',
+  onClearSearch,
+}: ProjectListProps) {
+  const router = useRouter();
   const [projects] = useState<Project[]>(INITIAL_PROJECTS);
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -172,12 +183,6 @@ export default function ProjectList() {
   const [selectedSkill, setSelectedSkill] = useState('All');
   const [sortBy, setSortBy] = useState('best-seller');
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [applyingProject, setApplyingProject] = useState<Project | null>(null);
-  const [candidateName, setCandidateName] = useState('');
-  const [candidateEmail, setCandidateEmail] = useState('');
-  const [customCoverLetter, setCustomCoverLetter] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [alertText, setAlertText] = useState<string | null>(null);
 
   const sortMenuRef = useRef<HTMLDivElement>(null);
@@ -193,6 +198,8 @@ export default function ProjectList() {
     selectedLanguage,
     selectedSkill,
     sortBy,
+    searchQuery,
+    searchLocation,
   ]);
 
   useEffect(() => {
@@ -256,6 +263,27 @@ export default function ProjectList() {
       });
     }
 
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(query) ||
+          p.companyName.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query) ||
+          p.skills.some((skill) => skill.toLowerCase().includes(query)),
+      );
+    }
+
+    const location = searchLocation.trim().toLowerCase();
+    if (location) {
+      result = result.filter((p) => {
+        const workLocation = p.location.toLowerCase();
+        const displayLocation = locationDisplay(p.location).toLowerCase();
+        return workLocation.includes(location) || displayLocation.includes(location);
+      });
+    }
+
     if (sortBy === 'budget-high') {
       result.sort((a, b) => b.budgetMax - a.budgetMax);
     } else if (sortBy === 'duration-low') {
@@ -275,6 +303,8 @@ export default function ProjectList() {
     selectedLanguage,
     selectedSkill,
     sortBy,
+    searchQuery,
+    searchLocation,
   ]);
 
   const itemsPerPage = 8;
@@ -329,23 +359,11 @@ export default function ProjectList() {
     });
   };
 
-  const handleApplyFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!candidateName.trim() || !candidateEmail.trim()) {
-      alert('Please specify your name and email to submit application.');
-      return;
-    }
-
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      setApplyingProject(null);
-      setCandidateName('');
-      setCandidateEmail('');
-      setCustomCoverLetter('');
-      triggerAlert(`Successfully submitted application proposal for ${applyingProject?.title}!`);
-    }, 1200);
-  };
+  const hasActiveSearch = Boolean(searchQuery.trim() || searchLocation.trim());
+  const activeSearchLabel =
+    searchQuery.trim() && searchLocation.trim()
+      ? `${searchQuery.trim()} (${searchLocation.trim()})`
+      : searchQuery.trim() || searchLocation.trim();
 
   const resetAllFilters = () => {
     setSelectedCategory('All');
@@ -355,6 +373,7 @@ export default function ProjectList() {
     setSelectedLocation('All');
     setSelectedLanguage('All');
     setSelectedSkill('All');
+    onClearSearch?.();
     triggerAlert('All filters have been reset.');
   };
 
@@ -365,7 +384,8 @@ export default function ProjectList() {
     selectedLevel !== 'All' ||
     selectedLocation !== 'All' ||
     selectedLanguage !== 'All' ||
-    selectedSkill !== 'All';
+    selectedSkill !== 'All' ||
+    hasActiveSearch;
 
   const renderRadioFilter = (
     items: { value: string; label: string }[],
@@ -553,6 +573,25 @@ export default function ProjectList() {
               </div>
             </div>
 
+            {hasActiveSearch ? (
+              <div className="mb-4 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <p className={`${discoverBody} text-sm text-neutral-600`}>
+                  Showing project matches for{' '}
+                  <span className={`${discoverMedium} text-[#1D3E35]`}>&quot;{activeSearchLabel}&quot;</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClearSearch?.();
+                    triggerAlert('Search cleared.');
+                  }}
+                  className={`${discoverMedium} cursor-pointer text-sm text-[#52C47F] transition-opacity hover:opacity-80`}
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : null}
+
             {filteredProjectsList.length === 0 ? (
               <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
                 <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
@@ -560,7 +599,9 @@ export default function ProjectList() {
                   No matching listings found
                 </span>
                 <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500`}>
-                  There are no available opportunities matching your category and filtered specifications.
+                  {hasActiveSearch
+                    ? 'No projects match your search. Try different keywords or clear the search.'
+                    : 'There are no available opportunities matching your category and filtered specifications.'}
                 </p>
                 <button
                   type="button"
@@ -583,10 +624,26 @@ export default function ProjectList() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.25 }}
-                        className="relative box-border flex w-full shrink-0 flex-col justify-between rounded-[8px] border border-neutral-200/90 bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row"
                       >
+                        <div
+                          role="link"
+                          tabIndex={0}
+                          onClick={() => router.push(getProjectDetailPath(project))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              router.push(getProjectDetailPath(project));
+                            }
+                          }}
+                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col justify-between rounded-[8px] border border-neutral-200/90 bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row"
+                        >
                         <div className="flex min-w-0 flex-1 gap-5">
-                          <div className="relative shrink-0 select-none">
+                          <Link
+                            href={getEmployerProfilePathByCompanyName(project.companyName)}
+                            className="relative shrink-0 select-none transition-opacity hover:opacity-80"
+                            onClick={(e) => e.stopPropagation()}
+                            title={project.companyName}
+                          >
                             <div
                               className={`flex h-[52px] w-[52px] items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] ${project.companyLogoBg}`}
                             >
@@ -598,13 +655,12 @@ export default function ProjectList() {
                                 title="Verified Employer"
                               />
                             )}
-                          </div>
+                          </Link>
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
                               <h3
-                                onClick={() => setApplyingProject(project)}
-                                className={`${discoverBody} cursor-pointer truncate text-[18.5px] !font-normal leading-snug text-black transition-colors hover:text-[#52C47F] hover:underline`}
+                                className={`${discoverBody} block truncate text-[18.5px] !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F]`}
                               >
                                 {project.title}
                               </h3>
@@ -673,10 +729,8 @@ export default function ProjectList() {
                               </span>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => setApplyingProject(project)}
-                              className={`${discoverBody} group/btn relative flex w-full min-w-[250px] cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-12 py-3.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 hover:text-white md:min-w-[250px]`}
+                            <span
+                              className={`${discoverBody} group/btn relative flex w-full min-w-[250px] cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-12 py-3.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white md:min-w-[250px]`}
                             >
                               <span
                                 aria-hidden
@@ -686,8 +740,9 @@ export default function ProjectList() {
                                 <span>Send Proposal</span>
                                 <ArrowUpRight className="h-4.5 w-4.5 shrink-0 stroke-[2.5] text-current transition-colors duration-300" />
                               </span>
-                            </button>
+                            </span>
                           </div>
+                        </div>
                         </div>
                       </motion.div>
                     );
@@ -728,165 +783,6 @@ export default function ProjectList() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {applyingProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1D3E35]/20 p-4 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 15 }}
-              className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative bg-[#1D3E35] p-6 text-white">
-                <button
-                  type="button"
-                  onClick={() => setApplyingProject(null)}
-                  className="absolute right-5 top-5 cursor-pointer rounded-full border-none bg-white/10 p-1.5 text-white/75 outline-none transition-all hover:bg-white/15 hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-
-                <div className="mb-2.5 flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white">
-                    <CustomLogo type={applyingProject.companyIconType} className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <span className={`${discoverMedium} block text-xs font-bold text-[#52C47F]`}>
-                      Active Contract Role
-                    </span>
-                    <span className={`${discoverBody} block text-xs text-white/80`}>
-                      Posted by {applyingProject.companyName} • {applyingProject.location}
-                    </span>
-                  </div>
-                </div>
-
-                <h3 className={`${discoverHeadline} mb-2 text-lg font-bold tracking-tight sm:text-xl`}>
-                  {applyingProject.title}
-                </h3>
-
-                <div className={`${discoverMedium} mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs font-semibold text-white/80`}>
-                  <span className="flex items-center gap-1">
-                    <Briefcase className="h-3.5 w-3.5 text-[#52C47F]" />
-                    {applyingProject.type}
-                  </span>
-                  <span>•</span>
-                  <span>{applyingProject.experienceLevel}</span>
-                  <span>•</span>
-                  <span>{applyingProject.budgetLabel} Value</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleApplyFormSubmit} className="max-h-[60vh] space-y-4 overflow-y-auto p-6">
-                <div className="rounded-xl border border-neutral-100 bg-neutral-50 p-4">
-                  <span className={`${discoverMedium} mb-1.5 block text-xs font-bold text-[#1D3E35]`}>
-                    Core Specifications
-                  </span>
-                  <p className={`${discoverBody} mb-3 text-xs leading-relaxed text-neutral-600`}>
-                    {applyingProject.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {applyingProject.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className={`${discoverMedium} rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600`}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <span className={`${discoverMedium} mt-2 block border-b border-gray-100 pb-1 text-xs font-bold uppercase tracking-wider text-neutral-400`}>
-                  Submit Proposal
-                </span>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={`${discoverMedium} mb-1 block text-xs font-bold text-gray-500`}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={candidateName}
-                      onChange={(e) => setCandidateName(e.target.value)}
-                      placeholder="Jane Doe"
-                      className={`${discoverBody} w-full rounded-lg border border-gray-200 bg-neutral-50/50 px-3 py-2 text-xs outline-none transition-all focus:border-[#52C47F]`}
-                    />
-                  </div>
-                  <div>
-                    <label className={`${discoverMedium} mb-1 block text-xs font-bold text-gray-500`}>
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={candidateEmail}
-                      onChange={(e) => setCandidateEmail(e.target.value)}
-                      placeholder="jane@example.com"
-                      className={`${discoverBody} w-full rounded-lg border border-gray-200 bg-neutral-50/50 px-3 py-2 text-xs outline-none transition-all focus:border-[#52C47F]`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="mb-1 flex items-center justify-between">
-                    <label className={`${discoverMedium} text-xs font-bold text-gray-500`}>
-                      Introduction / Cover Letter
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const skillsStr = applyingProject.skills.slice(0, 3).join(', ');
-                        setCustomCoverLetter(
-                          `Dear Team at ${applyingProject.companyName},\n\nI was immediately drawn to your opening for the ${applyingProject.title}. With structured expertise in ${skillsStr}, I specialize in completing high-fidelity visual assets, modern responsiveness frameworks, and clean modular development.\n\nI would love the opportunity to discuss potential solutions with your team. Let me know best times to connect!`
-                        );
-                        triggerAlert('Injected tailored introduction!');
-                      }}
-                      className={`${discoverMedium} flex cursor-pointer select-none items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#52C47F] hover:underline`}
-                    >
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Auto-tailor Letter
-                    </button>
-                  </div>
-                  <textarea
-                    rows={4}
-                    value={customCoverLetter}
-                    onChange={(e) => setCustomCoverLetter(e.target.value)}
-                    placeholder="Describe your credentials, previous experience, and proposed workflow strategies here..."
-                    className={`${discoverBody} w-full resize-none rounded-lg border border-gray-200 bg-neutral-50/50 px-3 py-2 text-xs outline-none transition-all focus:border-[#52C47F]`}
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setApplyingProject(null)}
-                    className={`${discoverMedium} flex-1 cursor-pointer rounded-lg border border-gray-200 bg-white py-2.5 text-center text-xs font-bold text-neutral-600 transition-all hover:border-black hover:text-black`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className={`${discoverMedium} flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#1D3E35] py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#52C47F] disabled:opacity-50`}
-                  >
-                    {submitting ? (
-                      <span className="animate-pulse">Uploading Proposal...</span>
-                    ) : (
-                      <>
-                        <Send className="h-3 w-3" />
-                        Submit Proposal
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

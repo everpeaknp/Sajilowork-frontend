@@ -310,7 +310,26 @@ function TaskBreakDivider({
   );
 }
 
-export default function MessagesSection() {
+export type MessagesSectionProps = {
+  /** Route used for URL sync and sign-in redirect (default `/message`). */
+  basePath?: string;
+};
+
+function messagesHref(
+  basePath: string,
+  params?: Record<string, string | null | undefined>
+): string {
+  const sp = new URLSearchParams();
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      if (value != null && value !== '') sp.set(key, value);
+    }
+  }
+  const qs = sp.toString();
+  return qs ? `${basePath}?${qs}` : basePath;
+}
+
+export default function MessagesSection({ basePath = '/message' }: MessagesSectionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated, initialize } = useAuthStore();
@@ -531,9 +550,9 @@ export default function MessagesSection() {
 
   useEffect(() => {
     if (!isAuthenticated && !user) {
-      router.replace('/signin?next=/message');
+      router.replace(`/signin?next=${encodeURIComponent(basePath)}`);
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, basePath]);
 
   useEffect(() => {
     if (isAuthenticated || user) {
@@ -655,14 +674,14 @@ export default function MessagesSection() {
   useEffect(() => {
     if (!selectedId) {
       if (searchParams.get('conversation')) {
-        router.replace('/message', { scroll: false });
+        router.replace(messagesHref(basePath), { scroll: false });
       }
       return;
     }
     const current = searchParams.get('conversation');
     if (current === selectedId) return;
-    router.replace(`/message?conversation=${selectedId}`, { scroll: false });
-  }, [selectedId, searchParams, router]);
+    router.replace(messagesHref(basePath, { conversation: selectedId }), { scroll: false });
+  }, [selectedId, searchParams, router, basePath]);
 
   const handleBackToList = useCallback(() => {
     setSelectedId(null);

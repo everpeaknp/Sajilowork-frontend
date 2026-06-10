@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Trash2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 type SavedSubTab = 'services' | 'project' | 'jobs';
 
@@ -588,20 +589,24 @@ export default function DashboardSaved() {
   const [services, setServices] = useState<SavedItem[]>(INITIAL_SERVICES);
   const [projects, setProjects] = useState<SavedItem[]>(INITIAL_PROJECTS);
   const [jobs, setJobs] = useState<SavedItem[]>(INITIAL_JOBS);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const handleTabChange = (tab: SavedSubTab) => {
     setActiveSubTab(tab);
     setCurrentPage(1);
   };
 
-  const handleDelete = (id: string) => {
+  const confirmDelete = () => {
+    if (deleteTargetId === null) return;
+
     if (activeSubTab === 'services') {
-      setServices((prev) => prev.filter((item) => item.id !== id));
+      setServices((prev) => prev.filter((item) => item.id !== deleteTargetId));
     } else if (activeSubTab === 'project') {
-      setProjects((prev) => prev.filter((item) => item.id !== id));
+      setProjects((prev) => prev.filter((item) => item.id !== deleteTargetId));
     } else {
-      setJobs((prev) => prev.filter((item) => item.id !== id));
+      setJobs((prev) => prev.filter((item) => item.id !== deleteTargetId));
     }
+    setDeleteTargetId(null);
   };
 
   const activeList =
@@ -654,7 +659,7 @@ export default function DashboardSaved() {
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {currentItems.map((item) => (
-                <SavedCard key={item.id} item={item} onDelete={handleDelete} />
+                <SavedCard key={item.id} item={item} onDelete={setDeleteTargetId} />
               ))}
             </div>
 
@@ -716,6 +721,12 @@ export default function DashboardSaved() {
           </>
         )}
       </div>
+
+      <DeleteConfirmModal
+        open={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

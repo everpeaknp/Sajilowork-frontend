@@ -1,9 +1,15 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import ServiceTable from './ServiceTable';
-import type { Service } from './types';
+import DashboardCreateService, {
+  createServiceFromForm,
+  type CreateServiceFormData,
+} from './DashboardCreateService';
+import type { FormUploadsPayload, Service } from './types';
+import DeleteConfirmModal from './DeleteConfirmModal';
+import { initialGalleryUrls, resolveGalleryUploads } from './uploadUtils';
 
 type ServiceStatus = Service['status'];
 
@@ -154,30 +160,31 @@ function buildInitialServices(): Service[] {
   return list;
 }
 
-const EMPTY_FORM = {
-  title: '',
-  category: 'Web & App Design',
-  typeCost: '$500.00/Fixed',
-  costVal: '500',
-  bullets: '',
-  image: '',
-  status: 'Active' as ServiceStatus,
-};
+type ServicesView = 'list' | 'create' | 'edit';
+
+function serviceToFormData(service: Service): Partial<CreateServiceFormData> {
+  return {
+    title: service.title,
+    price: String(service.costVal),
+    category: service.category,
+    serviceDetail: service.bullets.join('\n'),
+  };
+}
 
 export default function DashboardServices() {
   const [services, setServices] = useState<Service[]>(buildInitialServices);
   const [activeSubTab, setActiveSubTab] = useState<ServiceStatus>('Active');
-  const [currentPage, setCurrentPage] = useState(2);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [view, setView] = useState<ServicesView>('list');
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
 
   const filteredServices = useMemo(
     () => services.filter((svc) => svc.status === activeSubTab),
     [services, activeSubTab],
   );
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredServices.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
 
@@ -193,62 +200,57 @@ export default function DashboardServices() {
         : 'bg-transparent text-black hover:text-[#52C47F]'
     }`;
 
-  const openAddModal = () => {
+  const closeFormPage = () => {
+    setView('list');
     setEditingService(null);
-    setForm(EMPTY_FORM);
-    setIsModalOpen(true);
   };
 
-  const openEditModal = (service: Service) => {
+  const openCreatePage = () => {
+    setEditingService(null);
+    setView('create');
+  };
+
+  const openEditPage = (service: Service) => {
     setEditingService(service);
-    setForm({
-      title: service.title,
-      category: service.category,
-      typeCost: service.typeCost,
-      costVal: String(service.costVal),
-      bullets: service.bullets.join('\n'),
-      image: service.image,
-      status: service.status,
-    });
-    setIsModalOpen(true);
+    setView('edit');
   };
 
-  const handleDelete = (id: string) => {
-    setServices((prev) => prev.filter((svc) => svc.id !== id));
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim()) return;
-
-    const bullets = form.bullets
-      .split('\n')
-      .map((b) => b.trim())
-      .filter(Boolean);
-
+  const handleCreateSubmit = (data: CreateServiceFormData, uploads: FormUploadsPayload) => {
+    const resolved = resolveGalleryUploads(uploads.galleryFiles, uploads.keptGalleryUrls);
     const payload: Service = {
-      id: editingService?.id ?? `svc-${Date.now()}`,
-      title: form.title.trim(),
-      bullets,
-      category: form.category,
-      typeCost: form.typeCost,
-      costVal: Number(form.costVal) || 0,
-      status: form.status,
-      image:
-        form.image.trim() ||
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
+      id: `svc-${Date.now()}`,
+      ...createServiceFromForm(data, resolved.image),
+      gallery: resolved.gallery,
+    };
+    setServices((prev) => [payload, ...prev]);
+    setActiveSubTab(payload.status);
+    setCurrentPage(1);
+    closeFormPage();
+  };
+
+  const handleEditSubmit = (data: CreateServiceFormData, uploads: FormUploadsPayload) => {
+    if (!editingService) return;
+
+    const resolved = resolveGalleryUploads(
+      uploads.galleryFiles,
+      uploads.keptGalleryUrls,
+      editingService.image,
+    );
+    const payload: Service = {
+      id: editingService.id,
+      ...createServiceFromForm(data, resolved.image),
+      gallery: resolved.gallery,
+      status: editingService.status,
     };
 
-    if (editingService) {
-      setServices((prev) => prev.map((svc) => (svc.id === editingService.id ? payload : svc)));
-    } else {
-      setServices((prev) => [payload, ...prev]);
-      setActiveSubTab(payload.status);
-    }
+    setServices((prev) => prev.map((svc) => (svc.id === editingService.id ? payload : svc)));
+    closeFormPage();
+  };
 
-    setIsModalOpen(false);
-    setEditingService(null);
-    setForm(EMPTY_FORM);
+  const confirmDelete = () => {
+    if (deleteTargetId === null) return;
+    setServices((prev) => prev.filter((svc) => svc.id !== deleteTargetId));
+    setDeleteTargetId(null);
   };
 
   const subTabClass = (tab: ServiceStatus) =>
@@ -257,6 +259,23 @@ export default function DashboardServices() {
         ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
         : 'text-neutral-400 hover:text-neutral-900'
     }`;
+
+  if (view === 'create') {
+    return <DashboardCreateService mode="create" onBack={closeFormPage} onSubmit={handleCreateSubmit} />;
+  }
+
+  if (view === 'edit' && editingService) {
+    return (
+      <DashboardCreateService
+        key={editingService.id}
+        mode="edit"
+        initialData={serviceToFormData(editingService)}
+        initialGalleryUrls={initialGalleryUrls(editingService.image, editingService.gallery)}
+        onBack={closeFormPage}
+        onSubmit={handleEditSubmit}
+      />
+    );
+  }
 
   return (
     <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
@@ -272,7 +291,7 @@ export default function DashboardServices() {
 
         <button
           type="button"
-          onClick={openAddModal}
+          onClick={openCreatePage}
           className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.99]"
         >
           <Plus className="h-4 w-4" />
@@ -302,9 +321,9 @@ export default function DashboardServices() {
         <ServiceTable
           services={paginatedServices}
           activeSubTab={activeSubTab}
-          onEdit={openEditModal}
-          onDelete={handleDelete}
-          onAddClick={openAddModal}
+          onEdit={openEditPage}
+          onDelete={setDeleteTargetId}
+          onAddClick={openCreatePage}
         />
 
         {filteredServices.length > 0 ? (
@@ -370,130 +389,11 @@ export default function DashboardServices() {
         ) : null}
       </div>
 
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close service modal"
-            onClick={() => setIsModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-              <h3 className="text-lg font-bold text-neutral-900">
-                {editingService ? 'Edit Service' : 'Add New Service'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Title</label>
-                <input
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="I will design modern websites in figma..."
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Category</label>
-                  <input
-                    value={form.category}
-                    onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Status</label>
-                  <select
-                    value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ServiceStatus }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  >
-                    {STATUS_TABS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Type/Cost</label>
-                  <input
-                    value={form.typeCost}
-                    onChange={(e) => setForm((f) => ({ ...f, typeCost: e.target.value }))}
-                    placeholder="$500.00/Fixed"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Cost Value</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={form.costVal}
-                    onChange={(e) => setForm((f) => ({ ...f, costVal: e.target.value }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
-                  Feature Bullets (one per line)
-                </label>
-                <textarea
-                  rows={3}
-                  value={form.bullets}
-                  onChange={(e) => setForm((f) => ({ ...f, bullets: e.target.value }))}
-                  placeholder="3 unique homepage concepts&#10;Responsive mobile layouts"
-                  className="w-full resize-none rounded-xl border border-neutral-200 p-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Image URL</label>
-                <input
-                  value={form.image}
-                  onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  {editingService ? 'Save Changes' : 'Create Service'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+      <DeleteConfirmModal
+        open={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

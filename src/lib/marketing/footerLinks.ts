@@ -14,6 +14,11 @@ export const FOOTER_SECTIONS: FooterSection[] = [
     links: [
       { label: 'How it works', href: '/how-it-works' },
       { label: 'Categories', href: '/categories' },
+      { label: 'Employers', href: '/employers' },
+      { label: 'Freelancers', href: '/freelancers' },
+      { label: 'Jobs', href: '/jobs' },
+      { label: 'Projects', href: '/projects' },
+      { label: 'Services', href: '/services' },
       { label: 'Trust & Safety', href: '/trust-and-safety' },
     ],
   },

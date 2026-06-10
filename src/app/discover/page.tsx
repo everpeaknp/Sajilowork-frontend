@@ -30,8 +30,10 @@ export default function DiscoverPage() {
       <Navbar />
       <main className="pb-2 md:pb-0">
         <Hero
-          onPostWithTitle={(title) => {
-            router.push(`/post-task?title=${encodeURIComponent(title)}`);
+          onSearchSubmit={(query) => {
+            const trimmed = query.trim();
+            if (!trimmed) return;
+            router.push(`/projects?q=${encodeURIComponent(trimmed)}`);
           }}
         />
         <Workflow className="!py-10 sm:!py-12 lg:!py-14" />

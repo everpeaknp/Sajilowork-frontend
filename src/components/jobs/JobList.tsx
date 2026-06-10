@@ -1,83 +1,22 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Check,
-  X,
-  Sparkles,
-  Send,
   AlertCircle,
-  Briefcase,
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
-import { type Job, generateMockJobs } from './jobListData';
-
-const CustomLogo: React.FC<{
-  type: Job['companyIconType'];
-  className?: string;
-}> = ({ type, className = 'h-6 w-6 text-white' }) => {
-  if (type === 'wave') {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-      >
-        <path d="M2 10s3-3 5-3 5 3 7 3 5-3 7-3M2 17s3-3 5-3 5 3 7 3 5-3 7-3" />
-      </svg>
-    );
-  }
-  if (type === 'face') {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={className}>
-        <circle cx="12" cy="12" r="10" />
-        <circle cx="8" cy="9" r="1.5" fill="currentColor" />
-        <circle cx="16" cy="9" r="1.5" fill="currentColor" />
-        <path d="M8.5 14.5c1.5 2 4.5 2 6 0" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (type === 'in') {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-      >
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-        <rect x="2" y="9" width="4" height="12" />
-        <circle cx="4" cy="4" r="2" />
-      </svg>
-    );
-  }
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M12 22v-3M9 19c-1.5 0-3-1.5-3-3s1.5-3 3-3 3 1.5 3 3-1.5 3-3 3zM15 19c1.5 0 3-1.5 3-3s-1.5-3-3-3-3 1.5-3 3 1.5 3 3 3zM12 2v3M9 5C7.5 5 6 6.5 6 8s1.5 3 3 3 3-1.5 3-3-1.5-3-3-3zM15 5c1.5 0 3 1.5 3 3s-1.5 3-3 3-3-1.5-3-3 1.5-3 3-3z" />
-    </svg>
-  );
-};
-
-const INITIAL_JOBS = generateMockJobs();
+import { type Job } from './jobListData';
+import JobCompanyLogo from './JobCompanyLogo';
+import { getEmployerProfilePathByCompanyName } from '@/components/employers/employerSlug';
+import { getJobDetailPath } from './jobSlug';
+import { getAllJobsIncludingPosted, hydratePostedJobs } from './jobStore';
 
 const FILTER_CATEGORIES = [
   { value: 'All', label: 'All Categories' },
@@ -119,10 +58,27 @@ const SORT_OPTIONS = [
 
 interface JobListProps {
   className?: string;
+  searchQuery?: string;
+  searchLocation?: string;
+  onClearSearch?: () => void;
 }
 
-export default function JobList({ className = '' }: JobListProps) {
-  const [jobs] = useState<Job[]>(INITIAL_JOBS);
+export default function JobList({
+  className = '',
+  searchQuery = '',
+  searchLocation = '',
+  onClearSearch,
+}: JobListProps) {
+  const router = useRouter();
+  const [jobs, setJobs] = useState<Job[]>(() => {
+    hydratePostedJobs();
+    return getAllJobsIncludingPosted();
+  });
+
+  useEffect(() => {
+    hydratePostedJobs();
+    setJobs(getAllJobsIncludingPosted());
+  }, []);
   const [starredIds, setStarredIds] = useState<Record<string, boolean>>({ 'job-1': true });
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -131,17 +87,12 @@ export default function JobList({ className = '' }: JobListProps) {
   const [selectedLevel, setSelectedLevel] = useState('All');
   const [sortBy, setSortBy] = useState('best-seller');
   const [currentPage, setCurrentPage] = useState(1);
-  const [applyingJob, setApplyingJob] = useState<Job | null>(null);
-  const [candidateName, setCandidateName] = useState('');
-  const [candidateEmail, setCandidateEmail] = useState('');
-  const [customCoverLetter, setCustomCoverLetter] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [alertText, setAlertText] = useState<string | null>(null);
   const filterRowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, selectedSalary, selectedType, selectedLevel, sortBy]);
+  }, [selectedCategory, selectedSalary, selectedType, selectedLevel, sortBy, searchQuery, searchLocation]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -194,6 +145,27 @@ export default function JobList({ className = '' }: JobListProps) {
       result = result.filter((j) => j.experienceLevel === selectedLevel);
     }
 
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      result = result.filter(
+        (j) =>
+          j.title.toLowerCase().includes(query) ||
+          j.companyName.toLowerCase().includes(query) ||
+          j.category.toLowerCase().includes(query) ||
+          j.description.toLowerCase().includes(query) ||
+          j.skills.some((skill) => skill.toLowerCase().includes(query)),
+      );
+    }
+
+    const location = searchLocation.trim().toLowerCase();
+    if (location) {
+      result = result.filter((j) => {
+        const city = j.city?.toLowerCase() ?? '';
+        const workLocation = j.location.toLowerCase();
+        return city.includes(location) || workLocation.includes(location);
+      });
+    }
+
     if (sortBy === 'budget-high') {
       result.sort((a, b) => b.budgetMax - a.budgetMax);
     } else if (sortBy === 'duration-low') {
@@ -203,7 +175,7 @@ export default function JobList({ className = '' }: JobListProps) {
     }
 
     return result;
-  }, [jobs, selectedCategory, selectedSalary, selectedType, selectedLevel, sortBy]);
+  }, [jobs, selectedCategory, selectedSalary, selectedType, selectedLevel, sortBy, searchQuery, searchLocation]);
 
   const itemsPerPage = 16;
   const totalJobs = filteredJobsList.length;
@@ -216,17 +188,25 @@ export default function JobList({ className = '' }: JobListProps) {
     return filteredJobsList.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredJobsList, currentPage]);
 
+  const hasActiveSearch = Boolean(searchQuery.trim() || searchLocation.trim());
+  const activeSearchLabel =
+    searchQuery.trim() && searchLocation.trim()
+      ? `${searchQuery.trim()} (${searchLocation.trim()})`
+      : searchQuery.trim() || searchLocation.trim();
+
   const hasActiveFilters =
     selectedCategory !== 'All' ||
     selectedSalary !== 'All' ||
     selectedType !== 'All' ||
-    selectedLevel !== 'All';
+    selectedLevel !== 'All' ||
+    hasActiveSearch;
 
   const resetFilters = () => {
     setSelectedCategory('All');
     setSelectedSalary('All');
     setSelectedType('All');
     setSelectedLevel('All');
+    onClearSearch?.();
     triggerAlert('Filters cleared.');
   };
 
@@ -264,22 +244,6 @@ export default function JobList({ className = '' }: JobListProps) {
         </button>
       );
     });
-  };
-
-  const handleApplyFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!candidateName.trim() || !candidateEmail.trim()) return;
-
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      const title = applyingJob?.title;
-      setApplyingJob(null);
-      setCandidateName('');
-      setCandidateEmail('');
-      setCustomCoverLetter('');
-      triggerAlert(`Successfully submitted application proposal for ${title}!`);
-    }, 1200);
   };
 
   const locationLabel = (loc: Job['location']) =>
@@ -417,6 +381,25 @@ export default function JobList({ className = '' }: JobListProps) {
           </div>
         </div>
 
+        {hasActiveSearch ? (
+          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+            <p className={`${discoverBody} text-sm text-neutral-600`}>
+              Showing job matches for{' '}
+              <span className={`${discoverMedium} text-[#1D3E35]`}>&quot;{activeSearchLabel}&quot;</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                onClearSearch?.();
+                triggerAlert('Search cleared.');
+              }}
+              className={`${discoverMedium} cursor-pointer text-sm text-[#45a874] transition-opacity hover:opacity-80`}
+            >
+              Clear search
+            </button>
+          </div>
+        ) : null}
+
         {filteredJobsList.length === 0 ? (
           <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
             <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
@@ -424,7 +407,9 @@ export default function JobList({ className = '' }: JobListProps) {
               No matching listings
             </span>
             <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500`}>
-              There are no available opportunities matching your category and level filters.
+              {hasActiveSearch
+                ? 'No jobs match your search. Try different keywords or clear the search.'
+                : 'There are no available opportunities matching your category and level filters.'}
             </p>
             <button
               type="button"
@@ -447,21 +432,35 @@ export default function JobList({ className = '' }: JobListProps) {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.25 }}
-                    className="group relative flex min-h-[300px] cursor-pointer flex-col justify-between rounded-2xl border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.02)]"
-                    onClick={() => setApplyingJob(job)}
                   >
+                    <div
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => router.push(getJobDetailPath(job))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          router.push(getJobDetailPath(job));
+                        }
+                      }}
+                      className="group relative flex min-h-[300px] cursor-pointer flex-col justify-between rounded-2xl border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.02)]"
+                    >
                     <div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center">
+                        <Link
+                          href={getEmployerProfilePathByCompanyName(job.companyName)}
+                          className="flex items-center transition-opacity hover:opacity-80"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div
                             className={`flex h-[54px] w-[54px] items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.12)] ${job.companyLogoBg}`}
                           >
-                            <CustomLogo type={job.companyIconType} />
+                            <JobCompanyLogo type={job.companyIconType} />
                           </div>
                           <span className="ml-3.5 text-[14px] font-medium text-[#45a874] hover:underline">
                             {job.companyName}
                           </span>
-                        </div>
+                        </Link>
                         <button
                           type="button"
                           onClick={(e) => toggleStar(job.id, e)}
@@ -485,9 +484,7 @@ export default function JobList({ className = '' }: JobListProps) {
                           </svg>
                         </button>
                       </div>
-                      <h3
-                        className={`${discoverBody} mb-4.5 mt-6 text-[18px] font-normal leading-[1.35] tracking-tight text-black transition-colors group-hover:text-[#45a874]`}
-                      >
+                      <h3 className={`${discoverBody} mb-4.5 mt-6 text-[18px] font-normal leading-[1.35] tracking-tight text-black transition-colors group-hover:text-[#45a874]`}>
                         {job.title}
                       </h3>
                       <div className={`${discoverBody} mb-6 flex items-center text-[13px] font-normal text-black`}>
@@ -503,6 +500,7 @@ export default function JobList({ className = '' }: JobListProps) {
                       <span>{job.expenseLevel}</span>
                       <span className="mx-2 text-neutral-300">|</span>
                       <span>{locationLabel(job.location)}</span>
+                    </div>
                     </div>
                   </motion.div>
                 );
@@ -541,162 +539,6 @@ export default function JobList({ className = '' }: JobListProps) {
         )}
       </div>
 
-      <AnimatePresence>
-        {applyingJob && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#193e32]/20 p-4 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 15 }}
-              className="w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative bg-[#193e32] p-6 text-white">
-                <button
-                  type="button"
-                  onClick={() => setApplyingJob(null)}
-                  className="absolute right-5 top-5 cursor-pointer rounded-full bg-white/10 p-1.5 text-white/75 transition-all hover:bg-white/15 hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <div className="mb-2.5 flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
-                    <CustomLogo type={applyingJob.companyIconType} className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <span className={`${discoverMedium} block text-xs font-bold text-[#45a874]`}>
-                      Active Contract Role
-                    </span>
-                    <span className={`${discoverBody} block text-xs text-white/80`}>
-                      Posted by {applyingJob.companyName} • {locationLabel(applyingJob.location)}
-                    </span>
-                  </div>
-                </div>
-                <h3 className={`${discoverHeadline} mb-2 text-lg font-bold tracking-tight sm:text-xl`}>
-                  {applyingJob.title}
-                </h3>
-                <div className={`${discoverMedium} mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs font-semibold text-white/80`}>
-                  <span className="flex items-center gap-1">
-                    <Briefcase className="h-3.5 w-3.5 text-[#45a874]" />
-                    {applyingJob.type}
-                  </span>
-                  <span>•</span>
-                  <span>{applyingJob.experienceLevel}</span>
-                  <span>•</span>
-                  <span>{applyingJob.budgetLabel} Value</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleApplyFormSubmit} className="max-h-[60vh] space-y-4 overflow-y-auto p-6">
-                <div className="rounded-xl border border-gray-150 bg-neutral-50 p-4">
-                  <span className={`${discoverMedium} mb-1.5 block text-xs font-bold text-[#193e32]`}>
-                    Core Specifications
-                  </span>
-                  <p className={`${discoverBody} mb-3 text-xs leading-relaxed text-neutral-600`}>
-                    {applyingJob.description}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {applyingJob.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className={`${discoverMedium} rounded-md border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600`}
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <span className={`${discoverMedium} mt-2 block border-b border-gray-100 pb-1 text-xs font-black uppercase tracking-wider text-neutral-400`}>
-                  Submit Proposal
-                </span>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={`${discoverMedium} mb-1 block text-xs font-bold text-gray-500`}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={candidateName}
-                      onChange={(e) => setCandidateName(e.target.value)}
-                      placeholder="Jane Doe"
-                      className={`${discoverBody} w-full rounded-lg border border-gray-200 bg-neutral-50/50 px-3 py-2 text-xs outline-none transition-all focus:border-[#45a874]`}
-                    />
-                  </div>
-                  <div>
-                    <label className={`${discoverMedium} mb-1 block text-xs font-bold text-gray-500`}>
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={candidateEmail}
-                      onChange={(e) => setCandidateEmail(e.target.value)}
-                      placeholder="jane@example.com"
-                      className={`${discoverBody} w-full rounded-lg border border-gray-200 bg-neutral-50/50 px-3 py-2 text-xs outline-none transition-all focus:border-[#45a874]`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="mb-1 flex items-center justify-between">
-                    <label className={`${discoverMedium} text-xs font-bold text-gray-500`}>
-                      Introduction / Cover Letter
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const skillsStr = applyingJob.skills.slice(0, 3).join(', ');
-                        setCustomCoverLetter(
-                          `Dear Team at ${applyingJob.companyName},\n\nI was immediately drawn to your opening for the ${applyingJob.title}. With structured expertise in ${skillsStr}, I specialize in completing high-fidelity visual assets, modern responsiveness frameworks, and clean modular development.\n\nI would love the opportunity to discuss potential solutions with your team. Let me know best times to connect!`
-                        );
-                        triggerAlert('Injected tailored introduction!');
-                      }}
-                      className={`${discoverMedium} flex cursor-pointer select-none items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#45a874] hover:underline`}
-                    >
-                      <Sparkles className="h-3 w-3" />
-                      Auto-tailor Letter
-                    </button>
-                  </div>
-                  <textarea
-                    rows={4}
-                    value={customCoverLetter}
-                    onChange={(e) => setCustomCoverLetter(e.target.value)}
-                    placeholder="Describe your credentials, previous experience, and proposed workflow strategies here..."
-                    className={`${discoverBody} w-full resize-none rounded-lg border border-gray-200 bg-neutral-50/50 px-3 py-2 text-xs outline-none transition-all focus:border-[#45a874]`}
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setApplyingJob(null)}
-                    className={`${discoverMedium} flex-1 cursor-pointer rounded-lg border border-gray-200 bg-white py-2.5 text-center text-xs font-bold text-neutral-600 transition-all hover:border-black hover:text-black`}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className={`${discoverMedium} flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#193e32] py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#45a874] disabled:opacity-50`}
-                  >
-                    {submitting ? (
-                      <span className="animate-pulse">Uploading Proposal...</span>
-                    ) : (
-                      <>
-                        <Send className="h-3 w-3" />
-                        Submit Proposal
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </section>
   );
 }

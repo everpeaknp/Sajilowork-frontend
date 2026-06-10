@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { formatNPR } from '@/lib/nepalLocale';
 import type { Freelancer } from './freelancerData';
+import { getFreelancerProfilePath } from './freelancerSlug';
 
 interface FreelancerListProps {
   freelancers: Freelancer[];
@@ -42,6 +44,7 @@ const SORT_OPTIONS = ['Highest Rating', 'Rate: Low to High', 'Rate: High to Low'
 const ITEMS_PER_PAGE = 12;
 
 export default function FreelancerList({ freelancers, onInquire }: FreelancerListProps) {
+  const router = useRouter();
   const [selectedSkills, setSelectedSkills] = useState('All');
   const [selectedPrice, setSelectedPrice] = useState('All');
   const [selectedLocation, setSelectedLocation] = useState('All');
@@ -179,7 +182,7 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
       <button
         type="button"
         onClick={() => toggleDropdown(label)}
-        className={`flex items-center gap-2.5 rounded-none border px-4.5 py-2.5 text-xs font-normal tracking-tight text-black transition-all ${
+        className={`flex items-center gap-2.5 rounded-none border px-4.5 py-2.5 text-sm font-normal tracking-tight text-black transition-all ${
           value !== 'All'
             ? 'border-emerald-500 bg-[#EAF6F0] text-black'
             : 'border-neutral-200 bg-white hover:border-neutral-300'
@@ -205,7 +208,7 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
                 setCurrentPage(1);
                 setActiveDropdown(null);
               }}
-              className={`flex w-full items-center justify-between px-4 py-2 text-left text-xs font-normal tracking-tight transition-colors hover:bg-neutral-50 ${
+              className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm font-normal tracking-tight transition-colors hover:bg-neutral-50 ${
                 value === opt ? 'bg-emerald-50/40 text-black' : 'text-black'
               }`}
             >
@@ -238,7 +241,7 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="flex cursor-pointer items-center gap-1.5 rounded-none px-3.5 py-2 text-xs font-normal tracking-tight text-rose-600 transition-all hover:bg-rose-50/60 hover:text-rose-700"
+                className="flex cursor-pointer items-center gap-1.5 rounded-none px-3.5 py-2 text-sm font-normal tracking-tight text-rose-600 transition-all hover:bg-rose-50/60 hover:text-rose-700"
               >
                 <X className="h-3.5 w-3.5" />
                 <span>Reset Filters</span>
@@ -374,7 +377,7 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
 
                     <button
                       type="button"
-                      onClick={() => onInquire?.(fl.name)}
+                      onClick={() => router.push(getFreelancerProfilePath(fl))}
                       className="mt-5 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-none border border-neutral-200 bg-neutral-50 py-3.5 text-xs font-normal tracking-tight text-black transition-all hover:border-[#5bbb7b] hover:bg-[#5bbb7b] hover:text-white"
                     >
                       <span>View Profile</span>

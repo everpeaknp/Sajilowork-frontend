@@ -35,7 +35,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       <Navbar />
 
       <nav
-        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-full max-w-[20rem] bg-white shadow-xl transition-transform duration-300 ease-out lg:z-40 lg:translate-x-0 lg:shadow-none ${
+        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-full max-w-[17.5rem] bg-white shadow-xl transition-transform duration-300 ease-out lg:z-40 lg:translate-x-0 lg:shadow-none ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -56,7 +56,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         />
       ) : null}
 
-      <main className="min-h-[calc(100dvh-3.5rem)] bg-white lg:pl-80">
+      <main className="min-h-[calc(100dvh-3.5rem)] bg-white lg:pl-[17.5rem]">
         <div className="mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8 lg:p-10">
           <div className="mb-4 flex items-center gap-3 lg:hidden">
             <button

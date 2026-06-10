@@ -177,7 +177,7 @@ export default function DashboardInvoice() {
     );
   });
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage) || 1;
   const activePage = Math.min(currentPage, totalPages);
 

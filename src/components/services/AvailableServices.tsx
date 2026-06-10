@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
@@ -16,234 +17,10 @@ import {
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
+import { ALL_SERVICES, type Service as ServiceItem } from './serviceListData';
+import { getServiceAuthorProfilePath, getServiceDetailPath } from './serviceSlug';
 
-interface ServiceItem {
-  id: string;
-  category: string;
-  title: string;
-  rating: number;
-  reviews: number;
-  image: string;
-  images?: string[];
-  author: {
-    name: string;
-    avatar: string;
-    online: boolean;
-  };
-  startingPrice: number;
-  deliveryTime: '24h' | '3days' | '7days' | 'anytime';
-  budget: number;
-  designTool: 'Figma' | 'Sketch' | 'Adobe XD' | 'Illustrator' | 'Photoshop';
-  location: 'United States' | 'United Kingdom' | 'Germany' | 'Remote';
-  speaks: 'English' | 'Spanish' | 'French' | 'German';
-  level: 'New Seller' | 'Level 1' | 'Level 2' | 'Top Rated';
-}
-
-const SERVICES_DATA: ServiceItem[] = [
-  {
-    id: 'av-1',
-    category: 'Web & App Design',
-    title: 'I will design modern websites in figma or sketch platform',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e408c9?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Wanda Runo',
-      avatar:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 8500,
-    deliveryTime: '24h',
-    budget: 8500,
-    designTool: 'Figma',
-    location: 'United States',
-    speaks: 'English',
-    level: 'Level 2',
-  },
-  {
-    id: 'av-2',
-    category: 'Art & Illustration',
-    title: 'I will create modern flat design illustration elements',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-    images: [
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=80&w=400',
-      'https://images.unsplash.com/photo-1618005198143-d3663a89228a?auto=format&fit=crop&q=80&w=400',
-    ],
-    author: {
-      name: 'Ali Tufan',
-      avatar:
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 6500,
-    deliveryTime: '3days',
-    budget: 6500,
-    designTool: 'Illustrator',
-    location: 'Remote',
-    speaks: 'English',
-    level: 'Top Rated',
-  },
-  {
-    id: 'av-3',
-    category: 'Design & Creative',
-    title: 'I will build a fully responsive design in HTML, CSS layout',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Wanda Runo',
-      avatar:
-        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 4500,
-    deliveryTime: '7days',
-    budget: 4500,
-    designTool: 'Figma',
-    location: 'United Kingdom',
-    speaks: 'Spanish',
-    level: 'Level 1',
-  },
-  {
-    id: 'av-4',
-    category: 'Web & App Design',
-    title: 'I will do mobile app development for iOS and Android devices',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Wanda Runo',
-      avatar:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 12000,
-    deliveryTime: '7days',
-    budget: 12000,
-    designTool: 'Adobe XD',
-    location: 'Remote',
-    speaks: 'English',
-    level: 'Top Rated',
-  },
-  {
-    id: 'av-5',
-    category: 'Web & App Design',
-    title: 'I will design modern websites in figma or Adobe XD prototype',
-    rating: 4.82,
-    reviews: 94,
-    image:
-      'https://images.unsplash.com/photo-1581291518655-9523c932edcf?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Emma Watson',
-      avatar:
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 9000,
-    deliveryTime: '24h',
-    budget: 9000,
-    designTool: 'Figma',
-    location: 'Germany',
-    speaks: 'German',
-    level: 'Level 2',
-  },
-  {
-    id: 'av-6',
-    category: 'Art & Illustration',
-    title: 'I will paint modern minimalist canvas backgrounds & assets',
-    rating: 4.91,
-    reviews: 124,
-    image:
-      'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Ali Tufan',
-      avatar:
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 3500,
-    deliveryTime: '3days',
-    budget: 3500,
-    designTool: 'Photoshop',
-    location: 'United States',
-    speaks: 'English',
-    level: 'Level 2',
-  },
-  {
-    id: 'av-7',
-    category: 'Design & Creative',
-    title: 'I will make responsive design layouts & vector drawings',
-    rating: 4.75,
-    reviews: 42,
-    image:
-      'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Emma Watson',
-      avatar:
-        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100',
-      online: true,
-    },
-    startingPrice: 5500,
-    deliveryTime: 'anytime',
-    budget: 5500,
-    designTool: 'Illustrator',
-    location: 'Germany',
-    speaks: 'French',
-    level: 'New Seller',
-  },
-  {
-    id: 'av-8',
-    category: 'Web & App Design',
-    title: 'I will create low-fidelity wireframes in Sketch application',
-    rating: 4.88,
-    reviews: 67,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Marcus Thorne',
-      avatar:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
-      online: false,
-    },
-    startingPrice: 4800,
-    deliveryTime: '3days',
-    budget: 4800,
-    designTool: 'Sketch',
-    location: 'United Kingdom',
-    speaks: 'English',
-    level: 'Level 1',
-  },
-  {
-    id: 'av-9',
-    category: 'Design & Creative',
-    title: 'I will construct pristine vector mockups for high-tier companies',
-    rating: 4.98,
-    reviews: 180,
-    image:
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=400',
-    author: {
-      name: 'Marcus Thorne',
-      avatar:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
-      online: false,
-    },
-    startingPrice: 15000,
-    deliveryTime: '24h',
-    budget: 15000,
-    designTool: 'Figma',
-    location: 'United States',
-    speaks: 'English',
-    level: 'Top Rated',
-  },
-];
+const SERVICES_DATA = ALL_SERVICES;
 
 const BUDGET_MIN = 3000;
 const BUDGET_MAX = 20000;
@@ -256,9 +33,17 @@ const LEVELS = ['New Seller', 'Level 1', 'Level 2', 'Top Rated'] as const;
 
 interface AvailableServicesProps {
   className?: string;
+  searchQuery?: string;
+  searchCategory?: string;
+  onClearSearch?: () => void;
 }
 
-export default function AvailableServices({ className = '' }: AvailableServicesProps) {
+export default function AvailableServices({
+  className = '',
+  searchQuery = '',
+  searchCategory = '',
+  onClearSearch,
+}: AvailableServicesProps) {
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(2);
   const [cardSlideIndex, setCardSlideIndex] = useState<Record<string, number>>({ 'av-2': 1 });
@@ -279,6 +64,10 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
     speaks: false,
     level: false,
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, searchCategory]);
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -309,13 +98,20 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
     setter((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
   };
 
+  const hasActiveSearch = Boolean(searchQuery.trim() || searchCategory.trim());
+  const activeSearchLabel =
+    searchQuery.trim() && searchCategory.trim()
+      ? `${searchQuery.trim()} (${searchCategory.trim()})`
+      : searchQuery.trim() || searchCategory.trim();
+
   const hasActiveFilters =
     deliveryTime !== 'all' ||
     maxBudget !== BUDGET_DEFAULT ||
     selectedTools.length > 0 ||
     selectedLocations.length > 0 ||
     selectedLanguages.length > 0 ||
-    selectedLevels.length > 0;
+    selectedLevels.length > 0 ||
+    hasActiveSearch;
 
   const handleResetFilters = () => {
     setDeliveryTime('all');
@@ -324,6 +120,7 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
     setSelectedLocations([]);
     setSelectedLanguages([]);
     setSelectedLevels([]);
+    onClearSearch?.();
   };
 
   const filteredServices = useMemo(() => {
@@ -348,6 +145,29 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
       result = result.filter((item) => selectedLevels.includes(item.level));
     }
 
+    const query = searchQuery.trim().toLowerCase();
+    if (query) {
+      result = result.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query) ||
+          item.author.name.toLowerCase().includes(query) ||
+          item.designTool.toLowerCase().includes(query) ||
+          (item.description?.toLowerCase().includes(query) ?? false) ||
+          (item.author.role?.toLowerCase().includes(query) ?? false),
+      );
+    }
+
+    const category = searchCategory.trim().toLowerCase();
+    if (category) {
+      result = result.filter(
+        (item) =>
+          item.category.toLowerCase().includes(category) ||
+          item.title.toLowerCase().includes(category) ||
+          category.split(/\s+/).some((part) => part.length > 2 && item.title.toLowerCase().includes(part)),
+      );
+    }
+
     if (sortBy === 'best-seller') {
       result.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
     } else if (sortBy === 'price-asc') {
@@ -367,6 +187,8 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
     selectedLanguages,
     selectedLevels,
     sortBy,
+    searchQuery,
+    searchCategory,
   ]);
 
   const deliveryCounts = {
@@ -378,6 +200,7 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
 
   return (
     <section
+      id="available-services-grid"
       className={`w-full select-none bg-white px-4 pb-12 pt-0 sm:px-6 sm:pb-14 sm:pt-2 md:px-8 lg:px-12 ${className}`}
     >
       <div className="mx-auto w-full max-w-full">
@@ -537,6 +360,22 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
               </div>
             </div>
 
+            {hasActiveSearch ? (
+              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <p className={`${discoverBody} text-sm text-neutral-600`}>
+                  Showing service matches for{' '}
+                  <span className={`${discoverMedium} text-[#1a3c34]`}>&quot;{activeSearchLabel}&quot;</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onClearSearch?.()}
+                  className={`${discoverMedium} cursor-pointer text-sm text-brand-emerald transition-opacity hover:opacity-80`}
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : null}
+
             {filteredServices.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
@@ -551,8 +390,9 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
                   No services match your filters
                 </h3>
                 <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-sm text-neutral-500`}>
-                  Try clearing some criteria or sliders to discover more options available in our
-                  marketplace.
+                  {hasActiveSearch
+                    ? 'No services match your search. Try different keywords or clear the search.'
+                    : 'Try clearing some criteria or sliders to discover more options available in our marketplace.'}
                 </p>
                 <button
                   type="button"
@@ -580,13 +420,16 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.25 }}
-                        className="flex flex-col justify-between overflow-hidden rounded-none border border-neutral-300 bg-white"
+                        className="flex flex-col justify-between overflow-hidden rounded-none border border-neutral-300 bg-white transition-shadow hover:shadow-md"
                       >
-                        <div className="group relative aspect-[1.18/1] w-full flex-shrink-0 overflow-hidden bg-neutral-100">
+                        <Link
+                          href={getServiceDetailPath(card)}
+                          className="group relative block aspect-[1.18/1] w-full flex-shrink-0 overflow-hidden bg-neutral-100"
+                        >
                           <img
                             src={displayImage}
                             alt={card.title}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                             referrerPolicy="no-referrer"
                           />
 
@@ -632,17 +475,20 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
                               strokeWidth={2.5}
                             />
                           </button>
-                        </div>
+                        </Link>
 
                         <div className="flex flex-1 flex-col justify-between p-5">
                           <div>
                             <span className="mb-1 block text-xs font-normal text-neutral-400 sm:text-[13px]">
                               {card.category}
                             </span>
-                            <h3
-                              className={`${discoverBody} mb-2.5 line-clamp-2 text-sm font-normal leading-snug text-[#131118] transition-colors hover:text-emerald-600 sm:text-[15px]`}
-                            >
-                              {card.title}
+                            <h3 className={`${discoverBody} mb-2.5 line-clamp-2 text-sm font-normal leading-snug sm:text-[15px]`}>
+                              <Link
+                                href={getServiceDetailPath(card)}
+                                className="text-[#131118] transition-colors hover:text-emerald-600"
+                              >
+                                {card.title}
+                              </Link>
                             </h3>
                             <div className="mt-1 flex items-center gap-1 text-[13px] text-neutral-400">
                               <Star className="h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
@@ -652,7 +498,11 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
                           </div>
 
                           <div className="mt-5 flex items-center justify-between border-t border-neutral-300 pt-4">
-                            <div className="flex min-w-0 items-center gap-2">
+                            <Link
+                              href={getServiceAuthorProfilePath(card)}
+                              className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full border border-neutral-200/60">
                                 <img
                                   src={card.author.avatar}
@@ -664,10 +514,10 @@ export default function AvailableServices({ className = '' }: AvailableServicesP
                                   <span className="absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full bg-[#43b06d] ring-1 ring-white" />
                                 )}
                               </div>
-                              <span className="truncate text-xs font-normal text-neutral-500">
+                              <span className="truncate text-xs font-normal text-neutral-500 hover:text-emerald-600">
                                 {card.author.name}
                               </span>
-                            </div>
+                            </Link>
                             <div className="flex flex-shrink-0 items-center gap-1 text-right">
                               <span className="text-[10px] font-normal leading-none text-neutral-400">
                                 Starting at

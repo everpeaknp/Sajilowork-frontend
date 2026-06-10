@@ -16,12 +16,21 @@ export interface Job {
   expenseLevel: 'Expensive' | 'Intermediate' | 'Inexpensive';
   description: string;
   skills: string[];
+  city?: string;
+  hoursLabel?: string;
+  postedLabel?: string;
+  descriptionParagraphs?: string[];
+  keyResponsibilities?: string[];
+  workExperience?: string[];
+}
+
+export function formatJobBudgetLabel(min: number, max: number): string {
+  const fmt = (n: number) => (n >= 1000 ? `Rs. ${Math.round(n / 1000)}k` : `Rs. ${n}`);
+  return `${fmt(min)}–${fmt(max)}`;
 }
 
 function budgetLabel(min: number, max: number): string {
-  const fmt = (n: number) =>
-    n >= 1000 ? `Rs. ${Math.round(n / 1000)}k` : `Rs. ${n}`;
-  return `${fmt(min)}–${fmt(max)}`;
+  return formatJobBudgetLabel(min, max);
 }
 
 const baseJobs: Omit<Job, 'id'>[] = [
@@ -293,4 +302,108 @@ export function generateMockJobs(): Job[] {
   }
 
   return jobsList;
+}
+
+export const ALL_JOBS = generateMockJobs();
+
+export function getExperienceShortLabel(level: Job['experienceLevel']): string {
+  if (level === 'Intermediate') return 'Medium';
+  if (level === 'Entry Level') return 'Entry';
+  return level;
+}
+
+export function getJobLocationLabel(location: Job['location']): string {
+  if (location === 'In-office') return 'On-site';
+  return location;
+}
+
+export function getJobPostedDate(jobId: string): string {
+  const num = parseInt(jobId.replace(/^job-/, ''), 10) || 1;
+  const daysAgo = (num % 14) + 1;
+  return `${daysAgo} day${daysAgo === 1 ? '' : 's'} ago`;
+}
+
+export function getJobPostedLabel(jobOrId: Job | string): string {
+  if (typeof jobOrId !== 'string' && jobOrId.postedLabel) {
+    return jobOrId.postedLabel;
+  }
+  const jobId = typeof jobOrId === 'string' ? jobOrId : jobOrId.id;
+  return `Posted ${getJobPostedDate(jobId)}`;
+}
+
+const JOB_CITIES = ['London', 'New York', 'Berlin', 'Sydney', 'Toronto', 'Singapore'] as const;
+
+export function getJobCityLabel(job: Job): string {
+  if (job.city) return job.city;
+  if (job.location === 'Remote') return 'Remote';
+  const num = parseInt(job.id.replace(/^job-/, ''), 10) || 1;
+  return JOB_CITIES[num % JOB_CITIES.length];
+}
+
+export function getJobHoursLabel(job: Job): string {
+  if (job.hoursLabel) return job.hoursLabel;
+  const hoursByDuration: Record<string, string> = {
+    '1-5 Days': '50h / week',
+    '6-10 Days': '40h / week',
+    '10-15 Days': '35h / week',
+    '20-30 Days': '30h / week',
+  };
+  return hoursByDuration[job.duration] ?? '40h / week';
+}
+
+export function getJobSalaryLabel(job: Job): string {
+  return `${job.budgetLabel} ${job.type}`;
+}
+
+const JOB_DESCRIPTION_PARAGRAPHS = [
+  "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.",
+  "Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
+] as const;
+
+export function getJobDescriptionParagraphs(job: Job): string[] {
+  if (job.descriptionParagraphs?.length) return job.descriptionParagraphs;
+  if (job.description.trim()) return [job.description.trim()];
+  return [...JOB_DESCRIPTION_PARAGRAPHS];
+}
+
+const JOB_KEY_RESPONSIBILITIES = [
+  'Be involved in every step of the product design cycle from discovery to developer handoff and user acceptance testing.',
+  'Work with BAs, product managers and tech teams to lead the Product Design',
+  'Maintain quality of the design process and ensure that when designs are translated into code they accurately reflect the design specifications.',
+  'Accurately estimate design tickets during planning sessions.',
+  'Contribute to sketching sessions involving non-designers. Create, iterate and maintain UI deliverables including sketch files, style guides, high fidelity prototypes, micro interaction specifications and pattern libraries.',
+  'Ensure design choices are data led by identifying assumptions to test each sprint, and work with the analysts in your team to plan moderated usability test sessions.',
+  "Design pixel perfect responsive UI's and understand that adopting common interface patterns is better for UX than reinventing the wheel",
+  'Present your work to the wider business at Show & Tell sessions.',
+] as const;
+
+export function getJobKeyResponsibilities(job: Job): string[] {
+  if (job.keyResponsibilities?.length) return job.keyResponsibilities;
+  return [...JOB_KEY_RESPONSIBILITIES];
+}
+
+const JOB_WORK_EXPERIENCE = [
+  "You have at least 3 years' experience working as a Product Designer.",
+  'You have experience using Sketch and InVision or Framer X',
+  'You have some previous experience working in an agile environment – Think two-week sprints.',
+  'You are familiar using Jira and Confluence in your workflow',
+] as const;
+
+export function getJobWorkExperience(job: Job): string[] {
+  if (job.workExperience?.length) return job.workExperience;
+  return [...JOB_WORK_EXPERIENCE];
+}
+
+export function getRelatedJobs(job: Job, limit = 3): Job[] {
+  const others = ALL_JOBS.filter((j) => j.id !== job.id);
+  const byCategory = others.filter((j) => j.category === job.category);
+  const pool = byCategory.length >= limit ? byCategory : others;
+  const seed = parseInt(job.id.replace(/^job-/, ''), 10) || 1;
+  const offset = pool.length > limit ? (seed * 7) % (pool.length - limit + 1) : 0;
+  return pool.slice(offset, offset + limit);
+}
+
+export function getJobsLiveSubtitle(): string {
+  const addedToday = (ALL_JOBS.length * 17) % 400 + 200;
+  return `${ALL_JOBS.length.toLocaleString()} jobs live – ${addedToday} added today`;
 }

@@ -1,9 +1,16 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
-import { Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { addPostedJob, getPostedJobs } from '@/components/jobs/jobStore';
 import JobTable from './JobTable';
+import DashboardCreateJob, {
+  createDashboardJobFromForm,
+  createPublicJobFromForm,
+  type CreateJobFormData,
+} from './DashboardCreateJob';
 import type { Job } from './types';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 type JobStatus = Job['status'];
 
@@ -158,31 +165,59 @@ function buildInitialJobs(): Job[] {
   return list;
 }
 
-const EMPTY_FORM = {
-  title: '',
-  company: '',
-  logoColor: 'bg-[#635BFF]',
-  logoInitial: 'co',
-  applications: '0 New',
-  createdDate: '',
-  expiredDate: '',
-  status: 'Active' as JobStatus,
-};
+type JobsView = 'list' | 'create' | 'edit';
+
+function jobToFormData(job: Job): Partial<CreateJobFormData> {
+  const posted = getPostedJobs().find((item) => item.id === job.id);
+
+  if (posted) {
+    return {
+      title: posted.title,
+      category: posted.category,
+      companyName: posted.companyName,
+      companyLogoBg: posted.companyLogoBg,
+      companyIconType: posted.companyIconType,
+      verified: posted.verified,
+      location: posted.location,
+      city: posted.city ?? '',
+      duration: posted.duration,
+      type: posted.type,
+      experienceLevel: posted.experienceLevel,
+      budgetMin: String(posted.budgetMin),
+      budgetMax: String(posted.budgetMax),
+      expenseLevel: posted.expenseLevel,
+      hoursLabel: posted.hoursLabel ?? '',
+      postedLabel: posted.postedLabel ?? '',
+      skills: posted.skills.join(', '),
+      description: posted.descriptionParagraphs?.join('\n\n') ?? posted.description,
+      keyResponsibilities: posted.keyResponsibilities?.length ? posted.keyResponsibilities : [''],
+      workExperience: posted.workExperience?.length ? posted.workExperience : [''],
+      status: job.status,
+    };
+  }
+
+  return {
+    title: job.title,
+    companyName: job.company,
+    companyLogoBg: job.logoColor,
+    status: job.status,
+  };
+}
 
 export default function DashboardJobs() {
+  const [view, setView] = useState<JobsView>('list');
   const [jobs, setJobs] = useState<Job[]>(buildInitialJobs);
   const [activeSubTab, setActiveSubTab] = useState<JobStatus>('Active');
   const [currentPage, setCurrentPage] = useState(2);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
 
   const filteredJobs = useMemo(
     () => jobs.filter((job) => job.status === activeSubTab),
     [jobs, activeSubTab],
   );
 
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredJobs.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
 
@@ -198,60 +233,58 @@ export default function DashboardJobs() {
         : 'bg-transparent text-black hover:text-[#52C47F]'
     }`;
 
-  const openAddModal = () => {
+  const closeFormPage = () => {
+    setView('list');
     setEditingJob(null);
-    setForm(EMPTY_FORM);
-    setIsModalOpen(true);
   };
 
-  const openEditModal = (job: Job) => {
+  const openCreatePage = () => {
+    setEditingJob(null);
+    setView('create');
+  };
+
+  const openEditPage = (job: Job) => {
     setEditingJob(job);
-    setForm({
-      title: job.title,
-      company: job.company,
-      logoColor: job.logoColor,
-      logoInitial: job.logoInitial,
-      applications: job.applications,
-      createdDate: job.createdDate,
-      expiredDate: job.expiredDate,
-      status: job.status,
-    });
-    setIsModalOpen(true);
+    setView('edit');
   };
 
-  const handleDelete = (id: string) => {
-    setJobs((prev) => prev.filter((job) => job.id !== id));
+  const handleCreateSubmit = (data: CreateJobFormData) => {
+    const id = `job-${Date.now()}`;
+    const dashboardJob = createDashboardJobFromForm(data, id);
+    const publicJob = createPublicJobFromForm(data, id);
+
+    addPostedJob(publicJob);
+    setJobs((prev) => [dashboardJob, ...prev]);
+    setActiveSubTab(dashboardJob.status);
+    setCurrentPage(1);
+    closeFormPage();
   };
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!form.title.trim() || !form.company.trim()) return;
+  const handleEditSubmit = (data: CreateJobFormData) => {
+    if (!editingJob) return;
+
+    const id = editingJob.id;
+    const dashboardJob = createDashboardJobFromForm(data, id);
+    const publicJob = createPublicJobFromForm(data, id);
 
     const payload: Job = {
-      id: editingJob?.id ?? `job-${Date.now()}`,
-      title: form.title.trim(),
-      company: form.company.trim(),
-      logoColor: form.logoColor,
-      logoInitial: form.logoInitial.trim().toLowerCase() || 'co',
-      applications: form.applications.trim() || '0 New',
-      createdDate:
-        form.createdDate.trim() ||
-        new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      expiredDate: form.expiredDate.trim() || 'Expires in 30 days',
-      status: form.status,
+      ...dashboardJob,
+      applications: editingJob.applications,
+      createdDate: editingJob.createdDate,
+      expiredDate: editingJob.expiredDate,
+      logoInitial: editingJob.logoInitial,
     };
 
-    if (editingJob) {
-      setJobs((prev) => prev.map((job) => (job.id === editingJob.id ? payload : job)));
-    } else {
-      setJobs((prev) => [payload, ...prev]);
-      setActiveSubTab(payload.status);
-    }
+    addPostedJob(publicJob);
+    setJobs((prev) => prev.map((job) => (job.id === id ? payload : job)));
+    setActiveSubTab(payload.status);
+    closeFormPage();
+  };
 
-    setIsModalOpen(false);
-    setEditingJob(null);
-    setForm(EMPTY_FORM);
-    setCurrentPage(1);
+  const confirmDelete = () => {
+    if (deleteTargetId === null) return;
+    setJobs((prev) => prev.filter((job) => job.id !== deleteTargetId));
+    setDeleteTargetId(null);
   };
 
   const subTabClass = (tab: JobStatus) =>
@@ -260,6 +293,22 @@ export default function DashboardJobs() {
         ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
         : 'text-neutral-400 hover:text-neutral-900'
     }`;
+
+  if (view === 'create') {
+    return <DashboardCreateJob mode="create" onBack={closeFormPage} onSubmit={handleCreateSubmit} />;
+  }
+
+  if (view === 'edit' && editingJob) {
+    return (
+      <DashboardCreateJob
+        key={editingJob.id}
+        mode="edit"
+        initialData={jobToFormData(editingJob)}
+        onBack={closeFormPage}
+        onSubmit={handleEditSubmit}
+      />
+    );
+  }
 
   return (
     <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
@@ -273,7 +322,7 @@ export default function DashboardJobs() {
 
         <button
           type="button"
-          onClick={openAddModal}
+          onClick={openCreatePage}
           className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.99]"
         >
           <Plus className="h-4 w-4" />
@@ -303,9 +352,9 @@ export default function DashboardJobs() {
         <JobTable
           jobs={paginatedJobs}
           activeSubTab={activeSubTab}
-          onEdit={openEditModal}
-          onDelete={handleDelete}
-          onAddClick={openAddModal}
+          onEdit={openEditPage}
+          onDelete={setDeleteTargetId}
+          onAddClick={openCreatePage}
         />
 
         {filteredJobs.length > 0 ? (
@@ -371,139 +420,11 @@ export default function DashboardJobs() {
         ) : null}
       </div>
 
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <button
-            type="button"
-            aria-label="Close job modal"
-            onClick={() => setIsModalOpen(false)}
-            className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="mb-6 flex items-center justify-between border-b border-neutral-100 pb-4">
-              <h3 className="text-lg font-bold text-neutral-900">
-                {editingJob ? 'Edit Job Posting' : 'Post New Job'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Job Title</label>
-                <input
-                  required
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="Senior UI/UX Designer"
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Company</label>
-                  <input
-                    required
-                    value={form.company}
-                    onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
-                    placeholder="Mailchimp"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Status</label>
-                  <select
-                    value={form.status}
-                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as JobStatus }))}
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  >
-                    {STATUS_TABS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Logo Initial</label>
-                  <input
-                    value={form.logoInitial}
-                    onChange={(e) => setForm((f) => ({ ...f, logoInitial: e.target.value }))}
-                    placeholder="mc, in, ad"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Logo Color Class</label>
-                  <input
-                    value={form.logoColor}
-                    onChange={(e) => setForm((f) => ({ ...f, logoColor: e.target.value }))}
-                    placeholder="bg-[#FFE01B]"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Applications</label>
-                <input
-                  value={form.applications}
-                  onChange={(e) => setForm((f) => ({ ...f, applications: e.target.value }))}
-                  placeholder="12 New"
-                  className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Created Date</label>
-                  <input
-                    value={form.createdDate}
-                    onChange={(e) => setForm((f) => ({ ...f, createdDate: e.target.value }))}
-                    placeholder="April 9, 2023"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">Expiry Label</label>
-                  <input
-                    value={form.expiredDate}
-                    onChange={(e) => setForm((f) => ({ ...f, expiredDate: e.target.value }))}
-                    placeholder="Expires May 9, 2023"
-                    className="w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#52C47F]"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 border-t border-neutral-100 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white hover:bg-black"
-                >
-                  {editingJob ? 'Save Changes' : 'Publish Job'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+      <DeleteConfirmModal
+        open={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

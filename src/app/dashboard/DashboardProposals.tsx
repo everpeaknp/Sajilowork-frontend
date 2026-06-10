@@ -12,6 +12,7 @@ import {
   X,
   Briefcase,
 } from 'lucide-react';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 type ProposalIconType =
   | 'food'
@@ -254,8 +255,9 @@ function ProposalAvatar({ prop }: { prop: Proposal }) {
 export default function DashboardProposals() {
   const [proposalsList, setProposalsList] = useState<Proposal[]>(INITIAL_PROPOSALS);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
 
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
   const [editingProp, setEditingProp] = useState<Proposal | null>(null);
   const [formData, setFormData] = useState<ProposalFormData>({
     title: '',
@@ -272,13 +274,16 @@ export default function DashboardProposals() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = proposalsList.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handleDeleteProposal = (id: number) => {
-    const updated = proposalsList.filter((p) => p.id !== id);
+  const confirmDeleteProposal = () => {
+    if (deleteTargetId === null) return;
+
+    const updated = proposalsList.filter((p) => p.id !== deleteTargetId);
     setProposalsList(updated);
     const newTotalPages = Math.ceil(updated.length / itemsPerPage);
     if (currentPage > newTotalPages && newTotalPages > 0) {
       setCurrentPage(newTotalPages);
     }
+    setDeleteTargetId(null);
   };
 
   const handleEditClick = (prop: Proposal) => {
@@ -399,7 +404,7 @@ export default function DashboardProposals() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDeleteProposal(prop.id)}
+                      onClick={() => setDeleteTargetId(prop.id)}
                       className="shrink-0 cursor-pointer rounded-lg border-0 bg-[#FEF1EE] p-3 text-[#FF6B6B] outline-none transition-all hover:scale-105 hover:bg-[#FCE2DC] active:scale-95"
                       title="Delete Proposal"
                     >
@@ -591,6 +596,12 @@ export default function DashboardProposals() {
           </div>
         </div>
       ) : null}
+
+      <DeleteConfirmModal
+        open={deleteTargetId !== null}
+        onClose={() => setDeleteTargetId(null)}
+        onConfirm={confirmDeleteProposal}
+      />
     </div>
   );
 }

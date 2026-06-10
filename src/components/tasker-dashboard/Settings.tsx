@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -18,8 +19,11 @@ import {
   FileText,
   Clock,
   CheckCircle2,
-  XCircle
+  XCircle,
+  ArrowUpRight,
+  CreditCard,
 } from 'lucide-react';
+import type { Badge } from '@/types';
 import { useAuthStore } from '@/store/auth.store';
 import { userService } from '@/services';
 import { authService } from '@/services';
@@ -40,72 +44,129 @@ interface UserProfile {
   profileImage: string;
 }
 
+type SettingsAppearance = 'tasker' | 'dashboard';
+
+type SettingsProps = {
+  appearance?: SettingsAppearance;
+  defaultEmail?: string;
+  defaultPhone?: string;
+  showDeactivate?: boolean;
+};
+
 interface AccordionItemProps {
   title: string;
-  icon: any;
+  icon: React.ElementType;
   description: string;
   children: React.ReactNode;
   isOpen: boolean;
   onToggle: () => void;
+  appearance?: SettingsAppearance;
 }
 
-const AccordionItem = ({ title, icon: Icon, description, children, isOpen, onToggle }: AccordionItemProps) => {
+const AccordionItem = ({
+  title,
+  icon: Icon,
+  description,
+  children,
+  isOpen,
+  onToggle,
+  appearance = 'tasker',
+}: AccordionItemProps) => {
+  const isDashboard = appearance === 'dashboard';
+
   return (
-    <div 
-      className={`border border-gray-100 rounded-3xl transition-all duration-300 bg-white overflow-hidden mb-4 ${
-        isOpen ? "shadow-xl shadow-brand-dark/5 border-emerald-100" : "hover:border-emerald-200"
+    <div
+      className={`overflow-hidden transition-all duration-300 ${
+        isDashboard
+          ? `mb-3 rounded-xl border ${
+              isOpen
+                ? 'border-[#52C47F]/40 bg-white shadow-sm'
+                : 'border-neutral-200/90 bg-neutral-50/50 hover:border-neutral-300 hover:bg-white'
+            }`
+          : `mb-4 rounded-3xl border border-gray-100 bg-white ${
+              isOpen ? 'border-emerald-100 shadow-xl shadow-brand-dark/5' : 'hover:border-emerald-200'
+            }`
       }`}
     >
-      <button 
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-6 text-left outline-none"
-      >
-        <div className="flex items-center gap-5">
-          <div 
-            className={`p-3 rounded-2xl transition-colors ${
-              isOpen ? "bg-brand-emerald text-white" : "bg-surface-low text-gray-400"
+      <button type="button" onClick={onToggle} className="flex w-full items-center justify-between p-5 text-left outline-none sm:p-6">
+        <div className="flex items-center gap-4 sm:gap-5">
+          <div
+            className={`rounded-xl p-3 transition-colors ${
+              isOpen
+                ? isDashboard
+                  ? 'bg-[#52C47F] text-white'
+                  : 'bg-brand-emerald text-white'
+                : isDashboard
+                  ? 'bg-neutral-100 text-neutral-400'
+                  : 'bg-surface-low text-gray-400'
             }`}
           >
-            <Icon className="w-6 h-6" />
+            <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <h3 className="font-bold text-lg text-brand-dark">{title}</h3>
-            <p className="text-sm text-gray-500 font-medium">{description}</p>
+            <h3
+              className={`text-base font-semibold sm:text-lg ${
+                isDashboard ? 'text-neutral-900' : 'font-bold text-brand-dark'
+              }`}
+            >
+              {title}
+            </h3>
+            <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+              {description}
+            </p>
           </div>
         </div>
-        <div 
-          className={`p-2 rounded-xl bg-gray-50 text-gray-400 transition-transform duration-300 ${
-            isOpen && "rotate-180 bg-emerald-50 text-brand-emerald"
+        <div
+          className={`rounded-lg p-2 transition-transform duration-300 ${
+            isOpen
+              ? isDashboard
+                ? 'rotate-180 bg-emerald-50 text-[#52C47F]'
+                : 'rotate-180 bg-emerald-50 text-brand-emerald'
+              : isDashboard
+                ? 'bg-neutral-50 text-neutral-400'
+                : 'bg-gray-50 text-gray-400'
           }`}
         >
-          <ChevronDown className="w-5 h-5" />
+          <ChevronDown className="h-5 w-5" />
         </div>
       </button>
       <AnimatePresence>
-        {isOpen && (
+        {isOpen ? (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <div className="p-6 pt-0 border-t border-gray-50">
+            <div className={`border-t p-5 pt-0 sm:p-6 ${isDashboard ? 'border-neutral-100' : 'border-gray-50'}`}>
               {children}
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );
 };
 
-export default function Settings() {
+const DASHBOARD_CARD_CLASS =
+  'mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8';
+
+export default function Settings({
+  appearance = 'tasker',
+  defaultEmail = '',
+  defaultPhone = '',
+  showDeactivate = true,
+}: SettingsProps) {
+  const isDashboard = appearance === 'dashboard';
   const { user, setUser, refreshUser } = useAuthStore();
   const searchParams = useSearchParams();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [documentsUploading, setDocumentsUploading] = useState<Record<string, boolean>>({});
   const [documents, setDocuments] = useState<Record<string, any>>({});
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badgesLoading, setBadgesLoading] = useState(false);
+  const [paymentBadgeSubmitting, setPaymentBadgeSubmitting] = useState(false);
   
   // Form states
   const [email, setEmail] = useState('');
@@ -125,11 +186,12 @@ export default function Settings() {
   const [newAlertKeyword, setNewAlertKeyword] = useState('');
 
   useEffect(() => {
-    if (user) {
-      setEmail(user.email || '');
-      setPhoneNumber(user.phone_number || '');
-    }
-  }, [user]);
+    setEmail(user?.email || defaultEmail || '');
+    setPhoneNumber(user?.phone_number || defaultPhone || '');
+  }, [user, defaultEmail, defaultPhone]);
+
+  const displayEmail = user?.email || email || defaultEmail || 'Not set';
+  const displayPhone = user?.phone_number || phoneNumber || defaultPhone || 'Not set';
 
   useEffect(() => {
     const onProfileUpdated = () => {
@@ -169,9 +231,26 @@ export default function Settings() {
     }
   };
 
+  const fetchBadges = async () => {
+    try {
+      setBadgesLoading(true);
+      const response = await userService.getBadges();
+      if (response.success && Array.isArray(response.data)) {
+        setBadges(response.data);
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load verification badges';
+      console.error('Failed to load badges:', error);
+      toast.error(message);
+    } finally {
+      setBadgesLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (openSection === 'verify') {
-      fetchDocuments();
+      void fetchDocuments();
+      void fetchBadges();
     }
   }, [openSection]);
 
@@ -335,7 +414,7 @@ export default function Settings() {
       status === 'approved' ? (
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-xl font-black text-[10px] uppercase tracking-widest border border-green-100">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          Approved
+          Verified
         </div>
       ) : status === 'rejected' ? (
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-100">
@@ -350,24 +429,42 @@ export default function Settings() {
       );
 
     return (
-      <div className="bg-white p-6 rounded-3xl border border-outline-variant space-y-4">
+      <div
+        className={`space-y-4 rounded-xl border p-5 md:p-6 ${
+          isDashboard
+            ? 'border-neutral-200/90 bg-neutral-50/40'
+            : 'rounded-3xl border-outline-variant bg-white'
+        }`}
+      >
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <p className="font-black text-brand-dark tracking-tight">{title}</p>
-            <p className="text-sm text-gray-500 font-medium">{description}</p>
+            <p
+              className={`tracking-tight ${
+                isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+              }`}
+            >
+              {title}
+            </p>
+            <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+              {description}
+            </p>
           </div>
           {badge}
         </div>
 
         {status === 'rejected' && doc?.rejection_reason ? (
-          <div className="p-4 bg-red-50 text-red-700 rounded-2xl border border-red-100 text-sm font-semibold">
+          <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-semibold text-red-700">
             {doc.rejection_reason}
           </div>
         ) : null}
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3 text-sm text-gray-500 font-semibold">
-            <FileText className="w-4 h-4" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            className={`flex items-center gap-3 text-sm ${
+              isDashboard ? 'font-medium text-neutral-500' : 'font-semibold text-gray-500'
+            }`}
+          >
+            <FileText className="h-4 w-4" />
             <span>{doc?.uploaded_at ? 'Uploaded' : 'No upload yet'}</span>
           </div>
 
@@ -377,15 +474,25 @@ export default function Settings() {
                 href={doc.document_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest border border-outline-variant hover:bg-surface-low transition-all"
+                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                  isDashboard
+                    ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-100'
+                    : 'rounded-2xl border-outline-variant font-black text-xs uppercase tracking-widest hover:bg-surface-low'
+                }`}
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="h-4 w-4" />
                 View
               </a>
             ) : null}
 
-            <label className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest bg-brand-emerald text-white hover:opacity-90 transition-all cursor-pointer">
-              <Upload className="w-4 h-4" />
+            <label
+              className={`inline-flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-all ${
+                isDashboard
+                  ? 'bg-[#52C47F] hover:bg-[#43b06c]'
+                  : 'rounded-2xl bg-brand-emerald font-black text-xs uppercase tracking-widest hover:opacity-90'
+              }`}
+            >
+              <Upload className="h-4 w-4" />
               {uploading ? 'Uploading…' : doc?.document_url ? 'Replace' : 'Upload'}
               <input
                 type="file"
@@ -401,6 +508,140 @@ export default function Settings() {
               />
             </label>
           </div>
+        </div>
+      </div>
+    );
+  };
+
+  const paymentBadge = badges.find((b) => b.badge_type === 'payment_verified');
+  const hasLinkedPaymentMethod = !!user?.has_payment_method;
+
+  const handleActivatePaymentBadge = async () => {
+    if (!hasLinkedPaymentMethod) {
+      toast.message('Link a payment method first', {
+        description: 'Add eSewa or a bank account under Payment Methods.',
+      });
+      return;
+    }
+
+    try {
+      setPaymentBadgeSubmitting(true);
+      const response = await userService.addBadge({ badge_type: 'payment_verified' });
+      if (response.success && response.data) {
+        await fetchBadges();
+        if (response.data.is_verified) {
+          toast.success('Payment method verified');
+        } else {
+          toast.success('Verification submitted — we will review it shortly');
+        }
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to verify payment method';
+      toast.error(message);
+    } finally {
+      setPaymentBadgeSubmitting(false);
+    }
+  };
+
+  const PaymentMethodVerificationCard = () => {
+    const status = paymentBadge?.is_verified
+      ? 'approved'
+      : paymentBadge || hasLinkedPaymentMethod
+        ? 'pending'
+        : 'none';
+
+    const badge =
+      status === 'approved' ? (
+        <div className="inline-flex items-center gap-2 rounded-xl border border-green-100 bg-green-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-green-700">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          Verified
+        </div>
+      ) : status === 'pending' ? (
+        <div className="inline-flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-amber-800">
+          <Clock className="h-3.5 w-3.5" />
+          Pending
+        </div>
+      ) : (
+        <div className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
+          Not linked
+        </div>
+      );
+
+    return (
+      <div
+        className={`space-y-4 rounded-xl border p-5 md:p-6 ${
+          isDashboard
+            ? 'border-neutral-200/90 bg-neutral-50/40'
+            : 'rounded-3xl border-outline-variant bg-white'
+        }`}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div
+              className={`rounded-xl p-2.5 ${
+                isDashboard ? 'bg-white text-[#52C47F] shadow-sm' : 'bg-surface-low text-brand-emerald'
+              }`}
+            >
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <div className="space-y-1">
+              <p
+                className={`tracking-tight ${
+                  isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+                }`}
+              >
+                Payment method verified
+              </p>
+              <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+                Make payments with ease by having your payment method verified.
+              </p>
+            </div>
+          </div>
+          {badge}
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+          {paymentBadge?.is_verified ? (
+            <Link
+              href="/tasker-dashboard/methods"
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                isDashboard
+                  ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-100'
+                  : 'border-outline-variant hover:bg-surface-low'
+              }`}
+            >
+              Manage methods
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/tasker-dashboard/methods"
+                className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                  isDashboard
+                    ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-100'
+                    : 'border-outline-variant hover:bg-surface-low'
+                }`}
+              >
+                Link payment method
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+              {hasLinkedPaymentMethod && !paymentBadge?.is_verified ? (
+                <button
+                  type="button"
+                  onClick={() => void handleActivatePaymentBadge()}
+                  disabled={paymentBadgeSubmitting}
+                  className={
+                    isDashboard
+                      ? primaryButtonClass
+                      : 'rounded-2xl bg-brand-emerald px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
+                  }
+                >
+                  {paymentBadgeSubmitting ? 'Submitting…' : 'Request verification'}
+                </button>
+              ) : null}
+            </>
+          )}
         </div>
       </div>
     );
@@ -510,99 +751,115 @@ export default function Settings() {
     }
   };
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl space-y-10 pb-20"
-    >
-      <header>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="h-1 w-10 bg-brand-emerald rounded-full" />
-          <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.3em]">Account Control</span>
-        </div>
-        <h1 className="text-2xl font-black uppercase tracking-tighter text-brand-dark sm:text-4xl">Settings</h1>
-        <p className="text-gray-500 mt-2">Personalize your account security, notifications, and verification status.</p>
-      </header>
+  const inputClass = isDashboard
+    ? 'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F]'
+    : 'w-full rounded-2xl border border-outline-variant bg-gray-50 p-4 font-semibold outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-emerald';
 
-      <div className="space-y-2">
-        <AccordionItem 
-          title="Email Address" 
-          icon={Mail} 
-          description={user?.email || 'Not set'}
+  const primaryButtonClass = isDashboard
+    ? 'flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0'
+    : 'rounded-2xl bg-brand-emerald px-8 py-3 font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50';
+
+  const labelClass = isDashboard
+    ? 'block text-[15px] font-semibold leading-tight text-neutral-900'
+    : 'px-1 text-xs font-bold uppercase tracking-widest text-gray-400';
+
+  const dashboardToggleClass = (enabled: boolean) =>
+    `relative h-6 w-12 rounded-full transition-colors ${enabled ? 'bg-[#52C47F]' : 'bg-neutral-200'}`;
+
+  const settingsSections = (
+    <>
+        <AccordionItem
+          title="Email Address"
+          icon={Mail}
+          description={displayEmail}
           isOpen={openSection === 'email'}
           onToggle={() => toggleSection('email')}
+          appearance={appearance}
         >
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Update Email</label>
-              <input 
-                type="email" 
+              <label className={labelClass}>Update Email</label>
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="New email address"
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold"
+                className={inputClass}
               />
             </div>
-            <button 
-              onClick={handleUpdateEmail}
-              disabled={loading}
-              className="bg-brand-emerald text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="button" onClick={handleUpdateEmail} disabled={loading} className={primaryButtonClass}>
               {loading ? 'Updating...' : 'Verify & Update'}
+              {isDashboard && !loading ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
             </button>
           </div>
         </AccordionItem>
 
-        <AccordionItem 
-          title="Mobile Number" 
-          icon={Smartphone} 
-          description={user?.phone_number || 'Not set'}
+        <AccordionItem
+          title="Mobile Number"
+          icon={Smartphone}
+          description={displayPhone}
           isOpen={openSection === 'mobile'}
           onToggle={() => toggleSection('mobile')}
+          appearance={appearance}
         >
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">New Phone Number</label>
-              <input 
-                type="tel" 
+              <label className={labelClass}>New Phone Number</label>
+              <input
+                type="tel"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="+1 234 567 8900"
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold"
+                placeholder="98989898"
+                className={inputClass}
               />
             </div>
-            <button 
-              onClick={handleUpdatePhone}
-              disabled={loading}
-              className="bg-brand-emerald text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="button" onClick={handleUpdatePhone} disabled={loading} className={primaryButtonClass}>
               {loading ? 'Updating...' : 'Send SMS Code'}
+              {isDashboard && !loading ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
             </button>
           </div>
         </AccordionItem>
 
-        <AccordionItem 
-          title="Verify Account" 
-          icon={UserCheck} 
+        <AccordionItem
+          title="Verify Account"
+          icon={UserCheck}
           description="Government identity check"
           isOpen={openSection === 'verify'}
           onToggle={() => toggleSection('verify')}
+          appearance={appearance}
         >
           <div className="space-y-6">
-            <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 flex items-center gap-4">
-              <div className="p-4 bg-white rounded-full shadow-sm text-brand-emerald shrink-0">
-                <Shield className="w-10 h-10" />
+            <div
+              className={`flex items-center gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-5 md:p-6 ${
+                isDashboard ? 'rounded-xl' : ''
+              }`}
+            >
+              <div
+                className={`shrink-0 rounded-full bg-white shadow-sm ${
+                  isDashboard ? 'p-3.5 text-[#52C47F]' : 'p-4 text-brand-emerald'
+                }`}
+              >
+                <Shield className={isDashboard ? 'h-8 w-8' : 'h-10 w-10'} />
               </div>
               <div>
-                <h4 className="font-black text-brand-dark tracking-tight">Identity Trust Program</h4>
-                <p className="text-sm text-gray-600 font-medium mt-1">
-                  Upload your documents here. Our admins review them in the dashboard and update your verification status.
+                <h4
+                  className={`tracking-tight ${
+                    isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+                  }`}
+                >
+                  Identity Trust Program
+                </h4>
+                <p
+                  className={`mt-1 text-sm ${
+                    isDashboard ? 'font-normal text-neutral-500' : 'font-medium text-gray-600'
+                  }`}
+                >
+                  Upload your documents here. Our admins review them and update your verification status.
                 </p>
               </div>
             </div>
 
-            {documentsLoading ? (
+            {documentsLoading || badgesLoading ? (
               <div className="text-sm font-semibold text-gray-500">Loading verification status…</div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
@@ -616,69 +873,95 @@ export default function Settings() {
                   description="Upload a recent utility bill or official address document."
                   documentType="proof_of_address"
                 />
+                <DocumentCard
+                  title="Police check"
+                  description="Upload a valid police clearance or background check certificate."
+                  documentType="police_check"
+                />
+                <PaymentMethodVerificationCard />
               </div>
             )}
 
-            <div className="p-5 bg-surface-low rounded-3xl border border-outline-variant flex items-start gap-4">
-              <AlertCircle className="w-5 h-5 text-brand-emerald shrink-0 mt-0.5" />
-              <p className="text-sm text-gray-600 font-medium leading-relaxed">
-                Accepted formats: <span className="font-black text-brand-dark">JPG/PNG/PDF</span>, max{' '}
-                <span className="font-black text-brand-dark">5MB</span>. If a document is rejected, you’ll see the rejection reason here and can re-upload a corrected file.
+            <div
+              className={`flex items-start gap-4 p-5 ${
+                isDashboard
+                  ? 'rounded-xl border border-neutral-200/90 bg-neutral-50/60'
+                  : 'rounded-3xl border border-outline-variant bg-surface-low'
+              }`}
+            >
+              <AlertCircle
+                className={`mt-0.5 h-5 w-5 shrink-0 ${isDashboard ? 'text-[#52C47F]' : 'text-brand-emerald'}`}
+              />
+              <p
+                className={`text-sm leading-relaxed ${
+                  isDashboard ? 'font-normal text-neutral-600' : 'font-medium text-gray-600'
+                }`}
+              >
+                Accepted formats:{' '}
+                <span className={isDashboard ? 'font-semibold text-neutral-900' : 'font-black text-brand-dark'}>
+                  JPG/PNG/PDF
+                </span>
+                , max{' '}
+                <span className={isDashboard ? 'font-semibold text-neutral-900' : 'font-black text-brand-dark'}>
+                  5MB
+                </span>
+                . If a document is rejected, you’ll see the rejection reason here and can re-upload a corrected file.
               </p>
             </div>
           </div>
         </AccordionItem>
 
-        <AccordionItem 
-          title="Change Password" 
-          icon={Lock} 
+        <AccordionItem
+          title="Change Password"
+          icon={Lock}
           description="Secure your access with a fresh password"
           isOpen={openSection === 'password'}
           onToggle={() => toggleSection('password')}
+          appearance={appearance}
         >
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">Current Password</label>
-              <input 
-                type="password" 
+              <label className={labelClass}>Current Password</label>
+              <input
+                type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Current password" 
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold" 
+                placeholder="Current password"
+                className={inputClass}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest px-1">New Password</label>
-              <input 
-                type="password" 
+              <label className={labelClass}>New Password</label>
+              <input
+                type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Min 8 characters" 
-                className="w-full p-4 rounded-2xl bg-gray-50 border border-outline-variant focus:bg-white focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold" 
+                placeholder="Min 8 characters"
+                className={inputClass}
               />
             </div>
-            <button 
-              onClick={handleChangePassword}
-              disabled={loading}
-              className="bg-brand-emerald text-white px-8 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="button" onClick={handleChangePassword} disabled={loading} className={primaryButtonClass}>
               {loading ? 'Updating...' : 'Update Security'}
+              {isDashboard && !loading ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
             </button>
           </div>
         </AccordionItem>
 
-        <AccordionItem 
-          title="Notification Settings" 
-          icon={Bell} 
+        <AccordionItem
+          title="Notification Settings"
+          icon={Bell}
           description="Manage how we communicate with you"
           isOpen={openSection === 'notifications'}
           onToggle={() => toggleSection('notifications')}
+          appearance={appearance}
         >
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-bold text-brand-dark">Global channel toggles</p>
-                <p className="text-xs text-gray-500">
+                <p className={isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-bold text-brand-dark'}>
+                  Global channel toggles
+                </p>
+                <p className={isDashboard ? 'text-sm text-neutral-500' : 'text-xs text-gray-500'}>
                   These apply to all notification types.
                 </p>
               </div>
@@ -686,18 +969,28 @@ export default function Settings() {
                 type="button"
                 onClick={resetNotificationPrefs}
                 disabled={notificationPrefsLoading}
-                className="text-xs font-black text-gray-500 hover:text-brand-dark transition-colors disabled:opacity-50"
+                className={
+                  isDashboard
+                    ? 'text-sm font-semibold text-[#52C47F] transition-colors hover:text-[#43b06c] disabled:opacity-50'
+                    : 'text-xs font-black text-gray-500 transition-colors hover:text-brand-dark disabled:opacity-50'
+                }
               >
                 Reset
               </button>
             </div>
 
             {notificationPrefsLoading ? (
-              <div className="p-4 bg-gray-50 rounded-2xl border border-outline-variant text-sm font-semibold text-gray-500">
+              <div
+                className={`rounded-2xl border p-4 text-sm font-semibold ${
+                  isDashboard
+                    ? 'rounded-xl border-neutral-200/90 bg-neutral-50 font-medium text-neutral-500'
+                    : 'border-outline-variant bg-gray-50 text-gray-500'
+                }`}
+              >
                 Loading notification settings…
               </div>
             ) : (
-              <div className="space-y-1 divide-y divide-gray-50">
+              <div className={isDashboard ? 'divide-y divide-neutral-100' : 'space-y-1 divide-y divide-gray-50'}>
                 {[
                   {
                     key: 'push_enabled' as const,
@@ -717,12 +1010,20 @@ export default function Settings() {
                 ].map((n) => {
                   const enabled = channelToggles[n.key];
                   return (
-                    <div key={n.key} className="flex items-center justify-between py-4 group">
+                    <div key={n.key} className={`flex items-center justify-between py-4 ${isDashboard ? '' : 'group'}`}>
                       <div>
-                        <p className="font-bold text-brand-dark group-hover:text-brand-emerald transition-colors">
+                        <p
+                          className={
+                            isDashboard
+                              ? 'text-[15px] font-semibold text-neutral-900'
+                              : 'font-bold text-brand-dark transition-colors group-hover:text-brand-emerald'
+                          }
+                        >
                           {n.label}
                         </p>
-                        <p className="text-xs text-gray-500">{n.desc}</p>
+                        <p className={isDashboard ? 'text-sm text-neutral-500' : 'text-xs text-gray-500'}>
+                          {n.desc}
+                        </p>
                       </div>
                       <button
                         type="button"
@@ -732,9 +1033,13 @@ export default function Settings() {
                           setChannelToggles((p) => ({ ...p, [n.key]: next }));
                           void setChannelForAll(n.key, next);
                         }}
-                        className={`w-12 h-6 rounded-full relative transition-colors ${
-                          enabled ? 'bg-brand-emerald' : 'bg-gray-200'
-                        }`}
+                        className={
+                          isDashboard
+                            ? dashboardToggleClass(enabled)
+                            : `relative h-6 w-12 rounded-full transition-colors ${
+                                enabled ? 'bg-brand-emerald' : 'bg-gray-200'
+                              }`
+                        }
                       >
                         <div
                           className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${
@@ -750,12 +1055,13 @@ export default function Settings() {
           </div>
         </AccordionItem>
 
-        <AccordionItem 
-          title="Task Alerts" 
-          icon={AlertCircle} 
+        <AccordionItem
+          title="Task Alerts"
+          icon={AlertCircle}
           description="Instant notifications for matching jobs"
           isOpen={openSection === 'alerts'}
           onToggle={() => toggleSection('alerts')}
+          appearance={appearance}
         >
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-4 bg-orange-50 text-orange-700 rounded-2xl border border-orange-100">
@@ -779,16 +1085,21 @@ export default function Settings() {
                     if (e.key === 'Enter') void addAlertKeyword();
                   }}
                   placeholder="Add keyword (e.g. Moving, IKEA)"
-                  className="flex-1 p-4 rounded-2xl bg-white border border-outline-variant focus:ring-2 focus:ring-brand-emerald outline-none transition-all font-semibold"
+                  className={isDashboard ? `flex-1 ${inputClass}` : 'flex-1 rounded-2xl border border-outline-variant bg-white p-4 font-semibold outline-none transition-all focus:ring-2 focus:ring-brand-emerald'}
                   disabled={alertsLoading}
                 />
                 <button
                   type="button"
                   onClick={addAlertKeyword}
                   disabled={alertsLoading || !newAlertKeyword.trim()}
-                  className="bg-brand-emerald text-white px-6 py-3 rounded-2xl font-bold hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={
+                    isDashboard
+                      ? `${primaryButtonClass} shrink-0`
+                      : 'rounded-2xl bg-brand-emerald px-6 py-3 font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50'
+                  }
                 >
                   Add
+                  {isDashboard ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
                 </button>
               </div>
 
@@ -820,22 +1131,65 @@ export default function Settings() {
             </div>
           </div>
         </AccordionItem>
-      </div>
+    </>
+  );
 
-      <div className="pt-10 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div>
-          <h4 className="font-bold text-red-500">Deactivate Account</h4>
-          <p className="text-sm text-gray-500">This will remove your public tasker profile.</p>
+  if (isDashboard) {
+    return (
+      <div className="animate-in fade-in relative -mx-4 -my-6 min-h-screen bg-[#f0efec] px-4 py-4 font-sans text-black duration-300 sm:-mx-6 sm:px-6 sm:py-4 md:-mx-8 md:px-8">
+        <div className="mx-auto mb-8 max-w-7xl pl-1">
+          <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900">Settings</h1>
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+            Manage your email, phone, verification, password, and notifications.
+          </p>
         </div>
-        <button 
-          onClick={handleDeleteAccount}
-          disabled={loading}
-          className="flex items-center gap-2 text-red-500 font-bold hover:bg-red-50 px-6 py-3 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Trash2 className="w-5 h-5" />
-          Delete Account
-        </button>
+        <div className={`${DASHBOARD_CARD_CLASS} mb-8`}>
+          <div className="space-y-0">{settingsSections}</div>
+        </div>
       </div>
+    );
+  }
+
+  const content = (
+    <>
+      <header className="mb-0">
+        <div className="mb-2 flex items-center gap-3">
+          <div className="h-1 w-10 rounded-full bg-brand-emerald" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-emerald">
+            Account Control
+          </span>
+        </div>
+        <h1 className="text-2xl font-black uppercase tracking-tighter text-brand-dark sm:text-4xl">Settings</h1>
+        <p className="mt-2 text-gray-500">
+          Personalize your account security, notifications, and verification status.
+        </p>
+      </header>
+
+      <div className="mt-10 space-y-2">{settingsSections}</div>
+
+      {showDeactivate ? (
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-gray-100 pt-10 md:flex-row">
+          <div>
+            <h4 className="font-bold text-red-500">Deactivate Account</h4>
+            <p className="text-sm text-gray-500">This will remove your public tasker profile.</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            disabled={loading}
+            className="flex items-center gap-2 rounded-2xl px-6 py-3 font-bold text-red-500 transition-all hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Trash2 className="h-5 w-5" />
+            Delete Account
+          </button>
+        </div>
+      ) : null}
+    </>
+  );
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl space-y-10 pb-20">
+      {content}
     </motion.div>
   );
 }

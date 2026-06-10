@@ -269,3 +269,385 @@ export function locationDisplay(location: Project['location']): string {
   if (location === 'Hybrid') return 'Lalitpur';
   return 'Pokhara';
 }
+
+export const ALL_PROJECTS = generateMockProjects();
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
+
+export type ProjectMeta = {
+  locationLabel: string;
+  postedDate: string;
+  views: number;
+};
+
+export function getProjectMeta(project: Project): ProjectMeta {
+  const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
+
+  if (project.id === 'job-1') {
+    return {
+      locationLabel: 'London, UK',
+      postedDate: 'January 15, 2022',
+      views: 902,
+    };
+  }
+
+  return {
+    locationLabel: `${locationDisplay(project.location)}, Nepal`,
+    postedDate: `${MONTH_NAMES[jobNum % MONTH_NAMES.length]} ${(jobNum % 27) + 1}, ${2020 + (jobNum % 5)}`,
+    views: 400 + ((jobNum * 173) % 900),
+  };
+}
+
+export type ProjectDetailMeta = {
+  sellerType: string;
+  durationLabel: string;
+  languages: number;
+  englishLevel: string;
+};
+
+export type ProjectBuyerMeta = {
+  rating: number;
+  reviews: number;
+  buyerLocation: string;
+  employees: string;
+  department: string;
+};
+
+export function getProjectDetailMeta(project: Project): ProjectDetailMeta {
+  const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
+
+  let englishLevel = 'Basic';
+  if (project.experienceLevel === 'Expert') englishLevel = 'Professional';
+  else if (project.experienceLevel === 'Intermediate') englishLevel = 'Conversational';
+
+  return {
+    sellerType: 'Company',
+    durationLabel: project.id === 'job-1' ? '10-15 Hours' : project.duration,
+    languages: project.id === 'job-1' ? 20 : 5 + (jobNum % 18),
+    englishLevel,
+  };
+}
+
+export function getProjectBuyerMeta(project: Project): ProjectBuyerMeta {
+  const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
+
+  if (project.id === 'job-1') {
+    return {
+      rating: 4.9,
+      reviews: 595,
+      buyerLocation: 'London',
+      employees: '11-20',
+      department: 'Designer',
+    };
+  }
+
+  return {
+    rating: Number((4.4 + (jobNum % 6) * 0.1).toFixed(1)),
+    reviews: 40 + ((jobNum * 37) % 500),
+    buyerLocation: locationDisplay(project.location),
+    employees: jobNum % 2 === 0 ? '11-20' : '1-10',
+    department: project.category.split(' & ')[0] ?? 'Designer',
+  };
+}
+
+const PROJECT_DESCRIPTION_PARAGRAPHS = [
+  "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English.",
+  "Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
+] as const;
+
+export function getProjectDescriptionParagraphs(_project: Project): string[] {
+  return [...PROJECT_DESCRIPTION_PARAGRAPHS];
+}
+
+export interface ProjectAttachment {
+  name: string;
+  fileType: string;
+}
+
+export const PROJECT_ATTACHMENTS: ProjectAttachment[] = [
+  { name: 'Project Brief', fileType: 'PDF' },
+  { name: 'Project Brief', fileType: 'PDF' },
+];
+
+export interface ProjectProposalItem {
+  id: string;
+  name: string;
+  avatar: string;
+  rating: number;
+  reviews: number;
+  rateLabel: string;
+  hoursLabel: string;
+  submittedAt: string;
+  receivedCount: number;
+  message: string;
+}
+
+const PROPOSAL_FREELANCERS = [
+  {
+    name: 'Leslie Alexander',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+    rating: 4.9,
+    reviews: 595,
+  },
+  {
+    name: 'Leslie Alexander',
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+    rating: 4.9,
+    reviews: 595,
+  },
+  {
+    name: 'Leslie Alexander',
+    avatar:
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150',
+    rating: 4.9,
+    reviews: 595,
+  },
+] as const;
+
+const PROPOSAL_MESSAGE =
+  'Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text.';
+
+export interface ProjectReviewItem {
+  id: string;
+  reviewerName: string;
+  reviewerRole: string;
+  rating: number;
+  date: string;
+  comment: string;
+  likes: number;
+  dislikes: number;
+}
+
+const PROJECT_REVIEWS_MAP: Record<string, ProjectReviewItem[]> = {
+  'job-1': [
+    {
+      id: 'proj-job1-1',
+      reviewerName: 'Theresa Webb',
+      reviewerRole: 'Senior UX Designer',
+      rating: 5,
+      date: 'May 20, 2026',
+      comment:
+        'Mailchimp outlined milestones clearly for the Food Delivery Mobile App brief. Assets, feedback loops, and payment releases were handled professionally from kickoff through final handoff.',
+      likes: 12,
+      dislikes: 1,
+    },
+    {
+      id: 'proj-job1-2',
+      reviewerName: 'Albert Flores',
+      reviewerRole: 'React Developer',
+      rating: 4,
+      date: 'April 12, 2026',
+      comment:
+        'Strong project scope and actionable feedback on each deliverable. Credential setup took an extra day, but collaboration with the buyer team was excellent throughout.',
+      likes: 8,
+      dislikes: 0,
+    },
+    {
+      id: 'proj-job1-3',
+      reviewerName: 'Eleanor Pena',
+      reviewerRole: 'Product Copywriter',
+      rating: 5,
+      date: 'March 29, 2026',
+      comment:
+        'Outstanding buyer experience on this contract. Requirements were documented upfront with minimal revision churn. I would gladly bid on similar Mailchimp projects again.',
+      likes: 5,
+      dislikes: 0,
+    },
+  ],
+  'job-2': [
+    {
+      id: 'proj-job2-1',
+      reviewerName: 'Annette Black',
+      reviewerRole: 'Swift Developer',
+      rating: 5,
+      date: 'June 01, 2026',
+      comment:
+        'Slack provided sharp technical specs for the SwiftUI engagement. Communication was fast, milestones were realistic, and approvals came through without unnecessary delays.',
+      likes: 15,
+      dislikes: 0,
+    },
+    {
+      id: 'proj-job2-2',
+      reviewerName: 'Robert Fox',
+      reviewerRole: 'iOS Engineer',
+      rating: 4,
+      date: 'May 15, 2026',
+      comment:
+        'Well-structured B2B app requirements with clear acceptance criteria. Time zone gaps occasionally slowed reviews, but the overall project management was top tier.',
+      likes: 6,
+      dislikes: 1,
+    },
+  ],
+};
+
+const PROJECT_REVIEWER_NAMES = [
+  'Jane Cooper',
+  'Guy Hawkins',
+  'Courtney Henry',
+  'Robert Fox',
+  'Annette Black',
+];
+
+const PROJECT_REVIEWER_ROLES = [
+  'Freelance Developer',
+  'UI/UX Consultant',
+  'Product Designer',
+  'Full Stack Engineer',
+  'Mobile Specialist',
+];
+
+const PROJECT_REVIEW_DATES = [
+  'May 18, 2026',
+  'April 24, 2026',
+  'March 12, 2026',
+  'February 08, 2026',
+  'January 15, 2026',
+];
+
+function getProjectSeed(projectId: string): number {
+  return projectId.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+function buildFallbackProjectReviews(project: Project): ProjectReviewItem[] {
+  const buyer = project.companyName;
+  return [
+    {
+      id: `${project.id}-rev-1`,
+      reviewerName: PROJECT_REVIEWER_NAMES[0],
+      reviewerRole: PROJECT_REVIEWER_ROLES[0],
+      rating: 5,
+      date: PROJECT_REVIEW_DATES[0],
+      comment: `Working with ${buyer} on "${project.title}" was smooth and professional. Deliverables were clearly defined, questions were answered promptly, and payment was released on schedule.`,
+      likes: 6,
+      dislikes: 0,
+    },
+    {
+      id: `${project.id}-rev-2`,
+      reviewerName: PROJECT_REVIEWER_NAMES[1],
+      reviewerRole: PROJECT_REVIEWER_ROLES[1],
+      rating: 4,
+      date: PROJECT_REVIEW_DATES[1],
+      comment:
+        'Excellent brief and structured milestone plan. The buyer gave actionable feedback at each checkpoint and kept the project moving forward.',
+      likes: 3,
+      dislikes: 0,
+    },
+    {
+      id: `${project.id}-rev-3`,
+      reviewerName: PROJECT_REVIEWER_NAMES[2],
+      reviewerRole: PROJECT_REVIEWER_ROLES[2],
+      rating: 5,
+      date: PROJECT_REVIEW_DATES[2],
+      comment: `Highly recommend this ${project.category.toLowerCase()} project. Scope matched the listing, communication was respectful, and expectations were realistic throughout.`,
+      likes: 5,
+      dislikes: 0,
+    },
+  ];
+}
+
+export function buildProjectReviews(project: Project): ProjectReviewItem[] {
+  if (PROJECT_REVIEWS_MAP[project.id]) return PROJECT_REVIEWS_MAP[project.id];
+
+  const seed = getProjectSeed(project.id);
+  return buildFallbackProjectReviews(project).map((review, index) => ({
+    ...review,
+    reviewerName: PROJECT_REVIEWER_NAMES[(seed + index) % PROJECT_REVIEWER_NAMES.length],
+    reviewerRole: PROJECT_REVIEWER_ROLES[(seed + index * 2) % PROJECT_REVIEWER_ROLES.length],
+    date: PROJECT_REVIEW_DATES[(seed + index) % PROJECT_REVIEW_DATES.length],
+    likes: 4 + ((seed + index * 3) % 12),
+    dislikes: index === 1 && seed % 4 === 0 ? 1 : 0,
+  }));
+}
+
+export interface ProjectQuestionItem {
+  id: string;
+  askedByName: string;
+  askedByImage?: string;
+  question: string;
+  answer?: string;
+  answeredByName?: string;
+  createdAt: string;
+  answeredAt?: string;
+}
+
+function buildFallbackProjectQuestions(project: Project): ProjectQuestionItem[] {
+  const buyer = project.companyName;
+  const freelancers = PROPOSAL_FREELANCERS;
+  const now = Date.now();
+
+  return [
+    {
+      id: `${project.id}-q-1`,
+      askedByName: freelancers[0].name,
+      askedByImage: freelancers[0].avatar,
+      question: `What is the expected timeline for the first milestone on "${project.title}"?`,
+      answer: `We are targeting the first milestone within the first week. ${buyer} will share a detailed brief after a freelancer is selected.`,
+      answeredByName: buyer,
+      createdAt: new Date(now - 1000 * 60 * 60 * 28).toISOString(),
+      answeredAt: new Date(now - 1000 * 60 * 60 * 20).toISOString(),
+    },
+    {
+      id: `${project.id}-q-2`,
+      askedByName: freelancers[1].name,
+      askedByImage: freelancers[1].avatar,
+      question: 'Is this role fully remote, or are there any on-site requirements?',
+      answer:
+        project.location === 'Remote'
+          ? 'This project is fully remote. All collaboration happens through the platform.'
+          : `This is a ${project.location.toLowerCase()} engagement. We will confirm any on-site expectations during onboarding.`,
+      answeredByName: buyer,
+      createdAt: new Date(now - 1000 * 60 * 60 * 52).toISOString(),
+      answeredAt: new Date(now - 1000 * 60 * 60 * 40).toISOString(),
+    },
+    {
+      id: `${project.id}-q-3`,
+      askedByName: freelancers[2].name,
+      askedByImage: freelancers[2].avatar,
+      question: 'Which tools or stack should proposals reference for this project?',
+      createdAt: new Date(now - 1000 * 60 * 60 * 8).toISOString(),
+    },
+  ];
+}
+
+export function buildProjectQuestions(project: Project): ProjectQuestionItem[] {
+  return buildFallbackProjectQuestions(project);
+}
+
+export function buildProjectProposals(project: Project): ProjectProposalItem[] {
+  const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
+  const estimatedHours = [100, 100, 100];
+
+  return PROPOSAL_FREELANCERS.map((freelancer, index) => {
+    const rateMin = project.budgetMin - index * 200 + (jobNum % 3) * 50;
+    const rateMax = project.budgetMax - index * 150 + (jobNum % 4) * 40;
+    const hours = estimatedHours[index] ?? 100;
+
+    return {
+      id: `${project.id}-proposal-${index + 1}`,
+      name: freelancer.name,
+      avatar: freelancer.avatar,
+      rating: freelancer.rating,
+      reviews: freelancer.reviews,
+      rateLabel: hourlyLabel(Math.max(800, rateMin), Math.max(rateMin + 200, rateMax)),
+      hoursLabel: `in ${hours} hours`,
+      submittedAt: '2 hours ago',
+      receivedCount: 1,
+      message: PROPOSAL_MESSAGE,
+    };
+  });
+}

@@ -184,7 +184,7 @@ export function CategorySelect({
 
         type="button"
 
-        className="fixed inset-0 z-40 cursor-default bg-[#000d45]/20 sm:bg-transparent"
+        className="fixed inset-0 z-[10051] cursor-default bg-[#000d45]/20 sm:bg-transparent"
 
         aria-label="Close category list"
 
@@ -194,7 +194,7 @@ export function CategorySelect({
 
       <div
 
-        className="fixed z-50 overflow-hidden rounded-xl bg-white shadow-xl"
+        className="fixed z-[10052] overflow-hidden rounded-xl bg-white shadow-xl"
 
         style={{
 

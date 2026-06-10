@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Flag, CornerDownRight, Send } from 'lucide-react';
+import { Star, Flag, CornerDownRight, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type ReviewsSubTab = 'services' | 'project' | 'jobs';
 
@@ -82,8 +82,10 @@ const INITIAL_JOBS_REVIEWS: ReviewItem[] = [
 
 export default function DashboardReviews() {
   const [activeSubTab, setActiveSubTab] = useState<ReviewsSubTab>('services');
+  const [currentPage, setCurrentPage] = useState(1);
   const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const itemsPerPage = 10;
 
   const [servicesReviews, setServicesReviews] = useState<ReviewItem[]>(INITIAL_SERVICES_REVIEWS);
   const [projectReviews, setProjectReviews] = useState<ReviewItem[]>(INITIAL_PROJECT_REVIEWS);
@@ -95,6 +97,26 @@ export default function DashboardReviews() {
       : activeSubTab === 'project'
         ? projectReviews
         : jobsReviews;
+
+  const totalPages = Math.max(1, Math.ceil(activeReviews.length / itemsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
+  const indexOfLastItem = activePage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const paginatedReviews = activeReviews.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleTabChange = (tab: ReviewsSubTab) => {
+    setActiveSubTab(tab);
+    setCurrentPage(1);
+    setActiveReplyId(null);
+    setReplyText('');
+  };
+
+  const pageButtonClass = (page: number) =>
+    `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full border-0 text-sm font-normal outline-none transition-all focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 ${
+      activePage === page
+        ? 'bg-[#52C47F] font-medium text-white shadow-sm'
+        : 'bg-transparent text-black hover:text-[#52C47F]'
+    }`;
 
   const setActiveReviews = (updater: (prev: ReviewItem[]) => ReviewItem[]) => {
     if (activeSubTab === 'services') {
@@ -141,13 +163,13 @@ export default function DashboardReviews() {
       <div className="mx-auto max-w-7xl rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
         <div className="mb-8 flex items-center justify-between border-b border-neutral-100">
           <div className="flex gap-8">
-            <button type="button" onClick={() => setActiveSubTab('services')} className={subTabClass('services')}>
+            <button type="button" onClick={() => handleTabChange('services')} className={subTabClass('services')}>
               Services
             </button>
-            <button type="button" onClick={() => setActiveSubTab('project')} className={subTabClass('project')}>
+            <button type="button" onClick={() => handleTabChange('project')} className={subTabClass('project')}>
               Project
             </button>
-            <button type="button" onClick={() => setActiveSubTab('jobs')} className={subTabClass('jobs')}>
+            <button type="button" onClick={() => handleTabChange('jobs')} className={subTabClass('jobs')}>
               Jobs
             </button>
           </div>
@@ -157,7 +179,7 @@ export default function DashboardReviews() {
           {activeReviews.length === 0 ? (
             <div className="py-20 text-center text-sm text-neutral-400">No reviews found on this tab.</div>
           ) : (
-            activeReviews.map((review) => (
+            paginatedReviews.map((review) => (
               <div key={review.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -251,6 +273,73 @@ export default function DashboardReviews() {
             ))
           )}
         </div>
+
+        {activeReviews.length > 0 ? (
+          <div className="mt-10 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-12 font-sans">
+            <div className="flex items-center justify-center gap-6">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={activePage === 1}
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+              >
+                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {totalPages <= 6 ? (
+                  Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={pageButtonClass(page)}
+                    >
+                      {page}
+                    </button>
+                  ))
+                ) : (
+                  <>
+                    {[1, 2, 3, 4, 5].map((page) => (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => setCurrentPage(page)}
+                        className={pageButtonClass(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <span className="pointer-events-none flex h-[44px] w-[44px] select-none items-center justify-center text-sm font-normal text-neutral-400">
+                      ...
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={pageButtonClass(totalPages)}
+                    >
+                      {totalPages}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={activePage === totalPages}
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+              >
+                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+              </button>
+            </div>
+
+            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
+              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, activeReviews.length)} of{' '}
+              {activeReviews.length} reviews
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
