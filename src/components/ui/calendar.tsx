@@ -323,6 +323,7 @@ function Calendar({
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <button
+          type="button"
           onClick={() => navigateMonth("prev")}
           className="inline-flex items-center justify-center rounded-lg p-1 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           disabled={isAnimating}
@@ -378,6 +379,7 @@ function Calendar({
         </div>
 
         <button
+          type="button"
           onClick={() => navigateMonth("next")}
           className="inline-flex items-center justify-center rounded-lg p-1 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           disabled={isAnimating}
@@ -418,6 +420,7 @@ function Calendar({
             {showOutsideDays &&
               prevMonthDays.map((day) => (
                 <button
+                  type="button"
                   key={`prev-${day}`}
                   onClick={() => handleDateClick(day, -1)}
                   className={cn(
@@ -434,6 +437,7 @@ function Calendar({
             {/* Current month days */}
             {currentMonthDays.map((day) => (
               <button
+                type="button"
                 key={`current-${day}`}
                 onClick={() => handleDateClick(day)}
                 className={cn(
@@ -451,6 +455,7 @@ function Calendar({
             {showOutsideDays &&
               nextMonthDays.map((day) => (
                 <button
+                  type="button"
                   key={`next-${day}`}
                   onClick={() => handleDateClick(day, 1)}
                   className={cn(

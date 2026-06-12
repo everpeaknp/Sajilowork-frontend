@@ -1,5 +1,16 @@
+import { legacyUsdHourlyRange } from '@/lib/nepalLocale';
+
+export interface EmployerGalleryImage {
+  id: string;
+  url: string;
+  alt: string;
+}
+
+export type EmployerAccountType = 'individual' | 'company';
+
 export interface Employer {
   id: string;
+  accountType?: EmployerAccountType;
   name: string;
   tagline: string;
   industry: string;
@@ -14,6 +25,11 @@ export interface Employer {
   description: string;
   website: string;
   teamSize: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  galleryImages?: EmployerGalleryImage[];
+  logoUrl?: string;
+  memberSince?: string;
 }
 
 export const DEFAULT_EMPLOYERS: Employer[] = [
@@ -25,7 +41,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.9,
     reviewCount: 142,
     location: 'London, UK',
-    costRange: '$60 - $110 / hr',
+    costRange: legacyUsdHourlyRange(60, 110),
     openJobs: 29,
     logoColor: 'monkey-face',
     logoText: 'MC',
@@ -43,7 +59,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.5,
     reviewCount: 89,
     location: 'New York, USA',
-    costRange: '$75 - $130 / hr',
+    costRange: legacyUsdHourlyRange(75, 130),
     openJobs: 29,
     logoColor: 'wave-s',
     logoText: 'MC',
@@ -61,7 +77,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 3.8,
     reviewCount: 41,
     location: 'Tokyo, Japan',
-    costRange: '$50 - $90 / hr',
+    costRange: legacyUsdHourlyRange(50, 90),
     openJobs: 29,
     logoColor: 'cursive-in',
     logoText: 'MC',
@@ -79,7 +95,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.2,
     reviewCount: 76,
     location: 'Berlin, Germany',
-    costRange: '$80 - $140 / hr',
+    costRange: legacyUsdHourlyRange(80, 140),
     openJobs: 29,
     logoColor: 'linked-loops',
     logoText: 'MC',
@@ -97,7 +113,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.7,
     reviewCount: 95,
     location: 'Paris, France',
-    costRange: '$65 - $120 / hr',
+    costRange: legacyUsdHourlyRange(65, 120),
     openJobs: 29,
     logoColor: 'retro-grid',
     logoText: 'MC',
@@ -115,7 +131,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 3.5,
     reviewCount: 28,
     location: 'Sydney, Australia',
-    costRange: '$45 - $85 / hr',
+    costRange: legacyUsdHourlyRange(45, 85),
     openJobs: 29,
     logoColor: 'serif-m',
     logoText: 'MC',
@@ -133,7 +149,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.6,
     reviewCount: 112,
     location: 'Toronto, Canada',
-    costRange: '$85 - $160 / hr',
+    costRange: legacyUsdHourlyRange(85, 160),
     openJobs: 29,
     logoColor: 'cursive-u',
     logoText: 'MC',
@@ -151,7 +167,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.3,
     reviewCount: 64,
     location: 'Mumbai, India',
-    costRange: '$40 - $75 / hr',
+    costRange: legacyUsdHourlyRange(40, 75),
     openJobs: 29,
     logoColor: 'figma-icon',
     logoText: 'MC',
@@ -169,7 +185,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.9,
     reviewCount: 420,
     location: 'San Francisco, USA',
-    costRange: '$90 - $185 / hr',
+    costRange: legacyUsdHourlyRange(90, 185),
     openJobs: 14,
     logoColor: 'slack-icon',
     logoText: 'SL',
@@ -187,7 +203,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.8,
     reviewCount: 310,
     location: 'San Francisco, USA',
-    costRange: '$85 - $170 / hr',
+    costRange: legacyUsdHourlyRange(85, 170),
     openJobs: 22,
     logoColor: 'airbnb-icon',
     logoText: 'AB',
@@ -205,7 +221,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.95,
     reviewCount: 512,
     location: 'Dublin, Ireland',
-    costRange: '$100 - $220 / hr',
+    costRange: legacyUsdHourlyRange(100, 220),
     openJobs: 35,
     logoColor: 'stripe-icon',
     logoText: 'ST',
@@ -223,7 +239,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.75,
     reviewCount: 260,
     location: 'Ottawa, Canada',
-    costRange: '$80 - $150 / hr',
+    costRange: legacyUsdHourlyRange(80, 150),
     openJobs: 18,
     logoColor: 'shopify-icon',
     logoText: 'SP',
@@ -241,7 +257,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.4,
     reviewCount: 195,
     location: 'San Jose, USA',
-    costRange: '$70 - $135 / hr',
+    costRange: legacyUsdHourlyRange(70, 135),
     openJobs: 8,
     logoColor: 'zoom-icon',
     logoText: 'ZM',
@@ -259,7 +275,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.85,
     reviewCount: 380,
     location: 'Stockholm, Sweden',
-    costRange: '$95 - $190 / hr',
+    costRange: legacyUsdHourlyRange(95, 190),
     openJobs: 16,
     logoColor: 'spotify-icon',
     logoText: 'SF',
@@ -277,7 +293,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.9,
     reviewCount: 940,
     location: 'Mountain View, USA',
-    costRange: '$120 - $250 / hr',
+    costRange: legacyUsdHourlyRange(120, 250),
     openJobs: 42,
     logoColor: 'brand-google',
     logoText: 'GG',
@@ -295,7 +311,7 @@ export const DEFAULT_EMPLOYERS: Employer[] = [
     rating: 4.8,
     reviewCount: 175,
     location: 'Tokyo, Japan',
-    costRange: '$75 - $130 / hr',
+    costRange: legacyUsdHourlyRange(75, 130),
     openJobs: 11,
     logoColor: 'notion-icon',
     logoText: 'NT',

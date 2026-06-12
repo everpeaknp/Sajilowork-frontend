@@ -27,6 +27,7 @@ import {
   DEFAULT_CURRENCY,
   withNepalGeocodeQuery,
 } from '@/lib/nepalLocale';
+import { scheduleToDueDateIso } from '@/lib/scheduleUtils';
 import { formatTimeSlotRequirement } from '@/lib/timeSlot';
 import { consumeSimilarTaskPrefill } from '@/lib/similarTask';
 import { flattenCategoriesForSelect } from '@/lib/taskUtils';
@@ -36,6 +37,8 @@ import {
   postTaskBtnSecondary,
 } from '@/components/post-task/postTaskStyles';
 import { PostTaskShell } from '@/components/post-task/PostTaskShell';
+import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
+import { getEmployerPostingContext } from '@/lib/employerBusinessProfile';
 
 export default function App() {
   const router = useRouter();
@@ -71,6 +74,7 @@ export default function App() {
   });
 
   const [budgetLimits, setBudgetLimits] = useState<{ min: number; max: number } | null>(null);
+  const postingContext = isCustomer ? getEmployerPostingContext(user) : null;
 
   useEffect(() => {
     void fetchCategories();
@@ -152,7 +156,7 @@ export default function App() {
         .trim()
         .min(10, 'Must be at least 10 characters'),
       categoryId: z.string().trim().min(1, 'Please select a category'),
-      dateType: z.enum(['specific', 'before', 'flexible'], {
+      dateType: z.enum(['specific', 'before', 'both', 'flexible'], {
         errorMap: () => ({ message: 'Please select when you need this done' }),
       }),
       specificDate: z.string(),
@@ -174,6 +178,22 @@ export default function App() {
           path: ['beforeDate'],
           message: 'Please choose a date',
         });
+      }
+      if (value.dateType === 'both') {
+        if (!value.specificDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['specificDate'],
+            message: 'Please choose an on date',
+          });
+        }
+        if (!value.beforeDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['beforeDate'],
+            message: 'Please choose a before date',
+          });
+        }
       }
       if (value.timeOfDayRequired && !value.timeSlot) {
         ctx.addIssue({
@@ -412,15 +432,13 @@ export default function App() {
         }
       }
 
-      // Add due date if specified
-      if (taskData.dateType === 'specific' && taskData.specificDate) {
-        const [year, month, day] = taskData.specificDate.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        apiTaskData.due_date = date.toISOString();
-      } else if (taskData.dateType === 'before' && taskData.beforeDate) {
-        const [year, month, day] = taskData.beforeDate.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        apiTaskData.due_date = date.toISOString();
+      const dueDateIso = scheduleToDueDateIso(
+        taskData.dateType,
+        taskData.specificDate,
+        taskData.beforeDate,
+      );
+      if (dueDateIso) {
+        apiTaskData.due_date = dueDateIso;
       }
 
       // Add time slot as requirement if specified
@@ -638,6 +656,9 @@ export default function App() {
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <main className="no-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch] py-5 sm:py-8 lg:py-10">
                   <div className="w-full pb-4">
+                    {postingContext ? (
+                      <EmployerPostingBanner context={postingContext} className="mb-5" />
+                    ) : null}
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={activeStep}

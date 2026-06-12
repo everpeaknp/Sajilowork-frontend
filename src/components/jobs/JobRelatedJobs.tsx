@@ -1,38 +1,34 @@
 'use client';
 
-import { useState, type MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 import Link from 'next/link';
 import { discoverBody } from '@/components/LangingHome/landingTypography';
 import JobCompanyLogo from './JobCompanyLogo';
 import { getJobDetailPath } from './jobSlug';
 import {
   getJobLocationLabel,
-  getJobsLiveSubtitle,
-  getRelatedJobs,
   type Job,
 } from './jobListData';
+import { getJobsLiveSubtitle } from '@/lib/jobApi';
+import { toggleJobSaved, useSavedJobIds } from './jobBookmarks';
 
 interface JobRelatedJobsProps {
   job: Job;
+  relatedJobs?: Job[];
 }
 
 function MetaDivider() {
   return <span className="mx-2 text-neutral-300" aria-hidden>|</span>;
 }
 
-export default function JobRelatedJobs({ job }: JobRelatedJobsProps) {
-  const related = getRelatedJobs(job, 3);
-  const [starred, setStarred] = useState<Set<string>>(new Set());
+export default function JobRelatedJobs({ job, relatedJobs = [] }: JobRelatedJobsProps) {
+  const related = relatedJobs;
+  const savedJobIds = useSavedJobIds();
 
   const toggleStar = (jobId: string, e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setStarred((prev) => {
-      const next = new Set(prev);
-      if (next.has(jobId)) next.delete(jobId);
-      else next.add(jobId);
-      return next;
-    });
+    toggleJobSaved(jobId);
   };
 
   if (related.length === 0) return null;
@@ -40,11 +36,13 @@ export default function JobRelatedJobs({ job }: JobRelatedJobsProps) {
   return (
     <section className="mt-16">
       <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">Related Jobs</h2>
-      <p className="mt-1 text-sm font-light text-neutral-500">{getJobsLiveSubtitle()}</p>
+      <p className="mt-1 text-sm font-light text-neutral-500">
+        {getJobsLiveSubtitle(related.length > 0 ? related.length + 1 : 1)}
+      </p>
 
       <ul className={`${discoverBody} mt-6 list-none space-y-4 p-0`}>
         {related.map((relatedJob) => {
-          const isStarred = starred.has(relatedJob.id);
+          const isStarred = savedJobIds.includes(relatedJob.id);
           const locationLabel = getJobLocationLabel(relatedJob.location);
 
           return (

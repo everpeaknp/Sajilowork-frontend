@@ -1,135 +1,250 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Search,
   ChevronLeft,
   ChevronRight,
-  X,
   TrendingUp,
   Wallet,
   Clock,
   CircleDollarSign,
-  Download,
   Filter,
+  Eye,
 } from 'lucide-react';
+import { formatNPR } from '@/lib/nepalLocale';
+import { paymentService } from '@/services';
+import type {
+  PaymentHistoryDirection,
+  PaymentHistoryItem,
+} from '@/services/payment.service';
+import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
+import { buildReceiptId } from '@/lib/statementReceiptPdf';
+import StatementReceiptModal, { type StatementReceipt } from './StatementReceiptModal';
 
-interface Statement {
-  id: string;
-  date: string;
-  type: string;
-  detail: string;
-  price: string;
-  priceVal: number;
-  amount: string;
+type Statement = StatementReceipt;
+
+function formatStatementDate(dateString?: string) {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 
-function buildStatements(): Statement[] {
-  const list: Statement[] = [
-    {
-      id: 'stmt-p1-1',
-      date: 'April 15, 2023',
-      type: 'Service Purchased',
-      detail: 'API Redesign and GraphQL Setup for Client Workspace',
-      price: '$1.400',
-      priceVal: 1400,
-      amount: '$1.400',
-    },
-    {
-      id: 'stmt-p1-2',
-      date: 'April 12, 2023',
-      type: 'Service Purchased',
-      detail: 'NextJS static build adjustments & LCP speed tweaks',
-      price: '$600',
-      priceVal: 600,
-      amount: '$600',
-    },
-    {
-      id: 'stmt-p1-3',
-      date: 'April 10, 2023',
-      type: 'Hourly Contract',
-      detail: 'React dynamic maps and visual filters consulting hours',
-      price: '$450',
-      priceVal: 450,
-      amount: '$450',
-    },
-    {
-      id: 'stmt-p2-1',
-      date: 'April 9, 2023',
-      type: 'Service Purchased',
-      detail: 'I will design website UI UX in adobe xd or figma',
-      price: '$829',
-      priceVal: 829,
-      amount: '$829',
-    },
-    {
-      id: 'stmt-p2-2',
-      date: 'April 9, 2023',
-      type: 'Service Purchased',
-      detail: 'I will design website UI UX in adobe xd or figma',
-      price: '$829',
-      priceVal: 829,
-      amount: '$829',
-    },
-    {
-      id: 'stmt-p2-3',
-      date: 'April 9, 2023',
-      type: 'Service Purchased',
-      detail: 'Tailwind CSS responsive code overhaul and theme support',
-      price: '$829',
-      priceVal: 829,
-      amount: '$829',
-    },
-  ];
+type PaymentStatusKind = 'paid' | 'pending' | 'held' | 'failed' | 'other';
 
-  const extraDetails = [
-    'Custom authentication & security headers configuration',
-    'Tailwind layout cleanups and dark mode template adjustments',
-    'Marketing landing page illustrations template matching',
-    'Stripe payment integration with multi-currency dynamic calculations',
-    'Relational PostgreSQL schema setup and Drizzle migration script',
-    'React query caching and pagination improvements',
-    'Figma asset bundle sync instructions and vector assets',
-  ];
-  const types = ['Service Purchased', 'Hourly Contract', 'Milestone Released'];
+function paymentStatusKind(status: string): PaymentStatusKind {
+  const normalized = status.toLowerCase();
+  if (['released', 'succeeded', 'completed'].includes(normalized)) return 'paid';
+  if (normalized === 'held') return 'held';
+  if (['pending', 'processing'].includes(normalized)) return 'pending';
+  if (['failed', 'cancelled', 'refunded', 'reversed'].includes(normalized)) return 'failed';
+  return 'other';
+}
 
-  for (let i = 6; i < 60; i++) {
-    const priceVal = 200 + ((i * 85) % 1500);
-    const priceStr = `$${priceVal}`;
+function paymentStatusLabel(status: string) {
+  const normalized = status.toLowerCase();
+  if (['released', 'succeeded', 'completed'].includes(normalized)) return 'Paid';
+  if (normalized === 'held') return 'Held';
+  if (normalized === 'processing') return 'Processing';
+  if (normalized === 'pending') return 'Pending';
+  if (normalized === 'failed') return 'Failed';
+  if (normalized === 'cancelled') return 'Cancelled';
+  if (normalized === 'refunded') return 'Refunded';
+  return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-    list.push({
-      id: `stmt-gen-${i}`,
-      date: 'April 9, 2023',
-      type: types[i % types.length],
-      detail: extraDetails[i % extraDetails.length],
-      price: priceStr,
-      priceVal,
-      amount: priceStr,
-    });
+function PaymentStatusBadge({ status }: { status: string }) {
+  const kind = paymentStatusKind(status);
+  const label = paymentStatusLabel(status);
+
+  if (kind === 'paid') {
+    return (
+      <span className="inline-flex rounded-xl border border-[#EBF9F1] bg-[#EBF9F1] px-5 py-2.5 text-xs font-normal text-[#27AE60]">
+        {label}
+      </span>
+    );
+  }
+  if (kind === 'held') {
+    return (
+      <span className="inline-flex rounded-xl border border-[#FFF6E9] bg-[#FFF6E9] px-5 py-2.5 text-xs font-normal text-[#F2994A]">
+        {label}
+      </span>
+    );
+  }
+  if (kind === 'pending') {
+    return (
+      <span className="inline-flex rounded-xl border border-[#F3F9FE] bg-[#F3F9FE] px-5 py-2.5 text-xs font-normal text-[#2F80ED]">
+        {label}
+      </span>
+    );
+  }
+  if (kind === 'failed') {
+    return (
+      <span className="inline-flex rounded-xl border border-red-100 bg-red-50 px-5 py-2.5 text-xs font-normal text-red-700">
+        {label}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex rounded-xl bg-neutral-100 px-5 py-2.5 text-xs font-normal text-neutral-600">
+      {label}
+    </span>
+  );
+}
+
+function groupOutgoingTransactions(transactions: PaymentHistoryItem[]) {
+  const grouped = new Map<string, PaymentHistoryItem>();
+  const passthrough: PaymentHistoryItem[] = [];
+
+  for (const tx of transactions) {
+    const taskId = tx.task_id ? String(tx.task_id) : null;
+    if (!taskId) {
+      passthrough.push(tx);
+      continue;
+    }
+
+    const prev = grouped.get(taskId);
+    if (!prev) {
+      grouped.set(taskId, tx);
+      continue;
+    }
+
+    const prevIsPayment = prev.kind === 'payment';
+    const nextIsPayment = tx.kind === 'payment';
+    if (nextIsPayment && !prevIsPayment) {
+      grouped.set(taskId, tx);
+      continue;
+    }
+    if (nextIsPayment === prevIsPayment) {
+      if (new Date(tx.created_at).getTime() > new Date(prev.created_at).getTime()) {
+        grouped.set(taskId, tx);
+      }
+    }
   }
 
-  return list;
+  const merged = [...grouped.values(), ...passthrough];
+  merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  return merged;
+}
+
+function mapPaymentToStatement(
+  item: PaymentHistoryItem,
+  direction: PaymentHistoryDirection
+): Statement {
+  const grossVal = Number(item.gross_amount ?? item.amount ?? 0);
+  const feeVal = Number(item.platform_fee ?? 0);
+  const amountVal =
+    direction === 'earned'
+      ? Number(item.net_amount ?? item.amount ?? 0)
+      : Number(item.gross_amount ?? item.amount ?? 0);
+
+  return {
+    id: item.id,
+    receiptId: buildReceiptId(item.id),
+    date: formatStatementDate(item.created_at),
+    createdAt: item.created_at,
+    type: item.kind === 'wallet' && !item.task_id ? 'Wallet' : 'Task payment',
+    title: item.title,
+    subtitle: item.subtitle ?? '',
+    detail: item.title,
+    price: formatNPR(grossVal),
+    priceVal: grossVal,
+    amount: formatNPR(amountVal),
+    amountVal,
+    grossVal,
+    netVal: Number(item.net_amount ?? item.amount ?? 0),
+    feeVal,
+    status: item.status,
+    currency: item.currency || 'NPR',
+    taskId: item.task_id,
+  };
 }
 
 export default function DashboardStatements() {
+  const role = useDashboardSidebarRole();
+  const direction: PaymentHistoryDirection = role === 'customer' ? 'outgoing' : 'earned';
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('All');
+  const [filterStatus, setFilterStatus] = useState('All');
   const [selectedStatement, setSelectedStatement] = useState<Statement | null>(null);
-  const [currentPage, setCurrentPage] = useState(2);
-  const [statements] = useState<Statement[]>(buildStatements);
-
-  const totalNetIncome = statements.reduce((accum, st) => accum + st.priceVal, 0);
-
-  const filteredStatements = statements.filter((st) => {
-    const textMatch =
-      st.detail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      st.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      st.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      st.price.toLowerCase().includes(searchQuery.toLowerCase());
-
-    if (filterType === 'All') return textMatch;
-    return textMatch && st.type === filterType;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [statements, setStatements] = useState<Statement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [walletStats, setWalletStats] = useState({
+    available: 0,
+    pending: 0,
+    withdrawn: 0,
+    netIncome: 0,
   });
+
+  const loadStatements = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [historyRes, walletRes] = await Promise.all([
+        paymentService.getPaymentHistory(direction),
+        paymentService.getWalletBalance().catch(() => null),
+      ]);
+
+      let items: PaymentHistoryItem[] = [];
+      let netIncome = 0;
+
+      if (historyRes.success && historyRes.data) {
+        items = historyRes.data.items ?? [];
+        netIncome =
+          direction === 'outgoing'
+            ? groupOutgoingTransactions(items).reduce(
+                (sum, tx) => sum + Number(tx.gross_amount ?? tx.amount ?? 0),
+                0
+              )
+            : Number(historyRes.data.total_amount) || 0;
+      }
+
+      const displayItems =
+        direction === 'outgoing' ? groupOutgoingTransactions(items) : items;
+
+      setStatements(displayItems.map((item) => mapPaymentToStatement(item, direction)));
+
+      const wallet = walletRes?.success ? walletRes.data : null;
+      setWalletStats({
+        netIncome,
+        available: Number(wallet?.withdrawable_balance ?? wallet?.available_balance ?? 0),
+        pending: Number(wallet?.pending_balance ?? wallet?.held_balance ?? 0),
+        withdrawn: Number(wallet?.total_earned ?? 0) - Number(wallet?.available_balance ?? 0),
+      });
+    } catch (error) {
+      console.error('Failed to load statements:', error);
+      setStatements([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [direction]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    loadStatements();
+  }, [loadStatements]);
+
+  const totalNetIncome = walletStats.netIncome || statements.reduce((sum, st) => sum + st.amountVal, 0);
+
+  const filteredStatements = useMemo(() => {
+    return statements.filter((st) => {
+      const statusText = paymentStatusLabel(st.status).toLowerCase();
+      const textMatch =
+        st.receiptId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        st.detail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        st.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        statusText.includes(searchQuery.toLowerCase()) ||
+        st.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        st.price.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        st.amount.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (filterStatus === 'All') return textMatch;
+      return textMatch && paymentStatusKind(st.status) === filterStatus;
+    });
+  }, [statements, searchQuery, filterStatus]);
 
   const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredStatements.length / itemsPerPage));
@@ -150,36 +265,47 @@ export default function DashboardStatements() {
     <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
       <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">Statements</h1>
+          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+            Statements
+          </h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
-            Lorem ipsum dolor sit amet, consectetur.
+            {direction === 'outgoing'
+              ? 'Task payments and outgoing transactions.'
+              : 'Earnings and releases from completed work.'}
           </p>
         </div>
 
-        <div className="relative flex w-full items-center rounded-xl border border-neutral-200/80 bg-white px-3.5 shadow-sm sm:w-[260px] md:w-auto">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="Search Statements"
-            className="w-full border-0 bg-transparent py-3 text-xs font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
-          />
-          <Search className="ml-1.5 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} />
+        <div className="flex w-full flex-col items-center gap-3 sm:flex-row md:w-auto">
+          <div className="relative flex w-full items-center rounded-xl border border-neutral-200/80 bg-white px-3.5 shadow-sm sm:w-[260px]">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search Statements"
+              className="w-full border-0 bg-transparent py-3 text-xs font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+            />
+            <Search className="ml-1.5 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} />
+          </div>
         </div>
       </div>
 
       <div className="mx-auto mb-8 grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
           <div className="z-10 space-y-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">Net Income</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+              {direction === 'outgoing' ? 'Total Outgoing' : 'Net Income'}
+            </span>
             <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
-              ${totalNetIncome >= 40000 ? (totalNetIncome / 1000).toFixed(3) : '1.928'}
+              {formatNPR(totalNetIncome, { compact: true })}
             </h3>
             <p className="font-sans text-[12px] font-normal leading-tight text-[#52C47F]">
-              $99 <span className="text-neutral-500">New Earning</span>
+              {statements.length}{' '}
+              <span className="text-neutral-500">
+                {direction === 'outgoing' ? 'Payments' : 'Transactions'}
+              </span>
             </p>
           </div>
           <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#EBF9F1] text-[#27AE60]">
@@ -190,10 +316,14 @@ export default function DashboardStatements() {
 
         <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
           <div className="z-10 space-y-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">Withdrawn</span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">$912</h3>
+            <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+              Withdrawn
+            </span>
+            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+              {formatNPR(Math.max(0, walletStats.withdrawn), { compact: true })}
+            </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
-              80+ <span className="text-neutral-500">New Completed</span>
+              <span className="text-neutral-500">From wallet</span>
             </p>
           </div>
           <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#FCF0ED] text-[#F2994A]">
@@ -207,9 +337,11 @@ export default function DashboardStatements() {
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Pending Clearance
             </span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">$820</h3>
+            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+              {formatNPR(walletStats.pending, { compact: true })}
+            </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
-              35+ <span className="text-neutral-500">New Queue</span>
+              <span className="text-neutral-500">In escrow / pending</span>
             </p>
           </div>
           <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F9FE] text-[#2F80ED]">
@@ -223,9 +355,11 @@ export default function DashboardStatements() {
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Available for Withdrawal
             </span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">$8.000</h3>
+            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+              {formatNPR(walletStats.available, { compact: true })}
+            </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
-              290+ <span className="text-neutral-500">New Review</span>
+              <span className="text-neutral-500">Wallet balance</span>
             </p>
           </div>
           <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-[#193E32]">
@@ -238,19 +372,20 @@ export default function DashboardStatements() {
       <div className="mx-auto mb-5 flex max-w-7xl justify-end">
         <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs">
           <Filter className="h-3.5 w-3.5 text-neutral-400" />
-          <span className="font-normal text-neutral-500">Type:</span>
+          <span className="font-normal text-neutral-500">Payment Status:</span>
           <select
-            value={filterType}
+            value={filterStatus}
             onChange={(e) => {
-              setFilterType(e.target.value);
+              setFilterStatus(e.target.value);
               setCurrentPage(1);
             }}
             className="cursor-pointer border-none bg-transparent p-0 font-bold text-neutral-800 outline-none focus:outline-none focus:ring-0"
           >
-            <option value="All">All Types</option>
-            <option value="Service Purchased">Service Purchased</option>
-            <option value="Hourly Contract">Hourly Contract</option>
-            <option value="Milestone Released">Milestone Released</option>
+            <option value="All">All Statuses</option>
+            <option value="paid">Paid</option>
+            <option value="held">Held</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
           </select>
         </div>
       </div>
@@ -260,38 +395,59 @@ export default function DashboardStatements() {
           <table className="w-full table-auto border-collapse text-left">
             <thead>
               <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
-                <th className="w-[20%] pb-6 pt-2 font-medium">Date</th>
-                <th className="w-[20%] pb-6 pt-2 font-medium">Type</th>
-                <th className="w-[40%] pb-6 pt-2 font-medium">Detail</th>
+                <th className="w-[14%] pb-6 pt-2 font-medium">Invoice ID</th>
+                <th className="w-[22%] pb-6 pt-2 font-medium">Title</th>
+                <th className="w-[14%] pb-6 pt-2 font-medium">Date</th>
                 <th className="w-[10%] pb-6 pt-2 font-medium">Price</th>
                 <th className="w-[10%] pb-6 pt-2 font-medium">Amount</th>
+                <th className="w-[16%] pb-6 pt-2 font-medium">Payment Status</th>
+                <th className="w-[14%] pb-6 pt-2 pr-4 text-left font-medium">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {currentStatements.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center text-sm font-normal text-neutral-400">
-                    No matching statements discovered. Try another query or adjust category type.
+                  <td colSpan={7} className="py-16 text-center text-sm font-normal text-neutral-400">
+                    Loading statements…
+                  </td>
+                </tr>
+              ) : currentStatements.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-sm font-normal text-neutral-400">
+                    No matching statements found. Try a different search or payment status filter.
                   </td>
                 </tr>
               ) : (
                 currentStatements.map((st) => (
-                  <tr
-                    key={st.id}
-                    onClick={() => setSelectedStatement(st)}
-                    className="group cursor-pointer transition-colors hover:bg-neutral-50/40"
-                  >
-                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-800">{st.date}</td>
-                    <td className="py-6 pr-4 align-middle">
-                      <span className="inline-flex rounded-lg bg-[#5E626A] px-4 py-2 text-xs font-semibold text-white transition-transform group-hover:scale-[1.02]">
-                        {st.type}
-                      </span>
+                  <tr key={st.id} className="transition-colors hover:bg-neutral-50/30">
+                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-900">
+                      {st.receiptId}
                     </td>
-                    <td className="break-words py-6 pr-4 align-middle text-sm font-normal leading-relaxed text-neutral-800 transition-colors hover:text-[#52C47F]">
-                      {st.detail}
+                    <td className="break-words py-6 pr-4 align-middle text-sm font-medium text-neutral-900">
+                      {st.title}
                     </td>
-                    <td className="py-6 align-middle text-sm font-medium text-neutral-800">{st.price}</td>
-                    <td className="py-6 align-middle text-sm font-bold text-neutral-900">{st.amount}</td>
+                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-500">
+                      {st.date}
+                    </td>
+                    <td className="py-6 align-middle text-sm font-medium text-neutral-800">
+                      {st.price}
+                    </td>
+                    <td className="py-6 align-middle text-sm font-bold text-neutral-900">
+                      {st.amount}
+                    </td>
+                    <td className="py-6 align-middle">
+                      <PaymentStatusBadge status={st.status} />
+                    </td>
+                    <td className="py-6 align-middle">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStatement(st)}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF0ED] px-5 py-2.5 text-xs font-medium text-[#222222] transition-all hover:scale-[1.02] hover:bg-[#FCE6E1] active:scale-[0.98]"
+                      >
+                        <Eye className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        <span>View</span>
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -299,7 +455,7 @@ export default function DashboardStatements() {
           </table>
         </div>
 
-        {filteredStatements.length > 0 ? (
+        {!loading && filteredStatements.length > 0 ? (
           <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
             <div className="flex items-center justify-center gap-6">
               <button
@@ -338,8 +494,12 @@ export default function DashboardStatements() {
                     <span className="flex h-[44px] w-[44px] items-center justify-center text-sm font-normal text-neutral-400">
                       ...
                     </span>
-                    <button type="button" onClick={() => setCurrentPage(20)} className={pageButtonClass(20)}>
-                      20
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={pageButtonClass(totalPages)}
+                    >
+                      {totalPages}
                     </button>
                   </>
                 )}
@@ -356,111 +516,19 @@ export default function DashboardStatements() {
             </div>
 
             <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-              1 – {totalPages === 20 ? 20 : totalPages} of 300+ property available
+              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, filteredStatements.length)} of{' '}
+              {filteredStatements.length} statements
             </div>
           </div>
         ) : null}
       </div>
 
       {selectedStatement ? (
-        <div className="animate-in fade-in fixed inset-0 z-[100] flex items-center justify-center p-4 duration-300">
-          <button
-            type="button"
-            aria-label="Close statement detail"
-            onClick={() => setSelectedStatement(null)}
-            className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm"
-          />
-
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 w-full max-w-lg space-y-6 rounded-2xl border border-neutral-200/80 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-[#52C47F]" />
-                <h3 className="text-base font-semibold text-neutral-900">Transaction Receipt Ledger</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedStatement(null)}
-                className="rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-50 hover:text-black"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-5 rounded-xl border border-neutral-100 bg-[#fafafa]/50 p-6 text-xs text-neutral-700">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h4 className="text-lg font-black tracking-tight text-neutral-900">
-                    freeio<span className="text-[#52C47F]">.</span>
-                  </h4>
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-400">
-                    Statement Receipt
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="block font-mono uppercase tracking-wider text-neutral-500">
-                    Date Transaction
-                  </span>
-                  <span className="font-semibold text-neutral-900">{selectedStatement.date}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 border-y border-neutral-100 py-4 text-[11px]">
-                <div>
-                  <span className="mb-1 block font-bold uppercase tracking-wider text-neutral-400">
-                    Payer Account
-                  </span>
-                  <span className="block text-xs font-bold text-neutral-800">Freeio Client LLC</span>
-                  <span className="block text-neutral-400">Kathmandu, NP</span>
-                </div>
-                <div>
-                  <span className="mb-1 block font-bold uppercase tracking-wider text-neutral-400">
-                    Receiver Beneficiary
-                  </span>
-                  <span className="block text-xs font-bold text-neutral-800">Bishal Baniya</span>
-                  <span className="block text-neutral-400">mr.bishal.baniya@gmail.com</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                  Service Purchased Narrative:
-                </span>
-                <div className="space-y-1 rounded-xl border border-neutral-200/50 bg-white p-4">
-                  <div className="flex justify-between text-xs font-bold text-neutral-900">
-                    <span>{selectedStatement.type}</span>
-                    <span>{selectedStatement.price}</span>
-                  </div>
-                  <p className="select-all pt-1 text-[11px] font-normal leading-normal text-neutral-400">
-                    {selectedStatement.detail}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 text-sm font-bold leading-none text-neutral-900">
-                <span>Final Realized Amount:</span>
-                <span className="text-base text-emerald-600">{selectedStatement.amount}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-100 py-3 text-xs font-semibold text-neutral-700 transition-all hover:bg-neutral-200 hover:text-black"
-              >
-                <span>Print Ledger</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => alert('Statement Receipt PDF download initialized.')}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#222222] py-3 text-xs font-semibold text-white transition-all hover:bg-black"
-              >
-                <Download className="h-4 w-4 text-white" />
-                <span>Download PDF</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <StatementReceiptModal
+          statement={selectedStatement}
+          direction={direction}
+          onClose={() => setSelectedStatement(null)}
+        />
       ) : null}
     </div>
   );

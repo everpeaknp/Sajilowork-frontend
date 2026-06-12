@@ -361,6 +361,7 @@ class PaymentService {
   async getWalletTransactions(filters?: {
     type?: string;
     status?: string;
+    purpose?: 'recharge';
     page?: number;
     page_size?: number;
   }): Promise<ApiResponse<{
@@ -376,9 +377,80 @@ class PaymentService {
       description: string;
       reference_number: string;
       created_at: string;
+      metadata?: Record<string, unknown> | null;
     }>;
   }>> {
-    return apiClient.get(`/wallets/transactions/my_transactions/`, { params: filters });
+    const response = await apiClient.get<
+      | Array<{
+          id: string;
+          transaction_type: string;
+          amount: number;
+          currency: string;
+          status: string;
+          description: string;
+          reference_number: string;
+          created_at: string;
+          metadata?: Record<string, unknown> | null;
+        }>
+      | {
+          count: number;
+          next: string | null;
+          previous: string | null;
+          results: Array<{
+            id: string;
+            transaction_type: string;
+            amount: number;
+            currency: string;
+            status: string;
+            description: string;
+            reference_number: string;
+            created_at: string;
+            metadata?: Record<string, unknown> | null;
+          }>;
+        }
+    >(`/wallets/transactions/my_transactions/`, { params: filters });
+
+    if (!response.success) {
+      return response as ApiResponse<{
+        count: number;
+        next: string | null;
+        previous: string | null;
+        results: Array<{
+          id: string;
+          transaction_type: string;
+          amount: number;
+          currency: string;
+          status: string;
+          description: string;
+          reference_number: string;
+          created_at: string;
+        }>;
+      }>;
+    }
+
+    const raw = response.data;
+    if (Array.isArray(raw)) {
+      return {
+        ...response,
+        data: {
+          count: raw.length,
+          next: null,
+          previous: null,
+          results: raw,
+        },
+      };
+    }
+
+    const results = raw?.results ?? [];
+    return {
+      ...response,
+      data: {
+        count: raw?.count ?? results.length,
+        next: raw?.next ?? null,
+        previous: raw?.previous ?? null,
+        results,
+      },
+    };
   }
 
   /**

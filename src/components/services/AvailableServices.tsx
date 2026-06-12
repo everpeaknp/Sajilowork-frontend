@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
+import { fetchPublicServices } from '@/lib/serviceApi';
 import { ALL_SERVICES, type Service as ServiceItem } from './serviceListData';
 import { getServiceAuthorProfilePath, getServiceDetailPath } from './serviceSlug';
-
-const SERVICES_DATA = ALL_SERVICES;
+import { toggleServiceSaved, useSavedServiceIds } from './serviceBookmarks';
 
 const BUDGET_MIN = 3000;
 const BUDGET_MAX = 20000;
@@ -44,7 +44,9 @@ export default function AvailableServices({
   searchCategory = '',
   onClearSearch,
 }: AvailableServicesProps) {
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const savedServiceIds = useSavedServiceIds();
+  const [servicesData, setServicesData] = useState<ServiceItem[]>(ALL_SERVICES);
+  const [loadingServices, setLoadingServices] = useState(true);
   const [currentPage, setCurrentPage] = useState(2);
   const [cardSlideIndex, setCardSlideIndex] = useState<Record<string, number>>({ 'av-2': 1 });
 
@@ -69,13 +71,37 @@ export default function AvailableServices({
     setCurrentPage(1);
   }, [searchQuery, searchCategory]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingServices(true);
+    const params: Record<string, string> = {};
+    if (searchQuery.trim()) params.search = searchQuery.trim();
+    if (searchCategory.trim()) params.category = searchCategory.trim();
+
+    void fetchPublicServices(params)
+      .then((items) => {
+        if (cancelled) return;
+        setServicesData(items.length ? items : ALL_SERVICES);
+      })
+      .catch(() => {
+        if (!cancelled) setServicesData(ALL_SERVICES);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingServices(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchQuery, searchCategory]);
+
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+    toggleServiceSaved(id);
   };
 
   const handleCardPrevSlide = (cardId: string, maxSlides: number, e: React.MouseEvent) => {
@@ -124,7 +150,7 @@ export default function AvailableServices({
   };
 
   const filteredServices = useMemo(() => {
-    let result = [...SERVICES_DATA];
+    let result = [...servicesData];
 
     if (deliveryTime !== 'all') {
       result = result.filter((item) => item.deliveryTime === deliveryTime);
@@ -189,14 +215,20 @@ export default function AvailableServices({
     sortBy,
     searchQuery,
     searchCategory,
+    servicesData,
   ]);
 
-  const deliveryCounts = {
-    '24h': SERVICES_DATA.filter((s) => s.deliveryTime === '24h').length + 1944,
-    '3days': SERVICES_DATA.filter((s) => s.deliveryTime === '3days').length + 8134,
-    '7days': SERVICES_DATA.filter((s) => s.deliveryTime === '7days').length + 915,
-    anytime: SERVICES_DATA.filter((s) => s.deliveryTime === 'anytime').length + 239,
-  };
+  const deliveryCounts = useMemo(
+    () => ({
+      '24h': servicesData.filter((s) => s.deliveryTime === '24h').length,
+      '3days': servicesData.filter((s) => s.deliveryTime === '3days').length,
+      '7days': servicesData.filter((s) => s.deliveryTime === '7days').length,
+      anytime: servicesData.filter(
+        (s) => s.deliveryTime === 'anytime' || s.deliveryTime === undefined,
+      ).length,
+    }),
+    [servicesData],
+  );
 
   return (
     <section
@@ -406,7 +438,7 @@ export default function AvailableServices({
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
                   {filteredServices.map((card) => {
-                    const isFav = !!favorites[card.id];
+                    const isFav = savedServiceIds.includes(card.id);
                     const hasMultiImages = !!card.images && card.images.length > 0;
                     const activeSlideIdx = cardSlideIndex[card.id] ?? 0;
                     const displayImage =

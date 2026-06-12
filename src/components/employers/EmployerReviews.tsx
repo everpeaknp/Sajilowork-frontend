@@ -160,6 +160,7 @@ interface EmployerReviewsProps {
   employerId: string;
   employerName: string;
   initialRating: number;
+  initialReviews?: SingleReview[];
   onReviewsUpdated?: (count: number, average: number) => void;
   showToast?: (message: string) => void;
 }
@@ -175,6 +176,7 @@ export default function EmployerReviews({
   employerId,
   employerName,
   initialRating,
+  initialReviews,
   onReviewsUpdated,
   showToast = () => {},
 }: EmployerReviewsProps) {
@@ -190,7 +192,10 @@ export default function EmployerReviews({
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_REVIEWS);
 
   useEffect(() => {
-    const initial = INITIAL_REVIEWS_MAP[employerId] || getFallbackReviews(employerName);
+    const initial =
+      initialReviews ??
+      INITIAL_REVIEWS_MAP[employerId] ??
+      getFallbackReviews(employerName);
     setReviews(initial);
     setReviewerName('');
     setReviewerEmail('');
@@ -200,7 +205,7 @@ export default function EmployerReviews({
     setFilterStar('All');
     setSortParam('newest');
     setVisibleCount(INITIAL_VISIBLE_REVIEWS);
-  }, [employerId, employerName]);
+  }, [employerId, employerName, initialReviews]);
 
   const calculatedCount = reviews.length;
   const calculatedAverage =

@@ -1,17 +1,12 @@
 'use client';
 
+import { formatNPR } from '@/lib/nepalLocale';
+import type { EmployerListingCard } from '@/lib/employerApi';
 import { useMemo, useState } from 'react';
 import { Star } from 'lucide-react';
-import { renderCompanyLogo } from './employerLogos';
+import { renderEmployerBrandLogo } from './employerLogos';
 
-interface Project {
-  id: string;
-  title: string;
-  company: string;
-  budget: string;
-  duration: string;
-  level: string;
-  locationType: string;
+interface Project extends EmployerListingCard {
   logoColor: string;
   isSparked?: boolean;
 }
@@ -19,7 +14,12 @@ interface Project {
 interface EmployerProjectsListProps {
   employerName?: string;
   logoColor?: string;
-  onProjectSelect?: (projectTitle: string) => void;
+  logoUrl?: string;
+  logoText?: string;
+  projects?: EmployerListingCard[];
+  /** Demo placeholder cards for static mock employer pages only */
+  useMockFallback?: boolean;
+  onProjectSelect?: (project: EmployerListingCard) => void;
   triggerNotification?: (msg: string) => void;
 }
 
@@ -29,7 +29,7 @@ function buildDefaultProjects(employerName: string, logoColor: string): Project[
       id: 'proj-1',
       title: 'Website Designer Required For Directory Theme',
       company: employerName,
-      budget: '$125k–$135k Hourly',
+      budget: `${formatNPR(125000, { compact: true })} – ${formatNPR(135000, { compact: true })} Hourly`,
       duration: '1-5 Days',
       level: 'Expensive',
       locationType: 'Remote',
@@ -40,7 +40,7 @@ function buildDefaultProjects(employerName: string, logoColor: string): Project[
       id: 'proj-2',
       title: 'UI/UX Specialist Needed for Mobile SaaS App Layouts',
       company: employerName,
-      budget: '$95k–$120k Hourly',
+      budget: `${formatNPR(95000, { compact: true })} – ${formatNPR(120000, { compact: true })} Hourly`,
       duration: '2-4 Weeks',
       level: 'Intermediate',
       locationType: 'Remote',
@@ -51,7 +51,7 @@ function buildDefaultProjects(employerName: string, logoColor: string): Project[
       id: 'proj-3',
       title: 'Front-End Developer for Integration Kit',
       company: employerName,
-      budget: '$110k–$130k Hourly',
+      budget: `${formatNPR(110000, { compact: true })} – ${formatNPR(130000, { compact: true })} Hourly`,
       duration: '1-5 Days',
       level: 'Expensive',
       locationType: 'Remote',
@@ -64,19 +64,29 @@ function buildDefaultProjects(employerName: string, logoColor: string): Project[
 export default function EmployerProjectsList({
   employerName = 'Mailchimp',
   logoColor = 'monkey-face',
+  logoUrl,
+  logoText,
+  projects: projectsProp,
+  useMockFallback = false,
   onProjectSelect,
   triggerNotification,
 }: EmployerProjectsListProps) {
-  const [sparkedIds, setSparkedIds] = useState<Record<string, boolean>>({ 'proj-2': true });
+  const [sparkedIds, setSparkedIds] = useState<Record<string, boolean>>({});
 
-  const projects = useMemo(
-    () =>
-      buildDefaultProjects(employerName, logoColor).map((project) => ({
-        ...project,
-        isSparked: sparkedIds[project.id] ?? project.isSparked ?? false,
-      })),
-    [employerName, logoColor, sparkedIds],
-  );
+  const projects = useMemo(() => {
+    const source =
+      projectsProp !== undefined
+        ? projectsProp
+        : useMockFallback
+          ? buildDefaultProjects(employerName, logoColor).map(({ logoColor: color, ...rest }) => rest)
+          : [];
+
+    return source.map((project) => ({
+      ...project,
+      logoColor,
+      isSparked: sparkedIds[project.id] ?? false,
+    }));
+  }, [employerName, logoColor, projectsProp, useMockFallback, sparkedIds]);
 
   const handleSparkToggle = (id: string, title: string, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -95,14 +105,18 @@ export default function EmployerProjectsList({
     <div className="space-y-4" id="employer-projects-section">
       <h3 className="select-none text-xl font-normal tracking-tight text-black">Projects</h3>
 
+      {projects.length === 0 ? (
+        <p className="text-sm text-neutral-500">No open projects posted yet.</p>
+      ) : null}
+
       <div className="space-y-3">
         {projects.map((proj) => (
           <div
             key={proj.id}
             id={`project-card-${proj.id}`}
-            onClick={() => onProjectSelect?.(proj.title)}
+            onClick={() => onProjectSelect?.(proj)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') onProjectSelect?.(proj.title);
+              if (e.key === 'Enter' || e.key === ' ') onProjectSelect?.(proj);
             }}
             role="button"
             tabIndex={0}
@@ -110,7 +124,7 @@ export default function EmployerProjectsList({
           >
             <div className="flex items-center gap-4">
               <div className="shrink-0 transition-transform duration-300 group-hover:scale-105">
-                {renderCompanyLogo(proj.logoColor, proj.company)}
+                {renderEmployerBrandLogo(logoColor, employerName, logoUrl, logoText)}
               </div>
 
               <div className="space-y-1">

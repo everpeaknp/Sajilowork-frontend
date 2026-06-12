@@ -46,6 +46,48 @@ export function formatBudgetRange(min: number, max: number): string {
   return `${formatNPR(min)} – ${formatNPR(max)}`;
 }
 
+/** Prefix shown inside amount inputs (cost, price, payout, etc.). */
+export const CURRENCY_INPUT_PREFIX = 'Rs.';
+
+export function formatHourlyRate(amount: number): string {
+  return `${formatNPR(amount)} / hr`;
+}
+
+export function formatHourlyRange(min: number, max: number): string {
+  return `${formatNPR(min)} – ${formatNPR(max)} / hr`;
+}
+
+/** Standard freelancer hourly rate dropdown values (NPR). */
+export const STANDARD_HOURLY_RATE_AMOUNTS = [2500, 4500, 6500, 8500, 12000] as const;
+
+export const STANDARD_HOURLY_RATE_OPTIONS = STANDARD_HOURLY_RATE_AMOUNTS.map((amount) => {
+  const label = formatHourlyRate(amount);
+  return { value: label, label, amount };
+});
+
+/** Dashboard tables: "Rs. 4,000 - 6,000/Hour" or "Rs. 25,000/Fixed". */
+export function formatDashboardTypeCost(
+  priceType: string,
+  cost: number,
+  costMax?: number,
+): string {
+  if (/hour/i.test(priceType)) {
+    const max = costMax ?? cost + 500;
+    return `${formatNPR(cost)} - ${formatNPR(max)}/Hour`;
+  }
+  return `${formatNPR(cost)}/Fixed`;
+}
+
+/** Convert legacy USD seed/mock amounts to NPR (×40). */
+export function legacyUsdToNpr(amount: number): number {
+  return Math.round(amount * 40);
+}
+
+/** Hourly range label from legacy USD mock min/max. */
+export function legacyUsdHourlyRange(usdMin: number, usdMax: number): string {
+  return formatHourlyRange(legacyUsdToNpr(usdMin), legacyUsdToNpr(usdMax));
+}
+
 /** Replace legacy USD-style $ amounts in notification copy with NPR formatting. */
 export function normalizeNotificationCurrency(text: string): string {
   if (!text) return text;
@@ -170,6 +212,29 @@ export function mapToNepalProvince(stateName?: string): string {
   return '';
 }
 
+const NOMINATIM_HEADERS: HeadersInit = {
+  'Accept-Language': 'en',
+  'User-Agent': 'tasknepal/1.0 (location search)',
+};
+
+/** Reverse geocode coordinates in Nepal (Nominatim). */
+export async function reverseGeocodeNepal(
+  lat: number,
+  lon: number,
+  options?: { signal?: AbortSignal }
+): Promise<{ address?: Record<string, string | undefined> }> {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&countrycodes=np`,
+    { headers: NOMINATIM_HEADERS, signal: options?.signal }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to reverse geocode location');
+  }
+
+  return response.json();
+}
+
 /** Split Nominatim reverse-geocode `address` into billing form fields. */
 export function parseNepalBillingFromNominatim(
   address: Record<string, string | undefined> | undefined
@@ -215,6 +280,17 @@ export function parseNepalBillingFromNominatim(
   };
 }
 
+/** Split Nominatim reverse-geocode `address` into structured profile address fields. */
+export function parseNepalAddressFromNominatim(
+  address: Record<string, string | undefined> | undefined
+): { streetAddress: string; city: string; postcode: string; state: string; country: string } {
+  const parsed = parseNepalBillingFromNominatim(address);
+  return {
+    ...parsed,
+    country: address?.country?.trim() || DEFAULT_COUNTRY,
+  };
+}
+
 /** One-line billing / profile address for display. */
 export function formatBillingAddressSummary(parts: {
   address?: string | null;
@@ -243,11 +319,6 @@ export type NominatimPlace = {
   display_name: string;
   lat: string;
   lon: string;
-};
-
-const NOMINATIM_HEADERS: HeadersInit = {
-  'Accept-Language': 'en',
-  'User-Agent': 'tasknepal/1.0 (location search)',
 };
 
 /** Forward geocode search in Nepal (Nominatim). Min 3 characters recommended. */

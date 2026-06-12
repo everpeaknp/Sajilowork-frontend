@@ -7,35 +7,69 @@ import { discoverDmSans } from '@/components/LangingHome/landingTypography';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleJobPage from '@/components/jobs/SingleJobPage';
-import { findJobBySlug } from '@/components/jobs/jobSlug';
-import { hydratePostedJobs } from '@/components/jobs/jobStore';
 import type { Job } from '@/components/jobs/jobListData';
+import {
+  fetchPublicJobBySlug,
+  fetchPublicJobs,
+  getRelatedJobsFromList,
+} from '@/lib/jobApi';
 
 export default function JobSlugPage() {
   const params = useParams();
   const slug = typeof params.slug === 'string' ? params.slug : '';
-  const [job, setJob] = useState<Job | undefined>(undefined);
-  const [ready, setReady] = useState(false);
+  const [job, setJob] = useState<Job | null>(null);
+  const [relatedJobs, setRelatedJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notFoundState, setNotFoundState] = useState(false);
 
   useEffect(() => {
-    hydratePostedJobs();
-    setJob(slug ? findJobBySlug(slug) : undefined);
-    setReady(true);
+    if (!slug) {
+      setNotFoundState(true);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setNotFoundState(false);
+
+    void Promise.all([fetchPublicJobBySlug(slug), fetchPublicJobs()])
+      .then(([apiJob, allJobs]) => {
+        if (cancelled) return;
+        if (apiJob) {
+          setJob(apiJob);
+          setRelatedJobs(getRelatedJobsFromList(apiJob, allJobs, 3));
+          return;
+        }
+        setNotFoundState(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setNotFoundState(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
-  const cachedJob = useMemo(() => (slug ? findJobBySlug(slug) : undefined), [slug]);
-  const resolvedJob = ready ? job : cachedJob;
+  const pageTitle = useMemo(() => job?.title ?? 'Job', [job?.title]);
 
-  if (!slug) {
+  if (!slug || notFoundState) {
     notFound();
   }
 
-  if (ready && !resolvedJob) {
-    notFound();
-  }
-
-  if (!resolvedJob) {
-    return null;
+  if (loading || !job) {
+    return (
+      <div
+        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset flex min-h-screen items-center justify-center bg-white text-sm text-neutral-500`}
+      >
+        Loading {pageTitle}…
+      </div>
+    );
   }
 
   return (
@@ -44,7 +78,7 @@ export default function JobSlugPage() {
     >
       <Navbar />
       <main className="w-full max-w-none px-0 py-0">
-        <SingleJobPage job={resolvedJob} />
+        <SingleJobPage job={job} relatedJobs={relatedJobs} />
       </main>
       <Footer />
     </div>

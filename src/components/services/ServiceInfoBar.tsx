@@ -40,7 +40,7 @@ export default function ServiceInfoBar({ service }: ServiceInfoBarProps) {
       />
       <InfoItem
         icon={<BarChart3 className="h-5 w-5 stroke-[1.75]" />}
-        label="English Level"
+        label={service.languages?.length ? 'Languages' : 'English Level'}
         value={getEnglishLevel(service)}
       />
       <InfoItem

@@ -16,6 +16,9 @@ export interface PublicUserProfile {
   country?: string;
   location_display?: string;
   role?: string;
+  gender?: string | null;
+  specialization?: string | null;
+  profile_type?: string | null;
   average_rating?: number | string;
   total_reviews?: number;
   tasks_completed?: number;

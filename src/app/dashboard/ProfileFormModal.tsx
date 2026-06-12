@@ -8,7 +8,7 @@ export const profileModalFieldLabelClass =
   'mb-2 block text-[10px] font-black uppercase tracking-widest text-gray-400';
 
 export const profileModalInputClass =
-  'w-full rounded-2xl border border-gray-200 px-4 py-3 font-medium text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-emerald/30';
+  'w-full rounded-2xl border-2 border-gray-200 px-4 py-3 font-medium text-brand-dark focus:outline-none focus:border-[#52C47F] focus:ring-2 focus:ring-[#52C47F]/25';
 
 export const profileModalTextareaClass = `${profileModalInputClass} resize-none`;
 

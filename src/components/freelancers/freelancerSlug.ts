@@ -16,3 +16,12 @@ export function findFreelancerBySlug(
 export function getFreelancerProfilePath(freelancer: Freelancer): string {
   return `/freelancers/${getFreelancerSlug(freelancer)}`;
 }
+
+/** Public freelancer page for the signed-in tasker account (username slug). */
+export function getFreelancerBusinessProfileHref(
+  user?: { username?: string | null; role?: string | null } | null,
+): string | null {
+  const username = user?.username?.trim();
+  if (!username) return null;
+  return `/freelancers/${encodeURIComponent(username.toLowerCase())}`;
+}

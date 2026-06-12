@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowUpRight, X } from 'lucide-react';
 
 interface DeleteConfirmModalProps {
@@ -8,7 +10,16 @@ interface DeleteConfirmModalProps {
   onConfirm: () => void;
   title?: string;
   description?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  confirmTone?: 'danger' | 'primary' | 'brand';
 }
+
+const CONFIRM_TONE_CLASS: Record<NonNullable<DeleteConfirmModalProps['confirmTone']>, string> = {
+  danger: 'bg-[#E53935] hover:bg-[#d32f2f]',
+  primary: 'bg-[#222222] hover:bg-neutral-800',
+  brand: 'bg-[#52C47F] hover:bg-[#45a86d]',
+};
 
 export default function DeleteConfirmModal({
   open,
@@ -16,11 +27,20 @@ export default function DeleteConfirmModal({
   onConfirm,
   title = 'Are you sure you want to delete?',
   description = 'Do you really want to delete this record? This process cannot be undone.',
+  confirmLabel = 'Delete',
+  cancelLabel = 'Cancel',
+  confirmTone = 'danger',
 }: DeleteConfirmModalProps) {
-  if (!open) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!open || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[10052] flex items-center justify-center p-4">
       <button
         type="button"
         aria-label="Close delete confirmation"
@@ -47,9 +67,9 @@ export default function DeleteConfirmModal({
           <button
             type="button"
             onClick={onConfirm}
-            className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-[#E53935] px-6 py-3 text-sm font-normal text-white transition-colors hover:bg-[#d32f2f]"
+            className={`inline-flex min-w-[140px] items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-normal text-white transition-colors ${CONFIRM_TONE_CLASS[confirmTone]}`}
           >
-            Delete
+            {confirmLabel}
             <ArrowUpRight className="h-4 w-4" />
           </button>
           <button
@@ -57,11 +77,12 @@ export default function DeleteConfirmModal({
             onClick={onClose}
             className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-[#222222] px-6 py-3 text-sm font-normal text-white transition-colors hover:bg-neutral-800"
           >
-            Cancel
+            {cancelLabel}
             <ArrowUpRight className="h-4 w-4" />
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

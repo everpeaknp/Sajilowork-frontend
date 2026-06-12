@@ -6,7 +6,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { AlertCircle, Loader2, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { getMediaUrl } from '@/lib/utils';
+import { mapTaskQuestionToProjectItem } from '@/lib/projectApi';
+import { projectService } from '@/services/project.service';
 import {
   buildProjectQuestions,
   type Project,
@@ -17,8 +18,6 @@ interface ProjectQuestionsProps {
   project: Project;
 }
 
-const STORAGE_PREFIX = 'project-questions:';
-
 function formatRelativeTime(iso?: string): string {
   if (!iso) return '';
   try {
@@ -28,31 +27,11 @@ function formatRelativeTime(iso?: string): string {
   }
 }
 
-function loadStoredQuestions(projectId: string): ProjectQuestionItem[] | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = window.localStorage.getItem(`${STORAGE_PREFIX}${projectId}`);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as ProjectQuestionItem[];
-    return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveStoredQuestions(projectId: string, questions: ProjectQuestionItem[]) {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(`${STORAGE_PREFIX}${projectId}`, JSON.stringify(questions));
-  } catch {
-    // ignore quota errors
-  }
-}
-
 export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
   const router = useRouter();
-  const { user, isCustomer } = useAuth();
+  const { user } = useAuth();
   const buyerName = project.companyName;
+  const projectSlug = project.slug;
 
   const seedQuestions = useMemo(() => buildProjectQuestions(project), [project]);
 
@@ -61,23 +40,40 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [submittingAnswerId, setSubmittingAnswerId] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [loadingQuestions, setLoadingQuestions] = useState(Boolean(projectSlug));
 
-  const canAsk = Boolean(user) && !isCustomer;
-  const canAnswer = Boolean(user) && isCustomer;
+  const isOwner = Boolean(
+    user?.id && project.ownerId && String(user.id) === String(project.ownerId),
+  );
+  const showAskBox = !isOwner;
+  const canAnswer = isOwner;
+
+  const loadQuestions = useCallback(async () => {
+    if (!projectSlug) return;
+
+    setLoadingQuestions(true);
+    try {
+      const response = await projectService.getProjectQuestions(projectSlug);
+      if (response.success && response.data) {
+        setQuestions(
+          response.data.map((item) => mapTaskQuestionToProjectItem(item, buyerName)),
+        );
+      }
+    } catch {
+      // Non-blocking: keep seed/empty state
+    } finally {
+      setLoadingQuestions(false);
+    }
+  }, [buyerName, projectSlug]);
 
   useEffect(() => {
-    const stored = loadStoredQuestions(project.id);
-    setQuestions(stored ?? seedQuestions);
+    setQuestions(seedQuestions);
     setQuestionText('');
     setAnswerDrafts({});
-    setHydrated(true);
-  }, [project.id, seedQuestions]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    saveStoredQuestions(project.id, questions);
-  }, [hydrated, project.id, questions]);
+    if (projectSlug) {
+      void loadQuestions();
+    }
+  }, [project.id, projectSlug, seedQuestions, loadQuestions]);
 
   const handleAskQuestion = useCallback(async () => {
     const trimmed = questionText.trim();
@@ -88,33 +84,36 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
       return;
     }
 
-    if (isCustomer) {
-      toast.error('Only freelancers can ask questions on a project listing.');
+    if (isOwner) {
+      toast.error('You cannot ask questions on your own project.');
+      return;
+    }
+
+    if (!projectSlug) {
+      toast.error('Questions are not available for this demo project.');
       return;
     }
 
     setSubmittingQuestion(true);
     try {
-      const displayName =
-        user.full_name ||
-        `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
-        'Freelancer';
-
-      const newQuestion: ProjectQuestionItem = {
-        id: `user-q-${Date.now()}`,
-        askedByName: displayName,
-        askedByImage: getMediaUrl(user.profile_image) || undefined,
-        question: trimmed,
-        createdAt: new Date().toISOString(),
-      };
-
-      setQuestions((prev) => [newQuestion, ...prev]);
-      setQuestionText('');
-      toast.success('Question posted');
+      const response = await projectService.askQuestion(projectSlug, trimmed);
+      if (response.success && response.data) {
+        setQuestionText('');
+        toast.success('Question posted');
+        await loadQuestions();
+      } else {
+        toast.error(response.message || 'Failed to post question');
+      }
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string'
+          ? (err as { message: string }).message
+          : 'Failed to post question';
+      toast.error(message);
     } finally {
       setSubmittingQuestion(false);
     }
-  }, [isCustomer, questionText, router, user]);
+  }, [isOwner, loadQuestions, projectSlug, questionText, router, user]);
 
   const handleAnswerQuestion = useCallback(
     async (questionId: string) => {
@@ -126,32 +125,42 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
         return;
       }
 
+      if (!projectSlug) {
+        toast.error('Questions are not available for this demo project.');
+        return;
+      }
+
       setSubmittingAnswerId(questionId);
       try {
-        const answeredAt = new Date().toISOString();
-        setQuestions((prev) =>
-          prev.map((q) =>
-            q.id === questionId
-              ? {
-                  ...q,
-                  answer: trimmed,
-                  answeredByName: buyerName,
-                  answeredAt,
-                }
-              : q,
-          ),
-        );
-        setAnswerDrafts((prev) => {
-          const next = { ...prev };
-          delete next[questionId];
-          return next;
-        });
-        toast.success('Reply posted');
+        const response = await projectService.answerQuestion(projectSlug, questionId, trimmed);
+        if (response.success && response.data) {
+          setQuestions((prev) =>
+            prev.map((q) =>
+              q.id === questionId
+                ? mapTaskQuestionToProjectItem(response.data!, buyerName)
+                : q,
+            ),
+          );
+          setAnswerDrafts((prev) => {
+            const next = { ...prev };
+            delete next[questionId];
+            return next;
+          });
+          toast.success('Reply posted');
+        } else {
+          toast.error(response.message || 'Failed to post reply');
+        }
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string'
+            ? (err as { message: string }).message
+            : 'Failed to post reply';
+        toast.error(message);
       } finally {
         setSubmittingAnswerId(null);
       }
     },
-    [answerDrafts, buyerName, canAnswer],
+    [answerDrafts, buyerName, canAnswer, projectSlug],
   );
 
   const unansweredCount = questions.filter((q) => !q.answer?.trim()).length;
@@ -170,12 +179,24 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
       </div>
 
       <div className="space-y-6">
-        {canAsk ? (
+        {showAskBox ? (
           <div className="rounded-lg border border-neutral-200 bg-white p-5 sm:p-6">
             <h3 className="mb-3 text-base font-normal text-black sm:text-lg">Ask a question</h3>
-            <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 sm:p-4">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 sm:h-5 sm:w-5" />
-              <p className="text-xs font-normal leading-relaxed text-amber-900 sm:text-sm">
+            {!user ? (
+              <p className="mb-4 text-sm font-normal text-neutral-600">
+                <button
+                  type="button"
+                  onClick={() => router.push('/signin')}
+                  className="font-normal text-black underline underline-offset-2 hover:opacity-80"
+                >
+                  Sign in
+                </button>{' '}
+                to post your question.
+              </p>
+            ) : null}
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2.5 sm:p-3">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+              <p className="text-[11px] font-normal leading-snug text-amber-900 sm:text-xs">
                 <strong>Important:</strong> Do not share personal contact details in your question.
                 Keep all communication on the platform for your safety.
               </p>
@@ -203,18 +224,12 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
               </button>
             </div>
           </div>
-        ) : !user ? (
+        ) : (
           <div className="rounded-lg border border-neutral-200 bg-neutral-50/80 px-5 py-4 text-sm font-normal text-neutral-600">
-            <button
-              type="button"
-              onClick={() => router.push('/signin')}
-              className="font-normal text-black underline underline-offset-2 hover:opacity-80"
-            >
-              Sign in
-            </button>{' '}
-            to ask a question about this project.
+            You posted this project. Freelancers can ask questions here — reply in the list below
+            when questions come in.
           </div>
-        ) : null}
+        )}
 
         {canAnswer && unansweredCount > 0 ? (
           <p className="text-sm font-normal text-neutral-600">
@@ -228,7 +243,12 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
             Previous questions ({questions.length})
           </h3>
 
-          {questions.length === 0 ? (
+          {loadingQuestions ? (
+            <div className="flex items-center gap-2 text-sm font-normal text-neutral-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading questions…
+            </div>
+          ) : questions.length === 0 ? (
             <p className="text-sm font-normal text-neutral-500">
               No questions yet. Be the first to ask about this project.
             </p>

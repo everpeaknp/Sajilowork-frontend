@@ -15,10 +15,12 @@ export default function FreelancerSkills({ freelancer, skills }: FreelancerSkill
   );
 
   return (
-    <div className="mt-6 w-full rounded-xl border border-neutral-200/70 bg-white p-6 shadow-sm md:p-8">
-      <h3 className="mb-6 text-lg font-normal tracking-tight text-black sm:text-xl">My Skills</h3>
+    <div className="mt-10 w-full">
+      <h3 className="mb-5 text-lg font-normal leading-tight tracking-tight text-black sm:text-xl">
+        My Skills
+      </h3>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap justify-start gap-3">
         {skillItems.map((skill) => (
           <span
             key={skill}

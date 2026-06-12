@@ -1,8 +1,12 @@
 export interface Job {
   id: string;
+  /** Backend task slug for API-backed jobs */
+  slug?: string;
   title: string;
   category: string;
   companyName: string;
+  /** Owner username for public employer profile links */
+  employerSlug?: string;
   companyLogoBg: string;
   companyIconType: 'wave' | 'face' | 'in' | 'clover';
   verified: boolean;

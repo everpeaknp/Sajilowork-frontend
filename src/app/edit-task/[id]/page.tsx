@@ -24,6 +24,7 @@ import {
   DEFAULT_CURRENCY,
   formatTaskLocation,
 } from '@/lib/nepalLocale';
+import { scheduleToDueDateIso } from '@/lib/scheduleUtils';
 import { formatTimeSlotRequirement } from '@/lib/timeSlot';
 
 export default function EditTaskPage() {
@@ -69,7 +70,7 @@ export default function EditTaskPage() {
         const task = response.data;
 
         // Parse due date
-        let dateType: '' | 'flexible' | 'specific' | 'before' = '';
+        let dateType: '' | 'flexible' | 'specific' | 'before' | 'both' = '';
         let specificDate = '';
         let beforeDate = '';
         
@@ -252,15 +253,13 @@ export default function EditTaskPage() {
         apiTaskData.country = DEFAULT_COUNTRY;
       }
 
-      // Add due date if specified
-      if (taskData.dateType === 'specific' && taskData.specificDate) {
-        const [year, month, day] = taskData.specificDate.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        apiTaskData.due_date = date.toISOString();
-      } else if (taskData.dateType === 'before' && taskData.beforeDate) {
-        const [year, month, day] = taskData.beforeDate.split('-').map(Number);
-        const date = new Date(year, month - 1, day);
-        apiTaskData.due_date = date.toISOString();
+      const dueDateIso = scheduleToDueDateIso(
+        taskData.dateType,
+        taskData.specificDate,
+        taskData.beforeDate,
+      );
+      if (dueDateIso) {
+        apiTaskData.due_date = dueDateIso;
       }
 
       // Add time slot as requirement if specified

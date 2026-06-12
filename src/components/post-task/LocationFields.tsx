@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MapPin, Smartphone, Loader2, Navigation } from 'lucide-react';
+import { MapPin, Smartphone, Loader2, Navigation, Blend } from 'lucide-react';
 import { toast } from 'sonner';
+import { detectNepalLocationFromBrowser, GeolocationDetectError } from '@/lib/detectUserLocation';
 import {
-  formatNominatimNepalAddress,
   searchNominatimNepal,
   shortenNominatimDisplayName,
   type NominatimPlace,
@@ -20,7 +20,7 @@ import {
   postTaskCardInactive,
 } from '@/components/post-task/postTaskStyles';
 
-export type LocationType = 'in-person' | 'remote';
+export type LocationType = 'in-person' | 'remote' | 'hybrid';
 
 export type LocationFieldsData = {
   location: string;
@@ -35,6 +35,9 @@ type LocationFieldsProps = {
   variant?: 'post-task' | 'dashboard';
   showErrors?: boolean;
   locationError?: string;
+  /** When true, shows Remote / Location / Hybrid (profile-style) instead of two post-task modes only. */
+  enableHybrid?: boolean;
+  showWorkModeHeading?: boolean;
 };
 
 export default function LocationFields({
@@ -43,8 +46,11 @@ export default function LocationFields({
   variant = 'post-task',
   showErrors,
   locationError,
+  enableHybrid = false,
+  showWorkModeHeading = true,
 }: LocationFieldsProps) {
   const isDashboard = variant === 'dashboard';
+  const needsAddress = data.locationType === 'in-person' || data.locationType === 'hybrid';
   const [isDetecting, setIsDetecting] = useState(false);
   const [suggestions, setSuggestions] = useState<NominatimPlace[]>([]);
   const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
@@ -94,7 +100,7 @@ export default function LocationFields({
   );
 
   useEffect(() => {
-    if (data.locationType !== 'in-person') {
+    if (!needsAddress) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -139,7 +145,7 @@ export default function LocationFields({
       window.clearTimeout(timer);
       searchAbortRef.current?.abort();
     };
-  }, [data.location, data.locationType]);
+  }, [data.location, data.locationType, needsAddress]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -158,67 +164,39 @@ export default function LocationFields({
   const handleLocationTypeChange = (type: LocationType) => {
     if (type === 'remote') {
       onChange({ locationType: type, location: 'Remote', latitude: undefined, longitude: undefined });
-    } else {
-      onChange({ locationType: type, location: '', latitude: undefined, longitude: undefined });
-    }
-  };
-
-  const handleDetectLocation = async () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
       return;
     }
 
+    onChange({
+      locationType: type,
+      location: data.location === 'Remote' ? '' : data.location,
+      latitude: undefined,
+      longitude: undefined,
+    });
+  };
+
+  const handleDetectLocation = async () => {
     setIsDetecting(true);
     toast.info('Detecting your location...');
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const latitude = Number(position.coords.latitude.toFixed(6));
-        const longitude = Number(position.coords.longitude.toFixed(6));
-
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&countrycodes=np`,
-            { headers: { 'Accept-Language': 'en' } },
-          );
-
-          if (!response.ok) {
-            throw new Error('Failed to get location details');
-          }
-
-          const geo = await response.json();
-          const location = formatNominatimNepalAddress(geo.address);
-
-          onChange({ location, latitude, longitude });
-          toast.success(`Location detected: ${location}`);
-        } catch (error) {
-          console.error('Reverse geocoding error:', error);
-          toast.error('Could not determine your location address');
-        } finally {
-          setIsDetecting(false);
-        }
-      },
-      (error) => {
-        setIsDetecting(false);
-
-        let errorMessage = 'Could not detect your location';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Location permission denied. Please enable location access in your browser.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out';
-            break;
-        }
-
-        toast.error(errorMessage);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    );
+    try {
+      const result = await detectNepalLocationFromBrowser();
+      onChange({
+        location: result.location,
+        latitude: result.latitude,
+        longitude: result.longitude,
+      });
+      toast.success(`Location detected: ${result.location}`);
+    } catch (error) {
+      console.error('Reverse geocoding error:', error);
+      toast.error(
+        error instanceof GeolocationDetectError
+          ? error.message
+          : 'Could not determine your location address',
+      );
+    } finally {
+      setIsDetecting(false);
+    }
   };
 
   const cardClass = (active: boolean) =>
@@ -281,39 +259,78 @@ export default function LocationFields({
   return (
     <div className="space-y-4 sm:space-y-5">
       <div>
-        {isDashboard ? (
-          <label className={labelClass}>How will this project be done?</label>
+        {showWorkModeHeading ? (
+          isDashboard ? (
+            <label className={labelClass}>
+              {enableHybrid ? 'Location' : 'How will this project be done?'}
+            </label>
+          ) : null
         ) : null}
-        <div className="flex gap-2 sm:gap-3">
+        <div
+          className={cn(
+            'gap-2 sm:gap-3',
+            enableHybrid ? 'grid grid-cols-1 sm:grid-cols-3' : 'flex',
+          )}
+        >
+          {enableHybrid ? (
+            <button
+              type="button"
+              onClick={() => handleLocationTypeChange('remote')}
+              className={cardClass(data.locationType === 'remote')}
+            >
+              <Smartphone
+                className={cn('mx-auto mb-2 h-5 w-5', iconActiveClass(data.locationType === 'remote'))}
+              />
+              <div className={titleClass(data.locationType === 'remote')}>Remote</div>
+              <div className={subtitleClass(data.locationType === 'remote')}>Work from anywhere</div>
+            </button>
+          ) : null}
+
           <button
             type="button"
             onClick={() => handleLocationTypeChange('in-person')}
             className={cardClass(data.locationType === 'in-person')}
           >
             <MapPin className={cn('mx-auto mb-2 h-5 w-5', iconActiveClass(data.locationType === 'in-person'))} />
-            <div className={titleClass(data.locationType === 'in-person')}>In-person</div>
+            <div className={titleClass(data.locationType === 'in-person')}>
+              {enableHybrid ? 'Location' : 'In-person'}
+            </div>
             <div className={subtitleClass(data.locationType === 'in-person')}>
-              Freelancer needs to be on-site
+              {enableHybrid ? 'On-site in your area' : 'Freelancer needs to be on-site'}
             </div>
           </button>
 
-          <button
-            type="button"
-            onClick={() => handleLocationTypeChange('remote')}
-            className={cardClass(data.locationType === 'remote')}
-          >
-            <Smartphone
-              className={cn('mx-auto mb-2 h-5 w-5', iconActiveClass(data.locationType === 'remote'))}
-            />
-            <div className={titleClass(data.locationType === 'remote')}>Online</div>
-            <div className={subtitleClass(data.locationType === 'remote')}>
-              Can be completed remotely
-            </div>
-          </button>
+          {!enableHybrid ? (
+            <button
+              type="button"
+              onClick={() => handleLocationTypeChange('remote')}
+              className={cardClass(data.locationType === 'remote')}
+            >
+              <Smartphone
+                className={cn('mx-auto mb-2 h-5 w-5', iconActiveClass(data.locationType === 'remote'))}
+              />
+              <div className={titleClass(data.locationType === 'remote')}>Online</div>
+              <div className={subtitleClass(data.locationType === 'remote')}>
+                Can be completed remotely
+              </div>
+            </button>
+          ) : null}
+
+          {enableHybrid ? (
+            <button
+              type="button"
+              onClick={() => handleLocationTypeChange('hybrid')}
+              className={cardClass(data.locationType === 'hybrid')}
+            >
+              <Blend className={cn('mx-auto mb-2 h-5 w-5', iconActiveClass(data.locationType === 'hybrid'))} />
+              <div className={titleClass(data.locationType === 'hybrid')}>Hybrid</div>
+              <div className={subtitleClass(data.locationType === 'hybrid')}>Remote and on-site</div>
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {data.locationType === 'in-person' ? (
+      {needsAddress ? (
         <div className="space-y-2">
           <label className={labelClass}>Where do you need this done?</label>
           <div className="relative" ref={locationInputRef}>
@@ -480,7 +497,17 @@ export default function LocationFields({
       {data.locationType === 'remote' ? (
         <div className={remoteNoteClass}>
           <p className={isDashboard ? undefined : 'font-body text-xs font-medium text-[#6a719a] sm:text-sm'}>
-            This project can be completed remotely. No physical location required.
+            {enableHybrid
+              ? 'You are available for remote work. No base location is required.'
+              : 'This project can be completed remotely. No physical location required.'}
+          </p>
+        </div>
+      ) : null}
+
+      {data.locationType === 'hybrid' ? (
+        <div className={remoteNoteClass}>
+          <p className={isDashboard ? undefined : 'font-body text-xs font-medium text-[#6a719a] sm:text-sm'}>
+            Add your base location so clients can find you for on-site and hybrid opportunities.
           </p>
         </div>
       ) : null}

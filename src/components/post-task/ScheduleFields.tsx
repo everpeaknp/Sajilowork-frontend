@@ -10,8 +10,9 @@ import {
   postTaskChipInactive,
   postTaskErrorTextSm,
 } from '@/components/post-task/postTaskStyles';
+import { deriveScheduleDateType, hasScheduleSelection } from '@/lib/scheduleUtils';
 
-export type ScheduleDateType = 'specific' | 'before' | 'flexible' | '';
+export type ScheduleDateType = 'specific' | 'before' | 'both' | 'flexible' | '';
 export type ScheduleTimeSlot = 'morning' | 'midday' | 'afternoon' | 'evening' | null;
 
 export type ScheduleFieldsData = {
@@ -83,11 +84,13 @@ export default function ScheduleFields({
     const day = String(date.getDate()).padStart(2, '0');
     const dateString = `${year}-${month}-${day}`;
 
-    if (type === 'specific') {
-      onChange({ specificDate: dateString, dateType: 'specific' });
-    } else {
-      onChange({ beforeDate: dateString, dateType: 'before' });
-    }
+    const nextSpecific = type === 'specific' ? dateString : data.specificDate;
+    const nextBefore = type === 'before' ? dateString : data.beforeDate;
+
+    onChange({
+      ...(type === 'specific' ? { specificDate: dateString } : { beforeDate: dateString }),
+      dateType: deriveScheduleDateType(nextSpecific, nextBefore, false),
+    });
 
     setTimeout(() => setShowCalendar(null), 300);
   };
@@ -137,7 +140,12 @@ export default function ScheduleFields({
           <button
             type="button"
             onClick={() => {
-              onChange({ dateType: 'flexible' });
+              onChange({
+                dateType: 'flexible',
+                specificDate: '',
+                beforeDate: '',
+                timeOfDayRequired: data.timeOfDayRequired,
+              });
               setShowCalendar(null);
             }}
             className={chipClass(data.dateType === 'flexible')}
@@ -176,7 +184,7 @@ export default function ScheduleFields({
         ) : null}
       </div>
 
-      {data.dateType !== '' ? (
+      {hasScheduleSelection(data.dateType, data.specificDate, data.beforeDate) ? (
         <div className="space-y-3">
           <label className="group flex cursor-pointer items-center gap-2">
             <div className="relative flex items-center">

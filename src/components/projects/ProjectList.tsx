@@ -17,12 +17,16 @@ import {
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import {
+  ALL_PROJECTS,
   type Project,
-  generateMockProjects,
+  formatProjectLocation,
   locationDisplay,
 } from './projectListData';
-import { getEmployerProfilePathByCompanyName } from '@/components/employers/employerSlug';
+import { fetchPublicProjects } from '@/lib/projectApi';
+import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
+import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectDetailPath } from './projectSlug';
+import { toggleProjectSaved, useSavedProjectIds } from './projectBookmarks';
 
 const CustomLogo: React.FC<{
   type: Project['companyIconType'];
@@ -85,7 +89,26 @@ const CustomLogo: React.FC<{
   );
 };
 
-const INITIAL_PROJECTS = generateMockProjects();
+function formatProjectListDate(project: Project): string {
+  if (project.slug?.trim() && project.postedDate?.trim()) {
+    return project.postedDate;
+  }
+  const jobNum = parseInt(project.id.replace('job-', ''), 10);
+  if (project.id === 'job-1') return '2 hours ago';
+  if (!Number.isNaN(jobNum)) return `${(jobNum % 3) + 2} hours ago`;
+  return 'Recently posted';
+}
+
+function formatProposalsLabel(project: Project): string {
+  if (project.slug?.trim()) {
+    const count = project.ownerReviews ?? 0;
+    if (count === 0) return 'None received';
+    if (count === 1) return '1 Received';
+    return `${count} Received`;
+  }
+  if (project.id === 'job-1' || project.id === 'job-2') return '1 Received';
+  return 'None sent';
+}
 
 const FILTER_CATEGORIES = [
   { value: 'All', label: 'All Categories' },
@@ -161,7 +184,34 @@ export default function ProjectList({
   onClearSearch,
 }: ProjectListProps) {
   const router = useRouter();
-  const [projects] = useState<Project[]>(INITIAL_PROJECTS);
+  const [projects, setProjects] = useState<Project[]>(ALL_PROJECTS);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingProjects(true);
+    void fetchPublicProjects()
+      .then((items) => {
+        if (cancelled) return;
+        setProjects(items.length ? items : ALL_PROJECTS);
+      })
+      .catch(() => {
+        if (!cancelled) setProjects(ALL_PROJECTS);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingProjects(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const savedProjectIds = useSavedProjectIds();
+
+  const toggleSave = (projectId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    toggleProjectSaved(projectId);
+  };
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     category: false,
@@ -525,7 +575,7 @@ export default function ProjectList({
             <div className="mb-5 flex min-h-[40px] items-center justify-between">
               <p className={`${discoverBody} text-base font-medium text-neutral-800`}>
                 <span className={`${discoverMedium} font-bold text-neutral-900`}>{totalProjects}</span>{' '}
-                services available
+                projects available
               </p>
 
               <div className="relative flex items-center gap-1.5" ref={sortMenuRef}>
@@ -615,7 +665,25 @@ export default function ProjectList({
               <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
                   {paginatedProjectsList.map((project) => {
-                    const jobNum = parseInt(project.id.replace('job-', ''), 10);
+                    const isSaved = savedProjectIds.includes(project.id);
+                    const employerHref = resolveEmployerProfileHref({
+                      employerSlug: project.employerSlug,
+                      companyName: project.companyName,
+                      allowDemoLookup: !project.slug,
+                    });
+                    const employerAvatar = (
+                      <EmployerAvatarCircle
+                        name={project.employerLogoText || project.companyName}
+                        avatarUrl={project.ownerAvatarUrl}
+                        avatarBg={project.companyLogoBg}
+                        verified={project.verified}
+                        useDemoIcon={!project.slug}
+                        iconType={project.companyIconType}
+                        renderIcon={(type, className) => (
+                          <CustomLogo type={type} className={className} />
+                        )}
+                      />
+                    );
                     return (
                       <motion.div
                         layout
@@ -635,35 +703,58 @@ export default function ProjectList({
                               router.push(getProjectDetailPath(project));
                             }
                           }}
-                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col justify-between rounded-[8px] border border-neutral-200/90 bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row"
+                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[8px] border border-neutral-200/90 bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
                         >
-                        <div className="flex min-w-0 flex-1 gap-5">
-                          <Link
-                            href={getEmployerProfilePathByCompanyName(project.companyName)}
-                            className="relative shrink-0 select-none transition-opacity hover:opacity-80"
-                            onClick={(e) => e.stopPropagation()}
-                            title={project.companyName}
-                          >
-                            <div
-                              className={`flex h-[52px] w-[52px] items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] ${project.companyLogoBg}`}
+                        <div className="flex min-h-0 min-w-0 flex-1 gap-5 overflow-hidden">
+                          {employerHref ? (
+                            <Link
+                              href={employerHref}
+                              className="relative shrink-0 select-none transition-opacity hover:opacity-80"
+                              onClick={(e) => e.stopPropagation()}
+                              title={project.companyName}
                             >
-                              <CustomLogo type={project.companyIconType} className="h-6 w-6 text-white" />
+                              {employerAvatar}
+                            </Link>
+                          ) : (
+                            <div
+                              className="relative shrink-0 select-none"
+                              title={project.companyName}
+                            >
+                              {employerAvatar}
                             </div>
-                            {project.verified && (
-                              <div
-                                className="absolute right-0.5 top-0.5 flex h-[14px] w-[14px] items-center justify-center rounded-full border-2 border-white bg-[#52C47F] shadow-xs"
-                                title="Verified Employer"
-                              />
-                            )}
-                          </Link>
+                          )}
 
-                          <div className="min-w-0 flex-1">
+                          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
                             <div className="flex items-start justify-between gap-2">
                               <h3
                                 className={`${discoverBody} block truncate text-[18.5px] !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F]`}
                               >
                                 {project.title}
                               </h3>
+                              <button
+                                type="button"
+                                onClick={(e) => toggleSave(project.id, e)}
+                                className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
+                                  isSaved
+                                    ? 'border-amber-300 bg-amber-50 text-amber-500 shadow-sm'
+                                    : 'border-[#45a874]/20 bg-white text-[#45a874] hover:bg-[#45a874]/5'
+                                }`}
+                                title={isSaved ? 'Saved project' : 'Save project'}
+                                aria-label={isSaved ? 'Remove saved project' : 'Save project'}
+                                aria-pressed={isSaved}
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  className={`h-3.5 w-3.5 ${isSaved ? 'fill-amber-500 text-amber-500' : 'text-[#45a874]'}`}
+                                  stroke="currentColor"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                </svg>
+                              </button>
                             </div>
 
                             <div
@@ -671,31 +762,27 @@ export default function ProjectList({
                             >
                               <span className="flex items-center gap-1.5">
                                 <MapPin className="h-4 w-4 stroke-[1.6] text-neutral-500" />
-                                {locationDisplay(project.location)}
+                                {formatProjectLocation(project)}
                               </span>
                               <span className="mx-3.5 select-none font-light text-neutral-300">|</span>
                               <span className="flex items-center gap-1.5">
                                 <Calendar className="h-4 w-4 stroke-[1.6] text-neutral-500" />
-                                {project.id === 'job-1'
-                                  ? '2 hours ago'
-                                  : `${(jobNum % 3) + 2} hours ago`}
+                                {formatProjectListDate(project)}
                               </span>
                               <span className="mx-3.5 select-none font-light text-neutral-300">|</span>
                               <span className="flex items-center gap-1.5">
                                 <FileText className="h-4 w-4 stroke-[1.6] text-neutral-500" />
-                                {project.id === 'job-1' || project.id === 'job-2'
-                                  ? '1 Received'
-                                  : 'None sent'}
+                                {formatProposalsLabel(project)}
                               </span>
                             </div>
 
                             <p
-                              className={`${discoverBody} mb-4 mt-3.5 max-w-[620px] text-[13.5px] font-normal leading-relaxed text-black`}
+                              className={`${discoverBody} mb-3 mt-3 line-clamp-2 max-w-[620px] text-[13.5px] font-normal leading-relaxed text-black`}
                             >
                               {project.description}
                             </p>
 
-                            <div className="flex flex-wrap gap-1.5 pt-0.5 select-none">
+                            <div className="mt-auto flex max-h-[34px] flex-wrap gap-1.5 overflow-hidden pt-0.5 select-none">
                               {project.skills.map((skill) => (
                                 <button
                                   key={skill}
@@ -713,13 +800,8 @@ export default function ProjectList({
                           </div>
                         </div>
 
-                        <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-5 md:mt-0 md:self-stretch md:border-0 md:pt-0">
-                          <div
-                            className="absolute -left-8 top-0 bottom-0 hidden w-px bg-neutral-200 md:block lg:-left-10"
-                            aria-hidden
-                          />
-
-                          <div className="flex min-w-[240px] flex-col items-end justify-center gap-6 py-1.5 md:py-2 lg:min-w-[260px]">
+                        <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0">
+                          <div className="flex h-full min-w-[240px] flex-col items-end justify-between gap-4 lg:min-w-[260px]">
                             <div className="w-full text-right">
                               <span className={`${discoverBody} block text-[21px] font-normal leading-none tracking-tight text-black`}>
                                 {project.budgetLabel}
@@ -730,7 +812,7 @@ export default function ProjectList({
                             </div>
 
                             <span
-                              className={`${discoverBody} group/btn relative flex w-full min-w-[250px] cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-12 py-3.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white md:min-w-[250px]`}
+                              className={`${discoverBody} group/btn relative flex h-auto w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-8 py-2.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white lg:min-w-[250px]`}
                             >
                               <span
                                 aria-hidden
@@ -775,7 +857,7 @@ export default function ProjectList({
                   </button>
                 </div>
                 <div className={`${discoverBody} mt-3.5 select-none text-[13.5px] font-medium text-zinc-400`}>
-                  Showing {startIdx} – {endIdx} of {totalProjects} jobs available
+                  Showing {startIdx} – {endIdx} of {totalProjects} projects available
                 </div>
               </div>
             )}

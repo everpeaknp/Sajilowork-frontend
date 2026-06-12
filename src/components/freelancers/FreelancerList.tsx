@@ -12,30 +12,25 @@ import {
   Filter,
   X,
 } from 'lucide-react';
+import { formatFreelancerRating } from '@/lib/freelancerProfileFromApi';
 import { formatNPR } from '@/lib/nepalLocale';
 import type { Freelancer } from './freelancerData';
 import { getFreelancerProfilePath } from './freelancerSlug';
 
 interface FreelancerListProps {
   freelancers: Freelancer[];
+  loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onInquire?: (name: string) => void;
 }
 
-const SKILLS_OPTIONS = ['All', 'Figma', 'Sketch', 'HTML5', 'React', 'Node.js'];
+const DEFAULT_SKILLS_OPTIONS = ['All', 'Figma', 'Sketch', 'HTML5', 'React', 'Node.js'];
 const PRICE_OPTIONS = [
   'All',
   'Under Rs 2,000/hr',
   'Rs 2,000 – 4,000/hr',
   'Over Rs 4,000/hr',
-];
-const LOCATION_OPTIONS = [
-  'All',
-  'Kathmandu',
-  'Lalitpur',
-  'Bhaktapur',
-  'Pokhara',
-  'Chitwan',
-  'Remote',
 ];
 const LEVEL_OPTIONS = ['All', 'Entry', 'Mid', 'Senior', 'Expert'];
 const LANG_OPTIONS = ['All', 'English', 'Nepali', 'Hindi'];
@@ -43,7 +38,31 @@ const SORT_OPTIONS = ['Highest Rating', 'Rate: Low to High', 'Rate: High to Low'
 
 const ITEMS_PER_PAGE = 12;
 
-export default function FreelancerList({ freelancers, onInquire }: FreelancerListProps) {
+function FreelancerCardSkeleton() {
+  return (
+    <div className="flex animate-pulse flex-col items-stretch justify-between rounded-none border border-neutral-200/55 bg-white p-6">
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-5 mt-1 h-[105px] w-[105px] rounded-full bg-neutral-100" />
+        <div className="h-4 w-28 rounded bg-neutral-100" />
+        <div className="mt-2 h-3 w-20 rounded bg-neutral-100" />
+        <div className="mt-2 h-3 w-24 rounded bg-neutral-100" />
+        <div className="mt-4 flex gap-1.5">
+          <div className="h-7 w-14 rounded-full bg-neutral-100" />
+          <div className="h-7 w-14 rounded-full bg-neutral-100" />
+        </div>
+      </div>
+      <div className="mt-5 h-10 w-full rounded bg-neutral-100" />
+    </div>
+  );
+}
+
+export default function FreelancerList({
+  freelancers,
+  loading = false,
+  error = null,
+  onRetry,
+  onInquire,
+}: FreelancerListProps) {
   const router = useRouter();
   const [selectedSkills, setSelectedSkills] = useState('All');
   const [selectedPrice, setSelectedPrice] = useState('All');
@@ -53,6 +72,36 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
   const [sortBy, setSortBy] = useState('Highest Rating');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const skillsOptions = useMemo(() => {
+    const tags = new Set<string>();
+    for (const freelancer of freelancers) {
+      for (const tag of freelancer.tags) {
+        if (tag && tag !== 'General') tags.add(tag);
+      }
+    }
+    const dynamic = Array.from(tags).sort((a, b) => a.localeCompare(b));
+    return dynamic.length > 0 ? ['All', ...dynamic] : DEFAULT_SKILLS_OPTIONS;
+  }, [freelancers]);
+
+  const locationOptions = useMemo(() => {
+    const cities = new Set<string>();
+    for (const freelancer of freelancers) {
+      const city = freelancer.location?.trim();
+      if (city && city !== '—' && city.toLowerCase() !== 'remote') {
+        cities.add(city);
+      }
+    }
+    const dynamic = Array.from(cities).sort((a, b) => a.localeCompare(b));
+    const base = ['All', 'Kathmandu', 'Lalitpur', 'Bhaktapur', 'Pokhara', 'Chitwan', 'Remote'];
+    const merged = [...base];
+    for (const city of dynamic) {
+      if (!merged.some((item) => item.toLowerCase() === city.toLowerCase())) {
+        merged.push(city);
+      }
+    }
+    return merged;
+  }, [freelancers]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -226,12 +275,12 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
       <div className="w-full max-w-none">
         <div className="mb-8 mt-4 flex flex-col items-start justify-between gap-4 pb-6 md:flex-row md:items-center">
           <div className="flex flex-wrap gap-2.5" onClick={(e) => e.stopPropagation()}>
-            {renderFilterDropdown('Skills', selectedSkills, SKILLS_OPTIONS, setSelectedSkills)}
+            {renderFilterDropdown('Skills', selectedSkills, skillsOptions, setSelectedSkills)}
             {renderFilterDropdown('Price', selectedPrice, PRICE_OPTIONS, setSelectedPrice)}
             {renderFilterDropdown(
               'Location',
               selectedLocation,
-              LOCATION_OPTIONS,
+              locationOptions,
               setSelectedLocation,
             )}
             {renderFilterDropdown('Level', selectedLevel, LEVEL_OPTIONS, setSelectedLevel)}
@@ -289,8 +338,29 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
           </div>
         </div>
 
+        {error ? (
+          <div className="rounded-[24px] border border-red-200/80 bg-red-50/70 p-12 text-center shadow-sm">
+            <h3 className="text-sm font-normal tracking-tight text-red-800">{error}</h3>
+            {onRetry ? (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="mt-4 cursor-pointer rounded-none border border-red-200 bg-white px-4.5 py-2 text-xs font-normal tracking-tight text-red-700 transition-all hover:bg-red-50"
+              >
+                Retry
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
         <AnimatePresence mode="popLayout">
-          {paginatedFreelancers.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {Array.from({ length: ITEMS_PER_PAGE }).map((_, index) => (
+                <FreelancerCardSkeleton key={`freelancer-skeleton-${index}`} />
+              ))}
+            </div>
+          ) : error ? null : paginatedFreelancers.length > 0 ? (
             <motion.div
               className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
               initial="hidden"
@@ -337,7 +407,9 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
 
                     <div className="mt-2 flex select-none items-center justify-center gap-1 text-xs font-normal text-black/60">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      <span className="ml-0.5 text-black">{fl.rating.toFixed(1)}</span>
+                      <span className="ml-0.5 text-black">
+                        {formatFreelancerRating(fl.rating, fl.reviews)}
+                      </span>
                       <span>({fl.reviews} reviews)</span>
                     </div>
 
@@ -414,7 +486,7 @@ export default function FreelancerList({ freelancers, onInquire }: FreelancerLis
           )}
         </AnimatePresence>
 
-        {filteredFreelancers.length > 0 && (
+        {!loading && filteredFreelancers.length > 0 && (
           <div className="mt-12.5 flex flex-col items-center justify-center pt-8">
             <div className="flex items-center gap-3">
               <button

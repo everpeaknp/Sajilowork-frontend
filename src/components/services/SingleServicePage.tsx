@@ -11,6 +11,7 @@ import ServiceAbout from './ServiceAbout';
 import ServiceComparePackages from './ServiceComparePackages';
 import ServiceFaq from './ServiceFaq';
 import ServiceReviews from './ServiceReviews';
+import ServiceShareSaveActions from './ServiceShareSaveActions';
 import { getServiceMeta, type Service } from './serviceListData';
 
 interface SingleServicePageProps {
@@ -23,6 +24,10 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
   return (
     <div className="select-none bg-white pb-12 pt-8 font-normal text-black antialiased [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-5 flex justify-end">
+          <ServiceShareSaveActions service={service} />
+        </div>
+
         <ServiceDetailHero service={service} />
 
         <div className="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">

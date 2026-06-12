@@ -1,14 +1,23 @@
 'use client';
 
-import { MapPin, Calendar, FileText, Pencil, Trash2, ClipboardList } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { MapPin, Calendar, FileText, Pencil, Trash2, ClipboardList, ExternalLink } from 'lucide-react';
+import { getDashboardProjectDetailHref } from './dashboardTabs';
 import type { Project } from './types';
+
+function getProjectViewHref(project: Project): string | null {
+  if (!project.taskSlug) return null;
+  return getDashboardProjectDetailHref(project.taskSlug);
+}
 
 interface ProjectTableProps {
   projects: Project[];
   activeSubTab: string;
-  onEdit: (project: Project) => void;
-  onDelete: (id: string) => void;
-  onAddClick: () => void;
+  onEdit?: (project: Project) => void;
+  onDelete?: (id: string) => void;
+  onAddClick?: () => void;
+  variant?: 'manage' | 'assigned';
 }
 
 export default function ProjectTable({
@@ -17,16 +26,25 @@ export default function ProjectTable({
   onEdit,
   onDelete,
   onAddClick,
+  variant = 'manage',
 }: ProjectTableProps) {
+  const router = useRouter();
+  const isAssigned = variant === 'assigned';
+
+  const handleRowClick = (project: Project) => {
+    const href = getProjectViewHref(project);
+    if (href) router.push(href);
+  };
+
   return (
     <div className="overflow-x-auto" id="projects-table-wrapper">
       <table className="w-full table-auto border-collapse text-left" id="projects-data-table">
         <thead>
           <tr className="border-b border-neutral-100 text-[15px] font-medium text-neutral-800">
-            <th className="w-[50%] pb-5 pl-2 pt-2 font-medium">Title</th>
-            <th className="w-[20%] pb-5 pt-2 font-medium">Category</th>
-            <th className="w-[18%] pb-5 pt-2 font-medium">Type/Cost</th>
-            <th className="w-[12%] pb-5 pt-2 text-center font-medium">Actions</th>
+            <th className="w-[44%] pb-5 pl-2 pt-2 font-medium">Title</th>
+            <th className="w-[18%] pb-5 pt-2 font-medium">Category</th>
+            <th className="w-[16%] pb-5 pt-2 font-medium">Type/Cost</th>
+            <th className="min-w-[10.5rem] w-[22%] pb-5 pt-2 text-center font-medium">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100">
@@ -35,29 +53,66 @@ export default function ProjectTable({
               <td colSpan={4} className="py-20 text-center">
                 <div className="flex flex-col items-center justify-center space-y-2 text-neutral-400">
                   <ClipboardList className="h-10 w-10 text-neutral-300" strokeWidth={1.5} />
-                  <p className="text-sm font-normal">No projects found under {activeSubTab} Projects.</p>
-                  <button
-                    onClick={onAddClick}
-                    type="button"
-                    className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
-                  >
-                    Post a new project campaign
-                  </button>
+                  <p className="text-sm font-normal">
+                    {isAssigned
+                      ? `No assigned projects under ${activeSubTab}.`
+                      : `No projects found under ${activeSubTab} Projects.`}
+                  </p>
+                  {isAssigned ? (
+                    <Link
+                      href="/projects"
+                      className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
+                    >
+                      Browse available projects
+                    </Link>
+                  ) : onAddClick ? (
+                    <button
+                      onClick={onAddClick}
+                      type="button"
+                      className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
+                    >
+                      Post a new project campaign
+                    </button>
+                  ) : null}
                 </div>
               </td>
             </tr>
           ) : (
-            projects.map((project) => (
+            projects.map((project) => {
+              const viewHref = getProjectViewHref(project);
+              return (
               <tr
                 key={project.id}
-                className="transition-colors hover:bg-neutral-50/25"
+                role={viewHref ? 'link' : undefined}
+                tabIndex={viewHref ? 0 : undefined}
+                onClick={() => handleRowClick(project)}
+                onKeyDown={(event) => {
+                  if (!viewHref) return;
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleRowClick(project);
+                  }
+                }}
+                className={`transition-colors hover:bg-neutral-50/25 ${
+                  viewHref ? 'cursor-pointer select-none' : ''
+                }`}
                 id={`project-row-${project.id}`}
               >
-                <td className="select-all py-6 pl-2 align-top">
+                <td className="py-6 pl-2 align-top">
                   <div className="space-y-4">
-                    <h4 className="cursor-pointer text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 transition-colors hover:text-[#52C47F]">
-                      {project.title}
-                    </h4>
+                    {viewHref ? (
+                      <Link
+                        href={viewHref}
+                        onClick={(event) => event.stopPropagation()}
+                        className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 transition-colors hover:text-[#52C47F]"
+                      >
+                        {project.title}
+                      </Link>
+                    ) : (
+                      <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900">
+                        {project.title}
+                      </h4>
+                    )}
 
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[14px] text-neutral-400">
                       <div className="flex items-center gap-1.5 font-normal">
@@ -70,9 +125,16 @@ export default function ProjectTable({
                         <span>{project.postedTime}</span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 font-medium text-emerald-500">
-                        <FileText className="h-[18px] w-[18px] text-emerald-500" strokeWidth={1.8} />
-                        <span>{project.receivedCount} Received</span>
+                      <div
+                        className={`flex items-center gap-1.5 font-medium ${
+                          isAssigned ? 'text-neutral-500' : 'text-emerald-500'
+                        }`}
+                      >
+                        <FileText
+                          className={`h-[18px] w-[18px] ${isAssigned ? 'text-neutral-400' : 'text-emerald-500'}`}
+                          strokeWidth={1.8}
+                        />
+                        <span>{isAssigned ? project.status : `${project.receivedCount} Received`}</span>
                       </div>
                     </div>
                   </div>
@@ -82,31 +144,54 @@ export default function ProjectTable({
 
                 <td className="py-6 align-middle text-[15px] font-medium text-neutral-800">{project.typeCost}</td>
 
-                <td className="py-6 pr-1 text-center align-middle">
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      id={`project-edit-btn-${project.id}`}
-                      onClick={() => onEdit(project)}
-                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-2.5 text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444]"
-                      title="Edit project details"
+                <td
+                  className="whitespace-nowrap py-6 pr-2 text-center align-middle"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  {isAssigned && viewHref ? (
+                    <Link
+                      href={viewHref}
+                      className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-[#ebf8f2] px-3.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#dff5ea]"
                     >
-                      <Pencil className="h-[17px] w-[17px]" strokeWidth={2.2} />
-                    </button>
+                      <span>View</span>
+                      <ExternalLink className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                    </Link>
+                  ) : (
+                    <div className="inline-flex flex-nowrap items-center justify-center gap-1.5">
+                      {viewHref ? (
+                        <Link
+                          href={viewHref}
+                          className="inline-flex h-9 shrink-0 items-center rounded-lg bg-[#FEF1EE] px-3 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                        >
+                          View
+                        </Link>
+                      ) : null}
+                      <button
+                        type="button"
+                        id={`project-edit-btn-${project.id}`}
+                        onClick={() => onEdit?.(project)}
+                        className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent bg-[#FFF5F4] text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
+                        title="Edit project details"
+                      >
+                        <Pencil className="h-4 w-4" strokeWidth={2.2} />
+                      </button>
 
-                    <button
-                      type="button"
-                      id={`project-delete-btn-${project.id}`}
-                      onClick={() => onDelete(project.id)}
-                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-2.5 text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444]"
-                      title="Delete this project"
-                    >
-                      <Trash2 className="h-[17px] w-[17px]" strokeWidth={2.2} />
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        id={`project-delete-btn-${project.id}`}
+                        onClick={() => onDelete?.(project.id)}
+                        className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent bg-[#FFF5F4] text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
+                        title="Delete this project"
+                      >
+                        <Trash2 className="h-4 w-4" strokeWidth={2.2} />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
-            ))
+            );
+            })
           )}
         </tbody>
       </table>

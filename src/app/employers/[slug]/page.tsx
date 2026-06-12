@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import '@/components/LangingHome/landing-home.css';
@@ -9,26 +9,108 @@ import { discoverPageRoot, discoverPageTypo } from '@/components/LangingHome/lan
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleEmployerPage from '@/components/employers/SingleEmployerPage';
-import { findEmployerBySlug } from '@/components/employers/employerSlug';
+import type { SingleReview } from '@/components/employers/EmployerReviews';
+import type { Employer } from '@/components/employers/employerData';
+import {
+  loadEmployerPageData,
+  type EmployerListingCard,
+} from '@/lib/employerApi';
 
 export default function EmployerSlugPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = typeof params.slug === 'string' ? params.slug : '';
   const [notification, setNotification] = useState<string | null>(null);
 
-  const employer = useMemo(() => (slug ? findEmployerBySlug(slug) : undefined), [slug]);
+  const [employer, setEmployer] = useState<Employer | undefined>(undefined);
+  const [projects, setProjects] = useState<EmployerListingCard[] | undefined>(undefined);
+  const [jobs, setJobs] = useState<EmployerListingCard[] | undefined>(undefined);
+  const [reviews, setReviews] = useState<SingleReview[] | undefined>(undefined);
+  const [resolved, setResolved] = useState(false);
+  const [useMockListings, setUseMockListings] = useState(false);
+  const loadRequestRef = useRef(0);
+
+  useEffect(() => {
+    if (!slug) {
+      setEmployer(undefined);
+      setResolved(true);
+      return;
+    }
+
+    const requestId = ++loadRequestRef.current;
+    setEmployer(undefined);
+    setProjects(undefined);
+    setJobs(undefined);
+    setReviews(undefined);
+    setUseMockListings(false);
+    setResolved(false);
+
+    void loadEmployerPageData(slug)
+      .then((data) => {
+        if (requestId !== loadRequestRef.current) return;
+
+        if (!data) {
+          setEmployer(undefined);
+          return;
+        }
+
+        setEmployer(data.employer);
+        setUseMockListings(data.useMockListings);
+        if (data.useMockListings) {
+          setProjects(undefined);
+          setJobs(undefined);
+          setReviews(undefined);
+        } else {
+          setProjects(data.projects);
+          setJobs(data.jobs);
+          setReviews(data.reviews);
+        }
+      })
+      .catch((error) => {
+        if (requestId !== loadRequestRef.current) return;
+        setEmployer(undefined);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Employer page load failed:', error);
+        }
+      })
+      .finally(() => {
+        if (requestId === loadRequestRef.current) {
+          setResolved(true);
+        }
+      });
+  }, [slug]);
 
   if (!slug) {
     notFound();
   }
 
-  if (!employer) {
+  if (resolved && !employer) {
     notFound();
+  }
+
+  if (!employer) {
+    return null;
   }
 
   const triggerNotification = (msg: string) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 4000);
+  };
+
+  const handleProjectSelect = (listing: EmployerListingCard) => {
+    if (listing.slug) {
+      router.push(`/projects/${listing.slug}`);
+      return;
+    }
+    triggerNotification(`Opening project brief: "${listing.title}"`);
+  };
+
+  const handleJobSelect = (listing: EmployerListingCard) => {
+    if (listing.slug) {
+      router.push(`/jobs/${listing.slug}`);
+      return;
+    }
+    triggerNotification(`Opening job: "${listing.title}"`);
   };
 
   return (
@@ -62,8 +144,15 @@ export default function EmployerSlugPage() {
 
         <SingleEmployerPage
           employer={employer}
+          projects={useMockListings ? undefined : (projects ?? [])}
+          jobs={useMockListings ? undefined : (jobs ?? [])}
+          reviews={useMockListings ? undefined : (reviews ?? [])}
+          useMockProjects={useMockListings}
+          useMockJobs={useMockListings}
           onContact={(name) => triggerNotification(`Message sent to ${name}.`)}
           onNotification={triggerNotification}
+          onProjectSelect={handleProjectSelect}
+          onJobSelect={handleJobSelect}
         />
       </main>
       <Footer />

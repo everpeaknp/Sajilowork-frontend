@@ -13,7 +13,9 @@ import {
   Trash2,
 } from 'lucide-react';
 import FormAccordionSection from './FormAccordionSection';
+import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
 import { formatJobBudgetLabel, type Job as PublicJob } from '@/components/jobs/jobListData';
+import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
 import type { Job as DashboardJob } from './types';
 
 export type CreateJobFormData = {
@@ -190,6 +192,7 @@ interface DashboardCreateJobProps {
   onSubmit: (data: CreateJobFormData) => void;
   initialData?: Partial<CreateJobFormData>;
   mode?: 'create' | 'edit';
+  postingContext?: EmployerPostingContext | null;
 }
 
 function parseDescriptionParagraphs(text: string): string[] {
@@ -260,8 +263,11 @@ export default function DashboardCreateJob({
   onSubmit,
   initialData,
   mode = 'create',
+  postingContext,
 }: DashboardCreateJobProps) {
   const isEdit = mode === 'edit';
+  const isIndividualPoster = postingContext?.accountType === 'individual';
+  const posterNameLabel = isIndividualPoster ? 'Posted as' : 'Company name';
   const [form, setForm] = useState<CreateJobFormData>({ ...EMPTY_CREATE_FORM, ...initialData });
   const [openSection, setOpenSection] = useState<string | null>(null);
 
@@ -311,6 +317,7 @@ export default function DashboardCreateJob({
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
         <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        {postingContext ? <EmployerPostingBanner context={postingContext} className="mb-6" /> : null}
         <FormAccordionSection
           title="Basic Information"
           icon={Briefcase}
@@ -337,28 +344,32 @@ export default function DashboardCreateJob({
               options={CATEGORIES}
             />
             <div>
-              <label className={labelClass}>Company Name</label>
+              <label className={labelClass}>{posterNameLabel}</label>
               <input
                 value={form.companyName}
                 onChange={(e) => update({ companyName: e.target.value })}
-                placeholder="Vercel"
+                placeholder={isIndividualPoster ? 'Your name' : 'Vercel'}
                 className={fieldClass}
               />
             </div>
-            <SelectField
-              label="Company Logo Style"
-              value={form.companyIconType}
-              onChange={(companyIconType) =>
-                update({ companyIconType: companyIconType as PublicJob['companyIconType'] })
-              }
-              options={ICON_TYPES}
-            />
-            <SelectField
-              label="Logo Background"
-              value={form.companyLogoBg}
-              onChange={(companyLogoBg) => update({ companyLogoBg })}
-              options={LOGO_BACKGROUNDS}
-            />
+            {!isIndividualPoster ? (
+              <>
+                <SelectField
+                  label="Company Logo Style"
+                  value={form.companyIconType}
+                  onChange={(companyIconType) =>
+                    update({ companyIconType: companyIconType as PublicJob['companyIconType'] })
+                  }
+                  options={ICON_TYPES}
+                />
+                <SelectField
+                  label="Logo Background"
+                  value={form.companyLogoBg}
+                  onChange={(companyLogoBg) => update({ companyLogoBg })}
+                  options={LOGO_BACKGROUNDS}
+                />
+              </>
+            ) : null}
             <SelectField
               label="Experience Level"
               value={form.experienceLevel}
@@ -375,15 +386,17 @@ export default function DashboardCreateJob({
             />
           </div>
 
-          <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-normal text-neutral-800">
-            <input
-              type="checkbox"
-              checked={form.verified}
-              onChange={(e) => update({ verified: e.target.checked })}
-              className="h-4 w-4 rounded-none border-neutral-300"
-            />
-            Verified company
-          </label>
+          {!isIndividualPoster ? (
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-normal text-neutral-800">
+              <input
+                type="checkbox"
+                checked={form.verified}
+                onChange={(e) => update({ verified: e.target.checked })}
+                className="h-4 w-4 rounded-none border-neutral-300"
+              />
+              Verified company
+            </label>
+          ) : null}
         </FormAccordionSection>
 
         <FormAccordionSection

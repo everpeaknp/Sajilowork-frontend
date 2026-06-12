@@ -1,6 +1,7 @@
 'use client';
 
 import { Pencil, Trash2, ClipboardList } from 'lucide-react';
+import { DEFAULT_SERVICE_IMAGE } from '@/lib/dashboardListingApi';
 import type { Service } from './types';
 
 interface ServiceTableProps {
@@ -59,10 +60,16 @@ export default function ServiceTable({
                   <div className="flex flex-col items-start gap-5 sm:flex-row">
                     <div className="h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-100 shadow-inner">
                       <img
-                        src={svc.image}
-                        alt={svc.title}
-                        referrerPolicy="no-referrer"
+                        src={svc.image || DEFAULT_SERVICE_IMAGE}
+                        alt=""
+                        role="presentation"
                         className="h-full w-full select-none object-cover"
+                        onError={(event) => {
+                          const img = event.currentTarget;
+                          if (img.dataset.fallbackApplied === 'true') return;
+                          img.dataset.fallbackApplied = 'true';
+                          img.src = DEFAULT_SERVICE_IMAGE;
+                        }}
                       />
                     </div>
 

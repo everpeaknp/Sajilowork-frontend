@@ -2,19 +2,20 @@
 
 import {
   Building2,
+  Calendar,
   Clock,
   DollarSign,
-  Copy,
   Languages,
-  Sparkles,
-  GraduationCap,
+  Sun,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { discoverBody } from '@/components/LangingHome/landingTypography';
 import {
-  PROJECT_ATTACHMENTS,
+  formatProjectScheduleNeedLabel,
+  formatProjectTimeOfDayLabel,
   getProjectDescriptionParagraphs,
   getProjectDetailMeta,
+  getProjectSchedule,
   type Project,
 } from './projectListData';
 
@@ -48,14 +49,29 @@ export default function ProjectAbout({ project }: ProjectAboutProps) {
   const detail = getProjectDetailMeta(project);
   const paragraphs = getProjectDescriptionParagraphs(project);
 
+  const schedule = getProjectSchedule(project);
+
   const metaItems: { icon: LucideIcon; label: string; value: string }[] = [
     { icon: Building2, label: 'Seller Type', value: detail.sellerType },
     { icon: DollarSign, label: 'Project type', value: project.type },
     { icon: Clock, label: 'Project Duration', value: detail.durationLabel },
-    { icon: Sparkles, label: 'Project Level', value: project.expenseLevel },
-    { icon: Languages, label: 'Languages', value: String(detail.languages) },
-    { icon: GraduationCap, label: 'English Level', value: detail.englishLevel },
+    { icon: Languages, label: 'Languages', value: detail.languagesLabel },
   ];
+
+  if (schedule) {
+    metaItems.push(
+      {
+        icon: Calendar,
+        label: 'When do you need this done?',
+        value: formatProjectScheduleNeedLabel(schedule),
+      },
+      {
+        icon: Sun,
+        label: 'I need a certain time of day',
+        value: formatProjectTimeOfDayLabel(schedule),
+      },
+    );
+  }
 
   return (
     <div>
@@ -65,7 +81,7 @@ export default function ProjectAbout({ project }: ProjectAboutProps) {
           ))}
         </div>
 
-        <div className="mt-12 border-t border-black pt-10">
+        <div className="mt-12 border-t border-neutral-200 pt-10">
           <h2 className="mb-4 text-base font-normal tracking-tight text-black sm:text-lg">Description</h2>
           <div
             className={`${discoverBody} max-w-3xl space-y-3 text-[13px] font-light leading-[1.6] text-black antialiased sm:text-sm [&_p]:font-light [&_p]:text-black`}
@@ -74,31 +90,6 @@ export default function ProjectAbout({ project }: ProjectAboutProps) {
               <p key={index} className="font-light text-black">
                 {paragraph}
               </p>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-12 border-t border-black pt-10">
-          <h2 className="mb-5 text-xl font-normal tracking-tight text-black sm:text-2xl">
-            Attachments
-          </h2>
-          <div className="flex flex-wrap gap-4">
-            {PROJECT_ATTACHMENTS.map((attachment, index) => (
-              <button
-                key={`${attachment.name}-${index}`}
-                type="button"
-                className="relative flex h-[88px] w-[148px] flex-col rounded-md bg-[#ebf8f2] px-4 py-4 text-left transition-colors hover:bg-[#dff5ea] sm:h-[92px] sm:w-[156px]"
-              >
-                <span className="text-sm font-normal text-black">{attachment.name}</span>
-                <span className="mt-1 text-xs font-normal uppercase tracking-wide text-neutral-500">
-                  {attachment.fileType}
-                </span>
-                <Copy
-                  className="absolute bottom-3 right-3 h-5 w-5 text-neutral-400/60"
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
-              </button>
             ))}
           </div>
         </div>

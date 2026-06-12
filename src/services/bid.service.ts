@@ -31,6 +31,45 @@ export function extractBidList<T>(data: PaginatedResponse<T> | T[] | null | unde
   return data.results ?? [];
 }
 
+export function getBidTaskId(bid: Pick<Bid, 'task'>): string {
+  const task = bid.task as string | { id?: string };
+  if (task && typeof task === 'object' && 'id' in task && task.id) {
+    return String(task.id);
+  }
+  return String(task);
+}
+
+/** Return the current user's bid on a task, if any. */
+export async function getMyBidForTask(taskId: string): Promise<Bid | null> {
+  const response = await bidService.getMyBids();
+  if (!response.success || !response.data) return null;
+  const normalizedTaskId = String(taskId);
+  return (
+    extractBidList(response.data).find((bid) => getBidTaskId(bid) === normalizedTaskId) ?? null
+  );
+}
+
+/** Short alphanumeric bid reference for display (first UUID segment). */
+export function formatBidDisplayId(id: string | null | undefined): string {
+  const normalized = String(id ?? '').trim();
+  if (!normalized) return '—';
+  const segment = normalized.split('-')[0];
+  if (segment && segment.length >= 4) {
+    return segment.toUpperCase();
+  }
+  return normalized.replace(/-/g, '').slice(0, 8).toUpperCase();
+}
+
+/** Sort bids (or bid rows) by display id using alphanumeric order. */
+export function sortBidsByIdAlphanumeric<T extends { id: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) =>
+    formatBidDisplayId(a.id).localeCompare(formatBidDisplayId(b.id), undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    })
+  );
+}
+
 function inferUploadFileType(mimeType: string): 'image' | 'document' | 'other' {
   if (mimeType.startsWith('image/')) return 'image';
   if (

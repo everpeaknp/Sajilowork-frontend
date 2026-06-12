@@ -1,183 +1,59 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  fetchMyListingTasks,
+  mapTaskToService,
+} from '@/lib/dashboardListingApi';
+import { taskService } from '@/services/task.service';
+import { useAuthStore } from '@/store';
+import { getDashboardCreateHref, getDashboardEditHref } from './dashboardTabs';
 import ServiceTable from './ServiceTable';
-import DashboardCreateService, {
-  createServiceFromForm,
-  type CreateServiceFormData,
-} from './DashboardCreateService';
-import type { FormUploadsPayload, Service } from './types';
+import type { Service } from './types';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import { initialGalleryUrls, resolveGalleryUploads } from './uploadUtils';
 
 type ServiceStatus = Service['status'];
 
 const STATUS_TABS: ServiceStatus[] = ['Active', 'Pending', 'Ongoing', 'Completed', 'Canceled'];
 
-const SERVICE_IMAGES = [
-  'https://images.unsplash.com/photo-1541462608141-ad4979e458c9?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80',
-];
-
-function buildInitialServices(): Service[] {
-  const list: Service[] = [
-    {
-      id: 'svc-p1-1',
-      title: 'I will design modern websites in figma or adobe xd',
-      bullets: ['3 unique homepage concepts', 'Responsive mobile layouts', 'Developer handoff specs'],
-      category: 'Web & App Design',
-      typeCost: '$500.00/Fixed',
-      costVal: 500,
-      status: 'Active',
-      image: SERVICE_IMAGES[0],
-    },
-    {
-      id: 'svc-p1-2',
-      title: 'I will create modern flat design illustration',
-      bullets: ['Custom vector artwork', 'Commercial usage rights', 'Source files included'],
-      category: 'Art & Illustration',
-      typeCost: '$350.00/Fixed',
-      costVal: 350,
-      status: 'Active',
-      image: SERVICE_IMAGES[1],
-    },
-    {
-      id: 'svc-p1-3',
-      title: 'I will build a fully responsive design in HTML, CSS, bootstrap, and javascript',
-      bullets: ['Pixel-perfect conversion', 'Cross-browser testing', 'Performance optimized'],
-      category: 'Design & Creative',
-      typeCost: '$75.00/Hour',
-      costVal: 75,
-      status: 'Pending',
-      image: SERVICE_IMAGES[2],
-    },
-    {
-      id: 'svc-p2-1',
-      title: 'I will design website UI UX in adobe xd or figma',
-      bullets: ['Wireframe to high-fidelity UI', 'Interactive component library', 'Design QA support'],
-      category: 'Web & App Design',
-      typeCost: '$829.00/Fixed',
-      costVal: 829,
-      status: 'Active',
-      image: SERVICE_IMAGES[3],
-    },
-    {
-      id: 'svc-p2-2',
-      title: 'I will design website UI UX in adobe xd or figma',
-      bullets: ['Mobile-first responsive screens', 'Auto-layout Figma systems', 'Export-ready assets'],
-      category: 'Web & App Design',
-      typeCost: '$829.00/Fixed',
-      costVal: 829,
-      status: 'Active',
-      image: SERVICE_IMAGES[4],
-    },
-    {
-      id: 'svc-p2-3',
-      title: 'Tailwind CSS responsive code overhaul and theme support',
-      bullets: ['Dark mode token mapping', 'Utility class cleanup', 'Component refactor pass'],
-      category: 'Design & Creative',
-      typeCost: '$829.00/Fixed',
-      costVal: 829,
-      status: 'Active',
-      image: SERVICE_IMAGES[5],
-    },
-  ];
-
-  const titles = [
-    'I will optimize NextJS React application performance',
-    'I will create Stripe checkout and subscription flows',
-    'I will build custom WordPress themes with Gutenberg blocks',
-    'I will develop REST API gateways with secure auth',
-    'I will craft premium dashboard widgets in React',
-    'I will design brand identity and logo systems',
-    'I will implement SEO-ready landing page structures',
-    'I will animate micro-interactions with Framer Motion',
-  ];
-  const categories = ['Web & App Design', 'Art & Illustration', 'Design & Creative', 'Development & IT'];
-  const bulletsPool = [
-    ['Fast delivery turnaround', 'Unlimited revisions', 'Source files included'],
-    ['Pixel-perfect handoff', 'Responsive breakpoints', 'Accessibility checked'],
-    ['SEO optimized markup', 'Performance tuned assets', 'Cross-browser tested'],
-  ];
-
-  const sampleByStatus: Service[] = [
-    {
-      id: 'svc-sample-ongoing',
-      title: 'I will do mobile app development for ios and android',
-      bullets: ['React Native builds', 'App Store deployment', 'Push notification setup'],
-      category: 'Web & App Design',
-      typeCost: '$1.200.00/Fixed',
-      costVal: 1200,
-      status: 'Ongoing',
-      image: SERVICE_IMAGES[3],
-    },
-    {
-      id: 'svc-sample-completed',
-      title: 'I will design interactive SaaS web flow prototypes',
-      bullets: ['User journey mapping', 'Clickable Figma prototype', 'Design system tokens'],
-      category: 'Web & App Design',
-      typeCost: '$850.00/Fixed',
-      costVal: 850,
-      status: 'Completed',
-      image: SERVICE_IMAGES[4],
-    },
-    {
-      id: 'svc-sample-canceled',
-      title: 'I will create geometric minimalist vector portraits',
-      bullets: ['High-resolution export', '2 revision rounds', 'Fast 48h delivery'],
-      category: 'Art & Illustration',
-      typeCost: '$120.00/Fixed',
-      costVal: 120,
-      status: 'Canceled',
-      image: SERVICE_IMAGES[5],
-    },
-  ];
-
-  list.push(...sampleByStatus);
-
-  for (let i = 6; i < 60; i++) {
-    const costVal = 200 + ((i * 95) % 1800);
-
-    list.push({
-      id: `svc-gen-${i}`,
-      title: titles[i % titles.length],
-      bullets: bulletsPool[i % bulletsPool.length],
-      category: categories[i % categories.length],
-      typeCost: i % 3 === 0 ? `$${costVal}.00/Hour` : `$${costVal}.00/Fixed`,
-      costVal,
-      status: 'Active',
-      image: SERVICE_IMAGES[i % SERVICE_IMAGES.length],
-    });
-  }
-
-  return list;
-}
-
-type ServicesView = 'list' | 'create' | 'edit';
-
-function serviceToFormData(service: Service): Partial<CreateServiceFormData> {
-  return {
-    title: service.title,
-    price: String(service.costVal),
-    category: service.category,
-    serviceDetail: service.bullets.join('\n'),
-  };
-}
-
 export default function DashboardServices() {
-  const [services, setServices] = useState<Service[]>(buildInitialServices);
+  const router = useRouter();
+  const pathname = usePathname();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState<ServiceStatus>('Active');
   const [currentPage, setCurrentPage] = useState(1);
-  const [view, setView] = useState<ServicesView>('list');
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Service | null>(null);
+
+  const loadServices = useCallback(async () => {
+    setLoading(true);
+    if (!isAuthenticated) {
+      setServices([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const tasks = await fetchMyListingTasks('service');
+      setServices(tasks.map(mapTaskToService));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Could not load services';
+      toast.error(message);
+      setServices([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (pathname === '/dashboard/services') {
+      void loadServices();
+    }
+  }, [pathname, loadServices, isAuthenticated]);
 
   const filteredServices = useMemo(
     () => services.filter((svc) => svc.status === activeSubTab),
@@ -200,57 +76,35 @@ export default function DashboardServices() {
         : 'bg-transparent text-black hover:text-[#52C47F]'
     }`;
 
-  const closeFormPage = () => {
-    setView('list');
-    setEditingService(null);
-  };
-
   const openCreatePage = () => {
-    setEditingService(null);
-    setView('create');
+    router.push(getDashboardCreateHref('services'));
   };
 
   const openEditPage = (service: Service) => {
-    setEditingService(service);
-    setView('edit');
+    if (!service.taskSlug) {
+      toast.error('This service cannot be edited yet');
+      return;
+    }
+    router.push(getDashboardEditHref('services', service.taskSlug));
   };
 
-  const handleCreateSubmit = (data: CreateServiceFormData, uploads: FormUploadsPayload) => {
-    const resolved = resolveGalleryUploads(uploads.galleryFiles, uploads.keptGalleryUrls);
-    const payload: Service = {
-      id: `svc-${Date.now()}`,
-      ...createServiceFromForm(data, resolved.image),
-      gallery: resolved.gallery,
-    };
-    setServices((prev) => [payload, ...prev]);
-    setActiveSubTab(payload.status);
-    setCurrentPage(1);
-    closeFormPage();
-  };
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const slug = deleteTarget.taskSlug ?? deleteTarget.id;
 
-  const handleEditSubmit = (data: CreateServiceFormData, uploads: FormUploadsPayload) => {
-    if (!editingService) return;
-
-    const resolved = resolveGalleryUploads(
-      uploads.galleryFiles,
-      uploads.keptGalleryUrls,
-      editingService.image,
-    );
-    const payload: Service = {
-      id: editingService.id,
-      ...createServiceFromForm(data, resolved.image),
-      gallery: resolved.gallery,
-      status: editingService.status,
-    };
-
-    setServices((prev) => prev.map((svc) => (svc.id === editingService.id ? payload : svc)));
-    closeFormPage();
-  };
-
-  const confirmDelete = () => {
-    if (deleteTargetId === null) return;
-    setServices((prev) => prev.filter((svc) => svc.id !== deleteTargetId));
-    setDeleteTargetId(null);
+    try {
+      const response = await taskService.deleteTask(slug);
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to delete service');
+      }
+      setServices((prev) => prev.filter((svc) => svc.id !== deleteTarget.id));
+      toast.success('Service deleted');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete service';
+      toast.error(message);
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
   const subTabClass = (tab: ServiceStatus) =>
@@ -259,23 +113,6 @@ export default function DashboardServices() {
         ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
         : 'text-neutral-400 hover:text-neutral-900'
     }`;
-
-  if (view === 'create') {
-    return <DashboardCreateService mode="create" onBack={closeFormPage} onSubmit={handleCreateSubmit} />;
-  }
-
-  if (view === 'edit' && editingService) {
-    return (
-      <DashboardCreateService
-        key={editingService.id}
-        mode="edit"
-        initialData={serviceToFormData(editingService)}
-        initialGalleryUrls={initialGalleryUrls(editingService.image, editingService.gallery)}
-        onBack={closeFormPage}
-        onSubmit={handleEditSubmit}
-      />
-    );
-  }
 
   return (
     <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
@@ -318,15 +155,22 @@ export default function DashboardServices() {
           </div>
         </div>
 
-        <ServiceTable
-          services={paginatedServices}
-          activeSubTab={activeSubTab}
-          onEdit={openEditPage}
-          onDelete={setDeleteTargetId}
-          onAddClick={openCreatePage}
-        />
+        {loading ? (
+          <div className="py-20 text-center text-sm text-neutral-400">Loading services…</div>
+        ) : (
+          <ServiceTable
+            services={paginatedServices}
+            activeSubTab={activeSubTab}
+            onEdit={openEditPage}
+            onDelete={(id) => {
+              const target = services.find((svc) => svc.id === id) ?? null;
+              setDeleteTarget(target);
+            }}
+            onAddClick={openCreatePage}
+          />
+        )}
 
-        {filteredServices.length > 0 ? (
+        {!loading && filteredServices.length > 0 ? (
           <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
             <div className="flex items-center justify-center gap-6">
               <button
@@ -362,11 +206,13 @@ export default function DashboardServices() {
                         {page}
                       </button>
                     ))}
-                    <span className="flex h-[44px] w-[44px] items-center justify-center text-sm font-normal text-neutral-400">
-                      ...
-                    </span>
-                    <button type="button" onClick={() => setCurrentPage(20)} className={pageButtonClass(20)}>
-                      20
+                    <span className="px-2 text-neutral-400">…</span>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={pageButtonClass(totalPages)}
+                    >
+                      {totalPages}
                     </button>
                   </>
                 )}
@@ -381,18 +227,16 @@ export default function DashboardServices() {
                 <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>
             </div>
-
-            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-              1 – {totalPages >= 20 ? 20 : totalPages} of 300+ property available
-            </div>
           </div>
         ) : null}
       </div>
 
       <DeleteConfirmModal
-        open={deleteTargetId !== null}
-        onClose={() => setDeleteTargetId(null)}
-        onConfirm={confirmDelete}
+        open={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
+        title="Delete service?"
+        description="This will permanently remove the service from your dashboard."
       />
     </div>
   );

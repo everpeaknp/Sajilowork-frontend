@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Star, MapPin, Calendar } from 'lucide-react';
+import { formatFreelancerRating } from '@/lib/freelancerProfileFromApi';
 import type { Freelancer } from './freelancerData';
 
 interface FreelancerProfileHeroProps {
@@ -93,7 +94,9 @@ export default function FreelancerProfileHero({ freelancer }: FreelancerProfileH
             <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] font-normal leading-none text-black sm:gap-x-6 sm:text-xs">
               <div className="flex select-none items-center gap-1">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 stroke-[1.5]" />
-                <span className="font-normal text-black">{freelancer.rating.toFixed(2)}</span>
+                <span className="font-normal text-black">
+                  {formatFreelancerRating(freelancer.rating, freelancer.reviews)}
+                </span>
                 <span className="font-normal text-black">({freelancer.reviews} reviews)</span>
               </div>
 

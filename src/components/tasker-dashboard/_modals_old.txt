@@ -1,0 +1,11 @@
+              {showWithdrawModal &&
+                typeof document !== 'undefined' &&
+                createPortal(
+                <>
+                  <div
+                    className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
+                    onClick={() => setShowWithdrawModal(false)}
+                    aria-hidden
+                  />
+                  <div
+                    className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6

@@ -12,6 +12,7 @@ export type FormUploadsPayload = {
 
 export interface Service {
   id: string;
+  taskSlug?: string;
   title: string;
   bullets: string[];
   category: string;
@@ -24,6 +25,7 @@ export interface Service {
 
 export interface Job {
   id: string;
+  taskSlug?: string;
   title: string;
   company: string;
   logoColor: string;
@@ -36,6 +38,7 @@ export interface Job {
 
 export interface Project {
   id: string;
+  taskSlug?: string;
   title: string;
   location: string;
   postedTime: string;

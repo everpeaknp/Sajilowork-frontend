@@ -27,12 +27,7 @@ function SettingsFallback() {
 export default function DashboardSettings() {
   return (
     <Suspense fallback={<SettingsFallback />}>
-      <Settings
-        appearance="dashboard"
-        defaultEmail="bishal@baniya.com"
-        defaultPhone="98989898"
-        showDeactivate={false}
-      />
+      <Settings appearance="dashboard" showDeactivate={false} />
     </Suspense>
   );
 }

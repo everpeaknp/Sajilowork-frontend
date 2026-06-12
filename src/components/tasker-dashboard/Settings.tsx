@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -21,15 +20,35 @@ import {
   CheckCircle2,
   XCircle,
   ArrowUpRight,
+  Camera,
+  User as UserIcon,
   CreditCard,
 } from 'lucide-react';
-import type { Badge } from '@/types';
+import LinkedPaymentMethods from '@/components/tasker-dashboard/LinkedPaymentMethods';
+import AddressAutocompleteFields, {
+  type AddressFieldValues,
+} from '@/components/AddressAutocompleteFields';
+import { DEFAULT_COUNTRY } from '@/lib/nepalLocale';
+import { genderLabelFromApi, genderValueFromLabel } from '@/lib/dashboardProfileSkills';
+
+const panStorageKey = (userId: string | number) => `dashboard_profile_pan_${userId}`;
+
+const SELECT_CHEVRON_STYLE = {
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 1rem center',
+  paddingRight: '2.5rem',
+} as const;
 import { useAuthStore } from '@/store/auth.store';
 import { userService } from '@/services';
 import { authService } from '@/services';
 import { notificationService } from '@/services';
 import { toast } from 'sonner';
 import { USER_PROFILE_UPDATED, notifyUserProfileUpdated } from '@/lib/userProfileSync';
+import { getMediaUrl } from '@/lib/utils';
+
+const DEFAULT_PROFILE_IMAGE =
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&h=300&fit=crop';
 
 interface UserProfile {
   firstName: string;
@@ -164,13 +183,23 @@ export default function Settings({
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [documentsUploading, setDocumentsUploading] = useState<Record<string, boolean>>({});
   const [documents, setDocuments] = useState<Record<string, any>>({});
-  const [badges, setBadges] = useState<Badge[]>([]);
-  const [badgesLoading, setBadgesLoading] = useState(false);
-  const [paymentBadgeSubmitting, setPaymentBadgeSubmitting] = useState(false);
-  
   // Form states
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [addressLatitude, setAddressLatitude] = useState<number | undefined>();
+  const [addressLongitude, setAddressLongitude] = useState<number | undefined>();
+  const [gender, setGender] = useState('Select');
+  const [birthday, setBirthday] = useState('');
+  const [panNumber, setPanNumber] = useState('');
+  const [verifySaving, setVerifySaving] = useState(false);
+  const [profileImageUploading, setProfileImageUploading] = useState(false);
+  const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -186,9 +215,44 @@ export default function Settings({
   const [newAlertKeyword, setNewAlertKeyword] = useState('');
 
   useEffect(() => {
+    const first = user?.first_name?.trim() || '';
+    const last = user?.last_name?.trim() || '';
+    setFullName([first, last].filter(Boolean).join(' '));
     setEmail(user?.email || defaultEmail || '');
     setPhoneNumber(user?.phone_number || defaultPhone || '');
+    setAddress(user?.address || '');
+    setCity(user?.city || '');
+    setState(user?.state || '');
+    setCountry(user?.country || DEFAULT_COUNTRY);
+    setPostalCode(user?.postal_code || '');
+    setAddressLatitude(user?.latitude);
+    setAddressLongitude(user?.longitude);
+    setBirthday(user?.date_of_birth || '');
+    setGender(genderLabelFromApi(user?.gender));
+    if (user?.id) {
+      try {
+        const storedPan = localStorage.getItem(panStorageKey(user.id));
+        setPanNumber(storedPan || '');
+      } catch {
+        setPanNumber('');
+      }
+    } else {
+      setPanNumber('');
+    }
   }, [user, defaultEmail, defaultPhone]);
+
+  const handleAddressFieldsChange = (updates: Partial<AddressFieldValues>) => {
+    if (updates.address !== undefined) setAddress(updates.address);
+    if (updates.city !== undefined) setCity(updates.city);
+    if (updates.state !== undefined) setState(updates.state);
+    if (updates.country !== undefined) setCountry(updates.country);
+    if (updates.postalCode !== undefined) setPostalCode(updates.postalCode);
+    if ('latitude' in updates) setAddressLatitude(updates.latitude);
+    if ('longitude' in updates) setAddressLongitude(updates.longitude);
+  };
+
+  const profileImageSrc =
+    getMediaUrl(user?.profile_image) || DEFAULT_PROFILE_IMAGE;
 
   const displayEmail = user?.email || email || defaultEmail || 'Not set';
   const displayPhone = user?.phone_number || phoneNumber || defaultPhone || 'Not set';
@@ -231,26 +295,9 @@ export default function Settings({
     }
   };
 
-  const fetchBadges = async () => {
-    try {
-      setBadgesLoading(true);
-      const response = await userService.getBadges();
-      if (response.success && Array.isArray(response.data)) {
-        setBadges(response.data);
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to load verification badges';
-      console.error('Failed to load badges:', error);
-      toast.error(message);
-    } finally {
-      setBadgesLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (openSection === 'verify') {
       void fetchDocuments();
-      void fetchBadges();
     }
   }, [openSection]);
 
@@ -513,138 +560,129 @@ export default function Settings({
     );
   };
 
-  const paymentBadge = badges.find((b) => b.badge_type === 'payment_verified');
-  const hasLinkedPaymentMethod = !!user?.has_payment_method;
+  const parseFullName = (value: string) => {
+    const trimmed = value.trim();
+    const spaceIndex = trimmed.indexOf(' ');
+    if (spaceIndex === -1) {
+      return { first_name: trimmed, last_name: '' };
+    }
+    return {
+      first_name: trimmed.slice(0, spaceIndex).trim(),
+      last_name: trimmed.slice(spaceIndex + 1).trim(),
+    };
+  };
 
-  const handleActivatePaymentBadge = async () => {
-    if (!hasLinkedPaymentMethod) {
-      toast.message('Link a payment method first', {
-        description: 'Add eSewa or a bank account under Payment Methods.',
-      });
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (JPG, PNG, or GIF)');
       return;
     }
 
     try {
-      setPaymentBadgeSubmitting(true);
-      const response = await userService.addBadge({ badge_type: 'payment_verified' });
+      setProfileImageUploading(true);
+      toast.info('Uploading profile picture…');
+      const response = await userService.uploadProfileImage(file);
       if (response.success && response.data) {
-        await fetchBadges();
-        if (response.data.is_verified) {
-          toast.success('Payment method verified');
-        } else {
-          toast.success('Verification submitted — we will review it shortly');
-        }
+        setUser(response.data);
+        notifyUserProfileUpdated();
+        toast.success('Profile picture updated');
+      } else {
+        toast.error(response.message || 'Failed to upload profile picture');
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to verify payment method';
+      const message = error instanceof Error ? error.message : 'Failed to upload profile picture';
       toast.error(message);
     } finally {
-      setPaymentBadgeSubmitting(false);
+      setProfileImageUploading(false);
+      if (profileImageInputRef.current) {
+        profileImageInputRef.current.value = '';
+      }
     }
   };
 
-  const PaymentMethodVerificationCard = () => {
-    const status = paymentBadge?.is_verified
-      ? 'approved'
-      : paymentBadge || hasLinkedPaymentMethod
-        ? 'pending'
-        : 'none';
+  const handleSaveVerificationDetails = async () => {
+    const trimmedName = fullName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phoneNumber.trim();
 
-    const badge =
-      status === 'approved' ? (
-        <div className="inline-flex items-center gap-2 rounded-xl border border-green-100 bg-green-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-green-700">
-          <CheckCircle2 className="h-3.5 w-3.5" />
-          Verified
-        </div>
-      ) : status === 'pending' ? (
-        <div className="inline-flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-amber-800">
-          <Clock className="h-3.5 w-3.5" />
-          Pending
-        </div>
-      ) : (
-        <div className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-neutral-500">
-          Not linked
-        </div>
-      );
+    if (!trimmedName) {
+      toast.error('Please enter your full name');
+      return;
+    }
+    if (!trimmedPhone) {
+      toast.error('Please enter your mobile number');
+      return;
+    }
+    if (!trimmedEmail) {
+      toast.error('Please enter your email address');
+      return;
+    }
 
-    return (
-      <div
-        className={`space-y-4 rounded-xl border p-5 md:p-6 ${
-          isDashboard
-            ? 'border-neutral-200/90 bg-neutral-50/40'
-            : 'rounded-3xl border-outline-variant bg-white'
-        }`}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div
-              className={`rounded-xl p-2.5 ${
-                isDashboard ? 'bg-white text-[#52C47F] shadow-sm' : 'bg-surface-low text-brand-emerald'
-              }`}
-            >
-              <CreditCard className="h-5 w-5" />
-            </div>
-            <div className="space-y-1">
-              <p
-                className={`tracking-tight ${
-                  isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
-                }`}
-              >
-                Payment method verified
-              </p>
-              <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
-                Make payments with ease by having your payment method verified.
-              </p>
-            </div>
-          </div>
-          {badge}
-        </div>
+    try {
+      setVerifySaving(true);
+      const { first_name, last_name } = parseFullName(trimmedName);
+      const genderValue = genderValueFromLabel(gender);
+      const profileResponse = await userService.updateProfile({
+        first_name,
+        last_name,
+        phone: trimmedPhone,
+        address: address.trim() || undefined,
+        city: city.trim() || undefined,
+        state: state.trim() || undefined,
+        country: country.trim() || undefined,
+        postal_code: postalCode.trim() || undefined,
+        ...(addressLatitude !== undefined ? { latitude: addressLatitude } : {}),
+        ...(addressLongitude !== undefined ? { longitude: addressLongitude } : {}),
+        ...(genderValue ? { gender: genderValue } : {}),
+        ...(birthday.trim() ? { date_of_birth: birthday.trim() } : {}),
+      });
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-          {paymentBadge?.is_verified ? (
-            <Link
-              href="/tasker-dashboard/methods"
-              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
-                isDashboard
-                  ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-100'
-                  : 'border-outline-variant hover:bg-surface-low'
-              }`}
-            >
-              Manage methods
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          ) : (
-            <>
-              <Link
-                href="/tasker-dashboard/methods"
-                className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
-                  isDashboard
-                    ? 'border-neutral-200 text-neutral-700 hover:bg-neutral-100'
-                    : 'border-outline-variant hover:bg-surface-low'
-                }`}
-              >
-                Link payment method
-                <ExternalLink className="h-4 w-4" />
-              </Link>
-              {hasLinkedPaymentMethod && !paymentBadge?.is_verified ? (
-                <button
-                  type="button"
-                  onClick={() => void handleActivatePaymentBadge()}
-                  disabled={paymentBadgeSubmitting}
-                  className={
-                    isDashboard
-                      ? primaryButtonClass
-                      : 'rounded-2xl bg-brand-emerald px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
-                  }
-                >
-                  {paymentBadgeSubmitting ? 'Submitting…' : 'Request verification'}
-                </button>
-              ) : null}
-            </>
-          )}
-        </div>
-      </div>
-    );
+      if (!profileResponse.success || !profileResponse.data) {
+        toast.error(profileResponse.message || 'Failed to save personal details');
+        return;
+      }
+
+      let nextUser = profileResponse.data;
+
+      if (trimmedEmail !== (user?.email || '').trim()) {
+        const emailResponse = await userService.updateEmail(trimmedEmail);
+        if (emailResponse.success && emailResponse.data) {
+          nextUser = emailResponse.data;
+        } else {
+          toast.error(emailResponse.message || 'Failed to update email');
+          return;
+        }
+      }
+
+      if (nextUser.id) {
+        try {
+          const normalizedPan = panNumber.trim().toUpperCase();
+          if (normalizedPan) {
+            localStorage.setItem(panStorageKey(nextUser.id), normalizedPan);
+          } else {
+            localStorage.removeItem(panStorageKey(nextUser.id));
+          }
+        } catch {
+          // ignore localStorage errors
+        }
+      }
+
+      setUser(nextUser);
+      notifyUserProfileUpdated();
+      toast.success('Personal details saved');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to save personal details';
+      toast.error(message);
+    } finally {
+      setVerifySaving(false);
+    }
   };
 
   const handleUpdateEmail = async () => {
@@ -763,62 +801,68 @@ export default function Settings({
     ? 'block text-[15px] font-semibold leading-tight text-neutral-900'
     : 'px-1 text-xs font-bold uppercase tracking-widest text-gray-400';
 
+  const selectClass = isDashboard
+    ? `${inputClass} cursor-pointer appearance-none bg-white`
+    : `${inputClass} cursor-pointer appearance-none bg-white`;
+
   const dashboardToggleClass = (enabled: boolean) =>
     `relative h-6 w-12 rounded-full transition-colors ${enabled ? 'bg-[#52C47F]' : 'bg-neutral-200'}`;
 
   const settingsSections = (
     <>
-        <AccordionItem
-          title="Email Address"
-          icon={Mail}
-          description={displayEmail}
-          isOpen={openSection === 'email'}
-          onToggle={() => toggleSection('email')}
-          appearance={appearance}
-        >
-          <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <label className={labelClass}>Update Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="New email address"
-                className={inputClass}
-              />
-            </div>
-            <button type="button" onClick={handleUpdateEmail} disabled={loading} className={primaryButtonClass}>
-              {loading ? 'Updating...' : 'Verify & Update'}
-              {isDashboard && !loading ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
-            </button>
-          </div>
-        </AccordionItem>
+        {!isDashboard ? (
+          <>
+            <AccordionItem
+              title="Email Address"
+              icon={Mail}
+              description={displayEmail}
+              isOpen={openSection === 'email'}
+              onToggle={() => toggleSection('email')}
+              appearance={appearance}
+            >
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <label className={labelClass}>Update Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="New email address"
+                    className={inputClass}
+                  />
+                </div>
+                <button type="button" onClick={handleUpdateEmail} disabled={loading} className={primaryButtonClass}>
+                  {loading ? 'Updating...' : 'Verify & Update'}
+                </button>
+              </div>
+            </AccordionItem>
 
-        <AccordionItem
-          title="Mobile Number"
-          icon={Smartphone}
-          description={displayPhone}
-          isOpen={openSection === 'mobile'}
-          onToggle={() => toggleSection('mobile')}
-          appearance={appearance}
-        >
-          <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <label className={labelClass}>New Phone Number</label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="98989898"
-                className={inputClass}
-              />
-            </div>
-            <button type="button" onClick={handleUpdatePhone} disabled={loading} className={primaryButtonClass}>
-              {loading ? 'Updating...' : 'Send SMS Code'}
-              {isDashboard && !loading ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
-            </button>
-          </div>
-        </AccordionItem>
+            <AccordionItem
+              title="Mobile Number"
+              icon={Smartphone}
+              description={displayPhone}
+              isOpen={openSection === 'mobile'}
+              onToggle={() => toggleSection('mobile')}
+              appearance={appearance}
+            >
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <label className={labelClass}>New Phone Number</label>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="98989898"
+                    className={inputClass}
+                  />
+                </div>
+                <button type="button" onClick={handleUpdatePhone} disabled={loading} className={primaryButtonClass}>
+                  {loading ? 'Updating...' : 'Send SMS Code'}
+                </button>
+              </div>
+            </AccordionItem>
+          </>
+        ) : null}
 
         <AccordionItem
           title="Verify Account"
@@ -859,7 +903,193 @@ export default function Settings({
               </div>
             </div>
 
-            {documentsLoading || badgesLoading ? (
+            <div
+              className={`space-y-4 rounded-xl border p-5 md:p-6 ${
+                isDashboard
+                  ? 'border-neutral-200/90 bg-neutral-50/40'
+                  : 'rounded-3xl border-outline-variant bg-white'
+              }`}
+            >
+              <div className="space-y-1">
+                <p
+                  className={`tracking-tight ${
+                    isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+                  }`}
+                >
+                  Personal details
+                </p>
+                <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+                  Use the same profile photo, name, contact details, and address as on your identity documents.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="relative shrink-0 self-start">
+                  <div
+                    className={`h-24 w-24 overflow-hidden rounded-2xl border bg-white shadow-sm ${
+                      isDashboard ? 'border-neutral-200' : 'border-outline-variant'
+                    }`}
+                  >
+                    <img
+                      src={profileImageSrc}
+                      alt="Profile"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <input
+                    ref={profileImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => void handleProfileImageChange(e)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => profileImageInputRef.current?.click()}
+                    disabled={profileImageUploading}
+                    className={`absolute -bottom-2 -right-2 rounded-xl p-2.5 text-white shadow-md transition hover:scale-105 active:scale-95 disabled:opacity-50 ${
+                      isDashboard ? 'bg-[#52C47F]' : 'bg-brand-emerald'
+                    }`}
+                    aria-label="Change profile picture"
+                  >
+                    <Camera className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className={labelClass}>Profile picture</p>
+                  <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+                    Upload a clear photo of your face. JPG or PNG, up to 5MB.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => profileImageInputRef.current?.click()}
+                    disabled={profileImageUploading}
+                    className={`mt-2 inline-flex items-center gap-2 text-sm font-semibold transition disabled:opacity-50 ${
+                      isDashboard ? 'text-[#52C47F] hover:text-[#45a86d]' : 'text-brand-emerald hover:text-brand-emerald/80'
+                    }`}
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    {profileImageUploading ? 'Uploading…' : user?.profile_image ? 'Change photo' : 'Upload photo'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className={labelClass}>Full name</label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="First and last name"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className={labelClass}>Gender</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className={selectClass}
+                    style={SELECT_CHEVRON_STYLE}
+                  >
+                    <option value="Select">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={labelClass}>Mobile</label>
+                    {user?.is_phone_verified ? (
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-green-100 bg-green-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Verified
+                      </span>
+                    ) : null}
+                  </div>
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="98989898"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <label className={labelClass}>Email</label>
+                    {user?.is_email_verified ? (
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-green-100 bg-green-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Verified
+                      </span>
+                    ) : null}
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className={labelClass}>Birthday</label>
+                  <input
+                    type="date"
+                    value={birthday}
+                    onChange={(e) => setBirthday(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className={labelClass}>PAN number</label>
+                  <input
+                    type="text"
+                    value={panNumber}
+                    onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
+                    placeholder="Enter your PAN number"
+                    autoComplete="off"
+                    className={`${inputClass} uppercase`}
+                  />
+                </div>
+
+                <AddressAutocompleteFields
+                  variant={isDashboard ? 'dashboard' : 'default'}
+                  values={{
+                    address,
+                    city,
+                    state,
+                    country,
+                    postalCode,
+                    latitude: addressLatitude,
+                    longitude: addressLongitude,
+                  }}
+                  onChange={handleAddressFieldsChange}
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => void handleSaveVerificationDetails()}
+                  disabled={verifySaving}
+                  className={primaryButtonClass}
+                >
+                  {verifySaving ? 'Saving…' : 'Save personal details'}
+                  {isDashboard && !verifySaving ? <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} /> : null}
+                </button>
+              </div>
+            </div>
+
+            {documentsLoading ? (
               <div className="text-sm font-semibold text-gray-500">Loading verification status…</div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
@@ -878,7 +1108,6 @@ export default function Settings({
                   description="Upload a valid police clearance or background check certificate."
                   documentType="police_check"
                 />
-                <PaymentMethodVerificationCard />
               </div>
             )}
 
@@ -909,6 +1138,17 @@ export default function Settings({
               </p>
             </div>
           </div>
+        </AccordionItem>
+
+        <AccordionItem
+          title="Linked Payment Methods"
+          icon={CreditCard}
+          description="Link eSewa for wallet top-ups and withdrawals"
+          isOpen={openSection === 'payment-methods'}
+          onToggle={() => toggleSection('payment-methods')}
+          appearance={appearance}
+        >
+          <LinkedPaymentMethods />
         </AccordionItem>
 
         <AccordionItem
@@ -1140,7 +1380,7 @@ export default function Settings({
         <div className="mx-auto mb-8 max-w-7xl pl-1">
           <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900">Settings</h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
-            Manage your email, phone, verification, password, and notifications.
+            Manage your email, phone, verification, payment methods, password, and notifications.
           </p>
         </div>
         <div className={`${DASHBOARD_CARD_CLASS} mb-8`}>

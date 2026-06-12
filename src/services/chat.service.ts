@@ -166,6 +166,36 @@ export const chatService = {
   },
 
   /**
+   * Find an existing direct conversation with a user, or create one.
+   */
+  async findOrCreateDirectConversation(
+    otherParticipantId: string,
+  ): Promise<ApiResponse<Conversation>> {
+    const existing = await apiClient.get<PaginatedResponse<Conversation>>('/chat/conversations/', {
+      params: { page_size: 100 },
+    });
+
+    if (existing.success && existing.data) {
+      const match = findConversation(extractList(existing.data), {
+        otherParticipantId,
+      });
+      if (match && !match.task && !match.bid) {
+        return { success: true, data: match, message: 'OK' };
+      }
+      const anyMatch = findConversation(extractList(existing.data), {
+        otherParticipantId,
+      });
+      if (anyMatch) {
+        return { success: true, data: anyMatch, message: 'OK' };
+      }
+    }
+
+    return this.createConversation({
+      participant_ids: [otherParticipantId],
+    });
+  },
+
+  /**
    * Archive conversation
    */
   async archiveConversation(conversationId: string): Promise<ApiResponse<Conversation>> {

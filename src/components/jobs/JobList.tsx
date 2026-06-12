@@ -14,9 +14,10 @@ import {
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { type Job } from './jobListData';
 import JobCompanyLogo from './JobCompanyLogo';
-import { getEmployerProfilePathByCompanyName } from '@/components/employers/employerSlug';
+import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import { getJobDetailPath } from './jobSlug';
-import { getAllJobsIncludingPosted, hydratePostedJobs } from './jobStore';
+import { fetchPublicJobs } from '@/lib/jobApi';
+import { toggleJobSaved, useSavedJobIds } from './jobBookmarks';
 
 const FILTER_CATEGORIES = [
   { value: 'All', label: 'All Categories' },
@@ -70,16 +71,28 @@ export default function JobList({
   onClearSearch,
 }: JobListProps) {
   const router = useRouter();
-  const [jobs, setJobs] = useState<Job[]>(() => {
-    hydratePostedJobs();
-    return getAllJobsIncludingPosted();
-  });
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
 
   useEffect(() => {
-    hydratePostedJobs();
-    setJobs(getAllJobsIncludingPosted());
+    let cancelled = false;
+    setLoadingJobs(true);
+    void fetchPublicJobs()
+      .then((items) => {
+        if (cancelled) return;
+        setJobs(items);
+      })
+      .catch(() => {
+        if (!cancelled) setJobs([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingJobs(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
-  const [starredIds, setStarredIds] = useState<Record<string, boolean>>({ 'job-1': true });
+  const savedJobIds = useSavedJobIds();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSalary, setSelectedSalary] = useState('All');
@@ -115,13 +128,10 @@ export default function JobList({
 
   const toggleStar = (jobId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    setStarredIds((prev) => {
-      const updated = { ...prev, [jobId]: !prev[jobId] };
-      triggerAlert(
-        updated[jobId] ? 'Added to your visual bookmarks list.' : 'Removed from visual bookmarks.'
-      );
-      return updated;
-    });
+    const saved = toggleJobSaved(jobId);
+    triggerAlert(
+      saved ? 'Added to your visual bookmarks list.' : 'Removed from visual bookmarks.',
+    );
   };
 
   const filteredJobsList = useMemo(() => {
@@ -400,7 +410,11 @@ export default function JobList({
           </div>
         ) : null}
 
-        {filteredJobsList.length === 0 ? (
+        {loadingJobs ? (
+          <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center text-sm text-neutral-500">
+            Loading jobs…
+          </div>
+        ) : filteredJobsList.length === 0 ? (
           <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
             <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
             <span className={`${discoverHeadline} mb-1 block text-lg text-[#193e32]`}>
@@ -423,7 +437,24 @@ export default function JobList({
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <AnimatePresence mode="popLayout">
               {paginatedJobsList.map((job) => {
-                const isStarred = !!starredIds[job.id];
+                const isStarred = savedJobIds.includes(job.id);
+                const employerHref = resolveEmployerProfileHref({
+                  employerSlug: job.employerSlug,
+                  companyName: job.companyName,
+                  allowDemoLookup: true,
+                });
+                const employerHeader = (
+                  <>
+                    <div
+                      className={`flex h-[54px] w-[54px] items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.12)] ${job.companyLogoBg}`}
+                    >
+                      <JobCompanyLogo type={job.companyIconType} />
+                    </div>
+                    <span className="ml-3.5 text-[14px] font-medium text-[#45a874] hover:underline">
+                      {job.companyName}
+                    </span>
+                  </>
+                );
                 return (
                   <motion.div
                     layout
@@ -447,20 +478,17 @@ export default function JobList({
                     >
                     <div>
                       <div className="flex items-center justify-between">
-                        <Link
-                          href={getEmployerProfilePathByCompanyName(job.companyName)}
-                          className="flex items-center transition-opacity hover:opacity-80"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div
-                            className={`flex h-[54px] w-[54px] items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.12)] ${job.companyLogoBg}`}
+                        {employerHref ? (
+                          <Link
+                            href={employerHref}
+                            className="flex items-center transition-opacity hover:opacity-80"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <JobCompanyLogo type={job.companyIconType} />
-                          </div>
-                          <span className="ml-3.5 text-[14px] font-medium text-[#45a874] hover:underline">
-                            {job.companyName}
-                          </span>
-                        </Link>
+                            {employerHeader}
+                          </Link>
+                        ) : (
+                          <div className="flex items-center">{employerHeader}</div>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => toggleStar(job.id, e)}

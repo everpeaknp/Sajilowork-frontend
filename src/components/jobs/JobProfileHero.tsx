@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
-import { getEmployerProfilePathByCompanyName } from '@/components/employers/employerSlug';
+import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import JobCompanyLogo from './JobCompanyLogo';
 import {
   getExperienceShortLabel,
@@ -23,6 +23,11 @@ function MetaDivider() {
 export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
   const experienceLabel = getExperienceShortLabel(job.experienceLevel);
   const locationLabel = getJobLocationLabel(job.location);
+  const employerHref = resolveEmployerProfileHref({
+    employerSlug: job.employerSlug,
+    companyName: job.companyName,
+    allowDemoLookup: true,
+  });
 
   return (
     <section className="w-full">
@@ -48,13 +53,22 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
 
         <div className="relative z-10 flex flex-col gap-6 px-6 py-7 sm:px-8 sm:py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-10">
           <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center sm:gap-5">
-            <Link
-              href={getEmployerProfilePathByCompanyName(job.companyName)}
-              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.12)] transition-opacity hover:opacity-80 sm:h-16 sm:w-16 ${job.companyLogoBg}`}
-              title={job.companyName}
-            >
-              <JobCompanyLogo type={job.companyIconType} className="h-7 w-7 text-white sm:h-8 sm:w-8" />
-            </Link>
+            {employerHref ? (
+              <Link
+                href={employerHref}
+                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.12)] transition-opacity hover:opacity-80 sm:h-16 sm:w-16 ${job.companyLogoBg}`}
+                title={job.companyName}
+              >
+                <JobCompanyLogo type={job.companyIconType} className="h-7 w-7 text-white sm:h-8 sm:w-8" />
+              </Link>
+            ) : (
+              <div
+                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.12)] sm:h-16 sm:w-16 ${job.companyLogoBg}`}
+                title={job.companyName}
+              >
+                <JobCompanyLogo type={job.companyIconType} className="h-7 w-7 text-white sm:h-8 sm:w-8" />
+              </div>
+            )}
 
             <div className="min-w-0 flex-1">
               <motion.h1
@@ -66,12 +80,16 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
                 {job.title}
               </motion.h1>
 
-              <Link
-                href={getEmployerProfilePathByCompanyName(job.companyName)}
-                className="mt-1 inline-block text-sm font-normal text-[#45a874] transition-opacity hover:opacity-80 hover:underline"
-              >
-                {job.companyName}
-              </Link>
+              {employerHref ? (
+                <Link
+                  href={employerHref}
+                  className="mt-1 inline-block text-sm font-normal text-[#45a874] transition-opacity hover:opacity-80 hover:underline"
+                >
+                  {job.companyName}
+                </Link>
+              ) : (
+                <p className="mt-1 text-sm font-normal text-[#45a874]">{job.companyName}</p>
+              )}
 
               <p className="mt-1 text-sm font-normal text-[#52C47F]">{experienceLabel}</p>
 

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { ArrowUpRight, Star } from 'lucide-react';
-import { getEmployerProfilePathByCompanyName } from '@/components/employers/employerSlug';
+import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
+import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectBuyerMeta, type Project } from './projectListData';
 
 function CompanyLogo({
@@ -81,6 +82,40 @@ export default function ProjectSidebar({
   onContactBuyer,
 }: ProjectSidebarProps) {
   const buyer = getProjectBuyerMeta(project);
+  const employerHref = resolveEmployerProfileHref({
+    employerSlug: project.employerSlug,
+    companyName: project.companyName,
+    allowDemoLookup: !project.slug,
+  });
+
+  const buyerProfile = (
+    <>
+      <div className="relative shrink-0">
+        <EmployerAvatarCircle
+          name={project.employerLogoText || project.companyName}
+          avatarUrl={project.ownerAvatarUrl}
+          avatarBg={project.companyLogoBg}
+          verified={project.verified}
+          sizeClass="h-14 w-14"
+          textClass="text-base font-semibold"
+          useDemoIcon={!project.slug}
+          iconType={project.companyIconType}
+          renderIcon={(type, className) => (
+            <CompanyLogo type={type} className={className} />
+          )}
+        />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[17px] font-normal text-black hover:text-[#52C47F]">{project.companyName}</p>
+        <p className="mt-1 text-[15px] font-normal text-neutral-500">{project.category}</p>
+        <div className="mt-2 flex items-center gap-1.5 text-[15px] font-normal text-black">
+          <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+          <span>{buyer.rating.toFixed(1)}</span>
+          <span className="text-neutral-500">({buyer.reviews} reviews)</span>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <aside className="mx-auto w-full max-w-[19.5rem] sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:self-start">
@@ -106,27 +141,18 @@ export default function ProjectSidebar({
         <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
           <h3 className="mb-5 text-xl font-normal tracking-tight text-black">About Buyer</h3>
 
-          <Link
-            href={getEmployerProfilePathByCompanyName(project.companyName)}
-            className="flex items-start gap-3.5 transition-opacity hover:opacity-80"
-          >
-            <div
-              className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white ${project.companyLogoBg}`}
+          {employerHref ? (
+            <Link
+              href={employerHref}
+              className="flex items-start gap-3.5 transition-opacity hover:opacity-80"
             >
-              <CompanyLogo type={project.companyIconType} className="h-7 w-7 text-white" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[17px] font-normal text-black hover:text-[#52C47F]">{project.companyName}</p>
-              <p className="mt-1 text-[15px] font-normal text-neutral-500">{project.category}</p>
-              <div className="mt-2 flex items-center gap-1.5 text-[15px] font-normal text-black">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                <span>{buyer.rating.toFixed(1)}</span>
-                <span className="text-neutral-500">({buyer.reviews} reviews)</span>
-              </div>
-            </div>
-          </Link>
+              {buyerProfile}
+            </Link>
+          ) : (
+            <div className="flex items-start gap-3.5">{buyerProfile}</div>
+          )}
 
-          <div className="mt-6 grid grid-cols-3 gap-3 border-t border-black pt-5 text-center">
+          <div className="mt-6 grid grid-cols-3 gap-3 border-t border-neutral-200 pt-5 text-center">
             <div>
               <p className="text-xs font-normal text-neutral-400">Location</p>
               <p className="mt-1.5 text-sm font-normal text-black">{buyer.buyerLocation}</p>

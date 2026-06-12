@@ -8,7 +8,7 @@ interface ProjectSkillsRequiredProps {
 
 export default function ProjectSkillsRequired({ project }: ProjectSkillsRequiredProps) {
   return (
-    <section className="border-t border-black pt-10">
+    <section className="border-t border-neutral-200 pt-10">
       <h2 className="mb-5 text-xl font-normal tracking-tight text-black sm:text-2xl">
         Skills Required
       </h2>

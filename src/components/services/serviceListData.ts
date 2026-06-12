@@ -13,6 +13,8 @@ export interface ServicePackage {
 
 export interface Service {
   id: string;
+  /** Backend task slug for API-backed services */
+  slug?: string;
   category: string;
   title: string;
   rating: number;
@@ -31,6 +33,14 @@ export interface Service {
   };
   startingPrice: number;
   deliveryTime: '24h' | '3days' | '7days' | 'anytime';
+  /** Raw delivery time from dashboard form (e.g. "3 Days") */
+  deliveryTimeLabel?: string;
+  /** Raw languages from dashboard form */
+  languages?: string[];
+  /** Raw response time from dashboard form */
+  responseTime?: string;
+  /** Human-readable location for API-backed services */
+  locationLabel?: string;
   budget: number;
   designTool: 'Figma' | 'Sketch' | 'Adobe XD' | 'Illustrator' | 'Photoshop';
   location: 'United States' | 'United Kingdom' | 'Germany' | 'Remote';
@@ -39,12 +49,16 @@ export interface Service {
   description?: string;
   aboutIntro?: string;
   aboutOutro?: string;
+  /** Skills from dashboard form */
+  skills?: string[];
   servicesProvided?: string[];
   appTypes?: string[];
   designTools?: string[];
   devices?: string[];
   faq?: ServiceFaqItem[];
   reviewsData?: ServiceReviewItem[];
+  /** Packages from dashboard_meta when loaded from API */
+  apiPackages?: ServicePackage[];
 }
 
 export interface ServiceReviewItem {
@@ -66,9 +80,8 @@ export interface ServiceFaqItem {
 export interface ServiceAboutContent {
   intro: string;
   outro: string;
-  servicesProvided: string[];
+  skills: string[];
   appTypes: string[];
-  designTools: string[];
   devices: string[];
 }
 
@@ -383,11 +396,16 @@ const GALLERY_FALLBACKS = [
 const SERVICE_GALLERY_MAX = 5;
 
 export function getServiceGallery(service: Service): string[] {
-  if (service.images?.length) return service.images.slice(0, SERVICE_GALLERY_MAX);
-  return [service.image, ...GALLERY_FALLBACKS].slice(0, SERVICE_GALLERY_MAX);
+  if (service.images?.length) {
+    const unique = [...new Set(service.images.filter(Boolean))];
+    return unique.slice(0, SERVICE_GALLERY_MAX);
+  }
+  if (service.image) return [service.image];
+  return GALLERY_FALLBACKS.slice(0, SERVICE_GALLERY_MAX);
 }
 
 export function getDeliveryLabel(service: Service): string {
+  if (service.deliveryTimeLabel?.trim()) return service.deliveryTimeLabel.trim();
   switch (service.deliveryTime) {
     case '24h':
       return '1-3 Days';
@@ -401,16 +419,22 @@ export function getDeliveryLabel(service: Service): string {
 }
 
 export function getEnglishLevel(service: Service): string {
+  if (service.languages?.length) return service.languages.join(', ');
   if (service.level === 'Top Rated' || service.level === 'Level 2') return 'Professional';
   if (service.level === 'Level 1') return 'Fluent';
   return 'Conversational';
 }
 
 export function getLocationLabel(service: Service): string {
+  if (service.locationLabel?.trim()) return service.locationLabel.trim();
   return LOCATION_LABELS[service.location];
 }
 
 export function getServicePackages(service: Service): ServicePackage[] {
+  if (service.apiPackages?.length) {
+    return service.apiPackages;
+  }
+
   const base = service.startingPrice;
 
   return [
@@ -461,18 +485,27 @@ export function getServiceFaq(service: Service): ServiceFaqItem[] {
 }
 
 export function getServiceAbout(service: Service): ServiceAboutContent {
+  const fromApi = Boolean(service.slug);
+  const fallbackIntro = `Professional ${service.category.toLowerCase()} delivered by ${service.author.name}. I focus on clean layouts, clear hierarchy, and designs that convert visitors into customers.`;
+  const fallbackOutro =
+    'I work closely with clients through every stage — from wireframes and mood boards to polished UI files ready for development. Delivery is on time, revisions are included, and source files are always provided.';
+
   return {
-    intro:
-      service.aboutIntro ??
-      service.description ??
-      `Professional ${service.category.toLowerCase()} delivered by ${service.author.name}. I focus on clean layouts, clear hierarchy, and designs that convert visitors into customers.`,
-    outro:
-      service.aboutOutro ??
-      `I work closely with clients through every stage — from wireframes and mood boards to polished UI files ready for development. Delivery is on time, revisions are included, and source files are always provided.`,
-    servicesProvided: service.servicesProvided ?? DEFAULT_SERVICES_PROVIDED,
-    appTypes: service.appTypes ?? ['Business', 'Food & drink', 'Graphics & design'],
-    designTools: service.designTools ?? DESIGN_TOOL_SETS[service.designTool],
-    devices: service.devices ?? ['Mobile', 'Desktop'],
+    intro: service.aboutIntro?.trim() || service.description?.trim() || (fromApi ? '' : fallbackIntro),
+    outro: service.aboutOutro?.trim() || (fromApi ? '' : fallbackOutro),
+    skills: service.skills?.length
+      ? service.skills
+      : fromApi
+        ? []
+        : service.designTools?.length
+          ? service.designTools
+          : DESIGN_TOOL_SETS[service.designTool],
+    appTypes: service.appTypes?.length
+      ? service.appTypes
+      : fromApi
+        ? []
+        : ['Business', 'Food & drink', 'Graphics & design'],
+    devices: service.devices?.length ? service.devices : fromApi ? [] : ['Mobile', 'Desktop'],
   };
 }
 

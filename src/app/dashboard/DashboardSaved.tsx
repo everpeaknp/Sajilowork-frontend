@@ -1,520 +1,52 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Trash2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 import DeleteConfirmModal from './DeleteConfirmModal';
-
-type SavedSubTab = 'services' | 'project' | 'jobs';
-
-interface SavedItem {
-  id: string;
-  category: string;
-  title: string;
-  rating: number;
-  reviewsCount: number;
-  image: string;
-  authorName: string;
-  authorAvatar: string;
-  price: number;
-}
-
-const INITIAL_SERVICES: SavedItem[] = [
-  {
-    id: 'srv-1',
-    category: 'Web & App Design',
-    title: 'I will design modern websites in figma or adobe xd',
-    rating: 4.82,
-    reviewsCount: 94,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e458c9?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 983,
-  },
-  {
-    id: 'srv-2',
-    category: 'Art & Illustration',
-    title: 'I will create modern flat design illustration',
-    rating: 4.82,
-    reviewsCount: 94,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 983,
-  },
-  {
-    id: 'srv-3',
-    category: 'Design & Creative',
-    title: 'I will build a fully responsive design in HTML,CSS, bootstrap, and javascript',
-    rating: 4.82,
-    reviewsCount: 94,
-    image:
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 983,
-  },
-  {
-    id: 'srv-4',
-    category: 'Web & App Design',
-    title: 'I will do mobile app development for ios and android',
-    rating: 4.82,
-    reviewsCount: 94,
-    image:
-      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-    price: 983,
-  },
-  {
-    id: 'srv-5',
-    category: 'Web & App Design',
-    title: 'I will design interactive SaaS web flow prototypes',
-    rating: 4.91,
-    reviewsCount: 68,
-    image:
-      'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 850,
-  },
-  {
-    id: 'srv-6',
-    category: 'Art & Illustration',
-    title: 'I will create geometric minimalist vector portraits',
-    rating: 4.75,
-    reviewsCount: 110,
-    image:
-      'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 450,
-  },
-  {
-    id: 'srv-7',
-    category: 'Design & Creative',
-    title: 'I will create a comprehensive corporate identity package',
-    rating: 4.88,
-    reviewsCount: 52,
-    image:
-      'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 1200,
-  },
-  {
-    id: 'srv-8',
-    category: 'Web & App Design',
-    title: 'I will craft premium custom dashboard widgets in React',
-    rating: 4.96,
-    reviewsCount: 81,
-    image:
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 750,
-  },
-  {
-    id: 'srv-9',
-    category: 'Web & App Design',
-    title: 'I will integrate robust Stripe checkout flows into your site',
-    rating: 4.85,
-    reviewsCount: 30,
-    image:
-      'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 600,
-  },
-  {
-    id: 'srv-10',
-    category: 'Art & Illustration',
-    title: 'I will render cute 3D editorial icons for landing pages',
-    rating: 4.9,
-    reviewsCount: 45,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 320,
-  },
-  {
-    id: 'srv-11',
-    category: 'Design & Creative',
-    title: 'I will curate a custom typographic editorial style brandbook',
-    rating: 4.67,
-    reviewsCount: 22,
-    image:
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 1100,
-  },
-  {
-    id: 'srv-12',
-    category: 'Web & App Design',
-    title: 'I will optimize mobile loading speeds to 100% on lighthouse',
-    rating: 4.99,
-    reviewsCount: 61,
-    image:
-      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 900,
-  },
-  {
-    id: 'srv-13',
-    category: 'Web & App Design',
-    title: 'I will build high fidelity Shopify Plus custom storefront themes',
-    rating: 4.88,
-    reviewsCount: 39,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e408c9?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 1500,
-  },
-  {
-    id: 'srv-14',
-    category: 'Art & Illustration',
-    title: 'I will design beautiful custom greeting cards with handlettering',
-    rating: 4.8,
-    reviewsCount: 19,
-    image:
-      'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 180,
-  },
-  {
-    id: 'srv-15',
-    category: 'Design & Creative',
-    title: 'I will produce responsive email template designs with MJML',
-    rating: 4.79,
-    reviewsCount: 28,
-    image:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 440,
-  },
-  {
-    id: 'srv-16',
-    category: 'Web & App Design',
-    title: 'I will perform comprehensive automated and manual UX audit',
-    rating: 4.93,
-    reviewsCount: 77,
-    image:
-      'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-    price: 890,
-  },
-];
-
-const INITIAL_PROJECTS: SavedItem[] = [
-  {
-    id: 'proj-1',
-    category: 'Mobile Layout',
-    title: 'High Fidelity iOS Swift UI Kit design structure',
-    rating: 4.95,
-    reviewsCount: 12,
-    image:
-      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 1200,
-  },
-  {
-    id: 'proj-2',
-    category: 'Web Frontend',
-    title: 'Corporate Website Redesign for Global Logistics SaaS',
-    rating: 4.88,
-    reviewsCount: 29,
-    image:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 2400,
-  },
-  {
-    id: 'proj-3',
-    category: 'E-Commerce',
-    title: 'Modern Minimalist Fashion Storefront UI Concept',
-    rating: 4.9,
-    reviewsCount: 18,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e408c9?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 1800,
-  },
-  {
-    id: 'proj-4',
-    category: 'Fintech Platform',
-    title: 'Cryptocurrency Real-Time Tracking Sandbox Dashboard',
-    rating: 4.76,
-    reviewsCount: 35,
-    image:
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 3200,
-  },
-  {
-    id: 'proj-5',
-    category: 'Healthcare App',
-    title: 'Patient Tele-health Scheduling & Consultant Portal',
-    rating: 4.92,
-    reviewsCount: 42,
-    image:
-      'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-    price: 4300,
-  },
-  {
-    id: 'proj-6',
-    category: 'AR VR Systems',
-    title: 'Interactive Architectural Spatial Hologram Mockup',
-    rating: 4.85,
-    reviewsCount: 16,
-    image:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 5500,
-  },
-  {
-    id: 'proj-7',
-    category: 'Workspace Tools',
-    title: 'Collaborative Real-time Whiteboard Widget Pack',
-    rating: 4.8,
-    reviewsCount: 22,
-    image:
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 1950,
-  },
-  {
-    id: 'proj-8',
-    category: 'Machine Learning',
-    title: 'Computer Vision Tagging and Dataset Cleaning Utility',
-    rating: 4.97,
-    reviewsCount: 50,
-    image:
-      'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 6800,
-  },
-  {
-    id: 'proj-9',
-    category: 'Food Delivery',
-    title: 'Local Bistro Direct ordering checkout website',
-    rating: 4.7,
-    reviewsCount: 14,
-    image:
-      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 1100,
-  },
-  {
-    id: 'proj-10',
-    category: 'Travel Booker',
-    title: 'Interactive Alpine Cabin Rental list with interactive map',
-    rating: 4.94,
-    reviewsCount: 31,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e408c9?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 2200,
-  },
-];
-
-const INITIAL_JOBS: SavedItem[] = [
-  {
-    id: 'job-1',
-    category: 'React Specialist',
-    title: 'Need senior React & Tailwind developer for SaaS portal',
-    rating: 4.78,
-    reviewsCount: 42,
-    image:
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 1540,
-  },
-  {
-    id: 'job-2',
-    category: 'Mobile Native',
-    title: 'iOS Native Developer needed for modern Swift modular SDK',
-    rating: 4.91,
-    reviewsCount: 23,
-    image:
-      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 3500,
-  },
-  {
-    id: 'job-3',
-    category: 'Backend Node',
-    title: 'Build highly optimized REST APIs with Prisma & Postgres',
-    rating: 4.85,
-    reviewsCount: 19,
-    image:
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 2800,
-  },
-  {
-    id: 'job-4',
-    category: 'Creative Lead',
-    title: 'Figma UI/UX master needed for comprehensive SaaS dashboard',
-    rating: 4.96,
-    reviewsCount: 51,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e408c9?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 1800,
-  },
-  {
-    id: 'job-5',
-    category: 'Cloud Ops',
-    title: 'AWS DevOps specialist required for containerized CI/CD migration',
-    rating: 4.79,
-    reviewsCount: 30,
-    image:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 4900,
-  },
-  {
-    id: 'job-6',
-    category: 'AI Integration',
-    title: 'Embed Gemini LLM into custom Customer Service chat interface',
-    rating: 4.93,
-    reviewsCount: 18,
-    image:
-      'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
-    price: 4000,
-  },
-  {
-    id: 'job-7',
-    category: 'Vue Specialist',
-    title: 'Senior Vue.js developer for custom CMS integration',
-    rating: 4.65,
-    reviewsCount: 15,
-    image:
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 2100,
-  },
-  {
-    id: 'job-8',
-    category: 'Cybersecurity',
-    title: 'Perform external white box penetration testing on web application',
-    rating: 4.97,
-    reviewsCount: 34,
-    image:
-      'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    price: 6500,
-  },
-  {
-    id: 'job-9',
-    category: 'Marketing Graphic',
-    title: 'Need high converting social media graphics banner template',
-    rating: 4.8,
-    reviewsCount: 11,
-    image:
-      'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Ali Tufan',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    price: 850,
-  },
-  {
-    id: 'job-10',
-    category: 'Next.js Builder',
-    title: 'Refactor static landing pages to Next.js App Router structure',
-    rating: 4.89,
-    reviewsCount: 26,
-    image:
-      'https://images.unsplash.com/photo-1541462608141-ad4979e408c9?auto=format&fit=crop&w=600&q=80',
-    authorName: 'Wanda Runo',
-    authorAvatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    price: 1900,
-  },
-];
+import { formatNPR } from '@/lib/nepalLocale';
+import {
+  collectSavedItemsForTab,
+  mapTaskToDashboardSavedItem,
+  savedItemDetailPath,
+  type DashboardSavedItem,
+  type SavedSubTab,
+} from '@/lib/dashboardSaved';
+import { useSavedJobIds, setJobSaved } from '@/components/jobs/jobBookmarks';
+import { useSavedProjectIds, setProjectSaved } from '@/components/projects/projectBookmarks';
+import { useSavedServiceIds, setServiceSaved } from '@/components/services/serviceBookmarks';
+import { extractTaskList } from '@/lib/taskUtils';
+import { taskService } from '@/services';
 
 function SavedCard({
   item,
   onDelete,
+  onOpen,
 }: {
-  item: SavedItem;
-  onDelete: (id: string) => void;
+  item: DashboardSavedItem;
+  onDelete: (item: DashboardSavedItem) => void;
+  onOpen: (item: DashboardSavedItem) => void;
 }) {
   return (
     <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-neutral-100 bg-white transition-all hover:shadow-md">
       <div>
         <div className="relative h-[200px] w-full overflow-hidden bg-neutral-100">
-          <img
-            src={item.image}
-            alt={item.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            referrerPolicy="no-referrer"
-          />
           <button
             type="button"
-            onClick={() => onDelete(item.id)}
+            onClick={() => onOpen(item)}
+            className="block h-full w-full cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-[#52C47F]/40"
+          >
+            <img
+              src={item.image}
+              alt={item.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              referrerPolicy="no-referrer"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(item)}
             className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-100 bg-white text-black shadow-sm outline-none transition-all hover:scale-110 hover:text-red-500 active:scale-95"
             title="Remove from bookmarks"
           >
@@ -522,7 +54,11 @@ function SavedCard({
           </button>
         </div>
 
-        <div className="space-y-2.5 p-5 pb-4">
+        <button
+          type="button"
+          onClick={() => onOpen(item)}
+          className="w-full cursor-pointer space-y-2.5 p-5 pb-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#52C47F]/30"
+        >
           <span className="block text-xs font-normal tracking-tight text-neutral-500">
             {item.category}
           </span>
@@ -531,10 +67,21 @@ function SavedCard({
           </h4>
           <div className="flex items-center gap-1.5 text-xs font-normal text-neutral-800">
             <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500 stroke-none" />
-            <span className="font-normal text-neutral-950">{item.rating.toFixed(2)}</span>
-            <span className="font-normal text-neutral-500">{item.reviewsCount} reviews</span>
+            <span className="font-normal text-neutral-950">
+              {item.rating > 0 ? item.rating.toFixed(2) : '—'}
+            </span>
+            <span className="font-normal text-neutral-500">
+              {item.reviewsCount}{' '}
+              {item.kind === 'service'
+                ? item.reviewsCount === 1
+                  ? 'review'
+                  : 'reviews'
+                : item.reviewsCount === 1
+                  ? 'offer'
+                  : 'offers'}
+            </span>
           </div>
-        </div>
+        </button>
       </div>
 
       <div className="px-5 pb-5">
@@ -566,12 +113,12 @@ function SavedCard({
               <div className="text-xs font-normal text-neutral-950">
                 <span className="mb-0.5 block text-[10.5px] text-neutral-500">Starting</span>
                 <span className="mb-0.5 block text-[11.5px] text-neutral-500">at </span>
-                <span className="text-sm font-medium text-black">${item.price}</span>
+                <span className="text-sm font-medium text-black">{formatNPR(item.price)}</span>
               </div>
             ) : (
               <div className="text-xs font-normal">
                 <span className="text-[10px] text-neutral-500">Starting at </span>
-                <span className="text-sm font-medium text-black">${item.price}</span>
+                <span className="text-sm font-medium text-black">{formatNPR(item.price)}</span>
               </div>
             )}
           </div>
@@ -582,47 +129,112 @@ function SavedCard({
 }
 
 export default function DashboardSaved() {
+  const router = useRouter();
   const [activeSubTab, setActiveSubTab] = useState<SavedSubTab>('services');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const [services, setServices] = useState<SavedItem[]>(INITIAL_SERVICES);
-  const [projects, setProjects] = useState<SavedItem[]>(INITIAL_PROJECTS);
-  const [jobs, setJobs] = useState<SavedItem[]>(INITIAL_JOBS);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const savedServiceIds = useSavedServiceIds();
+  const savedProjectIds = useSavedProjectIds();
+  const savedJobIds = useSavedJobIds();
+
+  const [taskBookmarks, setTaskBookmarks] = useState<DashboardSavedItem[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<DashboardSavedItem | null>(null);
+  const [removing, setRemoving] = useState(false);
+
+  const loadTaskBookmarks = useCallback(async () => {
+    setTasksLoading(true);
+    try {
+      const response = await taskService.getBookmarkedTasks();
+      if (response.success && response.data) {
+        const tasks = extractTaskList(response.data);
+        setTaskBookmarks(tasks.map(mapTaskToDashboardSavedItem));
+      } else {
+        setTaskBookmarks([]);
+      }
+    } catch {
+      setTaskBookmarks([]);
+    } finally {
+      setTasksLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadTaskBookmarks();
+  }, [loadTaskBookmarks]);
 
   const handleTabChange = (tab: SavedSubTab) => {
     setActiveSubTab(tab);
     setCurrentPage(1);
   };
 
-  const confirmDelete = () => {
-    if (deleteTargetId === null) return;
+  const allItems = useMemo(
+    () =>
+      collectSavedItemsForTab(
+        activeSubTab,
+        savedServiceIds,
+        savedProjectIds,
+        savedJobIds,
+        taskBookmarks,
+      ),
+    [activeSubTab, savedServiceIds, savedProjectIds, savedJobIds, taskBookmarks],
+  );
 
-    if (activeSubTab === 'services') {
-      setServices((prev) => prev.filter((item) => item.id !== deleteTargetId));
-    } else if (activeSubTab === 'project') {
-      setProjects((prev) => prev.filter((item) => item.id !== deleteTargetId));
-    } else {
-      setJobs((prev) => prev.filter((item) => item.id !== deleteTargetId));
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setRemoving(true);
+    try {
+      if (deleteTarget.kind === 'task') {
+        const response = await taskService.unbookmarkTask(deleteTarget.slug);
+        if (response.success) {
+          setTaskBookmarks((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+          toast.success('Removed from saved');
+          setDeleteTarget(null);
+        } else {
+          toast.error(response.message || 'Could not remove bookmark');
+        }
+        return;
+      }
+
+      if (deleteTarget.kind === 'job') {
+        setJobSaved(deleteTarget.id, false);
+      } else if (deleteTarget.kind === 'project') {
+        setProjectSaved(deleteTarget.id, false);
+      } else if (deleteTarget.kind === 'service') {
+        setServiceSaved(deleteTarget.id, false);
+      }
+
+      toast.success('Removed from saved');
+      setDeleteTarget(null);
+    } catch {
+      toast.error('Could not remove bookmark');
+    } finally {
+      setRemoving(false);
     }
-    setDeleteTargetId(null);
   };
 
-  const activeList =
-    activeSubTab === 'services' ? services : activeSubTab === 'project' ? projects : jobs;
+  const openItem = (item: DashboardSavedItem) => {
+    router.push(savedItemDetailPath(item));
+  };
+
   const activeLabel =
     activeSubTab === 'services' ? 'services' : activeSubTab === 'project' ? 'projects' : 'jobs';
 
-  const totalItems = activeList.length;
+  const totalItems = allItems.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  const indexOfLastItem = currentPage * itemsPerPage;
+  const safePage = Math.min(currentPage, totalPages);
+  const indexOfLastItem = safePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = activeList.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = allItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const showLoading =
+    activeSubTab === 'jobs' && tasksLoading && totalItems === 0 && savedJobIds.length === 0;
 
   const pageButtonClass = (page: number) =>
     `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full border-0 text-sm font-normal outline-none transition-all focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 ${
-      currentPage === page
+      safePage === page
         ? 'bg-[#52C47F] font-medium text-white shadow-sm'
         : 'bg-transparent text-black hover:text-[#52C47F]'
     }`;
@@ -651,15 +263,22 @@ export default function DashboardSaved() {
           </div>
         </div>
 
-        {totalItems === 0 ? (
+        {showLoading ? (
+          <div className="py-24 text-center text-sm text-neutral-400">Loading saved items…</div>
+        ) : totalItems === 0 ? (
           <div className="py-24 text-center text-sm text-neutral-400">
-            No saved {activeSubTab} found.
+            No saved {activeLabel} found.
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {currentItems.map((item) => (
-                <SavedCard key={item.id} item={item} onDelete={setDeleteTargetId} />
+                <SavedCard
+                  key={`${item.kind}-${item.id}`}
+                  item={item}
+                  onDelete={setDeleteTarget}
+                  onOpen={openItem}
+                />
               ))}
             </div>
 
@@ -668,7 +287,7 @@ export default function DashboardSaved() {
                 <button
                   type="button"
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
+                  disabled={safePage === 1}
                   className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
                 >
                   <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
@@ -694,19 +313,21 @@ export default function DashboardSaved() {
                     </span>
                   ) : null}
 
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage(totalPages)}
-                    className={pageButtonClass(totalPages > 5 ? totalPages : 20)}
-                  >
-                    {totalPages > 5 ? totalPages : 20}
-                  </button>
+                  {totalPages > 5 ? (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={pageButtonClass(totalPages)}
+                    >
+                      {totalPages}
+                    </button>
+                  ) : null}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
+                  disabled={safePage === totalPages}
                   className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
                 >
                   <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
@@ -714,8 +335,8 @@ export default function DashboardSaved() {
               </div>
 
               <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-                {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, totalItems)} of {totalItems * 5}+{' '}
-                {activeLabel} available
+                {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, totalItems)} of {totalItems}{' '}
+                {activeLabel} saved
               </div>
             </div>
           </>
@@ -723,9 +344,9 @@ export default function DashboardSaved() {
       </div>
 
       <DeleteConfirmModal
-        open={deleteTargetId !== null}
-        onClose={() => setDeleteTargetId(null)}
-        onConfirm={confirmDelete}
+        open={deleteTarget !== null}
+        onClose={() => !removing && setDeleteTarget(null)}
+        onConfirm={() => void confirmDelete()}
       />
     </div>
   );

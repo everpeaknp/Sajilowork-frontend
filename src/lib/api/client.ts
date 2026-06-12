@@ -2,6 +2,13 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, InternalAxiosRequ
 import Cookies from 'js-cookie';
 import { ApiResponse, ApiError } from '@/types';
 
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    /** Do not attach JWT — required for public AllowAny endpoints when the stored token is invalid. */
+    skipAuth?: boolean;
+  }
+}
+
 // ============================================================================
 // Custom Error Class
 // ============================================================================
@@ -45,6 +52,16 @@ class ApiErrorClass extends Error {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
 const TOKEN_REFRESH_ENDPOINT = '/auth/token/refresh/';
 const REQUEST_TIMEOUT = 30000; // 30 seconds
+
+/** Endpoints where 401 means invalid credentials, not an expired access token. */
+const PUBLIC_AUTH_PATHS = [
+  '/auth/login/',
+  '/auth/register/',
+  '/users/register/',
+  '/auth/password-reset/',
+  '/users/password-reset/',
+  '/users/password-reset/confirm/',
+];
 
 // Token storage keys
 const ACCESS_TOKEN_KEY = 'access_token';
@@ -230,8 +247,9 @@ class ApiClient {
         }
 
         const token = tokenManager.getAccessToken();
-        
-        if (token && config.headers) {
+        const skipAuth = config.skipAuth === true;
+
+        if (token && config.headers && !skipAuth) {
           config.headers.Authorization = `Bearer ${token}`;
         }
 
@@ -274,8 +292,11 @@ class ApiClient {
           return this.instance(originalRequest);
         }
 
-        // Handle 401 Unauthorized - Token expired
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Handle 401 Unauthorized - Token expired (skip for login/register failures)
+        const requestUrl = originalRequest.url || '';
+        const isPublicAuthRequest = PUBLIC_AUTH_PATHS.some((path) => requestUrl.includes(path));
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isPublicAuthRequest) {
           if (this.isRefreshing) {
             // Queue the request while refreshing
             return new Promise((resolve, reject) => {
@@ -351,10 +372,13 @@ class ApiClient {
    */
   private handleAuthFailure(): void {
     tokenManager.clearTokens();
-    
-    // Redirect to login if on client side
+
     if (typeof window !== 'undefined') {
-      window.location.href = '/signin';
+      const path = window.location.pathname;
+      const onAuthPage = path.startsWith('/signin') || path.startsWith('/signup');
+      if (!onAuthPage) {
+        window.location.href = '/signin';
+      }
     }
   }
 

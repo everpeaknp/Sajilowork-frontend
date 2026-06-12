@@ -1,6 +1,16 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { CURRENCY_INPUT_PREFIX, formatDashboardTypeCost, formatNPR } from '@/lib/nepalLocale';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type MouseEvent,
+} from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
   Check,
@@ -13,6 +23,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import LocationFields, { type LocationType } from '@/components/post-task/LocationFields';
+import { parseServiceSkills } from '@/lib/dashboardListingApi';
 import FormAccordionSection from './FormAccordionSection';
 import type { FormUploadsPayload, Service } from './types';
 
@@ -49,12 +61,14 @@ export type CreateServiceFormData = {
   title: string;
   price: string;
   category: string;
-  englishLevel: string;
+  languages: string[];
   responseTime: string;
   deliveryTime: string;
-  skills: string;
-  country: string;
-  city: string;
+  skills: string[];
+  locationType: LocationType;
+  location: string;
+  latitude?: number;
+  longitude?: number;
   serviceDetail: string;
   packages: PackagesConfig;
 };
@@ -120,13 +134,24 @@ function createDefaultPackagesConfig(): PackagesConfig {
         id: 'total',
         label: 'Total',
         type: 'text',
-        values: { [basic]: '$29', [standard]: '$49', [premium]: '$89' },
+        values: {
+          [basic]: formatNPR(2900),
+          [standard]: formatNPR(4900),
+          [premium]: formatNPR(8900),
+        },
       },
     ],
   };
 }
 
 const DEFAULT_PACKAGES_CONFIG = createDefaultPackagesConfig();
+
+export function normalizePackagesConfig(config?: PackagesConfig | null): PackagesConfig {
+  if (config?.tiers?.length && config?.rows?.length) {
+    return structuredClone(config);
+  }
+  return structuredClone(DEFAULT_PACKAGES_CONFIG);
+}
 
 function addPackageTier(config: PackagesConfig): PackagesConfig {
   const id = newId('tier');
@@ -185,17 +210,17 @@ const EMPTY_CREATE_FORM: CreateServiceFormData = {
   title: '',
   price: '10',
   category: '',
-  englishLevel: '',
+  languages: [],
   responseTime: '',
   deliveryTime: '',
-  skills: '',
-  country: 'United States',
-  city: 'New York',
+  skills: [],
+  locationType: 'in-person',
+  location: '',
   serviceDetail: '',
   packages: DEFAULT_PACKAGES_CONFIG,
 };
 
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   'Web & App Design',
   'Art & Illustration',
   'Design & Creative',
@@ -204,20 +229,10 @@ const CATEGORIES = [
   'Video & Animation',
 ];
 
-const ENGLISH_LEVELS = ['Basic', 'Conversational', 'Fluent', 'Native'];
+const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Nepali', 'Hindi'];
 const RESPONSE_TIMES = ['1 hour', '2 hours', '6 hours', '12 hours', '24 hours'];
 const DELIVERY_TIMES = ['1 Day', '2 Days', '3 Days', '5 Days', '7 Days'];
 const SKILLS = ['Figma', 'Adobe XD', 'UI/UX Design', 'HTML/CSS', 'React', 'Illustration', 'Logo Design'];
-const COUNTRIES = ['United States', 'United Kingdom', 'Nepal', 'Germany', 'Australia', 'Canada'];
-const CITIES: Record<string, string[]> = {
-  'United States': ['New York', 'San Francisco', 'Los Angeles', 'Chicago'],
-  'United Kingdom': ['London', 'Manchester', 'Birmingham'],
-  Nepal: ['Kathmandu', 'Pokhara', 'Lalitpur'],
-  Germany: ['Berlin', 'Munich', 'Hamburg'],
-  Australia: ['Sydney', 'Melbourne', 'Brisbane'],
-  Canada: ['Toronto', 'Vancouver', 'Montreal'],
-};
-
 const DEFAULT_SERVICE_IMAGE =
   'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80';
 
@@ -260,6 +275,153 @@ function SelectField({
   );
 }
 
+function MultiSelectField({
+  label,
+  value,
+  onChange,
+  placeholder = 'Nothing selected',
+  options,
+}: {
+  label: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+  options: string[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const updatePanelPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    setPanelStyle({
+      position: 'fixed',
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    updatePanelPosition();
+    window.addEventListener('resize', updatePanelPosition);
+    window.addEventListener('scroll', updatePanelPosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePanelPosition);
+      window.removeEventListener('scroll', updatePanelPosition, true);
+    };
+  }, [open, updatePanelPosition]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: globalThis.MouseEvent) => {
+      const target = event.target as Node;
+      if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return;
+      }
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [open]);
+
+  const toggle = (option: string) => {
+    if (value.includes(option)) {
+      onChange(value.filter((item) => item !== option));
+      return;
+    }
+    onChange([...value, option]);
+  };
+
+  const remove = (option: string, event: MouseEvent) => {
+    event.stopPropagation();
+    onChange(value.filter((item) => item !== option));
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <label className={labelClass}>{label}</label>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => {
+          setOpen((prev) => {
+            if (!prev) updatePanelPosition();
+            return !prev;
+          });
+        }}
+        className={`${fieldClass} flex min-h-[46px] w-full flex-wrap items-center gap-1.5 text-left`}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        {value.length === 0 ? (
+          <span className="text-neutral-400">{placeholder}</span>
+        ) : (
+          value.map((skill) => (
+            <span
+              key={skill}
+              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800"
+            >
+              {skill}
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(event) => remove(skill, event)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    remove(skill, event as unknown as MouseEvent);
+                  }
+                }}
+                className="text-neutral-500 hover:text-neutral-800"
+                aria-label={`Remove ${skill}`}
+              >
+                <X className="h-3 w-3" />
+              </span>
+            </span>
+          ))
+        )}
+      </button>
+      {open && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              ref={panelRef}
+              role="listbox"
+              aria-multiselectable
+              style={panelStyle}
+              className="max-h-56 overflow-y-auto border border-neutral-200 bg-white shadow-lg"
+            >
+              {options.map((option) => {
+                const checked = value.includes(option);
+                return (
+                  <label
+                    key={option}
+                    className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(option)}
+                      className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35]"
+                    />
+                    {option}
+                  </label>
+                );
+              })}
+            </div>,
+            document.body,
+          )
+        : null}
+    </div>
+  );
+}
+
 function PackageCheckbox({
   checked,
   onChange,
@@ -294,23 +456,25 @@ function PackagesEditor({
   config: PackagesConfig;
   onChange: (config: PackagesConfig) => void;
 }) {
+  const safeConfig = normalizePackagesConfig(config);
+
   const updateTier = (tierId: string, patch: Partial<PackageTierColumn>) => {
     onChange({
-      ...config,
-      tiers: config.tiers.map((tier) => (tier.id === tierId ? { ...tier, ...patch } : tier)),
+      ...safeConfig,
+      tiers: safeConfig.tiers.map((tier) => (tier.id === tierId ? { ...tier, ...patch } : tier)),
     });
   };
 
   const updateRow = (rowId: string, patch: Partial<PackageRow>) => {
     onChange({
-      ...config,
-      rows: config.rows.map((row) => {
+      ...safeConfig,
+      rows: safeConfig.rows.map((row) => {
         if (row.id !== rowId) return row;
         const next = { ...row, ...patch };
 
         if (patch.type && patch.type !== row.type) {
           const values: Record<string, boolean | string> = {};
-          for (const tier of config.tiers) {
+          for (const tier of safeConfig.tiers) {
             values[tier.id] = patch.type === 'checkbox' ? false : '';
           }
           next.values = values;
@@ -323,8 +487,8 @@ function PackagesEditor({
 
   const updateRowValue = (rowId: string, tierId: string, value: boolean | string) => {
     onChange({
-      ...config,
-      rows: config.rows.map((row) =>
+      ...safeConfig,
+      rows: safeConfig.rows.map((row) =>
         row.id === rowId ? { ...row, values: { ...row.values, [tierId]: value } } : row,
       ),
     });
@@ -337,7 +501,7 @@ function PackagesEditor({
           <thead>
             <tr>
               <th className="w-[26%] pb-4 text-left font-normal text-neutral-800">Features</th>
-              {config.tiers.map((tier) => (
+              {safeConfig.tiers.map((tier) => (
                 <th key={tier.id} className="min-w-[180px] pb-4 text-left align-top font-normal">
                   <div className="space-y-2 pr-2">
                     <div className="flex items-start gap-2">
@@ -347,10 +511,10 @@ function PackagesEditor({
                         placeholder="Tier name"
                         className={packageHeaderInputClass}
                       />
-                      {config.tiers.length > 1 ? (
+                      {safeConfig.tiers.length > 1 ? (
                         <button
                           type="button"
-                          onClick={() => onChange(removePackageTier(config, tier.id))}
+                          onClick={() => onChange(removePackageTier(safeConfig, tier.id))}
                           className="mt-1 shrink-0 rounded-none p-1 text-neutral-400 transition-colors hover:text-red-600"
                           aria-label={`Remove ${tier.name} tier`}
                         >
@@ -371,7 +535,7 @@ function PackagesEditor({
             </tr>
           </thead>
           <tbody>
-            {config.rows.map((row) => (
+            {safeConfig.rows.map((row) => (
               <tr key={row.id} className="border-t border-neutral-100">
                 <td className="py-3 pr-3 align-middle">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -389,10 +553,10 @@ function PackagesEditor({
                       <option value="checkbox">Checkbox</option>
                       <option value="text">Text</option>
                     </select>
-                    {config.rows.length > 1 ? (
+                    {safeConfig.rows.length > 1 ? (
                       <button
                         type="button"
-                        onClick={() => onChange(removePackageRow(config, row.id))}
+                        onClick={() => onChange(removePackageRow(safeConfig, row.id))}
                         className="shrink-0 self-start rounded-none p-1 text-neutral-400 transition-colors hover:text-red-600 sm:self-center"
                         aria-label={`Remove ${row.label} row`}
                       >
@@ -401,7 +565,7 @@ function PackagesEditor({
                     ) : null}
                   </div>
                 </td>
-                {config.tiers.map((tier) => (
+                {safeConfig.tiers.map((tier) => (
                   <td key={tier.id} className="py-3 text-center align-middle">
                     {row.type === 'checkbox' ? (
                       <PackageCheckbox
@@ -427,7 +591,7 @@ function PackagesEditor({
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          onClick={() => onChange(addPackageTier(config))}
+          onClick={() => onChange(addPackageTier(safeConfig))}
           className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
         >
           <Plus className="h-4 w-4" />
@@ -435,7 +599,7 @@ function PackagesEditor({
         </button>
         <button
           type="button"
-          onClick={() => onChange(addPackageRow(config))}
+          onClick={() => onChange(addPackageRow(safeConfig))}
           className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
         >
           <Plus className="h-4 w-4" />
@@ -451,6 +615,7 @@ interface DashboardCreateServiceProps {
   onSubmit: (data: CreateServiceFormData, uploads: FormUploadsPayload) => void;
   initialData?: Partial<CreateServiceFormData>;
   initialGalleryUrls?: string[];
+  categoryOptions?: string[];
   mode?: 'create' | 'edit';
 }
 
@@ -464,7 +629,7 @@ export function createServiceFromForm(data: CreateServiceFormData, imageUrl?: st
       ? detail.split('\n').map((line) => line.trim()).filter(Boolean).slice(0, 3)
       : ['Professional service delivery', 'Fast response time', 'Quality guaranteed'],
     category: data.category || 'Web & App Design',
-    typeCost: `$${costVal.toFixed(2)}/Fixed`,
+    typeCost: formatDashboardTypeCost('Fixed', costVal),
     costVal,
     status: 'Pending',
     image: imageUrl || DEFAULT_SERVICE_IMAGE,
@@ -476,23 +641,31 @@ export default function DashboardCreateService({
   onSubmit,
   initialData,
   initialGalleryUrls = [],
+  categoryOptions = [],
   mode = 'create',
 }: DashboardCreateServiceProps) {
   const isEdit = mode === 'edit';
-  const [form, setForm] = useState<CreateServiceFormData>({
+  const [form, setForm] = useState<CreateServiceFormData>(() => ({
     ...EMPTY_CREATE_FORM,
-    packages: structuredClone(DEFAULT_PACKAGES_CONFIG),
     ...initialData,
-  });
+    skills: parseServiceSkills(initialData?.skills),
+    languages: parseServiceSkills(initialData?.languages),
+    packages: normalizePackagesConfig(initialData?.packages),
+  }));
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => toGalleryItems(initialGalleryUrls));
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [openSection, setOpenSection] = useState<string | null>(null);
 
+  const baseCategoryOptions =
+    categoryOptions.length > 0 ? categoryOptions : FALLBACK_CATEGORIES;
+  const categories =
+    form.category && !baseCategoryOptions.includes(form.category)
+      ? [form.category, ...baseCategoryOptions]
+      : baseCategoryOptions;
+
   const toggleSection = (id: string) => {
     setOpenSection((prev) => (prev === id ? null : id));
   };
-
-  const cityOptions = CITIES[form.country] ?? CITIES['United States'];
 
   const update = (patch: Partial<CreateServiceFormData>) => {
     setForm((prev) => ({ ...prev, ...patch }));
@@ -586,7 +759,7 @@ export default function DashboardCreateService({
               <label className={labelClass}>Price</label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-400">
-                  $
+                  {CURRENCY_INPUT_PREFIX}
                 </span>
                 <input
                   type="number"
@@ -602,13 +775,14 @@ export default function DashboardCreateService({
               label="Category"
               value={form.category}
               onChange={(category) => update({ category })}
-              options={CATEGORIES}
+              options={categories}
             />
-            <SelectField
-              label="English Level"
-              value={form.englishLevel}
-              onChange={(englishLevel) => update({ englishLevel })}
-              options={ENGLISH_LEVELS}
+            <MultiSelectField
+              label="Languages"
+              value={form.languages}
+              onChange={(languages) => update({ languages })}
+              placeholder="Select languages"
+              options={LANGUAGES}
             />
             <SelectField
               label="Response Time"
@@ -624,7 +798,7 @@ export default function DashboardCreateService({
             />
           </div>
 
-          <SelectField
+          <MultiSelectField
             label="Skills"
             value={form.skills}
             onChange={(skills) => update({ skills })}
@@ -636,29 +810,24 @@ export default function DashboardCreateService({
         <FormAccordionSection
           title="Location & Details"
           icon={MapPin}
-          description="Country, city, and service description"
+          description="Service location and description"
           isOpen={openSection === 'location'}
           onToggle={() => toggleSection('location')}
         >
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <SelectField
-              label="Country"
-              value={form.country}
-              onChange={(country) => update({ country, city: (CITIES[country] ?? [])[0] ?? '' })}
-              options={COUNTRIES}
-              placeholder="United States"
-            />
-            <SelectField
-              label="City"
-              value={form.city}
-              onChange={(city) => update({ city })}
-              options={cityOptions}
-              placeholder="New York"
-            />
-          </div>
+          <LocationFields
+            variant="dashboard"
+            showWorkModeHeading={false}
+            data={{
+              locationType: form.locationType,
+              location: form.location,
+              latitude: form.latitude,
+              longitude: form.longitude,
+            }}
+            onChange={(location) => update(location)}
+          />
 
           <div>
-            <label className={labelClass}>Services Detail</label>
+            <label className={labelClass}>Service Details</label>
             <textarea
               value={form.serviceDetail}
               onChange={(e) => update({ serviceDetail: e.target.value })}
@@ -701,10 +870,15 @@ export default function DashboardCreateService({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            {galleryItems.map((item) => (
+            {galleryItems.map((item, index) => (
               <div key={item.id} className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.preview} alt="" className="h-full w-full object-cover" />
+                {index === 0 ? (
+                  <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    Main
+                  </span>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => removeGalleryItem(item.id)}
@@ -725,8 +899,8 @@ export default function DashboardCreateService({
             </button>
           </div>
           <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500">
-            Upload multiple images. Max file size is 1MB each. Minimum dimension: 330x300. Suitable files
-            are .jpg and .png.
+            Upload multiple images — the first image is used as the main cover. Max file size is 1MB each.
+            Minimum dimension: 330x300. Suitable files are .jpg and .png.
           </p>
         </FormAccordionSection>
         </div>

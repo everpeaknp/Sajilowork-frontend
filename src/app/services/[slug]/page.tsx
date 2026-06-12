@@ -1,22 +1,67 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import '@/components/LangingHome/landing-home.css';
 import { discoverDmSans } from '@/components/LangingHome/landingTypography';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleServicePage from '@/components/services/SingleServicePage';
-import { findServiceBySlug } from '@/components/services/serviceSlug';
+import type { Service } from '@/components/services/serviceListData';
+import { fetchPublicServiceBySlug } from '@/lib/serviceApi';
 
 export default function ServiceSlugPage() {
   const params = useParams();
   const slug = typeof params.slug === 'string' ? params.slug : '';
+  const [service, setService] = useState<Service | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFoundState, setNotFoundState] = useState(false);
 
-  const service = useMemo(() => (slug ? findServiceBySlug(slug) : undefined), [slug]);
+  useEffect(() => {
+    if (!slug) {
+      setNotFoundState(true);
+      setLoading(false);
+      return;
+    }
 
-  if (!slug || !service) {
+    let cancelled = false;
+    setLoading(true);
+    setNotFoundState(false);
+
+    void fetchPublicServiceBySlug(slug)
+      .then((apiService) => {
+        if (cancelled) return;
+        if (apiService) {
+          setService(apiService);
+          return;
+        }
+        setNotFoundState(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setNotFoundState(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  if (!slug || notFoundState) {
     notFound();
+  }
+
+  if (loading || !service) {
+    return (
+      <div
+        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset flex min-h-screen items-center justify-center bg-white text-sm text-neutral-500`}
+      >
+        Loading service…
+      </div>
+    );
   }
 
   return (

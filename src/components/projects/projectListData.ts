@@ -1,7 +1,19 @@
-import { formatNPR } from '@/lib/nepalLocale';
+import type { ScheduleTimeSlot } from '@/components/post-task/ScheduleFields';
+import { formatNPR, shortenCommaSeparatedLocation } from '@/lib/nepalLocale';
+import { getTimeSlotById } from '@/lib/timeSlot';
+
+export type ProjectScheduleInfo = {
+  dateType: 'specific' | 'before' | 'both' | 'flexible' | '';
+  specificDate: string;
+  beforeDate: string;
+  timeOfDayRequired: boolean;
+  timeSlot: ScheduleTimeSlot;
+};
 
 export interface Project {
   id: string;
+  /** Backend task slug when loaded from API */
+  slug?: string;
   title: string;
   category: string;
   companyName: string;
@@ -18,6 +30,75 @@ export interface Project {
   expenseLevel: 'Expensive' | 'Intermediate' | 'Inexpensive';
   description: string;
   skills: string[];
+  /** API-backed fields from dashboard form / task */
+  languages?: string[];
+  freelancerType?: string;
+  locationLabel?: string;
+  postedDate?: string;
+  views?: number;
+  attachments?: ProjectAttachment[];
+  ownerRating?: number;
+  ownerReviews?: number;
+  schedule?: ProjectScheduleInfo;
+  /** Task owner id — used for Q&A permissions on API-backed projects */
+  ownerId?: string;
+  /** Owner username for public employer profile links */
+  employerSlug?: string;
+  /** Poster profile image when loaded from API */
+  ownerAvatarUrl?: string;
+  /** Business logo initials when no logo image is uploaded */
+  employerLogoText?: string;
+  /** Loaded from /api/v1/projects/{slug}/ when available */
+  questions?: ProjectQuestionItem[];
+}
+
+export function getProjectSchedule(project: Project): ProjectScheduleInfo | null {
+  const schedule = project.schedule;
+  if (!schedule) return null;
+  if (
+    schedule.dateType ||
+    schedule.specificDate ||
+    schedule.beforeDate ||
+    schedule.timeOfDayRequired
+  ) {
+    return schedule;
+  }
+  return null;
+}
+
+function formatScheduleDateLabel(dateString: string): string {
+  if (!dateString) return '';
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+  });
+}
+
+/** Human-readable value for the metadata grid — "When do you need this done?" */
+export function formatProjectScheduleNeedLabel(schedule: ProjectScheduleInfo): string {
+  if (schedule.dateType === 'flexible') return "I'm flexible";
+
+  const parts: string[] = [];
+  if (schedule.specificDate) {
+    parts.push(`On ${formatScheduleDateLabel(schedule.specificDate)}`);
+  }
+  if (schedule.beforeDate) {
+    parts.push(`Before ${formatScheduleDateLabel(schedule.beforeDate)}`);
+  }
+  if (parts.length) return parts.join(' · ');
+
+  return "I'm flexible";
+}
+
+/** Human-readable value for "I need a certain time of day" metadata. */
+export function formatProjectTimeOfDayLabel(schedule: ProjectScheduleInfo): string {
+  if (!schedule.timeOfDayRequired) return 'Any time';
+  const slot = getTimeSlotById(schedule.timeSlot ?? undefined);
+  if (slot) return `${slot.label} (${slot.sub})`;
+  return 'Preferred time of day';
 }
 
 function hourlyLabel(min: number, max: number): string {
@@ -270,6 +351,14 @@ export function locationDisplay(location: Project['location']): string {
   return 'Pokhara';
 }
 
+/** Short label for project cards and headers (API or mock). */
+export function formatProjectLocation(project: Project): string {
+  if (project.slug?.trim() && project.locationLabel?.trim()) {
+    return shortenCommaSeparatedLocation(project.locationLabel, 1);
+  }
+  return locationDisplay(project.location);
+}
+
 export const ALL_PROJECTS = generateMockProjects();
 
 const MONTH_NAMES = [
@@ -294,6 +383,18 @@ export type ProjectMeta = {
 };
 
 export function getProjectMeta(project: Project): ProjectMeta {
+  const fromApi = Boolean(project.slug?.trim());
+  if (fromApi) {
+    const raw =
+      project.locationLabel?.trim() ||
+      `${locationDisplay(project.location)}, Nepal`;
+    return {
+      locationLabel: shortenCommaSeparatedLocation(raw, 1),
+      postedDate: project.postedDate?.trim() || 'Recently posted',
+      views: project.views ?? 0,
+    };
+  }
+
   const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
 
   if (project.id === 'job-1') {
@@ -314,8 +415,7 @@ export function getProjectMeta(project: Project): ProjectMeta {
 export type ProjectDetailMeta = {
   sellerType: string;
   durationLabel: string;
-  languages: number;
-  englishLevel: string;
+  languagesLabel: string;
 };
 
 export type ProjectBuyerMeta = {
@@ -327,21 +427,38 @@ export type ProjectBuyerMeta = {
 };
 
 export function getProjectDetailMeta(project: Project): ProjectDetailMeta {
-  const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
+  const fromApi = Boolean(project.slug?.trim());
+  if (fromApi) {
+    return {
+      sellerType: project.freelancerType?.trim() || 'Company',
+      durationLabel: project.duration?.trim() || '—',
+      languagesLabel: project.languages?.length
+        ? project.languages.join(', ')
+        : '—',
+    };
+  }
 
-  let englishLevel = 'Basic';
-  if (project.experienceLevel === 'Expert') englishLevel = 'Professional';
-  else if (project.experienceLevel === 'Intermediate') englishLevel = 'Conversational';
+  const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
 
   return {
     sellerType: 'Company',
     durationLabel: project.id === 'job-1' ? '10-15 Hours' : project.duration,
-    languages: project.id === 'job-1' ? 20 : 5 + (jobNum % 18),
-    englishLevel,
+    languagesLabel: project.id === 'job-1' ? '20 languages' : `${5 + (jobNum % 18)} languages`,
   };
 }
 
 export function getProjectBuyerMeta(project: Project): ProjectBuyerMeta {
+  const fromApi = Boolean(project.slug?.trim());
+  if (fromApi) {
+    return {
+      rating: project.ownerRating ?? 0,
+      reviews: project.ownerReviews ?? 0,
+      buyerLocation: project.locationLabel?.trim() || locationDisplay(project.location),
+      employees: '—',
+      department: project.category,
+    };
+  }
+
   const jobNum = parseInt(project.id.replace('job-', ''), 10) || 1;
 
   if (project.id === 'job-1') {
@@ -368,19 +485,63 @@ const PROJECT_DESCRIPTION_PARAGRAPHS = [
   "Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
 ] as const;
 
-export function getProjectDescriptionParagraphs(_project: Project): string[] {
+export function getProjectDescriptionParagraphs(project: Project): string[] {
+  const fromApi = Boolean(project.slug?.trim());
+  const text = project.description?.trim();
+  if (fromApi && text) {
+    return text
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+  }
+  if (fromApi) return [];
   return [...PROJECT_DESCRIPTION_PARAGRAPHS];
 }
 
 export interface ProjectAttachment {
   name: string;
   fileType: string;
+  url?: string;
+  kind?: 'image' | 'document' | 'video' | 'other';
 }
 
+const IMAGE_FILE_TYPES = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp']);
+const DOCUMENT_FILE_TYPES = new Set(['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx']);
+
 export const PROJECT_ATTACHMENTS: ProjectAttachment[] = [
-  { name: 'Project Brief', fileType: 'PDF' },
-  { name: 'Project Brief', fileType: 'PDF' },
+  { name: 'Project Brief', fileType: 'PDF', kind: 'document' },
+  { name: 'Project Brief', fileType: 'PDF', kind: 'document' },
 ];
+
+export function getProjectAttachments(project: Project): ProjectAttachment[] {
+  if (project.slug?.trim()) {
+    return project.attachments ?? [];
+  }
+  return [...PROJECT_ATTACHMENTS];
+}
+
+export function isProjectAttachmentImage(attachment: ProjectAttachment): boolean {
+  if (attachment.kind === 'image') return true;
+  if (attachment.kind === 'document' || attachment.kind === 'video') return false;
+  return IMAGE_FILE_TYPES.has(attachment.fileType.toLowerCase());
+}
+
+export function isProjectAttachmentDocument(attachment: ProjectAttachment): boolean {
+  if (attachment.kind === 'document') return true;
+  if (attachment.kind === 'image' || attachment.kind === 'video') return false;
+  return DOCUMENT_FILE_TYPES.has(attachment.fileType.toLowerCase());
+}
+
+export function getProjectDocumentAttachments(project: Project): ProjectAttachment[] {
+  return getProjectAttachments(project).filter(isProjectAttachmentDocument);
+}
+
+export function getProjectGalleryImages(project: Project): string[] {
+  return getProjectAttachments(project)
+    .filter(isProjectAttachmentImage)
+    .map((attachment) => attachment.url?.trim())
+    .filter((url): url is string => Boolean(url));
+}
 
 export interface ProjectProposalItem {
   id: string;
@@ -625,6 +786,8 @@ function buildFallbackProjectQuestions(project: Project): ProjectQuestionItem[] 
 }
 
 export function buildProjectQuestions(project: Project): ProjectQuestionItem[] {
+  if (project.questions) return project.questions;
+  if (project.slug) return [];
   return buildFallbackProjectQuestions(project);
 }
 

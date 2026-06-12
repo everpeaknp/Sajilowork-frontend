@@ -14,34 +14,6 @@ interface EmployerGalleryProps {
   images?: ImageItem[];
 }
 
-const DEFAULT_IMAGES: ImageItem[] = [
-  {
-    id: 'img-1',
-    url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Relaxed workspace setting with bookcases and modern laptop desktop',
-  },
-  {
-    id: 'img-2',
-    url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Concentrated specialist looking at visual projects on notebook screen',
-  },
-  {
-    id: 'img-3',
-    url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Professional coder typing on keyboard with active development IDE',
-  },
-  {
-    id: 'img-4',
-    url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Creative developer sketching mobile wires sitting comfortably on a couch',
-  },
-  {
-    id: 'img-5',
-    url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Dynamic frontend team sharing layout perspectives in creative launchroom',
-  },
-];
-
 const slideVariants = {
   enter: (dir: number) => ({
     x: dir > 0 ? 300 : -300,
@@ -66,9 +38,13 @@ const slideVariants = {
 };
 
 export default function EmployerGallery({ images }: EmployerGalleryProps) {
-  const galleryImages = images ?? DEFAULT_IMAGES;
+  const galleryImages = (images ?? []).filter((item) => item.url?.trim());
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+
+  if (galleryImages.length === 0) {
+    return null;
+  }
 
   const handleNext = () => {
     setDirection(1);

@@ -5,13 +5,19 @@ import { ArrowUpRight } from 'lucide-react';
 import FreelancerProfileHero from './FreelancerProfileHero';
 import FreelancerAbout from './FreelancerAbout';
 import type { Freelancer } from './freelancerData';
+import type { FreelancerProfileExtras } from '@/lib/freelancerProfileFromApi';
 
 interface SingleFreelancerPageProps {
   freelancer: Freelancer;
-  onInquire?: (name: string, message?: string) => void;
+  profileExtras?: FreelancerProfileExtras;
+  onInquire?: (name: string, message?: string) => void | Promise<void>;
 }
 
-export default function SingleFreelancerPage({ freelancer, onInquire }: SingleFreelancerPageProps) {
+export default function SingleFreelancerPage({
+  freelancer,
+  profileExtras,
+  onInquire,
+}: SingleFreelancerPageProps) {
   return (
     <div className="select-none bg-white pb-12 pt-8 font-normal text-black">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -20,6 +26,7 @@ export default function SingleFreelancerPage({ freelancer, onInquire }: SingleFr
 
       <FreelancerAbout
         freelancer={freelancer}
+        profileExtras={profileExtras}
         onContact={(name, message) => onInquire?.(name, message)}
       />
 

@@ -20,5 +20,7 @@ export {
   findEmployerByCompanyName,
   getEmployerProfilePath,
   getEmployerProfilePathByCompanyName,
+  getEmployerBusinessProfileHref,
+  resolveEmployerProfileHref,
 } from './employerSlug';
 export { renderCompanyLogo, GreenSparkSparkle } from './employerLogos';

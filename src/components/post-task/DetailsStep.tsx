@@ -16,7 +16,7 @@ export interface TaskData {
   title: string;
   categoryId: string;
   categoryName: string;
-  dateType: 'specific' | 'before' | 'flexible' | '';
+  dateType: 'specific' | 'before' | 'both' | 'flexible' | '';
   specificDate: string;
   beforeDate: string;
   timeOfDayRequired: boolean;

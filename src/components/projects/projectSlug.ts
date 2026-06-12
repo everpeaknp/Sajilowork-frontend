@@ -7,17 +7,19 @@ function slugify(text: string): string {
     .replace(/^-|-$/g, '');
 }
 
-/** URL slug from project title + id, e.g. `food-delivery-mobile-app-1` */
+/** URL slug — API tasks use backend slug; legacy mock cards use title-id pattern. */
 export function getProjectSlug(project: Project): string {
-  const num = project.id.replace(/^job-/, '');
+  if (project.slug?.trim()) return project.slug.trim();
+  const num = project.id.replace(/^job-|^proj-/, '');
   return `${slugify(project.title)}-${num}`;
 }
 
-export function findProjectBySlug(
-  slug: string,
-  projects: Project[] = ALL_PROJECTS,
-): Project | undefined {
+export function findProjectBySlug(slug: string, projects: Project[] = ALL_PROJECTS): Project | undefined {
   const normalized = slug.trim().toLowerCase();
+  const byBackendSlug = projects.find(
+    (project) => project.slug?.trim().toLowerCase() === normalized,
+  );
+  if (byBackendSlug) return byBackendSlug;
   return projects.find((project) => getProjectSlug(project).toLowerCase() === normalized);
 }
 

@@ -10,6 +10,7 @@ import {
   Star,
 } from 'lucide-react';
 import type { DashboardTab } from './DashboardSidebar';
+import { formatNPR, legacyUsdToNpr } from '@/lib/nepalLocale';
 
 interface DashboardOverviewProps {
   onTabChange?: (tab: DashboardTab) => void;
@@ -420,7 +421,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                       <span>4.82</span>
                     </div>
                     <span className="text-[10px] font-medium text-neutral-400">
-                      Starting at <span className="text-[11px] font-semibold text-black">$983</span>
+                      Starting at <span className="text-[11px] font-semibold text-black">{formatNPR(legacyUsdToNpr(983))}</span>
                     </span>
                   </div>
                 </div>
@@ -446,7 +447,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                       <span>4.82</span>
                     </div>
                     <span className="text-[10px] font-medium text-neutral-400">
-                      Starting at <span className="text-[11px] font-semibold text-black">$983</span>
+                      Starting at <span className="text-[11px] font-semibold text-black">{formatNPR(legacyUsdToNpr(983))}</span>
                     </span>
                   </div>
                 </div>
@@ -472,7 +473,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                       <span>4.82</span>
                     </div>
                     <span className="text-[10px] font-medium text-neutral-400">
-                      Starting at <span className="text-[11px] font-semibold text-black">$983</span>
+                      Starting at <span className="text-[11px] font-semibold text-black">{formatNPR(legacyUsdToNpr(983))}</span>
                     </span>
                   </div>
                 </div>
@@ -517,7 +518,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                   </p>
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-medium text-neutral-400">February 26, 2021</span>
-                    <span className="font-semibold text-black">$983</span>
+                    <span className="font-semibold text-black">{formatNPR(legacyUsdToNpr(983))}</span>
                   </div>
                 </div>
               </div>
@@ -545,7 +546,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                   </p>
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-medium text-neutral-400">February 26, 2021</span>
-                    <span className="font-semibold text-black">$983</span>
+                    <span className="font-semibold text-black">{formatNPR(legacyUsdToNpr(983))}</span>
                   </div>
                 </div>
               </div>
@@ -562,7 +563,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                   </p>
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-medium text-neutral-400">February 26, 2021</span>
-                    <span className="font-semibold text-black">$983</span>
+                    <span className="font-semibold text-black">{formatNPR(legacyUsdToNpr(983))}</span>
                   </div>
                 </div>
               </div>
@@ -608,7 +609,7 @@ export default function DashboardOverview({ onTabChange: _onTabChange }: Dashboa
                   </div>
                   <div className="flex-1 space-y-0.5">
                     <p className="text-[11.5px] font-semibold leading-snug text-black">
-                      Make deposit <span className="font-semibold text-[#4138C4]">USD 700</span> to
+                      Make deposit <span className="font-semibold text-[#4138C4]">{formatNPR(legacyUsdToNpr(700))}</span> to
                       TFN
                     </p>
                   </div>

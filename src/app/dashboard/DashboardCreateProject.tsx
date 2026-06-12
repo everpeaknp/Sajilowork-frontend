@@ -1,10 +1,25 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, ChevronLeft, FolderKanban, MapPin, Paperclip, Trash2 } from 'lucide-react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+  type MouseEvent,
+} from 'react';
+import { createPortal } from 'react-dom';
+import { ArrowUpRight, ChevronLeft, FolderKanban, MapPin, Paperclip, Trash2, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { normalizeProjectFormData } from '@/lib/dashboardListingApi';
 import ScheduleFields, { type ScheduleTimeSlot } from '@/components/post-task/ScheduleFields';
 import LocationFields, { type LocationType } from '@/components/post-task/LocationFields';
 import FormAccordionSection from './FormAccordionSection';
+import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
+import { CURRENCY_INPUT_PREFIX, formatDashboardTypeCost, formatNPR } from '@/lib/nepalLocale';
+import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
+import type { Project as PublicProject } from '@/components/projects/projectListData';
 import type { FormUploadsPayload, Project, UploadAttachment } from './types';
 
 type AttachmentItem = { id: string; name: string; url: string; file?: File };
@@ -25,7 +40,7 @@ export type CreateProjectFormData = {
   cost: string;
   projectDuration: string;
   level: string;
-  dateType: 'specific' | 'before' | 'flexible' | '';
+  dateType: 'specific' | 'before' | 'both' | 'flexible' | '';
   specificDate: string;
   beforeDate: string;
   timeOfDayRequired: boolean;
@@ -34,9 +49,8 @@ export type CreateProjectFormData = {
   location: string;
   latitude?: number;
   longitude?: number;
-  language: string;
-  languageLevel: string;
-  skills: string;
+  languages: string[];
+  skills: string[];
   projectDetail: string;
 };
 
@@ -55,13 +69,12 @@ const EMPTY_CREATE_FORM: CreateProjectFormData = {
   timeSlot: null,
   locationType: 'in-person',
   location: '',
-  language: '',
-  languageLevel: '',
-  skills: '',
+  languages: [],
+  skills: [],
   projectDetail: '',
 };
 
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   'Web Development',
   'Mobile Development',
   'Design & Creative',
@@ -76,7 +89,6 @@ const PRICE_TYPES = ['Hourly', 'Fixed Price', 'Contract'];
 const DURATIONS = ['1-5 Days', '6-10 Days', '10-15 Days', '20-30 Days', '1-3 Months'];
 const LEVELS = ['Entry', 'Medium', 'Expert'];
 const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Nepali'];
-const LANGUAGE_LEVELS = ['Basic', 'Conversational', 'Fluent', 'Native'];
 const SKILLS = [
   'Figma',
   'React',
@@ -128,20 +140,227 @@ function SelectField({
   );
 }
 
+function MultiSelectField({
+  label,
+  value,
+  onChange,
+  placeholder = 'Nothing selected',
+  options,
+}: {
+  label: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+  options: string[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const updatePanelPosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    setPanelStyle({
+      position: 'fixed',
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    updatePanelPosition();
+    window.addEventListener('resize', updatePanelPosition);
+    window.addEventListener('scroll', updatePanelPosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePanelPosition);
+      window.removeEventListener('scroll', updatePanelPosition, true);
+    };
+  }, [open, updatePanelPosition]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: globalThis.MouseEvent) => {
+      const target = event.target as Node;
+      if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return;
+      }
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [open]);
+
+  const toggle = (option: string) => {
+    if (value.includes(option)) {
+      onChange(value.filter((item) => item !== option));
+      return;
+    }
+    onChange([...value, option]);
+  };
+
+  const remove = (option: string, event: MouseEvent) => {
+    event.stopPropagation();
+    onChange(value.filter((item) => item !== option));
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <label className={labelClass}>{label}</label>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => {
+          setOpen((prev) => {
+            if (!prev) updatePanelPosition();
+            return !prev;
+          });
+        }}
+        className={`${fieldClass} flex min-h-[46px] w-full flex-wrap items-center gap-1.5 text-left`}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        {value.length === 0 ? (
+          <span className="text-neutral-400">{placeholder}</span>
+        ) : (
+          value.map((item) => (
+            <span
+              key={item}
+              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800"
+            >
+              {item}
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(event) => remove(item, event)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    remove(item, event as unknown as MouseEvent);
+                  }
+                }}
+                className="text-neutral-500 hover:text-neutral-800"
+                aria-label={`Remove ${item}`}
+              >
+                <X className="h-3 w-3" />
+              </span>
+            </span>
+          ))
+        )}
+      </button>
+      {open && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              ref={panelRef}
+              role="listbox"
+              aria-multiselectable
+              style={panelStyle}
+              className="max-h-56 overflow-y-auto border border-neutral-200 bg-white shadow-lg"
+            >
+              {options.map((option) => {
+                const checked = value.includes(option);
+                return (
+                  <label
+                    key={option}
+                    className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(option)}
+                      className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35]"
+                    />
+                    {option}
+                  </label>
+                );
+              })}
+            </div>,
+            document.body,
+          )
+        : null}
+    </div>
+  );
+}
+
 interface DashboardCreateProjectProps {
   onBack: () => void;
   onSubmit: (data: CreateProjectFormData, uploads: FormUploadsPayload) => void;
   initialData?: Partial<CreateProjectFormData>;
   initialAttachments?: UploadAttachment[];
   mode?: 'create' | 'edit';
+  postingContext?: EmployerPostingContext | null;
+  categoryOptions?: string[];
+}
+
+const LEVEL_TO_EXPERIENCE: Record<string, PublicProject['experienceLevel']> = {
+  Entry: 'Entry Level',
+  Medium: 'Intermediate',
+  Expert: 'Expert',
+};
+
+const PRICE_TO_TYPE: Record<string, PublicProject['type']> = {
+  Hourly: 'Hourly',
+  'Fixed Price': 'Fixed Price',
+  Contract: 'Contract',
+};
+
+function mapProjectLocation(
+  locationType: CreateProjectFormData['locationType'],
+  location: string,
+): PublicProject['location'] {
+  if (locationType === 'remote') return 'Remote';
+  const normalized = location.trim().toLowerCase();
+  if (normalized.includes('hybrid')) return 'Hybrid';
+  if (location.trim()) return 'In-office';
+  return 'Remote';
+}
+
+export function createPublicProjectFromForm(
+  data: CreateProjectFormData,
+  postingContext: EmployerPostingContext,
+  id?: string,
+): PublicProject {
+  const costNum = Number(data.cost) || 0;
+  const isHourly = data.priceType === 'Hourly';
+  const budgetMin = costNum;
+  const budgetMax = isHourly ? costNum + 50 : costNum;
+  const budgetLabel = isHourly
+    ? `${formatNPR(budgetMin)} - ${formatNPR(budgetMax)}`
+    : formatNPR(budgetMin);
+
+  return {
+    id: id ?? `proj-${Date.now()}`,
+    title: data.title.trim(),
+    category: data.category || 'Web Development',
+    companyName: postingContext.displayName,
+    companyLogoBg: postingContext.accountType === 'company' ? 'bg-[#3f3ebd]' : 'bg-[#0f766e]',
+    companyIconType: 'face',
+    verified: postingContext.accountType === 'company',
+    location: mapProjectLocation(data.locationType, data.location),
+    duration: data.projectDuration || '1-5 Days',
+    type: PRICE_TO_TYPE[data.priceType] ?? 'Hourly',
+    experienceLevel: LEVEL_TO_EXPERIENCE[data.level] ?? 'Intermediate',
+    budgetMin,
+    budgetMax,
+    budgetLabel,
+    expenseLevel: 'Intermediate',
+    skills: data.skills.length ? data.skills : ['General'],
+    description: data.projectDetail.trim() || data.title.trim(),
+  };
 }
 
 export function createProjectFromForm(data: CreateProjectFormData): Omit<Project, 'id'> {
   const costNum = Number(data.cost) || 0;
-  const typeCost =
-    data.priceType === 'Hourly'
-      ? `$${costNum} - $${costNum + 50}/Hour`
-      : `$${costNum.toLocaleString()}/Fixed`;
+  const typeCost = formatDashboardTypeCost(
+    data.priceType,
+    costNum,
+    data.priceType === 'Hourly' ? costNum + 50 : undefined,
+  );
 
   return {
     title: data.title.trim(),
@@ -164,9 +383,20 @@ export default function DashboardCreateProject({
   initialData,
   initialAttachments = [],
   mode = 'create',
+  postingContext,
+  categoryOptions = [],
 }: DashboardCreateProjectProps) {
   const isEdit = mode === 'edit';
-  const [form, setForm] = useState<CreateProjectFormData>({ ...EMPTY_CREATE_FORM, ...initialData });
+  const [form, setForm] = useState<CreateProjectFormData>(() => ({
+    ...EMPTY_CREATE_FORM,
+    ...normalizeProjectFormData(initialData ?? {}),
+  }));
+  const baseCategoryOptions =
+    categoryOptions.length > 0 ? categoryOptions : FALLBACK_CATEGORIES;
+  const categories =
+    form.category && !baseCategoryOptions.includes(form.category)
+      ? [form.category, ...baseCategoryOptions]
+      : baseCategoryOptions;
   const [attachmentItems, setAttachmentItems] = useState<AttachmentItem[]>(() =>
     toAttachmentItems(initialAttachments),
   );
@@ -198,7 +428,29 @@ export default function DashboardCreateProject({
   const onAttachmentsSelected = (list: FileList | null) => {
     if (!list?.length) return;
 
-    const nextItems = Array.from(list).map((file) => ({
+    const allowedTypes = new Set([
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]);
+    const allowedExtensions = /\.(jpe?g|png|webp|gif|pdf|docx?)$/i;
+
+    const validFiles = Array.from(list).filter((file) => {
+      const typeOk = file.type ? allowedTypes.has(file.type) : allowedExtensions.test(file.name);
+      const extOk = allowedExtensions.test(file.name);
+      return typeOk || extOk;
+    });
+
+    if (!validFiles.length) {
+      toast.error('Only JPG, PNG, WEBP, GIF, PDF, DOC, and DOCX files are allowed.');
+      return;
+    }
+
+    const nextItems = validFiles.map((file) => ({
       id: `new-attachment-${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
       name: file.name,
       url: URL.createObjectURL(file),
@@ -250,6 +502,7 @@ export default function DashboardCreateProject({
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
         <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        {postingContext ? <EmployerPostingBanner context={postingContext} className="mb-6" /> : null}
         <FormAccordionSection
           title="Basic Information"
           icon={FolderKanban}
@@ -273,7 +526,7 @@ export default function DashboardCreateProject({
               label="Category"
               value={form.category}
               onChange={(category) => update({ category })}
-              options={CATEGORIES}
+              options={categories}
             />
             <SelectField
               label="Freelancer Type"
@@ -291,7 +544,7 @@ export default function DashboardCreateProject({
               <label className={labelClass}>Cost</label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-400">
-                  $
+                  {CURRENCY_INPUT_PREFIX}
                 </span>
                 <input
                   type="number"
@@ -343,22 +596,15 @@ export default function DashboardCreateProject({
             onChange={(location) => update(location)}
           />
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <SelectField
-              label="Language"
-              value={form.language}
-              onChange={(language) => update({ language })}
-              options={LANGUAGES}
-            />
-            <SelectField
-              label="Languages Level"
-              value={form.languageLevel}
-              onChange={(languageLevel) => update({ languageLevel })}
-              options={LANGUAGE_LEVELS}
-            />
-          </div>
+          <MultiSelectField
+            label="Languages"
+            value={form.languages}
+            onChange={(languages) => update({ languages })}
+            placeholder="Select languages"
+            options={LANGUAGES}
+          />
 
-          <SelectField
+          <MultiSelectField
             label="Skills"
             value={form.skills}
             onChange={(skills) => update({ skills })}
@@ -389,6 +635,7 @@ export default function DashboardCreateProject({
             ref={attachmentInputRef}
             type="file"
             multiple
+            accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,image/jpeg,image/png,image/webp,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             className="hidden"
             onChange={(e) => {
               onAttachmentsSelected(e.target.files);
@@ -402,7 +649,9 @@ export default function DashboardCreateProject({
           >
             Upload Files
           </button>
-          <p className="text-xs font-normal text-neutral-400">Maximum file size: 10 MB per file</p>
+          <p className="text-xs font-normal text-neutral-400">
+            JPG, PNG, WEBP, GIF, PDF, DOC, or DOCX — max 10 MB per file
+          </p>
           {attachmentItems.length > 0 ? (
             <ul className="space-y-2">
               {attachmentItems.map((item) => (

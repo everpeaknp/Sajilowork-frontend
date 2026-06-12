@@ -14,14 +14,34 @@ const protectedRoutes = [
   '/message',
   '/profile',
   '/settings',
+  '/dashboard',
 ];
 
 const authRoutes = ['/signin', '/signup'];
 
+function isAccessTokenValid(token: string | undefined): boolean {
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const exp = typeof payload.exp === 'number' ? payload.exp * 1000 : 0;
+    return exp > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function hasValidSession(request: NextRequest): boolean {
+  const accessToken = request.cookies.get('access_token')?.value;
+  if (isAccessTokenValid(accessToken)) return true;
+
+  // Allow through when access expired but refresh is still valid — client will refresh.
+  const refreshToken = request.cookies.get('refresh_token')?.value;
+  return isAccessTokenValid(refreshToken);
+}
+
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get('access_token')?.value;
-  const isAuthenticated = !!accessToken;
+  const isAuthenticated = hasValidSession(request);
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));

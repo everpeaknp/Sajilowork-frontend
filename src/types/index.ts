@@ -46,6 +46,7 @@ export interface User {
   phone_number?: string;
   profile_image?: string;
   bio?: string;
+  tagline?: string;
   date_of_birth?: string;
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say';
   
@@ -90,6 +91,7 @@ export interface UserSkill {
   id: string;
   user?: string;
   name: string;
+  details?: string;
   category?: string;
   proficiency_level?: 'beginner' | 'intermediate' | 'expert';
   years_of_experience?: number;
@@ -106,6 +108,7 @@ export type SkillCategory =
 
 export interface UserSkillInput {
   name: string;
+  details?: string;
   category?: SkillCategory | string;
   proficiency_level?: 'beginner' | 'intermediate' | 'expert';
   years_of_experience?: number;
@@ -224,6 +227,9 @@ export interface Bid {
   id: string;
   task: string;
   task_title?: string;
+  task_slug?: string;
+  task_city?: string;
+  task_listing_kind?: string | null;
   tasker: User;
   amount: number;
   currency?: string;
@@ -347,7 +353,13 @@ export interface Task {
   
   // Flat owner fields (from TaskListSerializer)
   owner_name?: string;
+  owner_username?: string;
   owner_image?: string;
+  /** Employer business logo (EmployerProfile.logo_image), not personal avatar */
+  owner_logo_url?: string;
+  owner_logo_text?: string;
+  owner_logo_color?: string;
+  owner_business_name?: string;
   owner_rating?: number;
   owner_is_verified?: boolean;
   
@@ -405,6 +417,16 @@ export interface Task {
 
   /** Present on task detail responses */
   attachments?: TaskAttachment[];
+
+  tags?: string[];
+  listing_kind?: 'service' | 'project' | 'job' | null;
+  /** Parsed dashboard_meta from /api/v1/services/ responses */
+  service_meta?: Record<string, unknown> | null;
+  /** Parsed dashboard_meta from /api/v1/projects/ responses */
+  project_meta?: Record<string, unknown> | null;
+  /** Parsed dashboard_meta from /api/v1/jobs/ responses */
+  job_meta?: Record<string, unknown> | null;
+  primary_image?: string | null;
 
   /** Present on task detail responses (e.g. time_slot) */
   requirements?: Array<{ type?: string; value?: string; label?: string }>;
@@ -471,17 +493,24 @@ export interface TaskQuestion {
 export interface Review {
   id: string;
   task: string;
+  task_title?: string;
+  task_budget_type?: 'fixed' | 'hourly';
   reviewer: User;
   reviewee: User;
+  reviewer_type?: 'customer' | 'tasker';
+  review_type?: 'owner_to_provider' | 'provider_to_owner';
   rating: number;
   comment?: string;
-  
+  response_text?: string;
+  response_at?: string;
+  tags?: string[];
+
   // Detailed ratings
   communication_rating?: number;
   quality_rating?: number;
   professionalism_rating?: number;
   timeliness_rating?: number;
-  
+
   // Metadata
   is_verified?: boolean;
   helpful_count?: number;
@@ -708,7 +737,12 @@ export interface ProfileFormData {
   last_name: string;
   username?: string;
   phone_number?: string;
+  phone?: string;
+  role?: 'customer' | 'tasker';
+  tagline?: string;
+  gender?: string;
   bio?: string;
+  date_of_birth?: string;
   address?: string;
   city?: string;
   state?: string;

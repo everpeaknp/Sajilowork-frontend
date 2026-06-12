@@ -8,17 +8,27 @@ import {
   buildFreelancerAboutStats,
   FREELANCER_ABOUT_DESCRIPTION,
   type Freelancer,
+  type FreelancerAboutStats,
+  type FreelancerAwardItem,
+  type FreelancerEducationItem,
+  type FreelancerExperienceItem,
+  type FreelancerFeaturedServiceItem,
+  type FreelancerReviewItem,
 } from './freelancerData';
+import type { FreelancerProfileExtras } from '@/lib/freelancerProfileFromApi';
 import FreelancerEducation from './FreelancerEducation';
 import FreelancerExperience from './FreelancerExperience';
 import FreelancerAwards from './FreelancerAwards';
+import FreelancerLicenceBadges from './FreelancerLicenceBadges';
+import FreelancerTransport from './FreelancerTransport';
 import FreelancerFeaturedServices from './FreelancerFeaturedServices';
 import FreelancerReviews from './FreelancerReviews';
 import FreelancerSkills from './FreelancerSkills';
 
 interface FreelancerAboutProps {
   freelancer: Freelancer;
-  onContact?: (name: string, message: string) => void;
+  profileExtras?: FreelancerProfileExtras;
+  onContact?: (name: string, message: string) => void | Promise<void>;
 }
 
 interface MetricItem {
@@ -35,12 +45,29 @@ function MetricIconWrap({ children }: { children: ReactNode }) {
   );
 }
 
-export default function FreelancerAbout({ freelancer, onContact }: FreelancerAboutProps) {
+export default function FreelancerAbout({ freelancer, profileExtras, onContact }: FreelancerAboutProps) {
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
   const [messageSent, setMessageSent] = useState(false);
+  const [contactSending, setContactSending] = useState(false);
 
-  const stats = useMemo(() => buildFreelancerAboutStats(freelancer), [freelancer]);
+  const stats = useMemo<FreelancerAboutStats>(
+    () => ({
+      ...buildFreelancerAboutStats(freelancer),
+      ...(profileExtras?.aboutStats ?? {}),
+    }),
+    [freelancer, profileExtras?.aboutStats],
+  );
+  const descriptionParagraphs = profileExtras?.description ?? [...FREELANCER_ABOUT_DESCRIPTION];
+  const educationItems: FreelancerEducationItem[] | undefined = profileExtras?.education;
+  const experienceItems: FreelancerExperienceItem[] | undefined = profileExtras?.experience;
+  const awardItems: FreelancerAwardItem[] | undefined = profileExtras?.awards;
+  const skillItems: string[] | undefined = profileExtras?.skills;
+  const licenceBadges = profileExtras?.licenceBadges;
+  const transportLabels = profileExtras?.transportLabels;
+  const featuredServices: FreelancerFeaturedServiceItem[] | undefined =
+    profileExtras?.featuredServices;
+  const reviewItems: FreelancerReviewItem[] | undefined = profileExtras?.reviews;
   const ringParts = freelancer.ringColor.split(' ');
   const languagesLabel = freelancer.languages.join(', ');
 
@@ -131,19 +158,24 @@ export default function FreelancerAbout({ freelancer, onContact }: FreelancerAbo
     },
   ];
 
-  const handleMessageSubmit = (e: FormEvent) => {
+  const handleMessageSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!contactMessage.trim()) {
+    if (!contactMessage.trim() || contactSending) {
       return;
     }
 
-    onContact?.(freelancer.name, contactMessage.trim());
-    setMessageSent(true);
-    setTimeout(() => {
-      setContactMessage('');
-      setShowContactModal(false);
-      setMessageSent(false);
-    }, 2500);
+    setContactSending(true);
+    try {
+      await onContact?.(freelancer.name, contactMessage.trim());
+      setMessageSent(true);
+      setTimeout(() => {
+        setContactMessage('');
+        setShowContactModal(false);
+        setMessageSent(false);
+      }, 2500);
+    } finally {
+      setContactSending(false);
+    }
   };
 
   return (
@@ -172,16 +204,20 @@ export default function FreelancerAbout({ freelancer, onContact }: FreelancerAbo
             </h3>
 
             <div className="space-y-6 text-xs font-normal leading-relaxed text-black sm:text-sm">
-              {FREELANCER_ABOUT_DESCRIPTION.map((paragraph) => (
+              {descriptionParagraphs.map((paragraph) => (
                 <p key={paragraph.slice(0, 24)}>{paragraph}</p>
               ))}
             </div>
 
-            <FreelancerEducation freelancer={freelancer} />
-            <FreelancerExperience freelancer={freelancer} />
-            <FreelancerAwards freelancer={freelancer} />
-            <FreelancerFeaturedServices freelancer={freelancer} />
-            <FreelancerReviews freelancer={freelancer} />
+            <FreelancerSkills freelancer={freelancer} skills={skillItems} />
+
+            <FreelancerEducation freelancer={freelancer} items={educationItems} />
+            <FreelancerExperience freelancer={freelancer} items={experienceItems} />
+            <FreelancerAwards freelancer={freelancer} items={awardItems} />
+            <FreelancerLicenceBadges badges={licenceBadges} />
+            <FreelancerTransport options={transportLabels} />
+            <FreelancerFeaturedServices freelancer={freelancer} services={featuredServices} />
+            <FreelancerReviews freelancer={freelancer} initialReviews={reviewItems} />
           </div>
 
           <div className="lg:col-span-4">
@@ -284,8 +320,6 @@ export default function FreelancerAbout({ freelancer, onContact }: FreelancerAbo
                 </svg>
               </button>
             </div>
-
-            <FreelancerSkills freelancer={freelancer} />
             </div>
           </div>
         </div>
@@ -367,10 +401,11 @@ export default function FreelancerAbout({ freelancer, onContact }: FreelancerAbo
                     </button>
                     <button
                       type="submit"
-                      className="flex cursor-pointer items-center gap-2 rounded-none bg-[#52C47F] px-5 py-2.5 text-xs font-normal text-white shadow-sm transition-all hover:bg-[#43a86c] active:scale-[0.97]"
+                      disabled={contactSending}
+                      className="flex cursor-pointer items-center gap-2 rounded-none bg-[#52C47F] px-5 py-2.5 text-xs font-normal text-white shadow-sm transition-all hover:bg-[#43a86c] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Send className="h-3.5 w-3.5" />
-                      <span>Send inquiry</span>
+                      <span>{contactSending ? 'Sending…' : 'Send inquiry'}</span>
                     </button>
                   </div>
                 </form>

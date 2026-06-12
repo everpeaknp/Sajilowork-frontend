@@ -39,6 +39,15 @@ export function getMediaUrl(path: string | null | undefined): string {
     normalizedPath = `/media${normalizedPath}`;
   }
 
+  // Task attachment paths stored without /media/ prefix
+  if (
+    !normalizedPath.startsWith('/media/') &&
+    (normalizedPath.includes('/task_attachments/') ||
+      normalizedPath.startsWith('/task_attachments/'))
+  ) {
+    normalizedPath = `/media${normalizedPath}`;
+  }
+
   return `${baseUrl}${normalizedPath}`;
 }
 

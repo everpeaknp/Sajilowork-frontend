@@ -8,8 +8,9 @@ function slugify(text: string): string {
     .replace(/^-|-$/g, '');
 }
 
-/** URL slug from job title + id, e.g. `website-designer-required-for-directory-theme-1` */
+/** URL slug — prefers backend task slug when available */
 export function getJobSlug(job: Job): string {
+  if (job.slug?.trim()) return job.slug.trim();
   const num = job.id.replace(/^job-/, '');
   return `${slugify(job.title)}-${num}`;
 }

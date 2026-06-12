@@ -28,6 +28,16 @@ export const taskService = {
   },
 
   /**
+   * @deprecated Use serviceService.getServices() — /api/v1/services/
+   */
+  async getServices(
+    params?: Record<string, string | number>,
+  ): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    const { serviceService } = await import('./service.service');
+    return serviceService.getServices(params);
+  },
+
+  /**
    * Get task by ID (deprecated - use getTaskBySlug instead)
    */
   async getTaskById(taskId: string): Promise<ApiResponse<Task>> {
@@ -112,9 +122,12 @@ export const taskService = {
   /**
    * Get user's posted tasks
    */
-  async getMyTasks(status?: string): Promise<ApiResponse<PaginatedResponse<Task>>> {
+  async getMyTasks(
+    params?: string | { status?: string; listing_kind?: string },
+  ): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    const query = typeof params === 'string' ? { status: params } : params;
     return apiClient.get<PaginatedResponse<Task>>('/tasks/my_tasks/', {
-      params: { status }
+      params: query,
     });
   },
 

@@ -9,8 +9,9 @@ function slugify(text: string): string {
     .replace(/^-|-$/g, '');
 }
 
-/** URL slug from service title + id, e.g. `i-will-design-website-ui-ux-in-adobe-xd-or-figma-av-1` */
+/** URL slug — API tasks use backend slug; legacy mock cards use title-id pattern. */
 export function getServiceSlug(service: Service): string {
+  if (service.slug?.trim()) return service.slug.trim();
   const suffix = service.id.replace(/^av-/, '');
   return `${slugify(service.title)}-${suffix}`;
 }
@@ -20,6 +21,10 @@ export function findServiceBySlug(
   services: Service[] = ALL_SERVICES,
 ): Service | undefined {
   const normalized = slug.trim().toLowerCase();
+  const byBackendSlug = services.find(
+    (service) => service.slug?.trim().toLowerCase() === normalized,
+  );
+  if (byBackendSlug) return byBackendSlug;
   return services.find((service) => getServiceSlug(service).toLowerCase() === normalized);
 }
 

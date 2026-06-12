@@ -7,6 +7,7 @@
 export { authService } from './auth.service';
 export { userService } from './user.service';
 export { taskService } from './task.service';
+export { serviceService } from './service.service';
 export { bidService } from './bid.service';
 export { dashboardService } from './dashboard.service';
 export { paymentService } from './payment.service';
@@ -21,6 +22,8 @@ export { walletService } from './wallet.service';
 export { disputeService } from './dispute.service';
 export { uploadService } from './upload.service';
 export { locationService } from './location.service';
+export { employerService } from './employer.service';
+export { freelancerService } from './freelancer.service';
 
 // Re-export API client and token manager for direct access
 export { apiClient, tokenManager } from '@/lib/api/client';

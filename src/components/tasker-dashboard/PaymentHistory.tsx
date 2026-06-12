@@ -18,6 +18,10 @@ import { formatNPR } from '@/lib/nepalLocale';
 
 type HistoryTab = 'earned' | 'outgoing';
 
+type PaymentHistoryProps = {
+  initialTab?: HistoryTab;
+};
+
 const EARNED_STATUSES = new Set(['released', 'succeeded', 'completed']);
 const OUTGOING_ACTIVE = new Set(['held', 'pending', 'processing', 'succeeded']);
 
@@ -34,8 +38,8 @@ function statusLabel(status: string) {
   return status.replace(/_/g, ' ');
 }
 
-export default function PaymentHistory() {
-  const [activeTab, setActiveTab] = useState<HistoryTab>('earned');
+export default function PaymentHistory({ initialTab = 'earned' }: PaymentHistoryProps) {
+  const [activeTab, setActiveTab] = useState<HistoryTab>(initialTab);
   const [transactions, setTransactions] = useState<PaymentHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalAmount, setTotalAmount] = useState(0);
@@ -117,6 +121,10 @@ export default function PaymentHistory() {
       setLoading(false);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     fetchPayments();

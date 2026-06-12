@@ -15,16 +15,36 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import type { EmployerListingCard } from '@/lib/employerApi';
 import type { Employer } from './employerData';
 import EmployerGallery from './EmployerGallery';
 import EmployerProjectsList from './EmployerProjectsList';
-import EmployerReviews from './EmployerReviews';
+import EmployerReviews, { type SingleReview } from './EmployerReviews';
 import EmployerJobsAt from './EmployerJobsAt';
 
 interface SingleEmployerPageProps {
   employer: Employer;
+  projects?: EmployerListingCard[];
+  jobs?: EmployerListingCard[];
+  reviews?: SingleReview[];
+  useMockProjects?: boolean;
+  useMockJobs?: boolean;
   onContact?: (name: string) => void;
   onNotification?: (message: string) => void;
+  onProjectSelect?: (project: EmployerListingCard) => void;
+  onJobSelect?: (job: EmployerListingCard) => void;
+}
+
+function formatMemberSince(iso?: string): string {
+  if (!iso) return '—';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function formatMemberSinceLabel(iso?: string): string {
+  const formatted = formatMemberSince(iso);
+  return formatted === '—' ? 'Recently joined' : `Since ${formatted}`;
 }
 
 const OrganicYellowBlob = () => (
@@ -74,7 +94,23 @@ function renderInvisionLogo(compact = false) {
   );
 }
 
-function renderProfileLogo(logoKey: string, name: string, compact = false) {
+function renderProfileLogo(logoKey: string, name: string, compact = false, logoUrl?: string) {
+  if (logoUrl) {
+    return (
+      <div className="relative shrink-0 select-none">
+        <div
+          className={`flex items-center justify-center overflow-hidden rounded-full border-white bg-neutral-100 shadow-md ${
+            compact ? 'h-16 w-16 border-[3px] sm:h-[4.5rem] sm:w-[4.5rem]' : 'h-24 w-24 border-[5px] sm:h-28 sm:w-28'
+          }`}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoUrl} alt={`${name} logo`} className="h-full w-full object-cover" />
+        </div>
+        <span className="absolute right-1.5 top-1 h-5 w-5 animate-pulse rounded-full border-[3.5px] border-white bg-[#22C55E] shadow-sm sm:right-2 sm:top-1.5" />
+      </div>
+    );
+  }
+
   if (logoKey === 'cursive-in' || name.toLowerCase() === 'invision') {
     return renderInvisionLogo(compact);
   }
@@ -223,7 +259,18 @@ const ABOUT_COMPANY_SECTIONS = [
   },
 ] as const;
 
-export default function SingleEmployerPage({ employer, onContact, onNotification }: SingleEmployerPageProps) {
+export default function SingleEmployerPage({
+  employer,
+  projects,
+  jobs,
+  reviews,
+  useMockProjects = false,
+  useMockJobs = false,
+  onContact,
+  onNotification,
+  onProjectSelect,
+  onJobSelect,
+}: SingleEmployerPageProps) {
   const [showContactModal, setShowContactModal] = useState(false);
   const [subject, setSubject] = useState('');
   const [messageText, setMessageText] = useState('');
@@ -243,36 +290,58 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
     }, 1800);
   };
 
+  const isIndividual = employer.accountType === 'individual';
+  const aboutTitle = isIndividual ? 'About' : 'About';
+  const aboutSubtitle = isIndividual
+    ? 'Profile details and how to reach this employer directly.'
+    : 'Company details and how to reach this employer directly.';
+
   const aboutMeCard = (
     <div className="relative flex h-full flex-col border border-neutral-100 bg-white p-6 text-left shadow-xl sm:p-8">
-      <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black">About Me</h3>
+      <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black">{aboutTitle}</h3>
       <p className="mb-5 text-sm font-normal leading-relaxed text-neutral-900 sm:mb-6 sm:text-base">
-        Company details and how to reach this employer directly.
+        {aboutSubtitle}
       </p>
 
       <div className="select-none space-y-0.5 text-xs sm:text-sm">
         <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
           <div className="flex items-center gap-2.5 font-normal text-neutral-500">
             <Layers className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
-            <span>Primary industry</span>
+            <span>Account type</span>
           </div>
-          <span className="font-normal tracking-tight text-black">{employer.industry}</span>
+          <span className="font-normal tracking-tight text-black">
+            {isIndividual ? 'Individual' : 'Company'}
+          </span>
         </div>
 
-        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
-          <div className="flex items-center gap-2.5 font-normal text-neutral-500">
-            <Users className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
-            <span>Company size</span>
+        {!isIndividual ? (
+          <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
+            <div className="flex items-center gap-2.5 font-normal text-neutral-500">
+              <Layers className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
+              <span>Primary industry</span>
+            </div>
+            <span className="font-normal tracking-tight text-black">{employer.industry}</span>
           </div>
-          <span className="font-normal tracking-tight text-black">{employer.teamSize}</span>
-        </div>
+        ) : null}
+
+        {!isIndividual ? (
+          <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
+            <div className="flex items-center gap-2.5 font-normal text-neutral-500">
+              <Users className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
+              <span>Company size</span>
+            </div>
+            <span className="font-normal tracking-tight text-black">{employer.teamSize}</span>
+          </div>
+        ) : null}
 
         <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
           <div className="flex items-center gap-2.5 font-normal text-neutral-500">
             <Calendar className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
             <span>Founded in</span>
           </div>
-          <span className="font-normal tracking-tight text-black">April 2022</span>
+          <span className="font-normal tracking-tight text-black">
+            {formatMemberSince(employer.memberSince).replace(/^—$/, 'Not specified')}
+          </span>
         </div>
 
         <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
@@ -280,7 +349,9 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
             <Phone className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
             <span>Phone</span>
           </div>
-          <span className="font-normal tracking-tight text-black">382 4632 01 03</span>
+          <span className="font-normal tracking-tight text-black">
+            {employer.contactPhone || '—'}
+          </span>
         </div>
 
         <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
@@ -289,7 +360,7 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
             <span>Email</span>
           </div>
           <span className="max-w-[140px] truncate text-right font-normal tracking-tight text-black sm:max-w-none">
-            info@freeio.com
+            {employer.contactEmail || '—'}
           </span>
         </div>
 
@@ -339,9 +410,12 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
                   transition={{ duration: 0.5 }}
                 >
                   <div className="flex items-center gap-5 sm:gap-6 md:gap-8">
-                    {renderProfileLogo(employer.logoColor, employer.name)}
+                    {renderProfileLogo(employer.logoColor, employer.name, false, employer.logoUrl)}
 
                     <div className="min-w-0 flex-1 select-none">
+                      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-neutral-500">
+                        {isIndividual ? 'Individual employer' : 'Company'}
+                      </p>
                       <h1 className="mb-1 font-sans text-2xl font-normal leading-tight tracking-tight text-black sm:text-3xl">
                         {employer.name}
                       </h1>
@@ -362,7 +436,7 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-4 w-4 shrink-0 text-neutral-700" strokeWidth={2.5} />
-                          <span>Since April 1, 2022</span>
+                          <span>{formatMemberSinceLabel(employer.memberSince)}</span>
                         </div>
                       </div>
                     </div>
@@ -382,39 +456,68 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
 
             <div className="relative z-10 order-2 w-full min-w-0 pb-10 pt-6 lg:order-none lg:pt-8 lg:pr-[calc(380px+3rem)] xl:pr-[calc(380px+4.5rem)] 2xl:pr-[calc(380px+6.5rem)]">
               <div className="space-y-6">
-                <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">About Company</h2>
+                <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">
+                  {isIndividual ? 'About' : 'About company'}
+                </h2>
 
                 <div className="space-y-4">
-                  {ABOUT_COMPANY_INTRO.map((paragraph, index) => (
-                    <p
-                      key={index}
-                      className="text-sm font-normal leading-relaxed text-black/80 sm:text-base"
-                    >
-                      {paragraph}
-                    </p>
-                  ))}
+                  {employer.description.trim() ? (
+                    employer.description
+                      .split(/\n{2,}/)
+                      .map((paragraph) => paragraph.trim())
+                      .filter(Boolean)
+                      .map((paragraph, index) => (
+                        <p
+                          key={index}
+                          className="text-sm font-normal leading-relaxed text-black/80 sm:text-base"
+                        >
+                          {paragraph}
+                        </p>
+                      ))
+                  ) : (
+                    ABOUT_COMPANY_INTRO.map((paragraph, index) => (
+                      <p
+                        key={index}
+                        className="text-sm font-normal leading-relaxed text-black/80 sm:text-base"
+                      >
+                        {paragraph}
+                      </p>
+                    ))
+                  )}
                 </div>
 
-                {ABOUT_COMPANY_SECTIONS.map((section) => (
-                  <div key={section.title} className="space-y-2">
-                    <h3 className="text-base font-normal tracking-tight text-black sm:text-lg">
-                      {section.title}
-                    </h3>
-                    <p className="text-sm font-normal leading-relaxed text-black/80 sm:text-base">{section.body}</p>
+                {!employer.description.trim()
+                  ? ABOUT_COMPANY_SECTIONS.map((section) => (
+                      <div key={section.title} className="space-y-2">
+                        <h3 className="text-base font-normal tracking-tight text-black sm:text-lg">
+                          {section.title}
+                        </h3>
+                        <p className="text-sm font-normal leading-relaxed text-black/80 sm:text-base">
+                          {section.body}
+                        </p>
+                      </div>
+                    ))
+                  : null}
+
+                {employer.galleryImages?.length ? (
+                  <div className="pt-4">
+                    <EmployerGallery images={employer.galleryImages} />
                   </div>
-                ))}
-
-                <div className="pt-4">
-                  <EmployerGallery />
-                </div>
+                ) : null}
 
                 <div className="pt-8">
                   <EmployerProjectsList
                     employerName={employer.name}
                     logoColor={employer.logoColor}
+                    logoUrl={employer.logoUrl}
+                    logoText={employer.logoText}
+                    projects={projects}
+                    useMockFallback={useMockProjects}
                     triggerNotification={onNotification}
-                    onProjectSelect={(title) =>
-                      onNotification?.(`Opening project brief: "${title}"`)
+                    onProjectSelect={
+                      onProjectSelect ??
+                      ((listing) =>
+                        onNotification?.(`Opening project brief: "${listing.title}"`))
                     }
                   />
                 </div>
@@ -424,6 +527,7 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
                     employerId={employer.id}
                     employerName={employer.name}
                     initialRating={employer.rating}
+                    initialReviews={reviews}
                     showToast={onNotification}
                   />
                 </div>
@@ -434,10 +538,16 @@ export default function SingleEmployerPage({ employer, onContact, onNotification
               <EmployerJobsAt
                 employerName={employer.name}
                 logoColor={employer.logoColor}
-                jobsLive={employer.openJobs + 2008}
-                addedToday={employer.openJobs + 279}
+                logoUrl={employer.logoUrl}
+                logoText={employer.logoText}
+                jobs={jobs}
+                useMockFallback={useMockJobs}
+                jobsLive={jobs?.length ?? employer.openJobs}
                 triggerNotification={onNotification}
-                onJobSelect={(title) => onNotification?.(`Opening job: "${title}"`)}
+                onJobSelect={
+                  onJobSelect ??
+                  ((listing) => onNotification?.(`Opening job: "${listing.title}"`))
+                }
               />
             </div>
           </div>

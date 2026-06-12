@@ -13,12 +13,15 @@ import {
 
 function DashboardLayoutShell({ children }: { children: React.ReactNode }) {
   const refreshUser = useAuthStore((s) => s.refreshUser);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const pathname = usePathname();
   const { mobileOpen, setMobileOpen } = useTaskerDashboardNav();
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    if (isAuthenticated) {
+      void refreshUser();
+    }
+  }, [isAuthenticated, refreshUser]);
 
   useEffect(() => {
     setMobileOpen(false);

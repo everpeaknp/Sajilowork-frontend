@@ -1,35 +1,130 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import { X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { notFound, useParams, useRouter } from 'next/navigation';
+import { Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import '@/components/LangingHome/landing-home.css';
 import { discoverDmSans } from '@/components/LangingHome/landingTypography';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleFreelancerPage from '@/components/freelancers/SingleFreelancerPage';
-import { findFreelancerBySlug } from '@/components/freelancers/freelancerSlug';
+import { useAuth } from '@/hooks/useAuth';
+import type { FreelancerProfileBundle } from '@/lib/freelancerProfileFromApi';
+import { loadFreelancerPageData } from '@/lib/freelancerApi';
+import { chatService } from '@/services/chat.service';
 
 export default function FreelancerSlugPage() {
   const params = useParams();
+  const router = useRouter();
+  const { user: currentUser } = useAuth();
   const slug = typeof params.slug === 'string' ? params.slug : '';
+
+  const [bundle, setBundle] = useState<FreelancerProfileBundle | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFoundState, setNotFoundState] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
 
-  const freelancer = useMemo(() => (slug ? findFreelancerBySlug(slug) : undefined), [slug]);
+  const loadProfile = useCallback(async () => {
+    if (!slug) return;
+    setLoading(true);
+    setNotFoundState(false);
+    setLoadError(null);
+    setBundle(null);
 
-  if (!slug) {
-    notFound();
-  }
+    try {
+      const loaded = await loadFreelancerPageData(slug);
+      if (!loaded) {
+        setNotFoundState(true);
+        return;
+      }
 
-  if (!freelancer) {
-    notFound();
-  }
+      const profileUsername = loaded.freelancer.username?.trim();
+      if (
+        slug &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug) &&
+        profileUsername &&
+        profileUsername.toLowerCase() !== slug.toLowerCase()
+      ) {
+        router.replace(`/freelancers/${encodeURIComponent(profileUsername)}`);
+        return;
+      }
+
+      setBundle(loaded);
+    } catch (error) {
+      const status =
+        error && typeof error === 'object' && 'status' in error
+          ? Number((error as { status?: number }).status)
+          : 0;
+      if (status === 404) {
+        setNotFoundState(true);
+      } else {
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : 'Could not load this profile. Check that the API is running and try again.',
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [slug, router]);
+
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
 
   const triggerNotification = (msg: string) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 4000);
   };
+
+  const handleContact = async (name: string, message?: string) => {
+    if (!bundle?.extras.userId || !message?.trim()) {
+      return;
+    }
+
+    if (!currentUser) {
+      router.push(`/login?redirect=${encodeURIComponent(`/freelancers/${slug}`)}`);
+      return;
+    }
+
+    if (currentUser.id === bundle.extras.userId) {
+      triggerNotification('You cannot message your own profile.');
+      return;
+    }
+
+    try {
+      const conversationRes = await chatService.findOrCreateDirectConversation(
+        bundle.extras.userId,
+      );
+      if (!conversationRes.success || !conversationRes.data) {
+        triggerNotification('Could not start a conversation. Please try again.');
+        return;
+      }
+
+      const sendRes = await chatService.sendMessage(conversationRes.data.id, {
+        content: message.trim(),
+      });
+      if (!sendRes.success) {
+        triggerNotification('Message could not be sent. Please try again.');
+        return;
+      }
+
+      router.push(`/message?conversation=${conversationRes.data.id}`);
+    } catch {
+      triggerNotification(`Could not send your message to ${name}. Please try again.`);
+    }
+  };
+
+  if (!slug) {
+    notFound();
+  }
+
+  if (!loading && notFoundState) {
+    notFound();
+  }
 
   return (
     <div
@@ -60,10 +155,28 @@ export default function FreelancerSlugPage() {
           ) : null}
         </AnimatePresence>
 
-        <SingleFreelancerPage
-          freelancer={freelancer}
-          onInquire={(name) => triggerNotification(`Message sent to ${name}.`)}
-        />
+        {loadError ? (
+          <div className="mx-auto flex min-h-[40vh] max-w-lg flex-col items-center justify-center gap-4 px-6 py-24 text-center">
+            <p className="text-sm text-neutral-600">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => void loadProfile()}
+              className="rounded-full bg-[#52C47F] px-5 py-2 text-sm text-white"
+            >
+              Try again
+            </button>
+          </div>
+        ) : loading || !bundle ? (
+          <div className="flex min-h-[50vh] items-center justify-center py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" aria-label="Loading profile" />
+          </div>
+        ) : (
+          <SingleFreelancerPage
+            freelancer={bundle.freelancer}
+            profileExtras={bundle.extras}
+            onInquire={handleContact}
+          />
+        )}
       </main>
       <Footer />
     </div>

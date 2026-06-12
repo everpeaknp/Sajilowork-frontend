@@ -2,10 +2,11 @@
 
 import { useState, type FormEvent } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight, X, CreditCard } from 'lucide-react';
+import { CURRENCY_INPUT_PREFIX, formatNPR } from '@/lib/nepalLocale';
 
-type PayoutStatus = 'Pending Orange' | 'Pending Blue' | 'Approved' | 'Processing';
+export type PayoutStatus = 'Pending Orange' | 'Pending Blue' | 'Approved' | 'Processing';
 
-interface Payout {
+export interface Payout {
   id: string;
   amount: string;
   amountVal: number;
@@ -18,7 +19,7 @@ function buildPayouts(): Payout[] {
   const list: Payout[] = [
     {
       id: 'payout-p1-1',
-      amount: '$2.400',
+      amount: formatNPR(2400),
       amountVal: 2400,
       date: 'April 15, 2023',
       payoutMethod: 'Paypal',
@@ -26,7 +27,7 @@ function buildPayouts(): Payout[] {
     },
     {
       id: 'payout-p1-2',
-      amount: '$1.650',
+      amount: formatNPR(1650),
       amountVal: 1650,
       date: 'April 11, 2023',
       payoutMethod: 'Bank Transfer',
@@ -34,7 +35,7 @@ function buildPayouts(): Payout[] {
     },
     {
       id: 'payout-p1-3',
-      amount: '$950',
+      amount: formatNPR(950),
       amountVal: 950,
       date: 'April 10, 2023',
       payoutMethod: 'Payoneer',
@@ -42,7 +43,7 @@ function buildPayouts(): Payout[] {
     },
     {
       id: 'payout-p2-1',
-      amount: '$1.800',
+      amount: formatNPR(1800),
       amountVal: 1800,
       date: 'April 9, 2023',
       payoutMethod: 'Paypal',
@@ -50,7 +51,7 @@ function buildPayouts(): Payout[] {
     },
     {
       id: 'payout-p2-2',
-      amount: '$1.800',
+      amount: formatNPR(1800),
       amountVal: 1800,
       date: 'April 9, 2023',
       payoutMethod: 'Payoneer',
@@ -58,7 +59,7 @@ function buildPayouts(): Payout[] {
     },
     {
       id: 'payout-p2-3',
-      amount: '$1.800',
+      amount: formatNPR(1800),
       amountVal: 1800,
       date: 'April 9, 2023',
       payoutMethod: 'Bank Transfer',
@@ -79,7 +80,7 @@ function buildPayouts(): Payout[] {
 
     list.push({
       id: `payout-gen-${i}`,
-      amount: `$${(1500 + ((i * 120) % 2500)).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }).replace(',', '.')}`,
+      amount: formatNPR(1500 + ((i * 120) % 2500)),
       amountVal: 1500 + ((i * 120) % 2500),
       date: 'April 9, 2023',
       payoutMethod: paymentMethods[i % paymentMethods.length],
@@ -90,7 +91,7 @@ function buildPayouts(): Payout[] {
   return list;
 }
 
-function StatusBadge({ status }: { status: PayoutStatus }) {
+export function StatusBadge({ status }: { status: PayoutStatus }) {
   if (status === 'Pending Orange') {
     return (
       <span className="inline-flex rounded-xl border border-[#FFF6E9] bg-[#FFF6E9] px-6 py-2.5 text-xs font-normal text-[#F2994A] transition-all">
@@ -119,8 +120,21 @@ function StatusBadge({ status }: { status: PayoutStatus }) {
   );
 }
 
-export default function DashboardPayouts() {
-  const [payouts, setPayouts] = useState<Payout[]>(buildPayouts);
+export interface DashboardPayoutsProps {
+  embedded?: boolean;
+  payouts?: Payout[];
+  loading?: boolean;
+  onCreatePayout?: () => void;
+}
+
+export default function DashboardPayouts({
+  embedded = false,
+  payouts: payoutsProp,
+  loading = false,
+  onCreatePayout,
+}: DashboardPayoutsProps = {}) {
+  const [localPayouts, setLocalPayouts] = useState<Payout[]>(buildPayouts);
+  const payouts = payoutsProp ?? localPayouts;
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAmount, setNewAmount] = useState('1800');
@@ -143,12 +157,20 @@ export default function DashboardPayouts() {
         : 'bg-transparent font-normal text-black hover:text-[#52C47F]'
     }`;
 
+  const handleCreateClick = () => {
+    if (onCreatePayout) {
+      onCreatePayout();
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   const handleCreateSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!newAmount || Number.isNaN(Number(newAmount))) return;
 
     const parsedVal = Number(newAmount);
-    const formattedAmount = `$${(parsedVal / 1000).toFixed(3)}`;
+    const formattedAmount = formatNPR(parsedVal);
 
     const freshPayout: Payout = {
       id: `payout-user-${Date.now()}`,
@@ -159,7 +181,7 @@ export default function DashboardPayouts() {
       status: newStatus,
     };
 
-    setPayouts((prev) => [freshPayout, ...prev]);
+    setLocalPayouts((prev) => [freshPayout, ...prev]);
     setIsModalOpen(false);
     setCurrentPage(1);
 
@@ -167,19 +189,23 @@ export default function DashboardPayouts() {
     setTimeout(() => setSuccessNote(null), 4500);
   };
 
+  const outerClass = embedded
+    ? 'animate-in fade-in duration-300 font-sans text-black'
+    : 'animate-in fade-in -mx-4 -my-6 min-h-screen bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8';
+
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+    <div className={outerClass}>
       <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">Payouts</h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
-            Lorem ipsum dolor sit amet, consectetur.
+            {embedded ? 'View payout history and request withdrawals.' : 'Lorem ipsum dolor sit amet, consectetur.'}
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleCreateClick}
           className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:scale-[1.01] hover:bg-neutral-800 active:scale-[0.99]"
         >
           <span>Create Payout</span>
@@ -204,84 +230,102 @@ export default function DashboardPayouts() {
       ) : null}
 
       <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto border-collapse text-left">
-            <thead>
-              <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
-                <th className="w-[25%] pb-6 pl-2 pt-2 font-medium">Amount</th>
-                <th className="w-[25%] pb-6 pt-2 font-medium">Date</th>
-                <th className="w-[25%] pb-6 pt-2 font-medium">Payout Method</th>
-                <th className="w-[25%] pb-6 pt-2 text-left font-medium">Payment Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {currentPayouts.map((pay) => (
-                <tr key={pay.id} className="transition-colors hover:bg-neutral-50/20">
-                  <td className="select-all py-6 pl-2 align-middle text-[15px] font-medium text-neutral-900">
-                    {pay.amount}
-                  </td>
-                  <td className="py-6 align-middle text-sm font-normal text-neutral-500">{pay.date}</td>
-                  <td className="py-6 align-middle text-sm font-normal text-neutral-800">{pay.payoutMethod}</td>
-                  <td className="py-6 align-middle">
-                    <StatusBadge status={pay.status} />
-                  </td>
+        {loading ? (
+          <div className="py-16 text-center text-sm text-neutral-500">Loading payouts…</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto border-collapse text-left">
+              <thead>
+                <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
+                  <th className="w-[25%] pb-6 pl-2 pt-2 font-medium">Amount</th>
+                  <th className="w-[25%] pb-6 pt-2 font-medium">Date</th>
+                  <th className="w-[25%] pb-6 pt-2 font-medium">Payout Method</th>
+                  <th className="w-[25%] pb-6 pt-2 text-left font-medium">Payment Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {currentPayouts.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-12 text-center text-sm text-neutral-500">
+                      No payouts yet. Create your first payout to get started.
+                    </td>
+                  </tr>
+                ) : (
+                  currentPayouts.map((pay) => (
+                    <tr key={pay.id} className="transition-colors hover:bg-neutral-50/20">
+                      <td className="select-all py-6 pl-2 align-middle text-[15px] font-medium text-neutral-900">
+                        {pay.amount}
+                      </td>
+                      <td className="py-6 align-middle text-sm font-normal text-neutral-500">{pay.date}</td>
+                      <td className="py-6 align-middle text-sm font-normal text-neutral-800">{pay.payoutMethod}</td>
+                      <td className="py-6 align-middle">
+                        <StatusBadge status={pay.status} />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-        <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
-          <div className="flex items-center justify-center gap-6">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={activePage === 1}
-              className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
-            >
-              <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
-            </button>
-
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((page) => (
-                <button
-                  key={page}
-                  type="button"
-                  onClick={() => setCurrentPage(page)}
-                  className={pageButtonClass(page)}
-                >
-                  {page}
-                </button>
-              ))}
-              <span className="flex h-[44px] w-[44px] items-center justify-center text-sm font-normal text-neutral-400">
-                ...
-              </span>
+        {!loading && payouts.length > 0 ? (
+          <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
+            <div className="flex items-center justify-center gap-6">
               <button
                 type="button"
-                onClick={() => setCurrentPage(totalPages)}
-                className={pageButtonClass(totalPages)}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={activePage === 1}
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
               >
-                {totalPages}
+                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+              </button>
+
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].filter((page) => page <= totalPages).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={pageButtonClass(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                {totalPages > 5 ? (
+                  <>
+                    <span className="flex h-[44px] w-[44px] items-center justify-center text-sm font-normal text-neutral-400">
+                      ...
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={pageButtonClass(totalPages)}
+                    >
+                      {totalPages}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={activePage === totalPages}
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+              >
+                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={activePage === totalPages}
-              className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
-            >
-              <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
-            </button>
+            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
+              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, payouts.length)} of {payouts.length} payouts
+            </div>
           </div>
-
-          <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-            {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, payouts.length)} of {payouts.length} payouts
-          </div>
-        </div>
+        ) : null}
       </div>
 
-      {isModalOpen ? (
+      {isModalOpen && !onCreatePayout ? (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <button
             type="button"
@@ -310,10 +354,10 @@ export default function DashboardPayouts() {
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
-                  Amount (USD)
+                  Amount (NPR)
                 </label>
                 <div className="flex items-center rounded-xl border border-neutral-200 px-4">
-                  <span className="font-bold text-neutral-400">$</span>
+                  <span className="font-bold text-neutral-400">{CURRENCY_INPUT_PREFIX}</span>
                   <input
                     type="number"
                     required
@@ -325,10 +369,7 @@ export default function DashboardPayouts() {
                   />
                 </div>
                 <p className="text-[11px] text-neutral-400">
-                  Value will format as $
-                  {Number(newAmount || 0)
-                    .toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
-                    .replace(',', '.')}
+                  Value will format as {formatNPR(Number(newAmount || 0))}
                 </p>
               </div>
 

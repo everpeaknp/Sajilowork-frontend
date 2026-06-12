@@ -1,9 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { CreditCard, Plus, CheckCircle2, Wallet, ArrowRight, ArrowDownLeft, History, Zap, TrendingUp, Trash2, MessageCircle, X } from 'lucide-react';
+import { Wallet, ArrowRight, ArrowDownLeft, ArrowUpRight, Zap, TrendingUp, MessageCircle, X } from 'lucide-react';
+import DashboardPayouts, { type Payout, type PayoutStatus } from '@/app/dashboard/DashboardPayouts';
+import DashboardRecharges, { type Recharge } from '@/app/dashboard/DashboardRecharges';
 
 const fieldLabelClass = 'text-sm font-semibold text-gray-600';
 const fieldInputClass =
@@ -13,9 +17,12 @@ import { paymentService } from '@/services';
 import { PaymentMethodData } from '@/types';
 import { toast } from 'sonner';
 import { formatNPR } from '@/lib/nepalLocale';
-import { USER_PROFILE_UPDATED, notifyUserProfileUpdated } from '@/lib/userProfileSync';
+import {
+  getWalletRechargeMethodLabel,
+  isWalletRechargeTransaction,
+} from '@/lib/walletRecharge';
+import { USER_PROFILE_UPDATED } from '@/lib/userProfileSync';
 import { useAuthStore } from '@/store/auth.store';
-import DeleteConfirmModal from '@/app/dashboard/DeleteConfirmModal';
 
 interface WalletData {
   id: string;
@@ -42,6 +49,7 @@ interface WalletTransaction {
   description: string;
   reference_number: string;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
 }
 
 function validateWithdrawAmountInput(
@@ -81,20 +89,48 @@ interface WithdrawalRecord {
   completed_at: string | null;
 }
 
-const isRechargeTransaction = (tx: WalletTransaction) => {
-  const desc = (tx.description || '').toLowerCase();
-  return (
-    desc.includes('wallet recharge') ||
-    desc.includes('manual wallet recharge') ||
-    desc.includes('recharge')
-  );
-};
+type PaymentMethodsTab = 'wallet' | 'recharges' | 'payouts';
 
-export default function PaymentMethods() {
+function mapTransactionStatus(status: string, index: number): PayoutStatus {
+  switch (status) {
+    case 'completed':
+    case 'approved':
+      return 'Approved';
+    case 'processing':
+      return 'Processing';
+    case 'pending':
+      return index % 2 === 0 ? 'Pending Orange' : 'Pending Blue';
+    default:
+      return 'Processing';
+  }
+}
+
+function mapWithdrawalStatus(status: string, index: number): PayoutStatus {
+  switch (status) {
+    case 'completed':
+    case 'approved':
+      return 'Approved';
+    case 'processing':
+      return 'Processing';
+    case 'pending':
+      return index % 2 === 0 ? 'Pending Orange' : 'Pending Blue';
+    default:
+      return 'Processing';
+  }
+}
+
+interface PaymentMethodsProps {
+  initialTab?: PaymentMethodsTab;
+}
+
+export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethodsProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isDashboardWallet = pathname.startsWith('/dashboard/wallet');
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'methods' | 'wallet'>('wallet');
+  const [activeTab, setActiveTab] = useState<PaymentMethodsTab>(initialTab);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
   const [withdrawalHistory, setWithdrawalHistory] = useState<WithdrawalRecord[]>([]);
@@ -102,12 +138,6 @@ export default function PaymentMethods() {
   const [selectedAmount, setSelectedAmount] = useState<number>(500);
   const [isRecharging, setIsRecharging] = useState(false);
   const [showRechargeModal, setShowRechargeModal] = useState(false);
-  const [showLinkESewaModal, setShowLinkESewaModal] = useState(false);
-  const [esewaFormData, setEsewaFormData] = useState({
-    fullName: '',
-    phoneNumber: ''
-  });
-  const [isLinkingESewa, setIsLinkingESewa] = useState(false);
   const [customRechargeAmount, setCustomRechargeAmount] = useState<string>('500');
   const [rechargeAmountError, setRechargeAmountError] = useState<string | null>(null);
   const [adminWhatsAppNumber, setAdminWhatsAppNumber] = useState('');
@@ -119,7 +149,6 @@ export default function PaymentMethods() {
   const [customWithdrawAmount, setCustomWithdrawAmount] = useState<string>('');
   const [withdrawAmountError, setWithdrawAmountError] = useState<string | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [deletePaymentMethodId, setDeletePaymentMethodId] = useState<string | null>(null);
   const [withdrawMethod, setWithdrawMethod] = useState<'esewa' | 'bank_transfer'>('esewa');
   const [selectedEsewaMethodId, setSelectedEsewaMethodId] = useState<string>('');
   const [withdrawFee, setWithdrawFee] = useState<number | null>(null);
@@ -131,22 +160,39 @@ export default function PaymentMethods() {
   });
 
   useEffect(() => {
-    if (activeTab === 'methods') {
-      fetchPaymentMethods();
-    } else if (activeTab === 'wallet') {
-      fetchWalletData();
-    }
-  }, [activeTab]);
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
-    const modalOpen = showWithdrawModal || showRechargeModal || showLinkESewaModal;
+    void fetchWalletData();
+  }, []);
+
+  const selectTab = useCallback(
+    (tab: PaymentMethodsTab) => {
+      setActiveTab(tab);
+      if (!isDashboardWallet) return;
+
+      const params = new URLSearchParams(searchParams.toString());
+      if (tab === 'wallet') {
+        params.delete('section');
+      } else {
+        params.set('section', tab);
+      }
+      const query = params.toString();
+      router.replace(query ? `/dashboard/wallet?${query}` : '/dashboard/wallet', { scroll: false });
+    },
+    [isDashboardWallet, router, searchParams]
+  );
+
+  useEffect(() => {
+    const modalOpen = showWithdrawModal || showRechargeModal;
     if (!modalOpen || typeof document === 'undefined') return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [showWithdrawModal, showRechargeModal, showLinkESewaModal]);
+  }, [showWithdrawModal, showRechargeModal]);
 
   useEffect(() => {
     const onProfileUpdated = () => {
@@ -158,20 +204,15 @@ export default function PaymentMethods() {
 
   const fetchPaymentMethods = async (forceRefresh = false) => {
     try {
-      setLoading(true);
       const response = await paymentService.getPaymentMethods(forceRefresh);
-      
       if (response.success && response.data) {
-        setPaymentMethods(response.data);
+        setPaymentMethods(Array.isArray(response.data) ? response.data : []);
       } else {
         setPaymentMethods([]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to fetch payment methods:', error);
-      toast.error(error.message || 'Failed to load payment methods');
       setPaymentMethods([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -206,22 +247,22 @@ export default function PaymentMethods() {
         // fallback to defaults
       }
       
-      const [transactionsResponse, withdrawalsResponse] = await Promise.all([
-        paymentService.getWalletTransactions({ page_size: 50 }),
+      const [transactionsResponse, withdrawalsResponse, paymentMethodsResponse] = await Promise.all([
+        paymentService.getWalletTransactions({ page_size: 50, purpose: 'recharge' }),
         paymentService.getMyWithdrawals({ page_size: 20 }),
+        paymentService.getPaymentMethods(),
       ]);
 
+      if (paymentMethodsResponse.success && paymentMethodsResponse.data) {
+        setPaymentMethods(
+          Array.isArray(paymentMethodsResponse.data) ? paymentMethodsResponse.data : []
+        );
+      }
+
       if (transactionsResponse.success && transactionsResponse.data) {
-        const all = Array.isArray(transactionsResponse.data.results)
-          ? transactionsResponse.data.results
-          : [];
+        const all = transactionsResponse.data.results ?? [];
         setWalletTransactions(
-          all
-            .filter(
-              (tx) =>
-                ['credit', 'bonus'].includes(tx.transaction_type) && isRechargeTransaction(tx)
-            )
-            .slice(0, 20)
+          all.filter((tx) => isWalletRechargeTransaction(tx)).slice(0, 50)
         );
       } else {
         setWalletTransactions([]);
@@ -242,66 +283,6 @@ export default function PaymentMethods() {
     }
   };
 
-  const requestDeletePaymentMethod = (id: string) => {
-    setDeletePaymentMethodId(id);
-  };
-
-  const confirmDeletePaymentMethod = async () => {
-    if (!deletePaymentMethodId) return;
-
-    const id = deletePaymentMethodId;
-    setDeletePaymentMethodId(null);
-
-    try {
-      await paymentService.deletePaymentMethod(id);
-      setPaymentMethods((prev) => prev.filter((pm) => pm.id !== id));
-      if (selectedEsewaMethodId === id) {
-        setSelectedEsewaMethodId('');
-      }
-      toast.success('Payment method deleted successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete payment method');
-    }
-  };
-
-  const deletePaymentMethodTarget = useMemo(
-    () => paymentMethods.find((pm) => pm.id === deletePaymentMethodId) ?? null,
-    [paymentMethods, deletePaymentMethodId],
-  );
-
-  const handleSetDefault = async (id: string) => {
-    try {
-      await paymentService.setDefaultPaymentMethod(id);
-      setPaymentMethods(paymentMethods.map(pm => ({
-        ...pm,
-        is_default: pm.id === id
-      } as PaymentMethodData)));
-      toast.success('Default payment method updated');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to set default payment method');
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    });
-  };
-
-  const getTransactionIcon = (type: string) => {
-    switch (type) {
-      case 'credit':
-        return <Zap className="w-4 h-4" />;
-      case 'debit':
-        return <ArrowRight className="w-4 h-4" />;
-      default:
-        return <Wallet className="w-4 h-4" />;
-    }
-  };
-
   const getWithdrawalMethodLabel = (method: string) => {
     switch (method) {
       case 'esewa':
@@ -314,90 +295,6 @@ export default function PaymentMethods() {
         return 'PayPal';
       default:
         return method.replace(/_/g, ' ');
-    }
-  };
-
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'completed':
-      case 'approved':
-        return 'bg-emerald-50 text-emerald-700';
-      case 'pending':
-      case 'processing':
-        return 'bg-amber-50 text-amber-700';
-      case 'rejected':
-      case 'failed':
-      case 'cancelled':
-        return 'bg-red-50 text-red-700';
-      default:
-        return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  const getTransactionLabel = (description: string) => {
-    // Extract provider from description or use default
-    if (description.toLowerCase().includes('esewa')) return 'eSewa';
-    if (description.toLowerCase().includes('khalti')) return 'Khalti';
-    if (description.toLowerCase().includes('bank')) return 'Bank Transfer';
-    return description || 'Wallet Recharge';
-  };
-
-  const handleLinkESewaAccount = async () => {
-    if (!esewaFormData.fullName.trim()) {
-      toast.error('Please enter your full name');
-      return;
-    }
-
-    if (!esewaFormData.phoneNumber.trim()) {
-      toast.error('Please enter your eSewa phone number');
-      return;
-    }
-
-    const cleanedPhone = esewaFormData.phoneNumber.replace(/\s|-/g, '');
-    if (!/^\d{10}$/.test(cleanedPhone)) {
-      toast.error('Phone number must be exactly 10 digits');
-      return;
-    }
-
-    if (!cleanedPhone.startsWith('97') && !cleanedPhone.startsWith('98')) {
-      toast.error('eSewa phone number must start with 97 or 98');
-      return;
-    }
-
-    try {
-      setIsLinkingESewa(true);
-
-      const response = await paymentService.linkESewaAccount({
-        esewa_account_name: esewaFormData.fullName,
-        esewa_phone_number: cleanedPhone,
-        is_default: paymentMethods.length === 0
-      });
-
-      if (response.success && response.data) {
-        toast.success('Payment method linked successfully!');
-        
-        setShowLinkESewaModal(false);
-        setEsewaFormData({ fullName: '', phoneNumber: '' });
-        
-        setActiveTab('methods');
-        await fetchPaymentMethods(true);
-        notifyUserProfileUpdated();
-      } else {
-        toast.error('Failed to link eSewa account');
-      }
-    } catch (error: any) {
-      console.error('Failed to link eSewa account:', error);
-      
-      if (error?.errors) {
-        const errorMessages = Object.entries(error.errors)
-          .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-          .join('\n');
-        toast.error(errorMessages);
-      } else {
-        toast.error(error.message || 'Failed to link eSewa account');
-      }
-    } finally {
-      setIsLinkingESewa(false);
     }
   };
 
@@ -692,7 +589,7 @@ export default function PaymentMethods() {
     if (withdrawMethod === 'esewa') {
       const linked = esewaPaymentMethods.find((m) => m.id === selectedEsewaMethodId);
       if (!linked?.esewa_phone_number) {
-        toast.error('Link a payment method under Linked Payment Methods first.');
+        toast.error('Link a payment method in Settings first.');
         return;
       }
     } else {
@@ -755,11 +652,48 @@ export default function PaymentMethods() {
     await handleRechargeViaWhatsApp();
   };
 
+  const rechargeRows = useMemo<Recharge[]>(
+    () =>
+      walletTransactions.map((transaction, index) => ({
+        id: transaction.id,
+        amount: formatNPR(transaction.amount ?? 0),
+        amountVal: Number(transaction.amount ?? 0),
+        date: new Date(transaction.created_at).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        rechargeMethod: getWalletRechargeMethodLabel(transaction.description),
+        status: mapTransactionStatus(transaction.status, index),
+      })),
+    [walletTransactions]
+  );
+
+  const payoutRows = useMemo<Payout[]>(
+    () =>
+      withdrawalHistory.map((withdrawal, index) => ({
+        id: withdrawal.id,
+        amount: formatNPR(withdrawal.amount ?? 0),
+        amountVal: Number(withdrawal.amount ?? 0),
+        date: new Date(withdrawal.created_at).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        payoutMethod: getWithdrawalMethodLabel(withdrawal.withdrawal_method),
+        status: mapWithdrawalStatus(withdrawal.status, index),
+      })),
+    [withdrawalHistory]
+  );
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl space-y-10 pb-20"
+      className={cn(
+        'space-y-10 pb-20',
+        activeTab === 'payouts' || activeTab === 'recharges' ? 'max-w-7xl' : 'max-w-4xl'
+      )}
     >
       <header className="space-y-6">
         <div>
@@ -772,27 +706,48 @@ export default function PaymentMethods() {
         </div>
 
         {/* Custom Tabs */}
-        <div className="inline-flex bg-surface-low p-1.5 rounded-2xl">
-          <button 
-            onClick={() => setActiveTab('wallet')}
-            className={cn(
-              "px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2",
-              activeTab === 'wallet' ? "bg-white text-brand-dark shadow-sm" : "text-gray-500 hover:text-gray-700"
-            )}
-          >
-            <Wallet className="w-4 h-4" />
-            My Wallet
-          </button>
-          <button 
-            onClick={() => setActiveTab('methods')}
-            className={cn(
-              "px-8 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2",
-              activeTab === 'methods' ? "bg-white text-brand-dark shadow-sm" : "text-gray-500 hover:text-gray-700"
-            )}
-          >
-            <CreditCard className="w-4 h-4" />
-            Linked Payment Methods
-          </button>
+        <div className="w-full max-w-full overflow-x-auto">
+          <div className="inline-flex min-w-max gap-1 rounded-2xl bg-neutral-100 p-1.5">
+            <button
+              type="button"
+              onClick={() => selectTab('wallet')}
+              className={cn(
+                'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
+                activeTab === 'wallet'
+                  ? 'bg-white text-brand-dark shadow-sm'
+                  : 'text-gray-600 hover:text-brand-dark'
+              )}
+            >
+              <Wallet className="h-4 w-4" />
+              My Wallet
+            </button>
+            <button
+              type="button"
+              onClick={() => selectTab('recharges')}
+              className={cn(
+                'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
+                activeTab === 'recharges'
+                  ? 'bg-white text-brand-dark shadow-sm'
+                  : 'text-gray-600 hover:text-brand-dark'
+              )}
+            >
+              <Zap className="h-4 w-4" />
+              Recharges
+            </button>
+            <button
+              type="button"
+              onClick={() => selectTab('payouts')}
+              className={cn(
+                'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
+                activeTab === 'payouts'
+                  ? 'bg-white text-brand-dark shadow-sm'
+                  : 'text-gray-600 hover:text-brand-dark'
+              )}
+            >
+              <ArrowUpRight className="h-4 w-4" />
+              Payouts
+            </button>
+          </div>
         </div>
       </header>
 
@@ -923,726 +878,367 @@ export default function PaymentMethods() {
                   )}
                 </div>
               </div>
-
-              {showWithdrawModal &&
-                typeof document !== 'undefined' &&
-                createPortal(
-                <>
-                  <div
-                    className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
-                    onClick={() => setShowWithdrawModal(false)}
-                    aria-hidden
-                  />
-                  <div
-                    className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6 pointer-events-none"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="withdraw-modal-title"
-                  >
-                    <div
-                      className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="shrink-0 px-6 pb-5 pt-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald">
-                              <ArrowDownLeft className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <h3 id="withdraw-modal-title" className="text-xl font-bold text-brand-dark">
-                                Withdraw funds
-                              </h3>
-                              <p className="mt-1 text-sm text-gray-500">
-                                Transfer to your linked account
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setShowWithdrawModal(false)}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                            aria-label="Close"
-                          >
-                            <X className="h-5 w-5" />
-                          </button>
-                        </div>
-                        <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
-                          <span className="text-sm text-gray-500">Available balance</span>
-                          <span className="text-lg font-bold text-brand-dark">
-                            {formatNPR(walletData?.available_balance ?? 0)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 pb-2">
-                        <div className="space-y-2">
-                          <label className={fieldLabelClass}>Amount</label>
-                          <div className="relative">
-                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">
-                              Rs.
-                            </span>
-                            <input
-                              type="number"
-                              min={10}
-                              max={withdrawableBalance >= 10 ? withdrawableBalance : undefined}
-                              step="0.01"
-                              value={customWithdrawAmount}
-                              onChange={(e) => handleWithdrawAmountChange(e.target.value)}
-                              inputMode="decimal"
-                              className={cn(
-                                fieldInputClass,
-                                'pl-12 text-lg',
-                                withdrawAmountError && 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                              )}
-                              placeholder="500"
-                            />
-                          </div>
-                          <p className="text-xs text-gray-400">
-                            Minimum Rs. 10 · you can request up to {formatNPR(withdrawableBalance)} now
-                            {pendingWithdrawalsAmount > 0 && (
-                              <> ({formatNPR(pendingWithdrawalsAmount)} already in pending requests)</>
-                            )}
-                          </p>
-                          {withdrawAmountError && (
-                            <p className="text-sm font-medium text-red-600">{withdrawAmountError}</p>
-                          )}
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className={fieldLabelClass}>Payout method</label>
-                          <div className="flex rounded-2xl bg-gray-100 p-1">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setWithdrawMethod('esewa');
-                                const parsed = Number(customWithdrawAmount.trim());
-                                if (Number.isFinite(parsed) && parsed >= 10) {
-                                  void refreshWithdrawFeePreview(parsed, 'esewa');
-                                }
-                              }}
-                              disabled={esewaPaymentMethods.length === 0}
-                              className={cn(
-                                'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
-                                withdrawMethod === 'esewa'
-                                  ? 'bg-white text-brand-dark shadow-sm'
-                                  : 'text-gray-500 hover:text-gray-700',
-                                esewaPaymentMethods.length === 0 && 'cursor-not-allowed opacity-40'
-                              )}
-                            >
-                              eSewa
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setWithdrawMethod('bank_transfer');
-                                const parsed = Number(customWithdrawAmount.trim());
-                                if (Number.isFinite(parsed) && parsed >= 10) {
-                                  void refreshWithdrawFeePreview(parsed, 'bank_transfer');
-                                }
-                              }}
-                              className={cn(
-                                'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
-                                withdrawMethod === 'bank_transfer'
-                                  ? 'bg-white text-brand-dark shadow-sm'
-                                  : 'text-gray-500 hover:text-gray-700'
-                              )}
-                            >
-                              Bank transfer
-                            </button>
-                          </div>
-                        </div>
-
-                        {withdrawMethod === 'esewa' ? (
-                          <div className="space-y-2">
-                            <label className={fieldLabelClass}>eSewa account</label>
-                            {esewaPaymentMethods.length === 0 ? (
-                              <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                Link an eSewa account under Linked Payment Methods first.
-                              </p>
-                            ) : (
-                              <div className="space-y-2">
-                                {esewaPaymentMethods.map((pm) => (
-                                  <button
-                                    key={pm.id}
-                                    type="button"
-                                    onClick={() => setSelectedEsewaMethodId(pm.id)}
-                                    className={cn(
-                                      'w-full rounded-xl border px-4 py-3 text-left transition-all',
-                                      selectedEsewaMethodId === pm.id
-                                        ? 'border-brand-emerald bg-brand-emerald/5 ring-1 ring-brand-emerald/20'
-                                        : 'border-gray-200 bg-white hover:border-gray-300'
-                                    )}
-                                  >
-                                    <p className="font-semibold text-brand-dark">
-                                      {pm.esewa_account_name || 'eSewa account'}
-                                    </p>
-                                    <p className="mt-0.5 text-sm text-gray-500">{pm.esewa_phone_number}</p>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <label className={fieldLabelClass}>Bank details</label>
-                            <input
-                              value={bankWithdrawDetails.accountName}
-                              onChange={(e) =>
-                                setBankWithdrawDetails((prev) => ({ ...prev, accountName: e.target.value }))
-                              }
-                              placeholder="Account holder name"
-                              className={fieldInputClass}
-                            />
-                            <input
-                              value={bankWithdrawDetails.accountNumber}
-                              onChange={(e) =>
-                                setBankWithdrawDetails((prev) => ({ ...prev, accountNumber: e.target.value }))
-                              }
-                              placeholder="Account number"
-                              className={fieldInputClass}
-                            />
-                            <input
-                              value={bankWithdrawDetails.bankName}
-                              onChange={(e) =>
-                                setBankWithdrawDetails((prev) => ({ ...prev, bankName: e.target.value }))
-                              }
-                              placeholder="Bank name"
-                              className={fieldInputClass}
-                            />
-                          </div>
-                        )}
-
-                        {withdrawFee !== null && withdrawNetAmount !== null && (
-                          <div className="rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-4">
-                            <div className="flex items-center justify-between text-sm text-gray-500">
-                              <span>Processing fee</span>
-                              <span>{formatNPR(withdrawFee)}</span>
-                            </div>
-                            <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
-                              <span className="font-semibold text-brand-dark">You receive</span>
-                              <span className="text-lg font-bold text-brand-emerald">
-                                {formatNPR(withdrawNetAmount)}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        <p className="text-center text-xs text-gray-400">
-                          Withdrawals are reviewed by admin before payout.
-                        </p>
-                      </div>
-
-                      <div className="shrink-0 px-6 pb-6 pt-4">
-                        <button
-                          type="button"
-                          onClick={submitWithdrawRequest}
-                          disabled={
-                            isWithdrawing ||
-                            withdrawAmountValidation.amount === null ||
-                            withdrawAmountValidation.error !== null
-                          }
-                          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/25 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:bg-gray-300 disabled:shadow-none"
-                        >
-                          {isWithdrawing ? (
-                            <>
-                              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                              Submitting...
-                            </>
-                          ) : (
-                            'Request withdrawal'
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </>,
-                document.body
-              )}
-
-              {showRechargeModal &&
-                typeof document !== 'undefined' &&
-                createPortal(
-                <>
-                  <div
-                    className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
-                    onClick={() => setShowRechargeModal(false)}
-                    aria-hidden
-                  />
-                  <div className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6 pointer-events-none">
-                    <div
-                      className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className="shrink-0 px-6 pb-5 pt-6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald">
-                              <Wallet className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-brand-dark">Recharge wallet</h3>
-                              <p className="mt-1 text-sm text-gray-500">Add funds to your balance</p>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setShowRechargeModal(false)}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                            aria-label="Close"
-                          >
-                            <X className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 pb-6">
-                        <div className="space-y-2">
-                          <label className={fieldLabelClass}>Amount</label>
-                          <div className="relative">
-                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">
-                              Rs.
-                            </span>
-                            <input
-                              value={customRechargeAmount}
-                              onChange={(e) => setCustomRechargeAmount(e.target.value)}
-                              inputMode="numeric"
-                              className={cn(
-                                fieldInputClass,
-                                'pl-12 text-lg',
-                                rechargeAmountError && 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                              )}
-                              placeholder="500"
-                            />
-                          </div>
-                          <p className="text-xs text-gray-400">
-                            Rs. {rechargeMinAmount.toLocaleString()} – Rs. {rechargeMaxAmount.toLocaleString()}
-                          </p>
-                          {rechargeAmountError && (
-                            <p className="text-sm font-medium text-red-600">{rechargeAmountError}</p>
-                          )}
-                        </div>
-
-                        <div className="space-y-3">
-                          <button
-                            type="button"
-                            onClick={proceedRechargeViaESewaFromModal}
-                            className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[#60bb46] py-3.5 text-base font-bold text-white transition-all hover:bg-[#52a13c] active:scale-[0.99]"
-                          >
-                            <img
-                              src="https://esewa.com.np/common/images/esewa-logo.png"
-                              alt="eSewa"
-                              className="h-5 brightness-0 invert"
-                              onError={(e) => (e.currentTarget.style.display = 'none')}
-                            />
-                            Pay with eSewa
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={proceedRechargeViaWhatsAppFromModal}
-                            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-50 active:scale-[0.99]"
-                          >
-                            <MessageCircle className="h-5 w-5 text-[#25D366]" />
-                            Request via WhatsApp
-                          </button>
-
-                          <p className="text-center text-xs text-gray-400">
-                            {adminWhatsAppNumber
-                              ? `Admin: +${adminWhatsAppNumber} · manual confirmation required`
-                              : 'Manual recharge requires admin confirmation'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>,
-                document.body
-              )}
-
-              {/* Recharge & withdrawal history */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                      <Zap className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-brand-dark">Recharge history</h3>
-                      <p className="text-xs text-gray-500">Wallet top-ups and credits</p>
-                    </div>
-                  </div>
-
-                  {walletLoading ? (
-                    <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">
-                      Loading…
-                    </div>
-                  ) : walletTransactions.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center">
-                      <p className="text-sm font-medium text-gray-500">No recharges yet</p>
-                      <p className="mt-1 text-xs text-gray-400">Completed top-ups will show here</p>
-                    </div>
-                  ) : (
-                    <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white">
-                      {walletTransactions.map((transaction) => (
-                        <li
-                          key={transaction.id}
-                          className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-gray-50/80"
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                              {getTransactionIcon(transaction.transaction_type)}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-brand-dark">
-                                {getTransactionLabel(transaction.description)}
-                              </p>
-                              <p className="text-xs text-gray-400">{formatDate(transaction.created_at)}</p>
-                            </div>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <p className="text-sm font-bold text-emerald-700">
-                              +{formatNPR(transaction.amount ?? 0)}
-                            </p>
-                            <span
-                              className={cn(
-                                'mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize',
-                                getStatusBadgeClass(transaction.status)
-                              )}
-                            >
-                              {transaction.status}
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-brand-emerald">
-                      <ArrowDownLeft className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-brand-dark">Withdrawal history</h3>
-                      <p className="text-xs text-gray-500">Payout requests and status</p>
-                    </div>
-                  </div>
-
-                  {walletLoading ? (
-                    <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-400">
-                      Loading…
-                    </div>
-                  ) : withdrawalHistory.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center">
-                      <p className="text-sm font-medium text-gray-500">No withdrawals yet</p>
-                      <p className="mt-1 text-xs text-gray-400">Requests you submit will appear here</p>
-                    </div>
-                  ) : (
-                    <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white">
-                      {withdrawalHistory.map((withdrawal) => (
-                        <li
-                          key={withdrawal.id}
-                          className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-gray-50/80"
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-brand-emerald">
-                              <ArrowDownLeft className="h-4 w-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-brand-dark">
-                                {getWithdrawalMethodLabel(withdrawal.withdrawal_method)}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                {formatDate(withdrawal.created_at)}
-                                {Number(withdrawal.net_amount) < Number(withdrawal.amount) && (
-                                  <span className="text-gray-400">
-                                    {' '}
-                                    · receive {formatNPR(withdrawal.net_amount)}
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <p className="text-sm font-bold text-brand-dark">
-                              {formatNPR(withdrawal.amount ?? 0)}
-                            </p>
-                            <span
-                              className={cn(
-                                'mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize',
-                                getStatusBadgeClass(withdrawal.status)
-                              )}
-                            >
-                              {withdrawal.status}
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
             </>
           )}
         </div>
-      ) : (
-        <div className="space-y-6">
-          {loading ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-500 font-medium">Loading payment methods...</p>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-brand-dark">Linked payment methods</h3>
-                  <p className="text-sm text-gray-500">Accounts for payouts and withdrawals</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowLinkESewaModal(true)}
-                  className="rounded-xl bg-brand-emerald/10 px-4 py-2 text-sm font-semibold text-brand-emerald transition-colors hover:bg-brand-emerald/15"
-                >
-                  Add
-                </button>
-              </div>
+      ) : activeTab === 'recharges' ? (
+        <DashboardRecharges
+          embedded
+          recharges={rechargeRows}
+          loading={walletLoading}
+          onCreateRecharge={openRechargeModal}
+        />
+      ) : activeTab === 'payouts' ? (
+        <DashboardPayouts
+          embedded
+          payouts={payoutRows}
+          loading={walletLoading}
+          onCreatePayout={openWithdrawModal}
+        />
+      ) : null}
 
-              {!paymentMethods.length ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <button 
-                    onClick={() => setShowLinkESewaModal(true)}
-                    className="p-8 rounded-[40px] border-2 border-dashed border-outline-variant hover:border-brand-emerald hover:bg-brand-emerald/5 transition-all flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-brand-emerald group"
-                  >
-                    <div className="p-4 rounded-full bg-surface-low group-hover:bg-brand-emerald/10 transition-colors">
-                      <Plus className="w-8 h-8" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-black text-lg uppercase tracking-tight">Link eSewa</p>
-                      <p className="text-xs font-medium text-gray-400">Add eSewa as a payment method</p>
-                    </div>
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {paymentMethods.map((method) => (
-                <div 
-                  key={method.id}
-                  className={cn(
-                    "relative space-y-5 overflow-hidden rounded-[28px] border p-6 transition-all",
-                    method.is_default 
-                      ? "border-brand-emerald/40 bg-brand-emerald/5 shadow-sm" 
-                      : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm"
-                  )}
-                >
-                  <div className="flex justify-between items-start relative z-10">
-                    <div className={cn(
-                      "p-3 rounded-2xl shadow-lg",
-                      method.is_default ? "bg-brand-emerald" : method.method_type === 'esewa' ? "bg-[#60bb46]" : "bg-gray-100"
-                    )}>
-                      {method.method_type === 'esewa' ? (
-                        <Wallet className={cn("w-8 h-8", method.is_default ? "text-white" : "text-white")} />
-                      ) : (
-                        <CreditCard className={cn("w-8 h-8", method.is_default ? "text-white" : "text-gray-600")} />
-                      )}
-                    </div>
-                    {method.is_default && (
-                      <div className="p-2 bg-brand-emerald rounded-full">
-                        <CheckCircle2 className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="relative z-10">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">
-                      {method.method_type === 'card' ? 'Card' : method.method_type === 'esewa' ? 'eSewa Account' : 'Bank Account'}
-                    </p>
-                    {method.method_type === 'esewa' ? (
-                      <>
-                        <p className="text-2xl font-black text-brand-dark tracking-tight">
-                          {method.esewa_phone_number && method.esewa_phone_number.length >= 4
-                            ? `${method.esewa_phone_number.substring(0, 5)}****${method.esewa_phone_number.substring(method.esewa_phone_number.length - 2)}`
-                            : method.esewa_account_name}
-                        </p>
-                        <p className="text-xs font-semibold text-gray-500 mt-1">
-                          {method.esewa_account_name}
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-2xl font-black text-brand-dark tracking-tight">
-                          ****{method.last_four}
-                        </p>
-                        {method.method_type === 'card' && method.expiry_date && (
-                          <p className="text-xs font-semibold text-gray-500 mt-1">
-                            Card • Expires {method.expiry_date}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div className="pt-2 flex items-center justify-between relative z-10">
-                    {method.is_default ? (
-                      <span className="text-xs font-black text-brand-emerald uppercase">Default Method</span>
-                    ) : (
-                      <button 
-                        onClick={() => handleSetDefault(method.id)}
-                        className="text-xs font-black text-brand-dark underline hover:text-brand-emerald"
-                      >
-                        Set as Default
-                      </button>
-                    )}
-                    <button 
-                      type="button"
-                      onClick={() => requestDeletePaymentMethod(method.id)}
-                      className="text-xs font-black text-red-500 hover:text-red-700 flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                  ))}
-
-                  <button 
-                    onClick={() => setShowLinkESewaModal(true)}
-                    className="p-8 rounded-[40px] border-2 border-dashed border-outline-variant hover:border-brand-emerald hover:bg-brand-emerald/5 transition-all flex flex-col items-center justify-center gap-4 text-gray-400 hover:text-brand-emerald group"
-                  >
-                    <div className="p-4 rounded-full bg-surface-low group-hover:bg-brand-emerald/10 transition-colors">
-                      <Plus className="w-8 h-8" />
-                    </div>
-                    <div className="text-center">
-                      <p className="font-black text-lg uppercase tracking-tight">Link eSewa</p>
-                      <p className="text-xs font-medium text-gray-400">Add eSewa as a payment method</p>
-                    </div>
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Link eSewa Account Modal */}
-      {showLinkESewaModal &&
+      {showWithdrawModal &&
         typeof document !== 'undefined' &&
         createPortal(
         <>
           <div
             className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
-            onClick={() => setShowLinkESewaModal(false)}
+            onClick={() => setShowWithdrawModal(false)}
             aria-hidden
           />
-          <div className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6 pointer-events-none">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
-            onClick={(e) => e.stopPropagation()}
+          <div
+            className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6 pointer-events-none"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="withdraw-modal-title"
           >
-            <div className="shrink-0 px-6 pb-5 pt-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#60bb46]/15">
-                    <img
-                      src="https://esewa.com.np/common/images/esewa-logo.png"
-                      alt=""
-                      className="h-5"
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
+            <div
+              className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="shrink-0 px-6 pb-5 pt-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald">
+                      <ArrowUpRight className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 id="withdraw-modal-title" className="text-xl font-bold text-brand-dark">
+                        Withdraw
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Transfer balance to your linked account
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowWithdrawModal(false)}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    aria-label="Close"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
+                  <span className="text-sm text-gray-500">Available to withdraw</span>
+                  <span className="text-lg font-bold text-brand-dark">
+                    {formatNPR(withdrawableBalance)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 pb-2">
+                <div className="space-y-2">
+                  <label className={fieldLabelClass}>Amount</label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">
+                      Rs.
+                    </span>
+                    <input
+                      type="number"
+                      min={withdrawMinAmount}
+                      max={withdrawableBalance >= withdrawMinAmount ? withdrawableBalance : undefined}
+                      step="0.01"
+                      value={customWithdrawAmount}
+                      onChange={(e) => handleWithdrawAmountChange(e.target.value)}
+                      inputMode="decimal"
+                      className={cn(
+                        fieldInputClass,
+                        'pl-12 text-lg',
+                        withdrawAmountError && 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                      )}
+                      placeholder="500"
                     />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-brand-dark">Link eSewa</h3>
-                    <p className="mt-1 text-sm text-gray-500">For withdrawals and payouts</p>
+                  <p className="text-xs text-gray-400">
+                    Minimum {formatNPR(withdrawMinAmount)} · you can request up to {formatNPR(withdrawableBalance)} now
+                    {pendingWithdrawalsAmount > 0 && (
+                      <> ({formatNPR(pendingWithdrawalsAmount)} already in pending requests)</>
+                    )}
+                  </p>
+                  {withdrawAmountError && (
+                    <p className="text-sm font-medium text-red-600">{withdrawAmountError}</p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <label className={fieldLabelClass}>Withdrawal method</label>
+                  <div className="flex rounded-2xl bg-gray-100 p-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWithdrawMethod('esewa');
+                        const parsed = Number(customWithdrawAmount.trim());
+                        if (Number.isFinite(parsed) && parsed >= withdrawMinAmount) {
+                          void refreshWithdrawFeePreview(parsed, 'esewa');
+                        }
+                      }}
+                      disabled={esewaPaymentMethods.length === 0}
+                      className={cn(
+                        'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
+                        withdrawMethod === 'esewa'
+                          ? 'bg-white text-brand-dark shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700',
+                        esewaPaymentMethods.length === 0 && 'cursor-not-allowed opacity-40'
+                      )}
+                    >
+                      eSewa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWithdrawMethod('bank_transfer');
+                        const parsed = Number(customWithdrawAmount.trim());
+                        if (Number.isFinite(parsed) && parsed >= withdrawMinAmount) {
+                          void refreshWithdrawFeePreview(parsed, 'bank_transfer');
+                        }
+                      }}
+                      className={cn(
+                        'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
+                        withdrawMethod === 'bank_transfer'
+                          ? 'bg-white text-brand-dark shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      )}
+                    >
+                      Bank transfer
+                    </button>
                   </div>
                 </div>
+
+                {withdrawMethod === 'esewa' ? (
+                  <div className="space-y-2">
+                    <label className={fieldLabelClass}>eSewa account</label>
+                    {esewaPaymentMethods.length === 0 ? (
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        <Link
+                          href="/dashboard/settings?tab=payment-methods"
+                          className="font-semibold underline hover:text-amber-950"
+                        >
+                          Link an eSewa account in Settings
+                        </Link>{' '}
+                        under Linked Payment Methods first.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {esewaPaymentMethods.map((pm) => (
+                          <button
+                            key={pm.id}
+                            type="button"
+                            onClick={() => setSelectedEsewaMethodId(pm.id)}
+                            className={cn(
+                              'w-full rounded-xl border px-4 py-3 text-left transition-all',
+                              selectedEsewaMethodId === pm.id
+                                ? 'border-brand-emerald bg-brand-emerald/5 ring-1 ring-brand-emerald/20'
+                                : 'border-gray-200 bg-white hover:border-gray-300'
+                            )}
+                          >
+                            <p className="font-semibold text-brand-dark">
+                              {pm.esewa_account_name || 'eSewa account'}
+                            </p>
+                            <p className="mt-0.5 text-sm text-gray-500">{pm.esewa_phone_number}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <label className={fieldLabelClass}>Bank details</label>
+                    <input
+                      value={bankWithdrawDetails.accountName}
+                      onChange={(e) =>
+                        setBankWithdrawDetails((prev) => ({ ...prev, accountName: e.target.value }))
+                      }
+                      placeholder="Account holder name"
+                      className={fieldInputClass}
+                    />
+                    <input
+                      value={bankWithdrawDetails.accountNumber}
+                      onChange={(e) =>
+                        setBankWithdrawDetails((prev) => ({ ...prev, accountNumber: e.target.value }))
+                      }
+                      placeholder="Account number"
+                      className={fieldInputClass}
+                    />
+                    <input
+                      value={bankWithdrawDetails.bankName}
+                      onChange={(e) =>
+                        setBankWithdrawDetails((prev) => ({ ...prev, bankName: e.target.value }))
+                      }
+                      placeholder="Bank name"
+                      className={fieldInputClass}
+                    />
+                  </div>
+                )}
+
+                {withdrawFee !== null && withdrawNetAmount !== null && (
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-4">
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <span>Processing fee</span>
+                      <span>{formatNPR(withdrawFee)}</span>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
+                      <span className="font-semibold text-brand-dark">You receive</span>
+                      <span className="text-lg font-bold text-brand-emerald">
+                        {formatNPR(withdrawNetAmount)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-center text-xs text-gray-400">
+                  Withdrawal requests are reviewed by admin before transfer.
+                </p>
+              </div>
+
+              <div className="shrink-0 px-6 pb-6 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowLinkESewaModal(false)}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                  aria-label="Close"
+                  onClick={submitWithdrawRequest}
+                  disabled={
+                    isWithdrawing ||
+                    withdrawAmountValidation.amount === null ||
+                    withdrawAmountValidation.error !== null
+                  }
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/25 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:bg-gray-300 disabled:shadow-none"
                 >
-                  <X className="h-5 w-5" />
+                  {isWithdrawing ? (
+                    <>
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Withdraw'
+                  )}
                 </button>
               </div>
             </div>
-
-            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 pb-6">
-              <div className="space-y-2">
-                <label className={fieldLabelClass}>Full name</label>
-                <input
-                  type="text"
-                  value={esewaFormData.fullName}
-                  onChange={(e) => setEsewaFormData({ ...esewaFormData, fullName: e.target.value })}
-                  placeholder="As on your eSewa account"
-                  className={fieldInputClass}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className={fieldLabelClass}>Phone number</label>
-                <input
-                  type="tel"
-                  value={esewaFormData.phoneNumber}
-                  onChange={(e) => setEsewaFormData({ ...esewaFormData, phoneNumber: e.target.value })}
-                  placeholder="98XXXXXXXX"
-                  maxLength={10}
-                  className={fieldInputClass}
-                />
-                <p className="text-xs text-gray-400">10 digits, starting with 98</p>
-              </div>
-            </div>
-
-            <div className="shrink-0 flex gap-3 border-t border-gray-100 px-6 py-5">
-              <button
-                type="button"
-                onClick={() => setShowLinkESewaModal(false)}
-                className="flex-1 rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleLinkESewaAccount}
-                disabled={isLinkingESewa}
-                className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#60bb46] py-3 text-sm font-bold text-white transition-all hover:bg-[#52a13c] disabled:cursor-not-allowed disabled:bg-gray-300"
-              >
-                {isLinkingESewa ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Linking…
-                  </>
-                ) : (
-                  'Link account'
-                )}
-              </button>
-            </div>
-          </motion.div>
           </div>
         </>,
         document.body
       )}
 
-      <DeleteConfirmModal
-        open={deletePaymentMethodId !== null}
-        onClose={() => setDeletePaymentMethodId(null)}
-        onConfirm={confirmDeletePaymentMethod}
-        title="Delete payment method?"
-        description={
-          deletePaymentMethodTarget
-            ? `Remove ${
-                deletePaymentMethodTarget.method_type === 'esewa'
-                  ? deletePaymentMethodTarget.esewa_account_name ||
-                    deletePaymentMethodTarget.esewa_phone_number ||
-                    'this eSewa account'
-                  : deletePaymentMethodTarget.method_type === 'card'
-                    ? `card ending in ${deletePaymentMethodTarget.last_four || '****'}`
-                    : 'this linked account'
-              } from your wallet? This cannot be undone.`
-            : 'This linked account will be removed from payouts and withdrawals. This cannot be undone.'
-        }
-      />
+      {showRechargeModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[10050] bg-brand-dark/40 backdrop-blur-sm"
+            onClick={() => setShowRechargeModal(false)}
+            aria-hidden
+          />
+          <div className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6 pointer-events-none">
+            <div
+              className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="shrink-0 px-6 pb-5 pt-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-emerald/10 text-brand-emerald">
+                      <Wallet className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-brand-dark">Recharge wallet</h3>
+                      <p className="mt-1 text-sm text-gray-500">Add funds to your balance</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowRechargeModal(false)}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    aria-label="Close"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 pb-6">
+                <div className="space-y-2">
+                  <label className={fieldLabelClass}>Amount</label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">
+                      Rs.
+                    </span>
+                    <input
+                      value={customRechargeAmount}
+                      onChange={(e) => setCustomRechargeAmount(e.target.value)}
+                      inputMode="numeric"
+                      className={cn(
+                        fieldInputClass,
+                        'pl-12 text-lg',
+                        rechargeAmountError && 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                      )}
+                      placeholder="500"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Rs. {rechargeMinAmount.toLocaleString()} – Rs. {rechargeMaxAmount.toLocaleString()}
+                  </p>
+                  {rechargeAmountError && (
+                    <p className="text-sm font-medium text-red-600">{rechargeAmountError}</p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={proceedRechargeViaESewaFromModal}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[#60bb46] py-3.5 text-base font-bold text-white transition-all hover:bg-[#52a13c] active:scale-[0.99]"
+                  >
+                    <img
+                      src="https://esewa.com.np/common/images/esewa-logo.png"
+                      alt="eSewa"
+                      className="h-5 brightness-0 invert"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                    Pay with eSewa
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={proceedRechargeViaWhatsAppFromModal}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-50 active:scale-[0.99]"
+                  >
+                    <MessageCircle className="h-5 w-5 text-[#25D366]" />
+                    Request via WhatsApp
+                  </button>
+
+                  <p className="text-center text-xs text-gray-400">
+                    {adminWhatsAppNumber
+                      ? `Admin: +${adminWhatsAppNumber} · manual confirmation required`
+                      : 'Manual recharge requires admin confirmation'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
     </motion.div>
   );
 }

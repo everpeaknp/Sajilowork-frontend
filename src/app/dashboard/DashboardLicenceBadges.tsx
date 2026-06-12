@@ -66,6 +66,7 @@ function LicenceBadgeRow({
   status,
   footer,
   action,
+  borderless = false,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -73,9 +74,14 @@ function LicenceBadgeRow({
   status: BadgeVisualStatus;
   footer?: React.ReactNode;
   action: React.ReactNode;
+  borderless?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200/90 bg-neutral-50/40 p-5 sm:flex-row sm:items-center sm:gap-6">
+    <div
+      className={`flex flex-col gap-4 rounded-xl p-5 sm:flex-row sm:items-center sm:gap-6 ${
+        borderless ? 'bg-neutral-50/40' : 'border border-neutral-200/90 bg-neutral-50/40'
+      }`}
+    >
       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-neutral-100">
         {icon}
       </div>
@@ -236,6 +242,7 @@ export default function DashboardLicenceBadges({ embedded = false }: { embedded?
         description="Let others know you hold an electrical contractor licence."
         status={getBadgeStatus('electrical_licence', badges)}
         action={renderDocAction('electrical_licence')}
+        borderless={embedded}
       />
 
       <LicenceBadgeRow
@@ -244,6 +251,7 @@ export default function DashboardLicenceBadges({ embedded = false }: { embedded?
         description="Let others know you hold a valid plumbing licence."
         status={getBadgeStatus('plumbing_licence', badges)}
         action={renderDocAction('plumbing_licence')}
+        borderless={embedded}
       />
 
       {customLicenceBadges.map((badge) => (
@@ -253,6 +261,7 @@ export default function DashboardLicenceBadges({ embedded = false }: { embedded?
           title={badge.name ?? 'Custom licence'}
           description={badge.description ?? 'Custom licence or certification on your profile.'}
           status={badge.is_verified ? 'verified' : 'pending'}
+          borderless={embedded}
           footer={
             badge.document_number ? (
               <p className="text-xs text-neutral-400">Ref: {badge.document_number}</p>
@@ -292,7 +301,9 @@ export default function DashboardLicenceBadges({ embedded = false }: { embedded?
       <button
         type="button"
         onClick={() => openUploadModal('custom_licence', 'custom')}
-        className="group flex w-full flex-col gap-4 rounded-xl border-2 border-dashed border-[#52C47F]/30 bg-emerald-50/30 p-5 text-left transition hover:border-[#52C47F]/50 sm:flex-row sm:items-center sm:gap-6"
+        className={`group flex w-full flex-col gap-4 rounded-xl bg-emerald-50/30 p-5 text-left transition sm:flex-row sm:items-center sm:gap-6 ${
+          embedded ? 'hover:bg-emerald-50/50' : 'border-2 border-dashed border-[#52C47F]/30 hover:border-[#52C47F]/50'
+        }`}
       >
         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white text-[#52C47F] shadow-sm ring-1 ring-emerald-100 transition group-hover:scale-105">
           <Plus className="h-7 w-7" strokeWidth={2} />

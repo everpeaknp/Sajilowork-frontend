@@ -1,16 +1,11 @@
 'use client';
 
+import { formatNPR } from '@/lib/nepalLocale';
+import type { EmployerListingCard } from '@/lib/employerApi';
 import { useMemo, useState } from 'react';
-import { GreenSparkSparkle, renderCompanyLogo } from './employerLogos';
+import { GreenSparkSparkle, renderEmployerBrandLogo } from './employerLogos';
 
-interface JobListing {
-  id: string;
-  title: string;
-  company: string;
-  budget: string;
-  duration: string;
-  level: string;
-  locationType: string;
+interface JobListing extends EmployerListingCard {
   logoColor: string;
   isSaved?: boolean;
 }
@@ -18,9 +13,14 @@ interface JobListing {
 interface EmployerJobsAtProps {
   employerName?: string;
   logoColor?: string;
+  logoUrl?: string;
+  logoText?: string;
+  jobs?: EmployerListingCard[];
+  /** Demo placeholder cards for static mock employer pages only */
+  useMockFallback?: boolean;
   jobsLive?: number;
   addedToday?: number;
-  onJobSelect?: (jobTitle: string) => void;
+  onJobSelect?: (job: EmployerListingCard) => void;
   triggerNotification?: (msg: string) => void;
 }
 
@@ -32,7 +32,7 @@ function buildDefaultJobs(employerName: string, logoColor: string): JobListing[]
       id: 'job-1',
       title: 'Website Designer Required For Directory Theme',
       company: employerName,
-      budget: '$125k–$135k Hourly',
+      budget: `${formatNPR(125000, { compact: true })} – ${formatNPR(135000, { compact: true })} Hourly`,
       duration: '1-5 Days',
       level: 'Expensive',
       locationType: 'Remote',
@@ -43,7 +43,7 @@ function buildDefaultJobs(employerName: string, logoColor: string): JobListing[]
       id: 'job-2',
       title: 'Website Designer Required For Directory Theme',
       company: employerName,
-      budget: '$125k–$135k Hourly',
+      budget: `${formatNPR(125000, { compact: true })} – ${formatNPR(135000, { compact: true })} Hourly`,
       duration: '1-5 Days',
       level: 'Expensive',
       locationType: 'Remote',
@@ -54,7 +54,7 @@ function buildDefaultJobs(employerName: string, logoColor: string): JobListing[]
       id: 'job-3',
       title: 'Website Designer Required For Directory Theme',
       company: employerName,
-      budget: '$125k–$135k Hourly',
+      budget: `${formatNPR(125000, { compact: true })} – ${formatNPR(135000, { compact: true })} Hourly`,
       duration: '1-5 Days',
       level: 'Expensive',
       locationType: 'Remote',
@@ -65,7 +65,7 @@ function buildDefaultJobs(employerName: string, logoColor: string): JobListing[]
       id: 'job-4',
       title: 'Website Designer Required For Directory Theme',
       company: employerName,
-      budget: '$125k–$135k Hourly',
+      budget: `${formatNPR(125000, { compact: true })} – ${formatNPR(135000, { compact: true })} Hourly`,
       duration: '1-5 Days',
       level: 'Expensive',
       locationType: 'Remote',
@@ -78,21 +78,36 @@ function buildDefaultJobs(employerName: string, logoColor: string): JobListing[]
 export default function EmployerJobsAt({
   employerName = 'Invision',
   logoColor = 'cursive-in',
-  jobsLive = 2022,
-  addedToday = 293,
+  logoUrl,
+  logoText,
+  jobs: jobsProp,
+  useMockFallback = false,
+  jobsLive,
+  addedToday,
   onJobSelect,
   triggerNotification,
 }: EmployerJobsAtProps) {
   const [savedIds, setSavedIds] = useState<Record<string, boolean>>({});
 
-  const jobs = useMemo(
-    () =>
-      buildDefaultJobs(employerName, logoColor).map((job) => ({
-        ...job,
-        isSaved: savedIds[job.id] ?? job.isSaved ?? false,
-      })),
-    [employerName, logoColor, savedIds],
-  );
+  const jobs = useMemo(() => {
+    const source =
+      jobsProp !== undefined
+        ? jobsProp
+        : useMockFallback
+          ? buildDefaultJobs(employerName, logoColor).map(({ logoColor: color, ...rest }) => rest)
+          : [];
+
+    return source.map((job, index) => ({
+      ...job,
+      logoColor: jobsProp
+        ? logoColor
+        : (buildDefaultJobs(employerName, logoColor)[index]?.logoColor ?? logoColor),
+      isSaved: savedIds[job.id] ?? false,
+    }));
+  }, [employerName, logoColor, jobsProp, useMockFallback, savedIds]);
+
+  const liveCount = jobsLive ?? jobs.length;
+  const todayCount = addedToday ?? 0;
 
   const handleSaveToggle = (id: string, title: string, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -116,9 +131,14 @@ export default function EmployerJobsAt({
           {jobs.length} jobs at {displayName}
         </h3>
         <p className="text-sm text-neutral-400">
-          {jobsLive.toLocaleString()} jobs live – {addedToday} added today
+          {liveCount.toLocaleString()} jobs live
+          {todayCount > 0 ? ` – ${todayCount} added today` : ''}
         </p>
       </div>
+
+      {jobs.length === 0 ? (
+        <p className="text-sm text-neutral-500">No open jobs posted yet.</p>
+      ) : null}
 
       <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {jobs.map((job) => (
@@ -126,16 +146,16 @@ export default function EmployerJobsAt({
             key={job.id}
             role="button"
             tabIndex={0}
-            onClick={() => onJobSelect?.(job.title)}
+            onClick={() => onJobSelect?.(job)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') onJobSelect?.(job.title);
+              if (e.key === 'Enter' || e.key === ' ') onJobSelect?.(job);
             }}
             className="group relative flex w-full cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3.5">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full [&_svg]:h-12 [&_svg]:w-12">
-                  {renderCompanyLogo(job.logoColor, job.company)}
+                  {renderEmployerBrandLogo(logoColor, employerName, logoUrl, logoText)}
                 </div>
                 <span className="truncate text-sm font-medium text-[#45a874]">{job.company}</span>
               </div>

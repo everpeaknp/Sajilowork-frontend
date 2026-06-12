@@ -69,29 +69,59 @@ export const useAuthStore = create<AuthState>()(
           }
         }
 
+        const activeAccess = tokenManager.getAccessToken();
+        const activeRefresh = tokenManager.getRefreshToken();
+        const activeTokens =
+          activeAccess && activeRefresh
+            ? { access: activeAccess, refresh: activeRefresh }
+            : tokens;
+
         // Fetch current user
         try {
           set({ isLoading: true });
           const response = await authService.getCurrentUser();
-          
+
           if (response.success && response.data) {
             set({
               user: normalizeUserFromApi(response.data as unknown as Record<string, unknown>),
-              tokens,
+              tokens: activeTokens,
               isAuthenticated: true,
               isLoading: false,
-              error: null
+              error: null,
             });
+            return;
           }
-        } catch (error: any) {
+
+          // Profile fetch failed but tokens may still be valid — keep session.
           set({
-            isAuthenticated: false,
-            user: null,
-            tokens: null,
+            tokens: activeTokens,
+            isAuthenticated: true,
             isLoading: false,
-            error: error.message || 'Failed to fetch user'
+            error: response.message || 'Failed to fetch user profile',
           });
-          tokenManager.clearTokens();
+        } catch (error: any) {
+          const status = typeof error?.status === 'number' ? error.status : 0;
+          const shouldClearSession = status === 401 || status === 403;
+
+          if (shouldClearSession) {
+            tokenManager.clearTokens();
+            set({
+              isAuthenticated: false,
+              user: null,
+              tokens: null,
+              isLoading: false,
+              error: error.message || 'Session expired',
+            });
+            return;
+          }
+
+          // Server/network errors: keep tokens so a refresh does not feel like logout.
+          set({
+            tokens: activeTokens,
+            isAuthenticated: true,
+            isLoading: false,
+            error: error.message || 'Failed to fetch user profile',
+          });
         }
       },
 
@@ -210,7 +240,16 @@ export const useAuthStore = create<AuthState>()(
         // Only persist user, not tokens (tokens are in cookies)
         user: state.user,
         isAuthenticated: state.isAuthenticated
-      })
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (!state || typeof window === 'undefined') return;
+        const hasTokens =
+          !!tokenManager.getAccessToken() && !!tokenManager.getRefreshToken();
+        if (!hasTokens) {
+          state.isAuthenticated = false;
+          state.user = null;
+        }
+      },
     }
   )
 );

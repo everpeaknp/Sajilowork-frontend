@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Star, Heart, ArrowLeft, ArrowRight } from 'lucide-react';
 import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
+import { fetchPublicServices } from '@/lib/serviceApi';
 import { ALL_SERVICES } from './serviceListData';
 import { getServiceAuthorProfilePath, getServiceDetailPath } from './serviceSlug';
-
-const BEST_SERVICES_DATA = ALL_SERVICES.slice(0, 7);
+import { toggleServiceSaved, useSavedServiceIds } from './serviceBookmarks';
 
 const PAGINATION_DOTS = [0, 1, 2];
 
@@ -18,14 +18,30 @@ interface BestServicesProps {
 }
 
 export default function BestServices({ className = '' }: BestServicesProps) {
-  const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const savedServiceIds = useSavedServiceIds();
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [bestServices, setBestServices] = useState(ALL_SERVICES.slice(0, 7));
 
-  const maxIndex = BEST_SERVICES_DATA.length - 1;
+  useEffect(() => {
+    let cancelled = false;
+    void fetchPublicServices({ ordering: '-views_count' })
+      .then((items) => {
+        if (cancelled) return;
+        setBestServices((items.length ? items : ALL_SERVICES).slice(0, 7));
+      })
+      .catch(() => {
+        if (!cancelled) setBestServices(ALL_SERVICES.slice(0, 7));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const maxIndex = Math.max(0, bestServices.length - 1);
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+    toggleServiceSaved(id);
   };
 
   const handlePrev = () => {
@@ -99,8 +115,8 @@ export default function BestServices({ className = '' }: BestServicesProps) {
             animate={{ x: `-${currentIndex * (100 / 5)}%` }}
             transition={{ type: 'spring', damping: 26, stiffness: 120 }}
           >
-            {BEST_SERVICES_DATA.map((card) => {
-              const isFav = !!favorites[card.id];
+            {bestServices.map((card) => {
+              const isFav = savedServiceIds.includes(card.id);
               return (
                 <div
                   key={card.id}

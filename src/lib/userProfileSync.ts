@@ -11,6 +11,7 @@ export function normalizeUserFromApi(raw: Record<string, unknown>): User {
 
   return {
     ...(raw as unknown as User),
+    tagline: raw.tagline as string | undefined,
     phone_number: phone,
     is_phone_verified:
       (raw.is_phone_verified as boolean | undefined) ??

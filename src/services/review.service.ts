@@ -68,6 +68,22 @@ class ReviewService {
       params: { task_id: taskId },
     });
   }
+
+  /**
+   * Reviews received by the authenticated user (employer or freelancer).
+   */
+  async getReceivedReviews(): Promise<ApiResponse<Review[]>> {
+    return apiClient.get(`${this.BASE_PATH}/received/`);
+  }
+
+  /**
+   * Post a public response as the reviewee.
+   */
+  async respondToReview(reviewId: string, responseText: string): Promise<ApiResponse<Review>> {
+    return apiClient.post(`${this.BASE_PATH}/${encodeURIComponent(reviewId)}/respond/`, {
+      response_text: responseText,
+    });
+  }
 }
 
 export const reviewService = new ReviewService();

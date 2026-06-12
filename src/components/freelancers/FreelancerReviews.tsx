@@ -3,7 +3,11 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { Star, ArrowUpRight, ThumbsUp, ThumbsDown, Filter, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { buildFreelancerReviews, type Freelancer } from './freelancerData';
+import {
+  buildFreelancerReviews,
+  type Freelancer,
+  type FreelancerReviewItem,
+} from './freelancerData';
 
 interface SingleReview {
   id: string;
@@ -23,6 +27,7 @@ type SortParam = 'newest' | 'highest' | 'lowest';
 
 interface FreelancerReviewsProps {
   freelancer: Freelancer;
+  initialReviews?: FreelancerReviewItem[];
   onReviewsUpdated?: (count: number, average: number) => void;
   showToast?: (message: string) => void;
 }
@@ -36,6 +41,7 @@ function formatReviewDate(date: Date) {
 
 export default function FreelancerReviews({
   freelancer,
+  initialReviews,
   onReviewsUpdated,
   showToast = () => {},
 }: FreelancerReviewsProps) {
@@ -52,7 +58,7 @@ export default function FreelancerReviews({
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_REVIEWS);
 
   useEffect(() => {
-    setReviews(buildFreelancerReviews(freelancer));
+    setReviews(initialReviews ?? buildFreelancerReviews(freelancer));
     setReviewerName('');
     setReviewerEmail('');
     setUserRating(1);
@@ -61,7 +67,7 @@ export default function FreelancerReviews({
     setFilterStar('All');
     setSortParam('newest');
     setVisibleCount(INITIAL_VISIBLE_REVIEWS);
-  }, [freelancer]);
+  }, [freelancer, initialReviews]);
 
   const calculatedCount = reviews.length;
   const calculatedAverage =

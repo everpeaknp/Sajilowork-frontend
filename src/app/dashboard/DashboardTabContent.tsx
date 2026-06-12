@@ -5,16 +5,16 @@ import DashboardProposals from './DashboardProposals';
 import DashboardSaved from './DashboardSaved';
 import DashboardMessages from './DashboardMessages';
 import DashboardReviews from './DashboardReviews';
-import DashboardInvoice from './DashboardInvoice';
-import DashboardPayouts from './DashboardPayouts';
 import DashboardStatements from './DashboardStatements';
 import DashboardWallet from './DashboardWallet';
 import DashboardServices from './DashboardServices';
 import DashboardJobs from './DashboardJobs';
 import DashboardProjects from './DashboardProjects';
+import DashboardFreelancerProjects from './DashboardFreelancerProjects';
 import DashboardProfile from './DashboardProfile';
 import DashboardSettings from './DashboardSettings';
 import { useDashboardTab } from './DashboardTabContext';
+import { useAuthStore } from '@/store';
 
 const TAB_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -22,8 +22,6 @@ const TAB_LABELS: Record<string, string> = {
   saved: 'Saved',
   message: 'Message',
   reviews: 'Reviews',
-  invoice: 'Invoice',
-  payouts: 'Payouts',
   statements: 'Statements',
   wallet: 'Wallet',
   services: 'Manage Services',
@@ -35,6 +33,7 @@ const TAB_LABELS: Record<string, string> = {
 
 export default function DashboardTabContent() {
   const { activeTab, setActiveTab } = useDashboardTab();
+  const userRole = useAuthStore((s) => s.user?.role);
 
   if (activeTab === 'dashboard') {
     return <DashboardOverview onTabChange={setActiveTab} />;
@@ -56,14 +55,6 @@ export default function DashboardTabContent() {
     return <DashboardReviews />;
   }
 
-  if (activeTab === 'invoice') {
-    return <DashboardInvoice />;
-  }
-
-  if (activeTab === 'payouts') {
-    return <DashboardPayouts />;
-  }
-
   if (activeTab === 'statements') {
     return <DashboardStatements />;
   }
@@ -81,7 +72,7 @@ export default function DashboardTabContent() {
   }
 
   if (activeTab === 'project') {
-    return <DashboardProjects />;
+    return userRole === 'tasker' ? <DashboardFreelancerProjects /> : <DashboardProjects />;
   }
 
   if (activeTab === 'profile') {

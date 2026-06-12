@@ -1,5 +1,7 @@
 'use client';
 
+import { resolveOwnerInitials } from '@/lib/employerAvatarUtils';
+
 export function renderCompanyLogo(logoKey: string, name: string) {
   const baseClass = 'h-12 w-12 shrink-0 select-none overflow-hidden rounded-full shadow-sm';
 
@@ -215,6 +217,55 @@ export function renderCompanyLogo(logoKey: string, name: string) {
         </div>
       );
   }
+}
+
+/** Business logo for employer profile listing rows (projects/jobs). Prefers uploaded logo URL. */
+export function renderEmployerBrandLogo(
+  logoColor: string,
+  name: string,
+  logoUrl?: string,
+  logoText?: string,
+) {
+  const baseClass = 'h-12 w-12 shrink-0 select-none overflow-hidden rounded-full shadow-sm';
+  const resolvedUrl = logoUrl?.trim();
+
+  if (resolvedUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={resolvedUrl} alt="" className={`${baseClass} object-cover`} />
+    );
+  }
+
+  const demoLogoKeys = new Set([
+    'monkey-face',
+    'wave-s',
+    'cursive-in',
+    'linked-loops',
+    'retro-grid',
+    'cursive-u',
+    'figma-icon',
+    'slack-icon',
+    'airbnb-icon',
+    'stripe-icon',
+    'shopify-icon',
+    'zoom-icon',
+    'spotify-icon',
+    'brand-google',
+    'notion-icon',
+  ]);
+
+  if (logoColor === 'serif-m' || !demoLogoKeys.has(logoColor)) {
+    const label = logoText?.trim() || resolveOwnerInitials(name);
+    return (
+      <div
+        className={`${baseClass} flex items-center justify-center bg-neutral-950 font-serif text-lg font-black text-white`}
+      >
+        {label.slice(0, 2).toUpperCase()}
+      </div>
+    );
+  }
+
+  return renderCompanyLogo(logoColor, name);
 }
 
 export function GreenSparkSparkle() {

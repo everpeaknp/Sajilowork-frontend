@@ -436,6 +436,13 @@ export interface UserDirectoryEntry {
   average_rating?: number;
   total_reviews?: number;
   tasks_completed?: number;
+  completion_rate?: number | string;
+  hourly_rate?: number | string;
+  skill_tags?: string[];
+  language_tags?: string[];
+  specialization?: string | null;
+  profile_type?: string | null;
+  date_joined?: string;
   is_verified_tasker?: boolean;
   is_online?: boolean;
 }

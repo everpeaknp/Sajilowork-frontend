@@ -1,22 +1,67 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import '@/components/LangingHome/landing-home.css';
 import { discoverDmSans } from '@/components/LangingHome/landingTypography';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleProjectPage from '@/components/projects/SingleProjectPage';
-import { findProjectBySlug } from '@/components/projects/projectSlug';
+import type { Project } from '@/components/projects/projectListData';
+import { fetchPublicProjectBySlug } from '@/lib/projectApi';
 
 export default function ProjectSlugPage() {
   const params = useParams();
   const slug = typeof params.slug === 'string' ? params.slug : '';
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFoundState, setNotFoundState] = useState(false);
 
-  const project = useMemo(() => (slug ? findProjectBySlug(slug) : undefined), [slug]);
+  useEffect(() => {
+    if (!slug) {
+      setNotFoundState(true);
+      setLoading(false);
+      return;
+    }
 
-  if (!slug || !project) {
+    let cancelled = false;
+    setLoading(true);
+    setNotFoundState(false);
+
+    void fetchPublicProjectBySlug(slug)
+      .then((apiProject) => {
+        if (cancelled) return;
+        if (apiProject) {
+          setProject(apiProject);
+          return;
+        }
+        setNotFoundState(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setNotFoundState(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  if (!slug || notFoundState) {
     notFound();
+  }
+
+  if (loading || !project) {
+    return (
+      <div
+        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset flex min-h-screen items-center justify-center bg-white text-sm text-neutral-500`}
+      >
+        Loading project…
+      </div>
+    );
   }
 
   return (

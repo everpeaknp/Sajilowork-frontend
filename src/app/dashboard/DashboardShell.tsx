@@ -7,15 +7,19 @@ import Navbar from '@/components/common/navbar';
 import { useAuthStore } from '@/store/auth.store';
 import DashboardSidebar from './DashboardSidebar';
 import { DashboardTabProvider, useDashboardTab } from './DashboardTabContext';
+import { DashboardRoleSwitchProvider } from './DashboardRoleSwitchContext';
 
 function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const refreshUser = useAuthStore((s) => s.refreshUser);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const pathname = usePathname();
   const { activeTab, setActiveTab, mobileOpen, setMobileOpen } = useDashboardTab();
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    if (isAuthenticated) {
+      void refreshUser();
+    }
+  }, [isAuthenticated, refreshUser]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -79,7 +83,9 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <DashboardTabProvider>
-      <DashboardShellInner>{children}</DashboardShellInner>
+      <DashboardRoleSwitchProvider>
+        <DashboardShellInner>{children}</DashboardShellInner>
+      </DashboardRoleSwitchProvider>
     </DashboardTabProvider>
   );
 }
