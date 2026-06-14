@@ -4,6 +4,13 @@ import { useAuthStore } from '@/store/auth.store';
 
 export type ListingKind = 'task' | 'job' | 'project' | 'service';
 
+export const BOOKMARKS_CHANGED_EVENT = 'tasknepal-bookmarks-changed';
+
+export function notifyBookmarksChanged(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(BOOKMARKS_CHANGED_EVENT));
+}
+
 const LABELS: Record<ListingKind, { saved: string; removed: string; auth: string }> = {
   task: {
     saved: 'Task saved',
@@ -59,6 +66,7 @@ export async function toggleListingBookmark(
 
     const next = !currentlySaved;
     toast.success(next ? LABELS[kind].saved : LABELS[kind].removed);
+    notifyBookmarksChanged();
     return next;
   } catch {
     toast.error('Could not update bookmark');

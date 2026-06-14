@@ -16,14 +16,17 @@ import {
   CircleUser,
   Settings,
   Wallet,
+  Plus,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 import UserAvatar from '@/components/common/UserAvatar';
 import {
   getDashboardHref,
+  getDashboardCreateHref,
   getNavTabsForRole,
   resolveDashboardSidebarRole,
+  type DashboardCreateTab,
   type DashboardSidebarRole,
   type DashboardTab,
 } from './dashboardTabs';
@@ -38,6 +41,22 @@ interface NavigationItem {
   href: string;
 }
 
+function isCreateTab(tab: DashboardTab): tab is DashboardCreateTab {
+  return tab === 'services' || tab === 'jobs' || tab === 'project' || tab === 'task';
+}
+
+function createLabelForTab(tab: DashboardCreateTab): string {
+  switch (tab) {
+    case 'services':
+      return 'service';
+    case 'jobs':
+      return 'job';
+    case 'project':
+      return 'project';
+    case 'task':
+      return 'task';
+  }
+}
 function resolveNavItem(tabId: DashboardTab, role: DashboardSidebarRole): NavigationItem {
   const base = NAV_ITEM_LOOKUP[tabId];
   if (role === 'tasker' && tabId === 'project') {
@@ -94,29 +113,74 @@ export default function DashboardSidebar({
   const renderItem = (item: NavigationItem) => {
     const isActive = activeTab === item.id;
     const Icon = item.icon;
+    const hasCreate = isCreateTab(item.id);
+
+    if (!hasCreate) {
+      return (
+        <Link
+          key={item.id}
+          href={item.href}
+          onClick={() => {
+            onTabChange(item.id);
+            onClose?.();
+          }}
+          className={`group flex w-full cursor-pointer items-center gap-[18px] rounded-lg px-4 py-3.5 text-[15px] font-medium transition-all duration-150 ${
+            isActive
+              ? 'bg-[#222222] font-semibold text-white shadow-sm'
+              : 'text-black hover:bg-neutral-50'
+          }`}
+        >
+          <Icon
+            className={`h-[22px] w-[22px] shrink-0 ${
+              isActive ? 'text-[#52C47F]' : 'text-black'
+            }`}
+            strokeWidth={1.8}
+          />
+          <span className="truncate tracking-wide">{item.label}</span>
+        </Link>
+      );
+    }
 
     return (
-      <Link
+      <div
         key={item.id}
-        href={item.href}
-        onClick={() => {
-          onTabChange(item.id);
-          onClose?.();
-        }}
-        className={`group flex w-full cursor-pointer items-center gap-[18px] rounded-lg px-4 py-3.5 text-[15px] font-medium transition-all duration-150 ${
-          isActive
-            ? 'bg-[#222222] font-semibold text-white shadow-sm'
-            : 'text-black hover:bg-neutral-50'
+        className={`group flex w-full items-center rounded-lg transition-all duration-150 ${
+          isActive ? 'bg-[#222222] shadow-sm' : 'hover:bg-neutral-50'
         }`}
       >
-        <Icon
-          className={`h-[22px] w-[22px] shrink-0 ${
-            isActive ? 'text-[#52C47F]' : 'text-black'
+        <Link
+          href={item.href}
+          onClick={() => {
+            onTabChange(item.id);
+            onClose?.();
+          }}
+          className={`flex min-w-0 flex-1 cursor-pointer items-center gap-[18px] rounded-lg px-4 py-3.5 text-[15px] font-medium transition-all duration-150 ${
+            isActive ? 'font-semibold text-white' : 'text-black'
           }`}
-          strokeWidth={1.8}
-        />
-        <span className="truncate tracking-wide">{item.label}</span>
-      </Link>
+        >
+          <Icon
+            className={`h-[22px] w-[22px] shrink-0 ${
+              isActive ? 'text-[#52C47F]' : 'text-black'
+            }`}
+            strokeWidth={1.8}
+          />
+          <span className="truncate tracking-wide">{item.label}</span>
+        </Link>
+
+        <Link
+          href={getDashboardCreateHref(item.id)}
+          onClick={() => onClose?.()}
+          aria-label={`Post new ${createLabelForTab(item.id)}`}
+          title={`Post new ${createLabelForTab(item.id)}`}
+          className={`mr-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${
+            isActive
+              ? 'text-white/80 hover:bg-white/10 hover:text-[#52C47F]'
+              : 'text-neutral-500 hover:bg-neutral-100 hover:text-black'
+          }`}
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.25} />
+        </Link>
+      </div>
     );
   };
 

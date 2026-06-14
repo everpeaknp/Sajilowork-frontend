@@ -17,6 +17,7 @@ import {
   getDashboardHref,
   getDashboardProposalDetailHref,
 } from './dashboardTabs';
+import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
 interface DashboardProposalsProjectProps {
   projectSlug: string;
@@ -119,7 +120,7 @@ export default function DashboardProposalsProject({ projectSlug }: DashboardProp
   }
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen space-y-6 bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+    <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       <div className="flex flex-col gap-4">
         <Link
           href={getDashboardHref('proposals')}

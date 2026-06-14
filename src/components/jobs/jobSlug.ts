@@ -1,6 +1,7 @@
 import { getAllJobsIncludingPosted } from './jobStore';
 import type { Job } from './jobListData';
 import type { Task } from '@/types';
+import { getDashboardEditHref } from '@/app/dashboard/dashboardTabs';
 
 /** Minimal task shape for bid/application submission from a job listing. */
 export function jobToOfferTask(job: Job): Task {
@@ -47,4 +48,12 @@ export function findJobBySlug(slug: string, jobs: Job[] = getAllJobsIncludingPos
 
 export function getJobDetailPath(job: Job): string {
   return `/jobs/${getJobSlug(job)}`;
+}
+
+export function getJobEditHref(job: Job): string {
+  return getDashboardEditHref('jobs', getJobSlug(job));
+}
+
+export function isJobOwner(job: Job, userId?: string | number | null): boolean {
+  return Boolean(userId) && Boolean(job.ownerId) && String(userId) === String(job.ownerId);
 }

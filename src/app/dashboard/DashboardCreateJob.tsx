@@ -28,6 +28,7 @@ import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner'
 import { formatJobBudgetLabel, type Job as PublicJob } from '@/components/jobs/jobListData';
 import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
 import type { Job as DashboardJob } from './types';
+import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
 export type CreateJobFormData = {
   title: string;
@@ -475,7 +476,7 @@ export default function DashboardCreateJob({
   };
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+    <div className={DASHBOARD_PAGE_ROOT}>
       <div className="mx-auto mb-8 flex max-w-5xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
         <div>
           <button

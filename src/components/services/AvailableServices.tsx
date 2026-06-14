@@ -20,9 +20,10 @@ import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
 import { fetchPublicServices } from '@/lib/serviceApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
-import { ALL_SERVICES, type Service as ServiceItem } from './serviceListData';
+import type { Service as ServiceItem } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
+import { MarketplaceServiceGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 
 const BUDGET_MIN = 3000;
 const BUDGET_MAX = 20000;
@@ -48,7 +49,7 @@ export default function AvailableServices({
   onClearSearch,
 }: AvailableServicesProps) {
   const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
-  const [servicesData, setServicesData] = useState<ServiceItem[]>(ALL_SERVICES);
+  const [servicesData, setServicesData] = useState<ServiceItem[]>([]);
   const [loadingServices, setLoadingServices] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [cardSlideIndex, setCardSlideIndex] = useState<Record<string, number>>({ 'av-2': 1 });
@@ -94,12 +95,11 @@ export default function AvailableServices({
     void fetchPublicServices(params)
       .then((items) => {
         if (cancelled) return;
-        const next = items.length ? items : ALL_SERVICES;
-        setServicesData(next);
-        setSavedSlugs(buildBookmarkSlugSet(next));
+        setServicesData(items);
+        setSavedSlugs(buildBookmarkSlugSet(items));
       })
       .catch(() => {
-        if (!cancelled) setServicesData(ALL_SERVICES);
+        if (!cancelled) setServicesData([]);
       })
       .finally(() => {
         if (!cancelled) setLoadingServices(false);
@@ -411,27 +411,36 @@ export default function AvailableServices({
 
           <div className="flex-1">
             <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
-              <span className={`${discoverBody} text-sm font-normal text-[#131118] sm:text-base md:text-lg`}>
-                <span className="font-semibold text-black">{filteredServices.length}</span> services
-                available
-              </span>
+              {loadingServices ? (
+                <>
+                  <div className="h-5 w-40 animate-pulse rounded bg-neutral-200" />
+                  <div className="h-9 w-36 animate-pulse rounded bg-neutral-100" />
+                </>
+              ) : (
+                <>
+                  <span className={`${discoverBody} text-sm font-normal text-[#131118] sm:text-base md:text-lg`}>
+                    <span className="font-semibold text-black">{filteredServices.length}</span> services
+                    available
+                  </span>
 
-              <div className="flex items-center gap-1.5 text-sm">
-                <span className="font-normal text-neutral-400">Sort by:</span>
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className={`${discoverMedium} cursor-pointer appearance-none border-0 bg-transparent py-2 pl-1 pr-6 text-[#131118] focus:outline-none`}
-                  >
-                    <option value="best-seller">Best Seller</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="reviews">Most Reviewed</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-0.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-800" />
-                </div>
-              </div>
+                  <div className="flex items-center gap-1.5 text-sm">
+                    <span className="font-normal text-neutral-400">Sort by:</span>
+                    <div className="relative">
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className={`${discoverMedium} cursor-pointer appearance-none border-0 bg-transparent py-2 pl-1 pr-6 text-[#131118] focus:outline-none`}
+                      >
+                        <option value="best-seller">Best Seller</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="reviews">Most Reviewed</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-0.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-800" />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {hasActiveSearch ? (
@@ -450,7 +459,9 @@ export default function AvailableServices({
               </div>
             ) : null}
 
-            {filteredServices.length === 0 ? (
+            {loadingServices ? (
+              <MarketplaceServiceGridSkeleton count={6} />
+            ) : filteredServices.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -615,7 +626,7 @@ export default function AvailableServices({
               </div>
             )}
 
-            {totalPages > 1 ? (
+            {!loadingServices && totalPages > 1 ? (
               <div className="mt-12 flex flex-col items-center justify-center gap-4 pt-5 sm:mt-16">
                 <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
                   <button

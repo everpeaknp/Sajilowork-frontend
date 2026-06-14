@@ -594,6 +594,11 @@ class PaymentService {
   }>> {
     return apiClient.post(`/wallets/withdrawals/`, data);
   }
+
+  /** Cancel a pending or in-progress withdrawal request */
+  async cancelWithdrawalRequest(withdrawalId: string): Promise<ApiResponse<{ message: string }>> {
+    return apiClient.post(`/wallets/withdrawals/${withdrawalId}/cancel/`, {});
+  }
 }
 
 export const paymentService = new PaymentService();

@@ -819,6 +819,9 @@ class ApiClient {
       if (baseUrl && baseUrl !== url) {
         this.clearCacheForUrl(baseUrl);
       }
+      if (url.includes('/bookmarks/')) {
+        this.clearCacheForUrl('/bookmarks/');
+      }
       
       return this.wrapResponse(response.data);
     } catch (error: any) {
@@ -886,9 +889,13 @@ class ApiClient {
     const response = await this.instance.delete<T>(url, config);
     
     // Clear cache for related GET requests after successful DELETE
+    this.clearCacheForUrl(url);
     const baseUrl = url.split('/').slice(0, -1).join('/');
     if (baseUrl) {
       this.clearCacheForUrl(baseUrl);
+    }
+    if (url.includes('/bookmarks/')) {
+      this.clearCacheForUrl('/bookmarks/');
     }
     
     return this.wrapResponse(response.data);

@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { Wallet, ArrowRight, ArrowDownLeft, ArrowUpRight, Zap, TrendingUp, MessageCircle, X } from 'lucide-react';
+import { Wallet, ArrowRight, ArrowDownLeft, ArrowUpRight, Zap, TrendingUp, MessageCircle, X, CircleDollarSign, Clock } from 'lucide-react';
 import DashboardPayouts, { type Payout, type PayoutStatus } from '@/app/dashboard/DashboardPayouts';
 import DashboardRecharges, { type Recharge } from '@/app/dashboard/DashboardRecharges';
+import { DashboardMetricCards } from '@/app/dashboard/DashboardMetricCards';
 
 const fieldLabelClass = 'text-sm font-semibold text-gray-600';
 const fieldInputClass =
@@ -21,8 +22,10 @@ import {
   getWalletRechargeMethodLabel,
   isWalletRechargeTransaction,
 } from '@/lib/walletRecharge';
+import { mapWithdrawalStatusToPayout } from '@/lib/walletTabStats';
 import { USER_PROFILE_UPDATED } from '@/lib/userProfileSync';
 import { useAuthStore } from '@/store/auth.store';
+import { DASHBOARD_HEADING } from '@/app/dashboard/dashboardResponsive';
 
 interface WalletData {
   id: string;
@@ -106,17 +109,7 @@ function mapTransactionStatus(status: string, index: number): PayoutStatus {
 }
 
 function mapWithdrawalStatus(status: string, index: number): PayoutStatus {
-  switch (status) {
-    case 'completed':
-    case 'approved':
-      return 'Approved';
-    case 'processing':
-      return 'Processing';
-    case 'pending':
-      return index % 2 === 0 ? 'Pending Orange' : 'Pending Blue';
-    default:
-      return 'Processing';
-  }
+  return mapWithdrawalStatusToPayout(status, index);
 }
 
 interface PaymentMethodsProps {
@@ -652,57 +645,216 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
     await handleRechargeViaWhatsApp();
   };
 
+  const handleCancelWithdrawal = useCallback(async (withdrawalId: string) => {
+    const response = await paymentService.cancelWithdrawalRequest(withdrawalId);
+    if (response.success) {
+      toast.success('Payout request cancelled. Funds returned to your wallet.');
+      await fetchWalletData();
+      return;
+    }
+    throw new Error(
+      (response as { message?: string }).message || 'Failed to cancel payout request'
+    );
+  }, []);
+
   const rechargeRows = useMemo<Recharge[]>(
     () =>
-      walletTransactions.map((transaction, index) => ({
-        id: transaction.id,
-        amount: formatNPR(transaction.amount ?? 0),
-        amountVal: Number(transaction.amount ?? 0),
-        date: new Date(transaction.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        rechargeMethod: getWalletRechargeMethodLabel(transaction.description),
-        status: mapTransactionStatus(transaction.status, index),
-      })),
+      walletTransactions.map((transaction, index) => {
+        const amountVal = Number(transaction.amount ?? 0);
+        return {
+          id: transaction.id,
+          amount: formatNPR(amountVal),
+          amountVal,
+          grossVal: amountVal,
+          netVal: amountVal,
+          feeVal: 0,
+          date: new Date(transaction.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          createdAt: transaction.created_at,
+          rechargeMethod: getWalletRechargeMethodLabel(transaction.description),
+          status: mapTransactionStatus(transaction.status, index),
+          referenceNumber: transaction.reference_number || undefined,
+        };
+      }),
     [walletTransactions]
   );
 
   const payoutRows = useMemo<Payout[]>(
     () =>
-      withdrawalHistory.map((withdrawal, index) => ({
-        id: withdrawal.id,
-        amount: formatNPR(withdrawal.amount ?? 0),
-        amountVal: Number(withdrawal.amount ?? 0),
-        date: new Date(withdrawal.created_at).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        payoutMethod: getWithdrawalMethodLabel(withdrawal.withdrawal_method),
-        status: mapWithdrawalStatus(withdrawal.status, index),
-      })),
+      withdrawalHistory.map((withdrawal, index) => {
+        const grossVal = Number(withdrawal.amount ?? 0);
+        const netVal = Number(withdrawal.net_amount ?? withdrawal.amount ?? 0);
+        const feeVal = Math.max(0, grossVal - netVal);
+        return {
+          id: withdrawal.id,
+          amount: formatNPR(grossVal),
+          amountVal: grossVal,
+          grossVal,
+          netVal,
+          feeVal,
+          date: new Date(withdrawal.created_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          createdAt: withdrawal.created_at,
+          payoutMethod: getWithdrawalMethodLabel(withdrawal.withdrawal_method),
+          status: mapWithdrawalStatus(withdrawal.status, index),
+          rawStatus: withdrawal.status,
+        };
+      }),
     [withdrawalHistory]
   );
+
+  const walletSummary = useMemo(
+    () => ({
+      rechargeBalance: Number(walletData?.recharge_balance ?? 0),
+      availableBalance: Number(walletData?.available_balance ?? 0),
+      withdrawableBalance: Number(
+        walletData?.withdrawable_balance ?? walletData?.available_balance ?? 0
+      ),
+      pendingWithdrawals: Number(walletData?.pending_withdrawals_amount ?? 0),
+    }),
+    [walletData]
+  );
+
+  const walletStatCards = useMemo(() => {
+    const pendingClearance =
+      Number(walletData?.pending_balance ?? 0) +
+      Number(walletData?.held_balance ?? 0) +
+      Number(walletData?.pending_withdrawals_amount ?? 0);
+
+    return [
+      {
+        label: 'Available Balance',
+        value: formatNPR(walletSummary.availableBalance, { compact: true }),
+        hintMuted: 'Total spendable wallet funds',
+        icon: CircleDollarSign,
+        iconWrapClass: 'border border-emerald-100 bg-emerald-50 text-[#193E32]',
+        iconClass: 'text-[#193E32]',
+        glowClass: 'bg-emerald-500/[0.01]',
+      },
+      {
+        label: 'Recharge Balance',
+        value: formatNPR(walletSummary.rechargeBalance, { compact: true }),
+        hintMuted: 'Total topped up',
+        icon: Zap,
+        iconWrapClass: 'bg-[#EBF9F1] text-[#27AE60]',
+        iconClass: 'text-[#27AE60]',
+        glowClass: 'bg-[#27AE60]/[0.01]',
+      },
+      {
+        label: 'Earned Balance',
+        value: formatNPR(Number(walletData?.earned_balance ?? 0), { compact: true }),
+        hintMuted: 'From completed work',
+        icon: TrendingUp,
+        iconWrapClass: 'bg-[#FCF0ED] text-[#F2994A]',
+        iconClass: 'text-[#F2994A]',
+        glowClass: 'bg-[#F2994A]/[0.01]',
+      },
+      {
+        label: 'Pending Clearance',
+        value: formatNPR(pendingClearance, { compact: true }),
+        hintMuted: 'Escrow, held & pending payouts',
+        icon: Clock,
+        iconWrapClass: 'bg-[#F3F9FE] text-[#2F80ED]',
+        iconClass: 'text-[#2F80ED]',
+        glowClass: 'bg-[#2F80ED]/[0.01]',
+      },
+    ];
+  }, [walletData, walletSummary]);
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        'min-w-0 space-y-10 pb-20',
-        activeTab === 'payouts' || activeTab === 'recharges' ? 'max-w-7xl' : 'max-w-4xl'
-      )}
+      className={cn('min-w-0 max-w-7xl space-y-8 pb-6')}
     >
       <header className="space-y-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-1 w-10 bg-brand-emerald rounded-full" />
-            <span className="text-[10px] font-black text-brand-emerald uppercase tracking-[0.3em]">Financials</span>
+        <div className="flex flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1 className={DASHBOARD_HEADING}>
+              {activeTab === 'wallet'
+                ? 'My Wallet'
+                : activeTab === 'recharges'
+                  ? 'Recharges'
+                  : 'Payouts'}
+            </h1>
+            <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+              {activeTab === 'wallet'
+                ? 'View balances, recharge funds, and withdraw earnings.'
+                : activeTab === 'recharges'
+                  ? 'View recharge history and add funds to your wallet.'
+                  : 'View payout history and request withdrawals.'}
+            </p>
           </div>
-          <h1 className="text-2xl font-black uppercase tracking-tighter text-brand-dark sm:text-4xl">Payments</h1>
-          <p className="text-gray-500 mt-2">Manage your funding sources and digital wallet.</p>
+
+          {activeTab === 'wallet' ? (
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={openRechargeModal}
+                disabled={isRecharging || walletData?.is_frozen}
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-emerald px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-brand-emerald/90 disabled:cursor-not-allowed disabled:bg-neutral-300"
+              >
+                {isRecharging ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    <span>Recharge</span>
+                    <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={openWithdrawModal}
+                disabled={isWithdrawing || walletData?.is_frozen || withdrawableBalance < 10}
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-6 py-4 text-sm font-medium text-brand-dark shadow-sm transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+              >
+                {isWithdrawing ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark border-t-transparent" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    <span>Withdraw</span>
+                    <ArrowDownLeft className="h-4 w-4" strokeWidth={2} />
+                  </>
+                )}
+              </button>
+            </div>
+          ) : null}
+
+          {activeTab === 'recharges' ? (
+            <button
+              type="button"
+              onClick={openRechargeModal}
+              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800"
+            >
+              <span>Create Recharge</span>
+              <ArrowDownLeft className="h-4 w-4" strokeWidth={2} />
+            </button>
+          ) : null}
+
+          {activeTab === 'payouts' ? (
+            <button
+              type="button"
+              onClick={openWithdrawModal}
+              disabled={walletData?.is_frozen || withdrawableBalance < 10}
+              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
+            >
+              <span>Create Payout</span>
+              <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
+            </button>
+          ) : null}
         </div>
 
         {/* Custom Tabs */}
@@ -752,132 +904,28 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
       </header>
 
       {activeTab === 'wallet' ? (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {walletLoading ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-gray-500 font-medium">Loading wallet data...</p>
+            <div className="py-16 text-center">
+              <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-brand-emerald border-t-transparent" />
+              <p className="font-medium text-gray-500">Loading wallet data…</p>
             </div>
           ) : (
             <>
-              {/* Wallet Card */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="relative overflow-hidden bg-brand-dark rounded-3xl p-5 text-white shadow-2xl shadow-brand-dark/40 sm:rounded-[40px] sm:p-8">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-brand-emerald/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                  <div className="relative z-10 flex flex-col h-full justify-between gap-10">
-                    <div className="flex items-center justify-between">
-                      <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl">
-                        <Wallet className="w-8 h-8 text-brand-emerald" />
-                      </div>
-                      <TrendingUp className="w-6 h-6 text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-emerald-200/60 uppercase tracking-widest mb-1">Available Balance</p>
-                      <p className="text-3xl font-black tracking-tighter sm:text-5xl">
-                        {formatNPR(walletData?.available_balance ?? 0)}
-                      </p>
-                      <div className="mt-6 grid grid-cols-2 gap-4">
-                        <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/50">Recharge Balance</p>
-                          <p className="mt-1 text-xl font-black text-white">
-                            {formatNPR(walletData?.recharge_balance ?? 0)}
-                          </p>
-                          <p className="mt-0.5 text-[10px] text-emerald-200/40">Total topped up</p>
-                        </div>
-                        <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200/50">Earned Balance</p>
-                          <p className="mt-1 text-xl font-black text-emerald-300">
-                            {formatNPR(walletData?.earned_balance ?? 0)}
-                          </p>
-                          <p className="mt-0.5 text-[10px] text-emerald-200/40">From completed tasks</p>
-                        </div>
-                      </div>
-                      {walletData &&
-                        (Number(walletData.pending_balance ?? 0) > 0 ||
-                          Number(walletData.held_balance ?? 0) > 0 ||
-                          pendingWithdrawalsAmount > 0) && (
-                        <div className="mt-3 space-y-1">
-                          {pendingWithdrawalsAmount > 0 && (
-                            <p className="text-xs text-amber-200/80">
-                              Pending withdrawals: {formatNPR(pendingWithdrawalsAmount)} (not deducted until approved)
-                            </p>
-                          )}
-                          {Number(walletData.pending_balance ?? 0) > 0 && (
-                            <p className="text-xs text-emerald-200/60">
-                              Pending: {formatNPR(walletData.pending_balance ?? 0)}
-                            </p>
-                          )}
-                          {Number(walletData.held_balance ?? 0) > 0 && (
-                            <p className="text-xs text-emerald-200/60">
-                              Held: {formatNPR(walletData.held_balance ?? 0)}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-200/40">
-                      <span className={cn(
-                        "w-2 h-2 rounded-full",
-                        walletData?.is_frozen ? "bg-red-400" : "bg-green-400 animate-pulse"
-                      )} />
-                      {walletData?.user_email || user?.email || 'Loading...'}
-                    </div>
-                  </div>
-                </div>
+              <DashboardMetricCards cards={walletStatCards} />
 
-                <div className="flex flex-col justify-center gap-3 rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-8">
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-bold text-brand-dark">Quick actions</h3>
-                    <p className="text-sm text-gray-500">Recharge or withdraw from your wallet.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={openRechargeModal}
-                    disabled={isRecharging || walletData?.is_frozen}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/20 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-                  >
-                    {isRecharging ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Wallet className="w-5 h-5" />
-                        Recharge
-                        <ArrowRight className="w-5 h-5" />
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openWithdrawModal}
-                    disabled={
-                      isWithdrawing ||
-                      walletData?.is_frozen ||
-                      withdrawableBalance < 10
-                    }
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-100 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-                  >
-                    {isWithdrawing ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-brand-dark border-t-transparent rounded-full animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <ArrowDownLeft className="w-5 h-5" />
-                        Withdraw
-                      </>
-                    )}
-                  </button>
-                  {withdrawableBalance < 10 && !walletData?.is_frozen && (
-                    <p className="text-xs text-gray-500 font-medium text-center">
-                      Minimum Rs. 10 available balance required to withdraw.
-                    </p>
-                  )}
+              {walletData?.is_frozen ? (
+                <div className="mx-auto max-w-7xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                  Your wallet is frozen. Recharge and withdrawals are temporarily disabled.
                 </div>
-              </div>
+              ) : null}
+
+              {!walletData?.is_frozen && pendingWithdrawalsAmount > 0 ? (
+                <div className="mx-auto max-w-7xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  Pending withdrawals: {formatNPR(pendingWithdrawalsAmount)} — not deducted from your
+                  balance until approved.
+                </div>
+              ) : null}
             </>
           )}
         </div>
@@ -887,6 +935,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
           recharges={rechargeRows}
           loading={walletLoading}
           onCreateRecharge={openRechargeModal}
+          walletSummary={walletSummary}
         />
       ) : activeTab === 'payouts' ? (
         <DashboardPayouts
@@ -894,6 +943,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
           payouts={payoutRows}
           loading={walletLoading}
           onCreatePayout={openWithdrawModal}
+          onCancelPayout={handleCancelWithdrawal}
+          walletSummary={walletSummary}
         />
       ) : null}
 

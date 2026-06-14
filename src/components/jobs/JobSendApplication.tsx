@@ -11,6 +11,7 @@ import { formatNPR } from '@/lib/nepalLocale';
 import { getMediaUrl } from '@/lib/utils';
 import type { Bid } from '@/types';
 import type { Job } from './jobListData';
+import { getJobEditHref, isJobOwner } from './jobSlug';
 
 interface JobSendApplicationProps {
   job: Job;
@@ -65,8 +66,8 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
   const [cvUrl, setCvUrl] = useState<string | null>(null);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
 
-  const isOwner =
-    Boolean(user?.id) && Boolean(job.ownerId) && String(user.id) === String(job.ownerId);
+  const isOwner = isJobOwner(job, user?.id);
+  const editHref = getJobEditHref(job);
 
   const loadExistingBid = useCallback(async () => {
     if (!user || isOwner || !job.id) {
@@ -134,7 +135,7 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
     }
 
     if (isOwner) {
-      toast.error('You cannot apply to your own job posting.');
+      router.push(editHref);
       return;
     }
 
@@ -217,19 +218,27 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
     return (
       <section className="border-t border-neutral-200 pt-10">
         <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl">
-          Apply For This Job
+          Manage This Job
         </h2>
         <p className="text-sm font-normal text-neutral-600">
-          You posted this job. Freelancers apply here — review applications under Dashboard → My
-          Proposals.
+          You posted this job. Update the listing or review applications from your dashboard.
         </p>
-        <Link
-          href="/dashboard/proposals"
-          className="mt-3 inline-flex items-center gap-1.5 text-sm font-normal text-[#52C47F] hover:underline"
-        >
-          View received applications
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link
+            href={editHref}
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1D3E35] px-6 py-3 text-sm font-normal text-white transition-colors hover:bg-[#5bbb7b]"
+          >
+            Edit Job
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/dashboard/proposals"
+            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 px-6 py-3 text-sm font-normal text-neutral-800 transition-colors hover:bg-neutral-50"
+          >
+            View received applications
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </section>
     );
   }

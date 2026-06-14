@@ -75,13 +75,26 @@ function ownerName(task: Task): string {
   return (task.owner_name || 'Task poster').trim();
 }
 
-function ownerAvatar(task: Task): string {
+export function resolveOwnerAvatarFromTask(task: Task): string {
   const nested =
     (task.poster && typeof task.poster === 'object' ? task.poster : null) ||
     (task.owner && typeof task.owner === 'object' ? task.owner : null);
   const fromNested = nested ? getMediaUrl(nested.profile_image) : '';
   const fromFlat = getMediaUrl(task.owner_image);
-  return fromNested || fromFlat || DEFAULT_AVATAR;
+  const fromLogo = getMediaUrl(task.owner_logo_url);
+  return fromLogo || fromNested || fromFlat || DEFAULT_AVATAR;
+}
+
+export function savedListingImage(task: Task): string {
+  const primary = getMediaUrl((task as Task & { primary_image?: string }).primary_image);
+  if (primary) return primary;
+
+  const attachment = task.attachments
+    ?.map((item) => getMediaUrl(item.file_url))
+    .find((url): url is string => Boolean(url));
+  if (attachment) return attachment;
+
+  return cardImageForKey(String(task.id || task.slug || '0'));
 }
 
 export function mapTaskToDashboardSavedItem(task: Task): DashboardSavedItem {
@@ -101,7 +114,7 @@ export function mapTaskToDashboardSavedItem(task: Task): DashboardSavedItem {
       getMediaUrl((task as Task & { primary_image?: string }).primary_image) ||
       cardImageForKey(String(task.id || task.slug || '0')),
     authorName: ownerName(task),
-    authorAvatar: ownerAvatar(task),
+    authorAvatar: resolveOwnerAvatarFromTask(task),
     price: taskBudgetAmount(task),
     budgetType,
   };
@@ -118,7 +131,7 @@ export function mapJobToDashboardSavedItem(job: Job): DashboardSavedItem {
     reviewsCount: 0,
     image: cardImageForKey(job.id),
     authorName: job.companyName,
-    authorAvatar: DEFAULT_AVATAR,
+    authorAvatar: job.ownerAvatarUrl || DEFAULT_AVATAR,
     price: job.budgetMin,
     budgetType: job.type === 'Hourly' ? 'hourly' : 'fixed',
   };
@@ -135,7 +148,7 @@ export function mapProjectToDashboardSavedItem(project: Project): DashboardSaved
     reviewsCount: 0,
     image: cardImageForKey(project.id),
     authorName: project.companyName,
-    authorAvatar: DEFAULT_AVATAR,
+    authorAvatar: project.ownerAvatarUrl || DEFAULT_AVATAR,
     price: project.budgetMin,
     budgetType: project.type === 'Hourly' ? 'hourly' : 'fixed',
   };

@@ -9,7 +9,8 @@ import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
 import { fetchPublicServices } from '@/lib/serviceApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
-import { ALL_SERVICES, type Service } from './serviceListData';
+import { MarketplaceServiceCarouselSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
+import type { Service } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
 
@@ -21,20 +22,24 @@ interface BestServicesProps {
 
 export default function BestServices({ className = '' }: BestServicesProps) {
   const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
+  const [loadingBestServices, setLoadingBestServices] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [bestServices, setBestServices] = useState(ALL_SERVICES.slice(0, 7));
+  const [bestServices, setBestServices] = useState<Service[]>([]);
 
   useEffect(() => {
     let cancelled = false;
+    setLoadingBestServices(true);
     void fetchPublicServices({ ordering: '-views_count' })
       .then((items) => {
         if (cancelled) return;
-        const next = (items.length ? items : ALL_SERVICES).slice(0, 7);
-        setBestServices(next);
-        setSavedSlugs(buildBookmarkSlugSet(next));
+        setBestServices(items.slice(0, 7));
+        setSavedSlugs(buildBookmarkSlugSet(items.slice(0, 7)));
       })
       .catch(() => {
-        if (!cancelled) setBestServices(ALL_SERVICES.slice(0, 7));
+        if (!cancelled) setBestServices([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingBestServices(false);
       });
     return () => {
       cancelled = true;
@@ -65,6 +70,10 @@ export default function BestServices({ className = '' }: BestServicesProps) {
     setCurrentIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
   };
 
+  if (!loadingBestServices && bestServices.length === 0) {
+    return null;
+  }
+
   return (
     <section
       className={`w-full select-none bg-white px-4 pb-4 pt-6 sm:px-6 sm:pb-6 sm:pt-8 md:px-8 lg:px-12 ${className}`}
@@ -86,7 +95,8 @@ export default function BestServices({ className = '' }: BestServicesProps) {
             <button
               type="button"
               onClick={handlePrev}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black"
+              disabled={loadingBestServices}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
               title="Previous"
               aria-label="Previous services"
             >
@@ -113,7 +123,8 @@ export default function BestServices({ className = '' }: BestServicesProps) {
             <button
               type="button"
               onClick={handleNext}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black"
+              disabled={loadingBestServices}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
               title="Next"
               aria-label="Next services"
             >
@@ -123,6 +134,9 @@ export default function BestServices({ className = '' }: BestServicesProps) {
         </div>
 
         <div className="relative -mx-1 w-full overflow-hidden px-1">
+          {loadingBestServices ? (
+            <MarketplaceServiceCarouselSkeleton count={5} />
+          ) : (
           <motion.div
             className="mx-1 flex cursor-grab gap-6 pb-4 active:cursor-grabbing"
             animate={{ x: `-${currentIndex * (100 / 5)}%` }}
@@ -223,6 +237,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
               );
             })}
           </motion.div>
+          )}
         </div>
       </div>
     </section>

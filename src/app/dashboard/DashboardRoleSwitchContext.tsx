@@ -16,6 +16,7 @@ import { normalizeUserFromApi, notifyUserProfileUpdated } from '@/lib/userProfil
 import DeleteConfirmModal from './DeleteConfirmModal';
 import {
   getDashboardHref,
+  getRequiredDashboardRoleForPathname,
   isTabAllowedForRole,
   tabFromPathname,
   type DashboardSidebarRole,
@@ -94,6 +95,40 @@ export function DashboardRoleSwitchProvider({ children }: { children: ReactNode 
       document.body.style.overflow = previousOverflow;
     };
   }, [pendingRole]);
+
+  // Job/task edit and other role-specific routes should open in the matching dashboard mode.
+  useEffect(() => {
+    if (!user || switching || pendingRole) return;
+
+    const requiredRole = getRequiredDashboardRoleForPathname(pathname);
+    if (!requiredRole || requiredRole === currentRole) return;
+
+    let cancelled = false;
+
+    const syncRoleForRoute = async () => {
+      setSwitching(true);
+      try {
+        const response = await userService.updateProfile({ role: requiredRole });
+        if (cancelled) return;
+        if (response.success && response.data) {
+          setUser(normalizeUserFromApi(response.data as unknown as Record<string, unknown>));
+          notifyUserProfileUpdated();
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Failed to align dashboard role with route', error);
+        }
+      } finally {
+        if (!cancelled) setSwitching(false);
+      }
+    };
+
+    void syncRoleForRoute();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentRole, pathname, pendingRole, setUser, switching, user]);
 
   const value = useMemo(
     () => ({

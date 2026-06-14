@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Trash2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import UserAvatar from '@/components/common/UserAvatar';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { formatNPR } from '@/lib/nepalLocale';
 import {
@@ -12,6 +13,7 @@ import {
   type SavedSubTab,
 } from '@/lib/dashboardSaved';
 import { filterBookmarkedTasksByTab } from '@/lib/dashboardSavedApi';
+import { BOOKMARKS_CHANGED_EVENT, notifyBookmarksChanged, resolveListingSlug } from '@/lib/listingBookmark';
 import { extractTaskList } from '@/lib/taskUtils';
 import { bookmarkService } from '@/services/bookmark.service';
 import type { Task } from '@/types';
@@ -95,11 +97,12 @@ function SavedCard({
       <div className="px-5 pb-5">
         <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
           <div className="flex min-w-0 items-center gap-2.5">
-            <img
+            <UserAvatar
               src={item.authorAvatar}
+              name={item.authorName}
               alt={item.authorName}
-              className="h-7 w-7 shrink-0 rounded-full object-cover"
-              referrerPolicy="no-referrer"
+              size="xs"
+              className="!h-7 !w-7 shrink-0"
             />
             <div className="min-w-0 leading-tight">
               {item.authorName === 'Wanda Runo' ? (
@@ -167,6 +170,18 @@ export default function DashboardSaved() {
     void loadTaskBookmarks();
   }, [loadTaskBookmarks]);
 
+  useEffect(() => {
+    const refresh = () => {
+      void loadTaskBookmarks();
+    };
+    window.addEventListener(BOOKMARKS_CHANGED_EVENT, refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.removeEventListener(BOOKMARKS_CHANGED_EVENT, refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [loadTaskBookmarks]);
+
   const handleTabChange = (tab: SavedSubTab) => {
     setActiveSubTab(tab);
     setCurrentPage(1);
@@ -184,9 +199,13 @@ export default function DashboardSaved() {
     try {
       const response = await bookmarkService.unbookmark(deleteTarget.slug);
       if (response.success) {
-        setBookmarkedTasks((prev) => prev.filter((task) => String(task.id) !== deleteTarget.id));
+        const removedSlug = deleteTarget.slug;
+        setBookmarkedTasks((prev) =>
+          prev.filter((task) => resolveListingSlug(task.slug, task.id) !== removedSlug),
+        );
         toast.success('Removed from saved');
         setDeleteTarget(null);
+        notifyBookmarksChanged();
       } else {
         toast.error(response.message || 'Could not remove bookmark');
       }

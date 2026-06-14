@@ -1,14 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { FileText, Loader2, Paperclip, Send, X } from 'lucide-react';
+import { ArrowUpRight, FileText, Loader2, Paperclip, Send, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth.store';
 import { bidService, extractBidList, getMyBidForTask } from '@/services/bid.service';
 import { tokenManager } from '@/lib/api/client';
 import { formatNPR } from '@/lib/nepalLocale';
 import type { Job } from '@/components/jobs/jobListData';
+import { getJobEditHref, isJobOwner } from '@/components/jobs/jobSlug';
 import {
   offerBtnPrimarySm,
   offerCard,
@@ -48,8 +50,8 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
   const [cvUrl, setCvUrl] = useState<string | null>(null);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
 
-  const isOwner =
-    Boolean(user?.id) && Boolean(job.ownerId) && String(user.id) === String(job.ownerId);
+  const isOwner = isJobOwner(job, user?.id);
+  const editHref = getJobEditHref(job);
 
   useEffect(() => {
     const checkExisting = async () => {
@@ -131,7 +133,6 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
     event.preventDefault();
 
     if (isOwner) {
-      toast.error('You cannot apply to your own job posting.');
       onCancel();
       return;
     }
@@ -212,6 +213,26 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
         <Loader2 className="h-10 w-10 animate-spin text-brand-emerald mb-4" />
         <p className={offerModalSubtitle}>Checking your application status…</p>
       </div>
+    );
+  }
+
+  if (isOwner) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-5 py-4 text-center"
+      >
+        <p className={offerModalSubtitle}>You posted this job. Edit the listing from your dashboard.</p>
+        <Link
+          href={editHref}
+          onClick={onCancel}
+          className={`${offerBtnPrimarySm} inline-flex items-center justify-center gap-2`}
+        >
+          Edit Job
+          <ArrowUpRight className="h-4 w-4" />
+        </Link>
+      </motion.div>
     );
   }
 

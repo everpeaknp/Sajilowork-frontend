@@ -49,7 +49,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   }, [mobileOpen]);
 
   return (
-    <div className="mobile-bottom-nav-offset min-h-[100dvh] overflow-x-clip bg-white font-body md:pb-0">
+    <div className="mobile-bottom-nav-offset min-h-[100dvh] overflow-x-clip bg-[#f0efec] font-body md:pb-0">
       <Navbar />
 
       <nav
@@ -74,8 +74,8 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
         />
       ) : null}
 
-      <main className="min-h-[calc(100dvh-3.5rem)] min-w-0 overflow-x-clip bg-white lg:pl-[17.5rem]">
-        <div className="mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8 lg:p-10">
+      <main className="min-w-0 overflow-x-clip bg-[#f0efec] lg:pl-[17.5rem]">
+        <div className="mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8">
           <div className="mb-4 flex items-center gap-3 lg:hidden">
             <button
               type="button"

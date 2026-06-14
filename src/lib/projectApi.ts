@@ -64,6 +64,21 @@ function resolveOwnerName(task: Task): string {
   return 'Employer';
 }
 
+function resolveProjectOwnerAvatarUrl(task: Task): string | undefined {
+  const businessLogo = task.owner_logo_url ? getMediaUrl(task.owner_logo_url) : undefined;
+  if (businessLogo) return businessLogo;
+
+  const ownerImage = task.owner_image ? getMediaUrl(task.owner_image) : undefined;
+  if (ownerImage) return ownerImage;
+
+  const owner = task.owner;
+  if (owner && typeof owner === 'object' && (owner as User).profile_image) {
+    return getMediaUrl((owner as User).profile_image as string);
+  }
+
+  return undefined;
+}
+
 function resolveCategoryName(task: Task): string {
   return resolveTaskCategoryName(task);
 }
@@ -259,9 +274,7 @@ export function mapTaskToPublicProject(task: Task): Project {
   const location = mapProjectLocation(task, form);
   const companyName = resolveOwnerName(task);
   const employerSlug = resolveOwnerUsername(task);
-  const ownerAvatarUrl = task.owner_logo_url
-    ? getMediaUrl(task.owner_logo_url)
-    : undefined;
+  const ownerAvatarUrl = resolveProjectOwnerAvatarUrl(task);
   const employerLogoText = task.owner_logo_text?.trim() || undefined;
   const avatarSeed = employerSlug || companyName;
   const questions = (task.questions ?? []).map((item) =>

@@ -15,13 +15,15 @@ import {
 interface JobProfileHeroProps {
   job: Job;
   onApply?: () => void;
+  isOwner?: boolean;
+  editHref?: string;
 }
 
 function MetaDivider() {
   return <span className="mx-2.5 hidden h-3.5 w-px bg-neutral-300 sm:inline-block" aria-hidden />;
 }
 
-export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
+export default function JobProfileHero({ job, onApply, isOwner = false, editHref }: JobProfileHeroProps) {
   const experienceLabel = getExperienceShortLabel(job.experienceLevel);
   const locationLabel = getJobLocationLabel(job.location);
   const employerHref = resolveEmployerProfileHref({
@@ -119,6 +121,21 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
             </div>
           </div>
 
+          {isOwner && editHref ? (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+            >
+              <Link
+                href={editHref}
+                className="inline-flex w-full shrink-0 items-center justify-center gap-2 self-stretch rounded-md bg-[#1D3E35] px-6 py-3 text-sm font-normal text-white transition-colors duration-200 hover:bg-[#5bbb7b] sm:w-auto sm:self-start lg:self-center"
+              >
+                Edit Job
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </motion.div>
+          ) : (
           <motion.button
             type="button"
             onClick={() => onApply?.()}
@@ -130,6 +147,7 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
             Apply For Job
             <ArrowUpRight className="h-4 w-4" />
           </motion.button>
+          )}
         </div>
       </div>
     </section>

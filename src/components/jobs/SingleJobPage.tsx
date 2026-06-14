@@ -7,7 +7,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { toast } from 'sonner';
 import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { useAuth } from '@/hooks/useAuth';
-import { getJobDetailPath } from './jobSlug';
+import { getJobDetailPath, getJobEditHref, isJobOwner } from './jobSlug';
 import JobAbout from './JobAbout';
 import JobKeyResponsibilities from './JobKeyResponsibilities';
 import JobSkillsRequired from './JobSkillsRequired';
@@ -39,6 +39,8 @@ export default function SingleJobPage({
   const useApplicationModal = applicationPresentation === 'modal';
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const applySectionRef = useRef<HTMLDivElement>(null);
+  const isOwner = isJobOwner(job, user?.id);
+  const editHref = getJobEditHref(job);
 
   const scrollToApply = useCallback(() => {
     applySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -61,10 +63,9 @@ export default function SingleJobPage({
       return;
     }
 
-    const isOwner =
-      Boolean(user.id) && Boolean(job.ownerId) && String(user.id) === String(job.ownerId);
-    if (isOwner) {
-      toast.error('You cannot apply to your own job posting.');
+    const isOwnerCheck = isJobOwner(job, user.id);
+    if (isOwnerCheck) {
+      router.push(getJobEditHref(job));
       return;
     }
 
@@ -72,12 +73,16 @@ export default function SingleJobPage({
   }, [job, router, user]);
 
   const handleApplyClick = useCallback(() => {
+    if (isOwner) {
+      router.push(editHref);
+      return;
+    }
     if (useApplicationModal) {
       openApplicationModal();
       return;
     }
     scrollToApply();
-  }, [openApplicationModal, scrollToApply, useApplicationModal]);
+  }, [editHref, isOwner, openApplicationModal, router, scrollToApply, useApplicationModal]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || window.location.hash !== `#${APPLY_JOB_SECTION_ID}`) {
@@ -99,7 +104,7 @@ export default function SingleJobPage({
           <JobShareSaveActions job={job} />
         </div>
 
-        <JobProfileHero job={job} onApply={handleApplyClick} />
+        <JobProfileHero job={job} onApply={handleApplyClick} isOwner={isOwner} editHref={editHref} />
 
         <div className="mx-auto w-full max-w-3xl">
           <JobAbout job={job} />
@@ -107,7 +112,7 @@ export default function SingleJobPage({
             <JobSkillsRequired job={job} />
           </div>
           <JobKeyResponsibilities job={job} />
-          <JobWorkExperience job={job} onApply={handleApplyClick} />
+          <JobWorkExperience job={job} onApply={handleApplyClick} isOwner={isOwner} editHref={editHref} />
           {!hideApplication && !useApplicationModal ? (
             <div
               id={APPLY_JOB_SECTION_ID}

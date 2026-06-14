@@ -1,5 +1,5 @@
 export const DASHBOARD_PAGE_ROOT =
-  'animate-in fade-in min-w-0 overflow-x-clip bg-[#f0efec] font-sans text-black duration-300 select-none -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8';
+  'animate-in fade-in min-w-0 overflow-x-clip font-sans text-black duration-300 select-none';
 
 export const DASHBOARD_HEADING =
   'text-2xl font-normal leading-none tracking-tight text-neutral-900 sm:text-[34px]';

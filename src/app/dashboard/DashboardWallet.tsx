@@ -18,7 +18,7 @@ function parseWalletSection(value: string | null): WalletSection | undefined {
 
 function WalletFallback() {
   return (
-    <div className="max-w-4xl animate-pulse space-y-6 pb-20">
+    <div className="max-w-7xl animate-pulse space-y-6 pb-6">
       <div className="space-y-4">
         <div className="h-3 w-24 rounded bg-neutral-200" />
         <div className="h-10 w-56 rounded-lg bg-neutral-200" />

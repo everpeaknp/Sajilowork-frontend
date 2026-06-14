@@ -18,6 +18,7 @@ import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import { getJobDetailPath } from './jobSlug';
 import { fetchPublicJobs } from '@/lib/jobApi';
+import { MarketplaceJobGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 const FILTER_CATEGORIES = [
@@ -421,9 +422,7 @@ export default function JobList({
         ) : null}
 
         {loadingJobs ? (
-          <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center text-sm text-neutral-500">
-            Loading jobs…
-          </div>
+          <MarketplaceJobGridSkeleton count={8} className="mt-2" />
         ) : filteredJobsList.length === 0 ? (
           <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
             <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
@@ -560,7 +559,7 @@ export default function JobList({
           </div>
         )}
 
-        {filteredJobsList.length > 0 && (
+        {!loadingJobs && filteredJobsList.length > 0 && (
           <div className="mt-12 flex flex-col items-center justify-center pb-4 sm:mt-16">
             <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
               <button

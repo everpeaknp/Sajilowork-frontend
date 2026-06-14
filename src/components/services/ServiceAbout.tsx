@@ -36,7 +36,7 @@ export default function ServiceAbout({ service }: ServiceAboutProps) {
             {about.skills.map((skill) => (
               <li
                 key={skill}
-                className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-sm font-normal text-neutral-700"
+                className="rounded-full bg-[#ffede8] px-4 py-2 text-sm font-normal tracking-tight text-black"
               >
                 {skill}
               </li>

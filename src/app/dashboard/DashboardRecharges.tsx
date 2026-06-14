@@ -1,8 +1,25 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
-import { ArrowDownLeft, ChevronLeft, ChevronRight, X, Wallet } from 'lucide-react';
+import { useMemo, useState, type FormEvent } from 'react';
+import {
+  ArrowDownLeft,
+  ChevronLeft,
+  ChevronRight,
+  CircleDollarSign,
+  Clock,
+  Eye,
+  TrendingUp,
+  Wallet,
+  X,
+  Zap,
+} from 'lucide-react';
 import { CURRENCY_INPUT_PREFIX, formatNPR } from '@/lib/nepalLocale';
+import { sumWalletAmountsByStatus, type WalletTabSummary } from '@/lib/walletTabStats';
+import { buildReceiptId } from '@/lib/statementReceiptPdf';
+import { mapRechargeToInvoice, type WalletInvoiceView } from '@/lib/walletInvoice';
+import { DashboardMetricCards } from './DashboardMetricCards';
+import StatementReceiptModal from './StatementReceiptModal';
+import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 import { StatusBadge, type PayoutStatus } from './DashboardPayouts';
 
 export type RechargeStatus = PayoutStatus;
@@ -11,9 +28,14 @@ export interface Recharge {
   id: string;
   amount: string;
   amountVal: number;
+  grossVal?: number;
+  netVal?: number;
+  feeVal?: number;
   date: string;
+  createdAt?: string;
   rechargeMethod: string;
   status: RechargeStatus;
+  referenceNumber?: string;
 }
 
 function buildRecharges(): Recharge[] {
@@ -41,11 +63,14 @@ function buildRecharges(): Recharge[] {
   });
 }
 
+export type { WalletTabSummary } from '@/lib/walletTabStats';
+
 export interface DashboardRechargesProps {
   embedded?: boolean;
   recharges?: Recharge[];
   loading?: boolean;
   onCreateRecharge?: () => void;
+  walletSummary?: WalletTabSummary;
 }
 
 export default function DashboardRecharges({
@@ -53,6 +78,7 @@ export default function DashboardRecharges({
   recharges: rechargesProp,
   loading = false,
   onCreateRecharge,
+  walletSummary,
 }: DashboardRechargesProps = {}) {
   const [localRecharges, setLocalRecharges] = useState<Recharge[]>(buildRecharges);
   const recharges = rechargesProp ?? localRecharges;
@@ -62,6 +88,7 @@ export default function DashboardRecharges({
   const [newMethod, setNewMethod] = useState('eSewa');
   const [newStatus, setNewStatus] = useState<'Pending Orange' | 'Pending Blue'>('Pending Orange');
   const [successNote, setSuccessNote] = useState<string | null>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<WalletInvoiceView | null>(null);
 
   const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(recharges.length / itemsPerPage));
@@ -70,6 +97,59 @@ export default function DashboardRecharges({
   const indexOfLastItem = activePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentRecharges = recharges.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalApproved = useMemo(
+    () => sumWalletAmountsByStatus(recharges, 'approved'),
+    [recharges]
+  );
+  const totalPending = useMemo(
+    () => sumWalletAmountsByStatus(recharges, 'pending'),
+    [recharges]
+  );
+
+  const statCards = useMemo(
+    () => [
+      {
+        label: 'Total Recharged',
+        value: formatNPR(totalApproved, { compact: true }),
+        hint: `${recharges.filter((item) => item.status === 'Approved').length} `,
+        hintMuted: 'Approved top-ups',
+        icon: TrendingUp,
+        iconWrapClass: 'bg-[#EBF9F1] text-[#27AE60]',
+        iconClass: 'text-[#27AE60]',
+        glowClass: 'bg-[#27AE60]/[0.01]',
+      },
+      {
+        label: 'Pending Recharges',
+        value: formatNPR(totalPending, { compact: true }),
+        hint: `${recharges.filter((item) => item.status !== 'Approved').length} `,
+        hintMuted: 'Awaiting confirmation',
+        icon: Clock,
+        iconWrapClass: 'bg-[#F3F9FE] text-[#2F80ED]',
+        iconClass: 'text-[#2F80ED]',
+        glowClass: 'bg-[#2F80ED]/[0.01]',
+      },
+      {
+        label: 'Recharge History',
+        value: String(recharges.length),
+        hintMuted: 'Total recharge records',
+        icon: Zap,
+        iconWrapClass: 'bg-[#FCF0ED] text-[#F2994A]',
+        iconClass: 'text-[#F2994A]',
+        glowClass: 'bg-[#F2994A]/[0.01]',
+      },
+      {
+        label: 'Recharge Balance',
+        value: formatNPR(walletSummary?.rechargeBalance ?? totalApproved, { compact: true }),
+        hintMuted: 'Total topped up in wallet',
+        icon: CircleDollarSign,
+        iconWrapClass: 'border border-emerald-100 bg-emerald-50 text-[#193E32]',
+        iconClass: 'text-[#193E32]',
+        glowClass: 'bg-emerald-500/[0.01]',
+      },
+    ],
+    [recharges, totalApproved, totalPending, walletSummary?.rechargeBalance]
+  );
 
   const pageButtonClass = (page: number) =>
     `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-sm transition-all ${
@@ -112,27 +192,29 @@ export default function DashboardRecharges({
 
   const outerClass = embedded
     ? 'animate-in fade-in duration-300 font-sans text-black'
-    : 'animate-in fade-in -mx-4 -my-6 min-h-screen bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8';
+    : DASHBOARD_PAGE_ROOT;
 
   return (
     <div className={outerClass}>
-      <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">Recharges</h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
-            {embedded ? 'View recharge history and add funds to your wallet.' : 'Lorem ipsum dolor sit amet, consectetur.'}
-          </p>
-        </div>
+      {!embedded ? (
+        <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">Recharges</h1>
+            <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+              Lorem ipsum dolor sit amet, consectetur.
+            </p>
+          </div>
 
-        <button
-          type="button"
-          onClick={handleCreateClick}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:scale-[1.01] hover:bg-neutral-800 active:scale-[0.99]"
-        >
-          <span>Create Recharge</span>
-          <ArrowDownLeft className="h-4 w-4 text-white" strokeWidth={2} />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={handleCreateClick}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:scale-[1.01] hover:bg-neutral-800 active:scale-[0.99]"
+          >
+            <span>Create Recharge</span>
+            <ArrowDownLeft className="h-4 w-4 text-white" strokeWidth={2} />
+          </button>
+        </div>
+      ) : null}
 
       {successNote ? (
         <div className="animate-in slide-in-from-bottom-2 mx-auto mb-5 flex max-w-7xl items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800 shadow-sm duration-300">
@@ -150,6 +232,8 @@ export default function DashboardRecharges({
         </div>
       ) : null}
 
+      <DashboardMetricCards cards={statCards} />
+
       <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
         {loading ? (
           <div className="py-16 text-center text-sm text-neutral-500">Loading recharges…</div>
@@ -158,29 +242,44 @@ export default function DashboardRecharges({
             <table className="w-full table-auto border-collapse text-left">
               <thead>
                 <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
-                  <th className="w-[25%] pb-6 pl-2 pt-2 font-medium">Amount</th>
-                  <th className="w-[25%] pb-6 pt-2 font-medium">Date</th>
-                  <th className="w-[25%] pb-6 pt-2 font-medium">Recharge Method</th>
-                  <th className="w-[25%] pb-6 pt-2 text-left font-medium">Payment Status</th>
+                  <th className="w-[12%] pb-6 pl-2 pt-2 font-medium">Invoice ID</th>
+                  <th className="w-[18%] pb-6 pt-2 font-medium">Amount</th>
+                  <th className="w-[18%] pb-6 pt-2 font-medium">Date</th>
+                  <th className="w-[18%] pb-6 pt-2 font-medium">Recharge Method</th>
+                  <th className="w-[18%] pb-6 pt-2 text-left font-medium">Payment Status</th>
+                  <th className="w-[16%] pb-6 pt-2 pr-2 text-left font-medium">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
                 {currentRecharges.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-12 text-center text-sm text-neutral-500">
+                    <td colSpan={6} className="py-12 text-center text-sm text-neutral-500">
                       No recharges yet. Create your first recharge to get started.
                     </td>
                   </tr>
                 ) : (
                   currentRecharges.map((item) => (
                     <tr key={item.id} className="transition-colors hover:bg-neutral-50/20">
-                      <td className="select-all py-6 pl-2 align-middle text-[15px] font-medium text-neutral-900">
+                      <td className="py-6 pl-2 align-middle text-sm font-normal text-neutral-900">
+                        {buildReceiptId(item.id)}
+                      </td>
+                      <td className="select-all py-6 align-middle text-[15px] font-medium text-neutral-900">
                         {item.amount}
                       </td>
                       <td className="py-6 align-middle text-sm font-normal text-neutral-500">{item.date}</td>
                       <td className="py-6 align-middle text-sm font-normal text-neutral-800">{item.rechargeMethod}</td>
                       <td className="py-6 align-middle">
                         <StatusBadge status={item.status} />
+                      </td>
+                      <td className="py-6 pr-2 align-middle">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedInvoice(mapRechargeToInvoice(item))}
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF0ED] px-4 py-2.5 text-xs font-medium text-[#222222] transition-all hover:scale-[1.02] hover:bg-[#FCE6E1] active:scale-[0.98]"
+                        >
+                          <Eye className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          <span>Invoice</span>
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -359,6 +458,15 @@ export default function DashboardRecharges({
             </form>
           </div>
         </div>
+      ) : null}
+
+      {selectedInvoice ? (
+        <StatementReceiptModal
+          statement={selectedInvoice.statement}
+          direction={selectedInvoice.direction}
+          labels={selectedInvoice.labels}
+          onClose={() => setSelectedInvoice(null)}
+        />
       ) : null}
     </div>
   );

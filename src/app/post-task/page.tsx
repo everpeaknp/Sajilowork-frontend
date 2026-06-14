@@ -17,6 +17,6 @@ export default function PostTaskRedirectPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-white text-sm text-neutral-500">
       Redirecting…
-    </div>
+      </div>
   );
 }

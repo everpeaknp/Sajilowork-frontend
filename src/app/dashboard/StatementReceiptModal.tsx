@@ -1,14 +1,17 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { X, Download, Printer, Copy, Check, FileText } from 'lucide-react';
+import { X, Download, Printer, Copy, Check, Receipt } from 'lucide-react';
 import { formatNPR } from '@/lib/nepalLocale';
+import { RECEIPT_DOCUMENT_STYLES } from '@/lib/receiptDocumentStyles';
 import {
   buildReceiptId,
+  buildShortReferenceId,
   downloadStatementReceiptPdf,
   printStatementReceipt,
   type StatementReceiptData,
 } from '@/lib/statementReceiptPdf';
+import { toast } from 'sonner';
 import type { PaymentHistoryDirection } from '@/services/payment.service';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -33,10 +36,20 @@ export interface StatementReceipt {
   taskId?: string | null;
 }
 
+export interface ReceiptLabelOverrides {
+  documentTitle?: string;
+  documentSubtitle?: string;
+  descriptionHeading?: string;
+  totalLabel?: string;
+  feeLabel?: string;
+  directionLabel?: string;
+}
+
 interface StatementReceiptModalProps {
   statement: StatementReceipt;
   direction: PaymentHistoryDirection;
   onClose: () => void;
+  labels?: ReceiptLabelOverrides;
 }
 
 function statusLabel(status: string) {
@@ -44,24 +57,29 @@ function statusLabel(status: string) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function statusTone(status: string) {
+function statusBadgeClass(status: string) {
   const normalized = status.toLowerCase();
   if (['released', 'succeeded', 'completed'].includes(normalized)) {
-    return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+    return 'tn-receipt-badge tn-receipt-badge--success';
   }
   if (['held', 'pending', 'processing'].includes(normalized)) {
-    return 'bg-amber-50 text-amber-700 ring-amber-200';
+    return 'tn-receipt-badge tn-receipt-badge--pending';
   }
   if (['failed', 'cancelled', 'refunded'].includes(normalized)) {
-    return 'bg-red-50 text-red-700 ring-red-200';
+    return 'tn-receipt-badge tn-receipt-badge--failed';
   }
-  return 'bg-neutral-100 text-neutral-700 ring-neutral-200';
+  return 'tn-receipt-badge tn-receipt-badge--neutral';
+}
+
+function isPaidStatus(status: string) {
+  return ['released', 'succeeded', 'completed'].includes(status.toLowerCase());
 }
 
 export default function StatementReceiptModal({
   statement,
   direction,
   onClose,
+  labels,
 }: StatementReceiptModalProps) {
   const user = useAuthStore((s) => s.user);
   const receiptRef = useRef<HTMLDivElement>(null);
@@ -69,8 +87,13 @@ export default function StatementReceiptModal({
   const [copied, setCopied] = useState(false);
 
   const receiptId = statement.receiptId || buildReceiptId(statement.id);
+  const shortTransactionId = buildShortReferenceId(statement.id);
+  const shortTaskRef = statement.taskId ? buildShortReferenceId(statement.taskId) : null;
 
-  const accountName = user?.full_name || [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Account holder';
+  const accountName =
+    user?.full_name ||
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
+    'Account holder';
   const accountEmail = user?.email || '—';
   const accountLocation = [user?.city, user?.country].filter(Boolean).join(', ') || 'Nepal';
 
@@ -93,14 +116,20 @@ export default function StatementReceiptModal({
       accountName,
       accountEmail,
       accountLocation,
+      descriptionHeading: labels?.descriptionHeading,
+      totalLabel: labels?.totalLabel,
+      feeLabel: labels?.feeLabel,
     }),
-    [statement, direction, receiptId, accountName, accountEmail, accountLocation]
+    [statement, direction, receiptId, accountName, accountEmail, accountLocation, labels]
   );
 
   const handleDownloadPdf = useCallback(async () => {
     try {
       setDownloading(true);
       downloadStatementReceiptPdf(receiptData);
+    } catch (error) {
+      console.error('Failed to generate receipt PDF:', error);
+      toast.error('Could not download receipt. Please try Print instead.');
     } finally {
       setDownloading(false);
     }
@@ -121,160 +150,205 @@ export default function StatementReceiptModal({
     }
   }, [receiptId]);
 
+  const totalLabel =
+    labels?.totalLabel ?? (direction === 'outgoing' ? 'Total paid' : 'Net received');
+  const descriptionHeading =
+    labels?.descriptionHeading ??
+    (direction === 'outgoing' ? 'Payment for' : 'Earnings from');
+  const feeLabel = labels?.feeLabel ?? 'Platform fee';
+  const directionLabel =
+    labels?.directionLabel ?? (direction === 'outgoing' ? 'Outgoing' : 'Earned');
+  const documentTitle = labels?.documentTitle ?? 'Transaction Receipt';
+  const documentSubtitle = labels?.documentSubtitle ?? 'Official payment record';
+  const showPaidStamp = isPaidStatus(statement.status);
+  const generatedAt = new Date().toLocaleString('en-NP', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+
   return (
     <>
       <button
         type="button"
         aria-label="Close receipt"
         onClick={onClose}
-        className="animate-in fade-in fixed inset-0 z-[10050] bg-neutral-900/50 backdrop-blur-sm duration-300"
+        className="animate-in fade-in fixed inset-0 z-[10050] bg-neutral-900/55 backdrop-blur-sm duration-300"
       />
 
       <div className="animate-in fade-in slide-in-from-bottom-4 pointer-events-none fixed inset-0 z-[10051] flex items-end justify-center p-0 duration-300 sm:items-center sm:p-4">
-      <div className="pointer-events-auto flex max-h-[min(92dvh,calc(100dvh-5rem))] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-neutral-200/80 bg-white shadow-2xl sm:max-h-[92vh] sm:rounded-3xl">
-        {/* Toolbar */}
-        <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-5 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EBF9F1] text-[#27AE60]">
-              <FileText className="h-5 w-5" strokeWidth={2} />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-neutral-900">Transaction Receipt</h3>
-              <p className="text-xs text-neutral-500">Official ledger record</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Printable receipt body */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-          <div
-            ref={receiptRef}
-            className="overflow-hidden rounded-2xl border border-neutral-200 bg-white"
-          >
-            <div className="bg-gradient-to-r from-[#52C47F] to-[#3daf6c] px-6 py-5 text-white">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-2xl font-black tracking-tight">TaskNepal</p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">
-                    Transaction Receipt Ledger
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-mono text-sm font-bold">{receiptId}</p>
-                  <p className="mt-1 text-xs text-white/80">{statement.date}</p>
-                </div>
+        <div className="pointer-events-auto flex max-h-[min(92dvh,calc(100dvh-5rem))] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-neutral-200/80 bg-neutral-50 shadow-2xl sm:max-h-[92vh] sm:rounded-3xl">
+          {/* Toolbar */}
+          <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-5 py-4 sm:px-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                <Receipt className="h-5 w-5" strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-neutral-900">{documentTitle}</h3>
+                <p className="text-xs text-neutral-500">{documentSubtitle}</p>
               </div>
             </div>
-
-            <div className="space-y-5 p-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${statusTone(statement.status)}`}
-                >
-                  {statusLabel(statement.status)}
-                </span>
-                <span className="inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
-                  {statement.type}
-                </span>
-                <span className="inline-flex rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
-                  {direction === 'outgoing' ? 'Outgoing' : 'Earned'}
-                </span>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-neutral-100 bg-[#fafafa] p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                    Account holder
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-neutral-900">{accountName}</p>
-                  <p className="mt-1 text-xs text-neutral-500">{accountEmail}</p>
-                  <p className="text-xs text-neutral-500">{accountLocation}</p>
-                </div>
-                <div className="rounded-xl border border-neutral-100 bg-[#fafafa] p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                    Reference
-                  </p>
-                  <p className="mt-2 font-mono text-xs text-neutral-700 break-all">{statement.id}</p>
-                  {statement.taskId ? (
-                    <p className="mt-2 text-xs text-neutral-500">
-                      Task: <span className="font-mono text-neutral-700">{statement.taskId}</span>
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-neutral-200 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                  {direction === 'outgoing' ? 'Payment for' : 'Earnings from'}
-                </p>
-                <p className="mt-2 text-sm font-semibold text-neutral-900">{statement.title}</p>
-              </div>
-
-              <div className="rounded-xl border border-neutral-200 bg-neutral-50/80 p-4">
-                <div className="flex items-center justify-between py-2 text-sm text-neutral-600">
-                  <span>Gross amount</span>
-                  <span className="font-medium text-neutral-900">{formatNPR(statement.grossVal)}</span>
-                </div>
-                <div className="flex items-center justify-between border-t border-neutral-200/80 py-2 text-sm text-neutral-600">
-                  <span>Platform fee</span>
-                  <span className="font-medium text-neutral-900">
-                    {statement.feeVal > 0 ? `− ${formatNPR(statement.feeVal)}` : formatNPR(0)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between border-t border-neutral-300 py-3">
-                  <span className="text-sm font-semibold text-neutral-900">
-                    {direction === 'outgoing' ? 'Total paid' : 'Net received'}
-                  </span>
-                  <span className="text-lg font-bold text-[#27AE60]">{statement.amount}</span>
-                </div>
-              </div>
-
-              <p className="text-[10px] leading-relaxed text-neutral-400">
-                Generated by TaskNepal on {new Date().toLocaleString('en-NP')}. This receipt confirms the
-                transaction listed above. Keep this document for your records.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="shrink-0 border-t border-neutral-100 bg-white px-5 py-4 sm:px-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="button"
-              onClick={handleCopyId}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+              onClick={onClose}
+              className="rounded-xl p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
             >
-              {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-              {copied ? 'Copied' : 'Copy receipt #'}
-            </button>
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-100 px-4 py-3 text-xs font-semibold text-neutral-800 transition-colors hover:bg-neutral-200"
-            >
-              <Printer className="h-4 w-4" />
-              Print
-            </button>
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#222222] px-4 py-3 text-xs font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <Download className="h-4 w-4" />
-              {downloading ? 'Generating…' : 'Download PDF'}
+              <X className="h-5 w-5" />
             </button>
           </div>
+
+          {/* Printable receipt body */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+            <div
+              ref={receiptRef}
+              className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm"
+            >
+              <style dangerouslySetInnerHTML={{ __html: RECEIPT_DOCUMENT_STYLES }} />
+
+              <div className="tn-receipt">
+                <div className="tn-receipt-accent" />
+                <div className="tn-receipt-body-wrap">
+                  {showPaidStamp ? <div className="tn-receipt-stamp">Paid</div> : null}
+
+                  <div className="tn-receipt-inner">
+                    <header className="tn-receipt-header">
+                      <div>
+                        <h1 className="tn-receipt-brand-name">TaskNepal</h1>
+                        <p className="tn-receipt-brand-meta">
+                          Kathmandu, Nepal
+                          <br />
+                          support@tasknepal.com
+                        </p>
+                      </div>
+                      <div className="tn-receipt-meta-block">
+                        <p className="tn-receipt-label">Receipt</p>
+                        <p className="tn-receipt-id">{receiptId}</p>
+                        <p className="tn-receipt-date">{statement.date}</p>
+                      </div>
+                    </header>
+
+                    <hr className="tn-receipt-divider" />
+
+                    <div className="tn-receipt-grid">
+                      <div>
+                        <p className="tn-receipt-section-title">Billed to</p>
+                        <p className="tn-receipt-name">{accountName}</p>
+                        <p className="tn-receipt-sub">{accountEmail}</p>
+                        <p className="tn-receipt-sub">{accountLocation}</p>
+                      </div>
+                      <div>
+                        <p className="tn-receipt-section-title">Payment details</p>
+                        <div className="tn-receipt-status-row">
+                          <span className={statusBadgeClass(statement.status)}>
+                            <span className="tn-receipt-badge-dot" aria-hidden />
+                            {statusLabel(statement.status)}
+                          </span>
+                          <span className="tn-receipt-badge tn-receipt-badge--neutral">
+                            {statement.type}
+                          </span>
+                          <span className="tn-receipt-badge tn-receipt-badge--neutral">
+                            {directionLabel}
+                          </span>
+                        </div>
+                        <p className="tn-receipt-sub" style={{ marginTop: 10 }}>
+                          Currency: {statement.currency || 'NPR'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="tn-receipt-desc-box">
+                      <p className="tn-receipt-section-title" style={{ marginBottom: 8 }}>
+                        {descriptionHeading}
+                      </p>
+                      <p className="tn-receipt-desc-title">{statement.title}</p>
+                      {statement.subtitle ? (
+                        <p className="tn-receipt-sub">{statement.subtitle}</p>
+                      ) : null}
+                      {shortTaskRef ? (
+                        <p className="tn-receipt-desc-ref">Task ref: {shortTaskRef}</p>
+                      ) : null}
+                    </div>
+
+                    <table className="tn-receipt-table">
+                      <thead>
+                        <tr>
+                          <th>Description</th>
+                          <th>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Gross amount</td>
+                          <td>{formatNPR(statement.grossVal)}</td>
+                        </tr>
+                        <tr>
+                          <td>{feeLabel}</td>
+                          <td>
+                            {statement.feeVal > 0
+                              ? `− ${formatNPR(statement.feeVal)}`
+                              : formatNPR(0)}
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td className="tn-receipt-total-label">{totalLabel}</td>
+                          <td className="tn-receipt-total-value">{statement.amount}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+
+                    <footer className="tn-receipt-footer">
+                      <p className="tn-receipt-footer-id">
+                        Transaction ID: <span>{shortTransactionId}</span>
+                      </p>
+                      <p className="tn-receipt-footer-note">
+                        Thank you for using TaskNepal. This is a system-generated receipt — keep it
+                        for your records. Generated on {generatedAt}. For support, email
+                        support@tasknepal.com and include receipt {receiptId}.
+                      </p>
+                    </footer>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="shrink-0 border-t border-neutral-200 bg-white px-5 py-4 sm:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                onClick={handleCopyId}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-emerald-600" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                {copied ? 'Copied' : 'Copy receipt #'}
+              </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-100 px-4 py-3 text-xs font-semibold text-neutral-800 transition-colors hover:bg-neutral-200"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </button>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={downloading}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-900 px-4 py-3 text-xs font-semibold text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Download className="h-4 w-4" />
+                {downloading ? 'Generating…' : 'Download PDF'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
       </div>
     </>
   );

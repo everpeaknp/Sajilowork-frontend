@@ -55,6 +55,7 @@ import ProfileFormModal, {
 } from '@/app/dashboard/ProfileFormModal';
 import Link from 'next/link';
 import { useDashboardSidebarRole } from '@/app/dashboard/DashboardRoleSwitchContext';
+import { DASHBOARD_PAGE_ROOT } from '@/app/dashboard/dashboardResponsive';
 import EmployerBusinessProfileForm from '@/app/dashboard/EmployerBusinessProfileForm';
 import EmployerBusinessCardPreview from '@/app/dashboard/EmployerBusinessCardPreview';
 import FreelancerCvPreview from '@/app/dashboard/FreelancerCvPreview';
@@ -1028,7 +1029,7 @@ export default function DashboardProfile() {
   );
 
   return (
-    <div className="animate-in fade-in relative -mx-4 -my-6 min-h-screen bg-[#f0efec] px-4 py-4 font-sans text-black duration-300 sm:-mx-6 sm:px-6 sm:py-4 md:-mx-8 md:px-8">
+    <div className={`${DASHBOARD_PAGE_ROOT} relative`}>
       <div className="mx-auto mb-8 max-w-7xl pl-1">
         <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900" id="profile-heading-id">
           {isEmployerMode ? 'Business Profile' : 'My Profile'}

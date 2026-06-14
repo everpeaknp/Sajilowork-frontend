@@ -46,10 +46,14 @@ export function formatMyTaskStatusLabel(status: string): string {
   }
 }
 
-/** Strip seed-script suffixes like " (458)" from titles shown in the UI. */
+/** Strip seed-script suffixes like " (458)", " — 2142", or " #3" from titles shown in the UI. */
 export function formatTaskDisplayTitle(title: string): string {
   if (!title) return title;
-  return title.replace(/\s+\(\d+\)\s*$/, '').trim();
+  return title
+    .replace(/\s+[—–-]\s*\d+\s*$/u, '')
+    .replace(/\s+#\d+\s*$/, '')
+    .replace(/\s+\(\d+\)\s*$/, '')
+    .trim();
 }
 
 export function normalizeTaskForDisplay<T extends { title?: string | null }>(task: T): T {

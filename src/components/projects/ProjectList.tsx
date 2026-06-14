@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import {
-  ALL_PROJECTS,
   type Project,
   formatProjectLocation,
   locationDisplay,
@@ -26,6 +25,7 @@ import { fetchPublicProjects } from '@/lib/projectApi';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectDetailPath } from './projectSlug';
+import { MarketplaceBrowseRowListSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 
 const CustomLogo: React.FC<{
   type: Project['companyIconType'];
@@ -183,7 +183,7 @@ export default function ProjectList({
   onClearSearch,
 }: ProjectListProps) {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>(ALL_PROJECTS);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
 
   useEffect(() => {
@@ -192,11 +192,10 @@ export default function ProjectList({
     void fetchPublicProjects()
       .then((items) => {
         if (cancelled) return;
-        const next = items.length ? items : ALL_PROJECTS;
-        setProjects(next);
+        setProjects(items);
       })
       .catch(() => {
-        if (!cancelled) setProjects(ALL_PROJECTS);
+        if (!cancelled) setProjects([]);
       })
       .finally(() => {
         if (!cancelled) setLoadingProjects(false);
@@ -635,7 +634,9 @@ export default function ProjectList({
               </div>
             ) : null}
 
-            {filteredProjectsList.length === 0 ? (
+            {loadingProjects ? (
+              <MarketplaceBrowseRowListSkeleton count={4} />
+            ) : filteredProjectsList.length === 0 ? (
               <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
                 <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
                 <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35]`}>
@@ -801,7 +802,7 @@ export default function ProjectList({
               </div>
             )}
 
-            {filteredProjectsList.length > 0 && (
+            {!loadingProjects && filteredProjectsList.length > 0 && (
               <div className="flex flex-col items-center justify-center pb-4 pt-8">
                 <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
                   <button

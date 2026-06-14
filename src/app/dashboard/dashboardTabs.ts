@@ -130,3 +130,18 @@ export function isTabAllowedForRole(tab: DashboardTab, role: DashboardSidebarRol
   if (tab === 'profile') return true;
   return getNavTabsForRole(role).includes(tab);
 }
+
+/** Employer-only dashboard sections (jobs, tasks). Freelancer-only: services. */
+export function getRequiredDashboardRoleForPathname(
+  pathname: string,
+): DashboardSidebarRole | null {
+  if (!pathname.startsWith('/dashboard')) return null;
+
+  const rest = pathname.slice('/dashboard'.length).replace(/^\//, '');
+  const segment = rest.split('/')[0];
+  if (!segment) return null;
+
+  if (segment === 'jobs' || segment === 'task') return 'customer';
+  if (segment === 'services') return 'tasker';
+  return null;
+}

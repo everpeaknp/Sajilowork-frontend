@@ -19,6 +19,7 @@ import {
   getDashboardHref,
   getDashboardProposalProjectHref,
 } from './dashboardTabs';
+import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
 interface DashboardProjectDetailProps {
   projectSlug: string;
@@ -221,7 +222,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
 
   if (!task || !project) {
     return (
-      <div className="animate-in fade-in -mx-4 -my-6 min-h-screen space-y-4 bg-[#f0efec] p-4 font-sans sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+      <div className={`${DASHBOARD_PAGE_ROOT} space-y-4`}>
         <Link
           href={getDashboardHref('project')}
           className="inline-flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-black"
@@ -236,7 +237,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
 
   if (!isOwner && !isAssignedTasker) {
     return (
-      <div className="animate-in fade-in -mx-4 -my-6 min-h-screen space-y-4 bg-[#f0efec] p-4 font-sans sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+      <div className={`${DASHBOARD_PAGE_ROOT} space-y-4`}>
         <Link
           href={getDashboardHref('project')}
           className="inline-flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-black"
@@ -252,7 +253,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
   const locationLabel = project.locationLabel || project.location || 'Remote';
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen space-y-6 bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+    <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       <div className="flex flex-col gap-4">
         <Link
           href={getDashboardHref('project')}
