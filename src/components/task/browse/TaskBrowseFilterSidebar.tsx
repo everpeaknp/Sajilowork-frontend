@@ -34,7 +34,7 @@ export default function TaskBrowseFilterSidebar({
   onClearAll,
 }: TaskBrowseFilterSidebarProps) {
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
-    category: true,
+    category: false,
     location: false,
     price: false,
     more: false,

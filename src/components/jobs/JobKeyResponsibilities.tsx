@@ -12,8 +12,8 @@ export default function JobKeyResponsibilities({ job }: JobKeyResponsibilitiesPr
   const items = getJobKeyResponsibilities(job);
 
   return (
-    <section className="mt-14">
-      <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">Key Responsibilities</h2>
+    <section className="mt-10 sm:mt-14">
+      <h2 className="text-base font-normal tracking-tight text-black sm:text-lg md:text-xl">Key Responsibilities</h2>
       <ul className={`${discoverBody} mt-6 list-none space-y-5 p-0`}>
         {items.map((item, index) => (
           <li key={index} className="flex items-start gap-3.5">

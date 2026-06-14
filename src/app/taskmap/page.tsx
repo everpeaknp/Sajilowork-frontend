@@ -21,8 +21,9 @@ import {
   TaskMapSkeleton,
 } from '@/components/task/TaskBrowseSkeletons';
 import { useSidebar } from '@/hooks/useSidebar';
-import { useTaskStore } from '@/store';
 import { useAuth } from '@/hooks/useAuth';
+import { useTaskStore } from '@/store';
+import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import type { SearchFilters, Task } from '@/types';
 import { getMediaUrl } from '@/lib/utils';
 import { filterAndSortTasks, taskBudgetAmount } from '@/lib/taskFilters';
@@ -488,7 +489,7 @@ export default function App() {
                             : 'There are currently no tasks posted. Be the first to post a task!'}
                         </p>
                         <a
-                          href="/post-task"
+                          href={POST_TASK_PATH}
                           className="px-6 py-2 bg-brand-emerald text-white rounded-full font-semibold hover:bg-brand-emerald/90 transition-colors"
                         >
                           Post a Task
@@ -602,7 +603,7 @@ export default function App() {
                       : 'Be the first to post a task!'}
                   </p>
                   <a
-                    href="/post-task"
+                    href={POST_TASK_PATH}
                     className="rounded-full bg-brand-emerald px-6 py-2 font-semibold text-white hover:bg-brand-emerald/90"
                   >
                     Post a Task

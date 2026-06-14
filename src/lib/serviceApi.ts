@@ -417,6 +417,8 @@ export function mapTaskToPublicService(task: Task): Service {
 
     slug: task.slug,
 
+    isBookmarked: Boolean(task.is_bookmarked),
+
     category: resolveCategoryName(task),
 
     title: formatTaskDisplayTitle(task.title || ''),

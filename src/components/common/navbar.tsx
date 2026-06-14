@@ -6,10 +6,11 @@ import {
   HelpCircle,
   Menu,
   X,
-  PlusCircle,
   Settings,
   LogOut,
   LayoutDashboard,
+  ClipboardList,
+  Briefcase,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import { TASK_BROWSE_PATH, TASK_MAP_PATH } from '@/lib/taskBrowsePath';
 import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
+import AccountRoleMode from '@/components/common/AccountRoleMode';
 import type { Conversation, Notification as NotificationType, PaginatedResponse } from '@/types';
 import { normalizeNotificationCurrency } from '@/lib/nepalLocale';
 import {
@@ -98,7 +100,7 @@ function getNotificationHref(notification: NotificationType): string {
 }
 
 const mobileDropdownPanelClass =
-  'fixed left-3 right-3 top-[calc(3.5rem+0.5rem)] z-[10000] max-h-[min(70dvh,28rem)] overflow-hidden rounded-2xl bg-white p-4 animate-in fade-in slide-in-from-top-3 duration-200 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72';
+  'fixed left-2 right-2 top-[calc(3.5rem+0.375rem)] z-[10000] max-h-[min(72dvh,28rem)] overflow-hidden rounded-2xl bg-white p-4 shadow-xl animate-in fade-in slide-in-from-top-3 duration-200 sm:left-3 sm:right-3 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72 md:shadow-none';
 
 function MobileDropdownBackdrop({ onClose }: { onClose: () => void }) {
   return (
@@ -336,14 +338,6 @@ export default function Navbar() {
     }
   };
 
-  const handlePostTaskClick = () => {
-    if (!isAuthenticated) {
-      router.push('/signin?redirect=/post-task');
-      return;
-    }
-    router.push('/post-task');
-  };
-
   const handleBrowseTasksClick = () => {
     router.push(TASK_BROWSE_PATH);
   };
@@ -388,32 +382,95 @@ export default function Navbar() {
     return `${Math.floor(seconds / 86400)}d ago`;
   };
 
+  const profileMenuItems = (
+    <>
+      <div className="px-3 py-3">
+        <p className={`${landingHeadlineSm} text-sm text-gray-900`}>
+          {user?.first_name} {user?.last_name}
+        </p>
+        <AccountRoleMode variant="navbar" />
+      </div>
+
+      <div className="py-1">
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            router.push('/dashboard');
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
+        >
+          <LayoutDashboard className="h-4 w-4 text-gray-400" />
+          <span>Dashboard</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            handleBrowseTasksClick();
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 md:hidden"
+        >
+          <ClipboardList className="h-4 w-4 text-gray-400" />
+          <span>Browse tasks</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            handleMyTasksClick();
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 md:hidden"
+        >
+          <Briefcase className="h-4 w-4 text-gray-400" />
+          <span>My tasks</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            router.push('/dashboard/settings');
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
+        >
+          <Settings className="h-4 w-4 text-gray-400" />
+          <span>Settings</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            void handleLogout();
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Sign out</span>
+        </button>
+      </div>
+    </>
+  );
+
   return (
-    <header className={`sticky top-0 z-[9999] isolate w-full bg-white ${landingBody} antialiased`}>
-      <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
+    <header className={`sticky top-0 z-[9999] isolate w-full min-w-0 overflow-x-clip bg-white ${landingBody} antialiased`}>
+      <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-1 px-2.5 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
         {/* Left section: Logo & Primary Links */}
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8 md:flex-none">
           <Link
             href={isAuthenticated ? '/discover' : '/'}
             className="flex shrink-0 items-center focus:outline-none cursor-pointer"
           >
-            <span className={`${landingHeadline} text-lg text-brand-emerald sm:text-2xl`}>
+            <span className={`${landingHeadline} text-base text-brand-emerald min-[380px]:text-lg sm:text-2xl`}>
               task<span className="text-brand-dark">nepal</span>
             </span>
           </Link>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-5 lg:space-x-6">
-            {isAuthenticated && (
-              <button
-                onClick={handlePostTaskClick}
-                className={`${landingBody} rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald cursor-pointer inline-flex items-center gap-1.5 active:scale-95`}
-              >
-                <PlusCircle className="h-4 w-4" />
-                Post a task
-              </button>
-            )}
-
             <Link
               href="/jobs"
               className={navLinkClass(isJobsActive)}
@@ -466,9 +523,16 @@ export default function Navbar() {
         </div>
 
         {/* Right section: Utilities Dashboard & Profile */}
-        <div className="flex shrink-0 items-center gap-0.5 sm:gap-2 md:gap-5">
+        <div className="flex shrink-0 items-center gap-0 sm:gap-1 md:gap-5">
           {!isAuthenticated ? (
-            <div className="hidden items-center gap-3 sm:flex">
+            <>
+              <Link
+                href="/signin"
+                className={`${landingBody} hidden min-h-9 items-center rounded-full px-3 text-xs font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 hover:text-brand-emerald min-[380px]:flex sm:text-sm`}
+              >
+                Sign in
+              </Link>
+              <div className="hidden items-center gap-3 sm:flex">
               <Link
                 href="/signin"
                 className={`${landingBody} text-sm font-semibold tracking-tight text-neutral-600 transition hover:text-brand-emerald`}
@@ -481,7 +545,8 @@ export default function Navbar() {
               >
                 Sign up
               </Link>
-            </div>
+              </div>
+            </>
           ) : (
             <>
               {/* Help button */}
@@ -502,7 +567,7 @@ export default function Navbar() {
                     setMessagesOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer sm:p-2"
+                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer min-[360px]:p-2"
                   aria-label="Notifications"
                 >
                   <Bell className="h-5 w-5 sm:h-5 sm:w-5" />
@@ -577,7 +642,7 @@ export default function Navbar() {
                     setNotificationsOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer sm:p-2"
+                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer min-[360px]:p-2"
                   aria-label="Messages"
                 >
                   <MessageSquare className="h-5 w-5" />
@@ -676,74 +741,41 @@ export default function Navbar() {
                     setMobileMenuOpen(false);
                     setNotificationsOpen(false);
                     setMessagesOpen(false);
-
-                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                      setProfileMenuOpen(false);
-                      router.push('/dashboard');
-                      return;
-                    }
-
                     setProfileMenuOpen(!profileMenuOpen);
                   }}
                   className="flex items-center rounded-full focus:outline-none"
                   aria-label="Account menu"
+                  aria-expanded={profileMenuOpen}
                 >
                   <UserAvatar
                     src={user?.profile_image}
                     name={user ? `${user.first_name} ${user.last_name}` : 'User'}
                     size="sm"
                     verified={user?.is_verified_tasker}
-                    className="transition cursor-pointer sm:!w-10 sm:!h-10"
+                    className="transition cursor-pointer !h-9 !w-9 sm:!h-10 sm:!w-10"
                   />
                 </button>
 
-                {/* Profile Dropdown Menu (desktop only) */}
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-3 hidden w-64 rounded-2xl bg-white p-2 animate-in fade-in slide-in-from-top-3 duration-200 md:block z-[10000]">
-                    {/* User Info */}
-                    <div className="px-3 py-3">
-                      <p className={`${landingHeadlineSm} text-sm text-gray-900`}>
-                        {user?.first_name} {user?.last_name}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">{user?.email}</p>
+                  <>
+                    <MobileDropdownBackdrop onClose={() => setProfileMenuOpen(false)} />
+                    <div className={cn(mobileDropdownPanelClass, 'md:hidden')}>
+                      <div className="mb-2 flex items-center justify-between pb-2">
+                        <h4 className={navPanelTitleClass}>Account</h4>
+                        <button
+                          type="button"
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="cursor-pointer rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      {profileMenuItems}
                     </div>
-
-                    {/* Menu Items */}
-                    <div className="py-1">
-                      <button
-                        onClick={() => {
-                          setProfileMenuOpen(false);
-                          router.push('/dashboard');
-                        }}
-                        className="w-full flex items-center space-x-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition cursor-pointer"
-                      >
-                        <LayoutDashboard className="h-4 w-4 text-gray-400" />
-                        <span>Dashboard</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setProfileMenuOpen(false);
-                          router.push('/dashboard/settings');
-                        }}
-                        className="w-full flex items-center space-x-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition cursor-pointer"
-                      >
-                        <Settings className="h-4 w-4 text-gray-400" />
-                        <span>Settings</span>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setProfileMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className="w-full flex items-center space-x-3 px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>Sign out</span>
-                      </button>
+                    <div className="absolute right-0 z-[10000] mt-3 hidden w-64 rounded-2xl bg-white p-2 animate-in fade-in slide-in-from-top-3 duration-200 md:block">
+                      {profileMenuItems}
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </>
@@ -805,42 +837,68 @@ export default function Navbar() {
       {/* Guest mobile menu only (signed-in users use icon shortcuts in the bar) */}
       {mobileMenuOpen && !isAuthenticated && (
         <nav
-          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain bg-white px-3 py-3 md:hidden sm:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden sm:px-4"
           aria-label="Mobile navigation"
         >
-          <div className="space-y-2">
+          <div className="space-y-1">
+            <Link
+              href={TASK_BROWSE_PATH}
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                landingBody,
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
+                isBrowseTasksActive ? 'text-brand-emerald' : 'text-neutral-600',
+              )}
+            >
+              Tasks
+            </Link>
             <Link
               href="/jobs"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight transition hover:bg-gray-50 ${isJobsActive ? 'text-brand-emerald' : 'text-neutral-600'}`}
+              className={cn(
+                landingBody,
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
+                isJobsActive ? 'text-brand-emerald' : 'text-neutral-600',
+              )}
             >
               Jobs
             </Link>
             <Link
               href="/projects"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight transition hover:bg-gray-50 ${isProjectsActive ? 'text-brand-emerald' : 'text-neutral-600'}`}
+              className={cn(
+                landingBody,
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
+                isProjectsActive ? 'text-brand-emerald' : 'text-neutral-600',
+              )}
             >
               Projects
             </Link>
             <Link
               href="/services"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight transition hover:bg-gray-50 ${isServicesActive ? 'text-brand-emerald' : 'text-neutral-600'}`}
+              className={cn(
+                landingBody,
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
+                isServicesActive ? 'text-brand-emerald' : 'text-neutral-600',
+              )}
             >
               Services
             </Link>
+
+            <div className="my-2 h-px bg-gray-100" />
+
             <Link
               href="/signin"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full py-3 text-center text-sm font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50`}
+              className={`${landingBody} block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50`}
             >
               Sign in
             </Link>
             <Link
               href="/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-full bg-brand-dark py-3 text-center text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald`}
+              className={`${landingBody} block w-full min-h-11 rounded-xl bg-brand-dark px-4 py-3 text-center text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald`}
             >
               Sign up
             </Link>

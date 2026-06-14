@@ -13,8 +13,8 @@ export default function JobWorkExperience({ job, onApply }: JobWorkExperiencePro
   const items = getJobWorkExperience(job);
 
   return (
-    <section className="mt-14">
-      <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">Work &amp; Experience</h2>
+    <section className="mt-10 sm:mt-14">
+      <h2 className="text-base font-normal tracking-tight text-black sm:text-lg md:text-xl">Work &amp; Experience</h2>
       <ul
         className={`${discoverBody} mt-6 list-disc space-y-4 pl-5 text-sm font-light leading-[1.75] text-neutral-600 marker:text-black sm:text-[15px]`}
       >

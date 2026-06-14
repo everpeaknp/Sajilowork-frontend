@@ -79,13 +79,13 @@ export default function PopularServices({ className = '' }: PopularServicesProps
 
   return (
     <section
-      className={`overflow-hidden bg-white px-6 py-16 sm:px-8 sm:py-20 lg:px-12 xl:px-16 ${className}`}
+      className={`overflow-hidden bg-white px-4 py-12 sm:px-8 sm:py-20 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-12 flex flex-col justify-between gap-6 xl:flex-row xl:items-end">
-          <div>
+        <div className="mb-10 flex flex-col justify-between gap-4 sm:mb-12 sm:flex-row sm:items-end">
+          <div className="min-w-0">
             <h2
-              className={`${discoverHeadline} mb-3 text-3xl leading-tight text-[#131118] sm:text-4xl`}
+              className={`${discoverHeadline} mb-2 text-2xl leading-tight text-[#131118] sm:text-3xl md:text-4xl`}
             >
               Popular Services
             </h2>
@@ -95,7 +95,8 @@ export default function PopularServices({ className = '' }: PopularServicesProps
           </div>
 
           {categories.length > 0 ? (
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
+              <div className="flex w-max max-w-full flex-nowrap gap-2 sm:w-auto sm:flex-wrap sm:gap-3">
               {categories.map((cat) => {
                 const isActive = activeCategory === cat;
                 return (
@@ -113,6 +114,7 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                   </button>
                 );
               })}
+              </div>
             </div>
           ) : null}
         </div>

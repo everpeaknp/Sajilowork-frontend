@@ -68,8 +68,8 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
           </svg>
         </div>
 
-        <div className="relative z-10 flex flex-col gap-6 px-6 py-7 sm:px-8 sm:py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-10">
-          <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center sm:gap-5">
+        <div className="relative z-10 flex flex-col gap-5 px-4 py-6 sm:gap-6 sm:px-8 sm:py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:px-10">
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center sm:gap-5">
             {employerHref ? (
               <Link
                 href={employerHref}
@@ -84,7 +84,7 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
 
             <div className="min-w-0 flex-1">
               <motion.h1
-                className="text-xl font-normal leading-snug tracking-tight text-black sm:text-2xl md:text-[28px]"
+                className="text-lg font-normal leading-snug tracking-tight text-black sm:text-2xl md:text-[28px]"
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45 }}
@@ -105,16 +105,16 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
 
               <p className="mt-1 text-sm font-normal text-[#52C47F]">{experienceLabel}</p>
 
-              <div className="mt-3 flex flex-wrap items-center text-[13px] font-normal text-black sm:text-sm">
+              <div className="mt-3 flex flex-col gap-1 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:text-sm">
                 <span>
                   {job.budgetLabel} {job.type}
                 </span>
                 <MetaDivider />
-                <span className="w-full sm:w-auto">{job.duration}</span>
+                <span>{job.duration}</span>
                 <MetaDivider />
-                <span className="w-full sm:w-auto">{job.expenseLevel}</span>
+                <span>{job.expenseLevel}</span>
                 <MetaDivider />
-                <span className="w-full sm:w-auto">{locationLabel}</span>
+                <span>{locationLabel}</span>
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function JobProfileHero({ job, onApply }: JobProfileHeroProps) {
           <motion.button
             type="button"
             onClick={() => onApply?.()}
-            className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-md bg-[#1D3E35] px-6 py-3 text-sm font-normal text-white transition-colors duration-200 hover:bg-[#5bbb7b] lg:self-center"
+            className="inline-flex w-full shrink-0 items-center justify-center gap-2 self-stretch rounded-md bg-[#1D3E35] px-6 py-3 text-sm font-normal text-white transition-colors duration-200 hover:bg-[#5bbb7b] sm:w-auto sm:self-start lg:self-center"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}

@@ -16,6 +16,9 @@ import {
 
 interface TaskQuestionsProps {
   project: Project;
+  /** Render inside tab panel — hides section chrome */
+  embedded?: boolean;
+  onCountChange?: (count: number) => void;
 }
 
 function formatRelativeTime(iso?: string): string {
@@ -27,7 +30,11 @@ function formatRelativeTime(iso?: string): string {
   }
 }
 
-export default function TaskQuestions({ project }: TaskQuestionsProps) {
+export default function TaskQuestions({
+  project,
+  embedded = false,
+  onCountChange,
+}: TaskQuestionsProps) {
   const router = useRouter();
   const { user } = useAuth();
   const posterName = project.companyName;
@@ -165,18 +172,31 @@ export default function TaskQuestions({ project }: TaskQuestionsProps) {
 
   const unansweredCount = questions.filter((q) => !q.answer?.trim()).length;
 
+  useEffect(() => {
+    onCountChange?.(questions.length);
+  }, [questions.length, onCountChange]);
+
   return (
-    <section className="mt-12 border-t border-neutral-200 pt-10" id="task-questions-section">
-      <div className="mb-6">
-        <h2 className="flex items-center gap-2 text-xl font-normal tracking-tight text-black sm:text-2xl">
-          <MessageCircle className="h-5 w-5 text-neutral-700" />
-          Questions
-          <span className="text-base font-normal text-neutral-500">({questions.length})</span>
-        </h2>
-        <p className="mt-1 text-sm font-normal text-neutral-500">
+    <section
+      className={embedded ? '' : 'mt-12 border-t border-neutral-200 pt-10'}
+      id={embedded ? undefined : 'task-questions-section'}
+    >
+      {!embedded ? (
+        <div className="mb-6">
+          <h2 className="flex items-center gap-2 text-xl font-normal tracking-tight text-black sm:text-2xl">
+            <MessageCircle className="h-5 w-5 text-neutral-700" />
+            Questions
+            <span className="text-base font-normal text-neutral-500">({questions.length})</span>
+          </h2>
+          <p className="mt-1 text-sm font-normal text-neutral-500">
+            Ask about scope, timing, or requirements before you make an offer.
+          </p>
+        </div>
+      ) : (
+        <p className="mb-4 text-sm font-normal text-neutral-500">
           Ask about scope, timing, or requirements before you make an offer.
         </p>
-      </div>
+      )}
 
       <div className="space-y-6">
         {showAskBox ? (

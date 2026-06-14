@@ -15,6 +15,7 @@ import type { MyTaskManagementActions } from '@/components/my-task/MyTaskManagem
 import { getDashboardEditHref } from '@/app/dashboard/dashboardTabs';
 import { apiClient } from '@/lib/api/client';
 import { TASK_BROWSE_PATH } from '@/lib/taskBrowsePath';
+import { postTaskHref, postTaskSignInRedirect } from '@/lib/postTaskPath';
 import { saveSimilarTaskPrefill, suggestTaskAlertKeyword } from '@/lib/similarTask';
 import { confirmCancelTask, confirmDeleteTask } from '@/lib/confirmToast';
 import notificationService from '@/services/notification.service';
@@ -166,9 +167,10 @@ export default function TaskDetails({
 
   const handlePostSimilar = useCallback(() => {
     if (!viewTask) return;
-    if (!requireSignedIn('Please sign in to post a task', '/post-task?from=similar')) return;
+    if (!requireSignedIn('Please sign in to post a task', postTaskSignInRedirect({ from: 'similar' })))
+      return;
     saveSimilarTaskPrefill(viewTask);
-    router.push('/post-task?from=similar');
+    router.push(postTaskHref({ from: 'similar' }));
   }, [requireSignedIn, router, viewTask]);
 
   const handleSetUpAlerts = useCallback(() => {

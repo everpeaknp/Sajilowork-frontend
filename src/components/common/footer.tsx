@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
 import { FOOTER_SECTIONS } from '@/lib/marketing/footerLinks';
+import { cn } from '@/lib/utils';
 
 const SOCIAL_LINKS = [
   { label: 'Facebook', Icon: FacebookIcon },
@@ -42,16 +45,44 @@ function LinkedinIcon({ className }: { className?: string }) {
   );
 }
 
+function FooterLinkList({ sectionTitle }: { sectionTitle: string }) {
+  const section = FOOTER_SECTIONS.find((item) => item.title === sectionTitle);
+  if (!section) return null;
+
+  return (
+    <ul className="space-y-1 sm:space-y-2.5 md:space-y-4">
+      {section.links.map((link) => (
+        <li key={link.href}>
+          <Link
+            href={link.href}
+            className="inline-flex min-h-10 w-full items-center py-1.5 text-sm text-white transition-colors hover:text-white/80 sm:min-h-0 sm:w-auto sm:py-0.5 sm:text-[15px]"
+          >
+            {link.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 type FooterProps = {
   outerClassName?: string;
 };
 
 export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    Discover: true,
+  });
+
+  const toggleSection = (title: string) => {
+    setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
+
   return (
-    <footer className={`${outerClassName} px-2 pt-3 sm:px-4 sm:pt-4`}>
-      <div className="overflow-hidden rounded-t-[1.75rem] bg-brand-dark text-white sm:rounded-t-[2.5rem] md:rounded-t-[3.5rem]">
-        <div className="mx-auto max-w-7xl px-4 py-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-14 md:py-16 lg:px-8 lg:py-20">
-          <div className="mb-10 grid gap-10 sm:mb-14 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
+    <footer className={cn('min-w-0 overflow-x-clip px-2 pt-3 sm:px-4 sm:pt-4', outerClassName)}>
+      <div className="overflow-hidden rounded-t-[1.25rem] bg-brand-dark text-white sm:rounded-t-[2.5rem] md:rounded-t-[3.5rem]">
+        <div className="mx-auto max-w-7xl px-4 py-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-14 md:py-16 lg:px-8 lg:py-20">
+          <div className="mb-8 grid gap-8 sm:mb-14 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
             <div className="min-w-0 lg:col-span-2">
               <Link href="/" className="mb-4 flex items-center gap-2 sm:mb-6 lg:mb-8">
                 <div
@@ -66,49 +97,72 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
                   tasknepal
                 </span>
               </Link>
-              <p className="max-w-sm text-sm leading-relaxed text-white sm:text-base">
+              <p className="max-w-sm text-sm leading-relaxed text-white/90 sm:text-base">
                 Connecting people who need tasks done with those who have the skills to do them.
                 Trusted by millions worldwide.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-3 sm:gap-x-8 sm:gap-y-10 lg:col-span-3">
+            {/* Mobile: collapsible sections */}
+            <div className="space-y-2 sm:hidden">
+              {FOOTER_SECTIONS.map((section) => {
+                const isOpen = openSections[section.title] ?? false;
+                return (
+                  <div
+                    key={section.title}
+                    className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.title)}
+                      className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-left"
+                      aria-expanded={isOpen}
+                    >
+                      <span className="text-sm font-semibold text-white">{section.title}</span>
+                      <ChevronDown
+                        className={cn(
+                          'h-4 w-4 shrink-0 text-white/70 transition-transform duration-200',
+                          isOpen && 'rotate-180',
+                        )}
+                      />
+                    </button>
+                    {isOpen ? (
+                      <div className="border-t border-white/10 px-4 pb-3 pt-1">
+                        <FooterLinkList sectionTitle={section.title} />
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Tablet+ */}
+            <div className="hidden min-w-0 grid-cols-2 gap-x-6 gap-y-8 sm:grid sm:gap-x-8 sm:gap-y-10 lg:col-span-3 lg:grid-cols-3">
               {FOOTER_SECTIONS.map((section) => (
                 <div key={section.title} className="min-w-0">
                   <h4 className="mb-3 text-sm font-semibold text-white sm:mb-4 sm:text-base md:mb-6 md:text-lg">
                     {section.title}
                   </h4>
-                  <ul className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                    {section.links.map((link) => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="inline-block py-0.5 text-sm text-white transition-colors hover:text-white/80 sm:text-[15px]"
-                        >
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <FooterLinkList sectionTitle={section.title} />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-6 border-t border-white/10 pt-8 sm:flex-row sm:justify-between sm:gap-8 sm:pt-10">
-            <div className="flex items-center justify-center gap-2 sm:gap-3">
+          <div className="flex flex-col items-center gap-5 border-t border-white/10 pt-6 sm:flex-row sm:justify-between sm:gap-8 sm:pt-10">
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
               {SOCIAL_LINKS.map(({ label, Icon }) => (
                 <a
                   key={label}
                   href="#"
                   aria-label={label}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 hover:text-white/80 sm:h-10 sm:w-10"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 hover:text-white/80 active:bg-white/15 sm:h-10 sm:w-10"
                 >
                   <Icon className="h-5 w-5" />
                 </a>
               ))}
             </div>
-            <p className="max-w-[18rem] text-center text-xs leading-relaxed text-white sm:max-w-none sm:text-right sm:text-sm">
+            <p className="w-full text-center text-xs leading-relaxed text-white/80 sm:w-auto sm:text-right sm:text-sm">
               © {new Date().getFullYear()} tasknepal Marketplace. All rights reserved.
             </p>
           </div>

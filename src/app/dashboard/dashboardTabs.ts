@@ -78,6 +78,21 @@ export function getDashboardEditHref(tab: DashboardCreateTab, taskSlug: string):
 
 export type DashboardSidebarRole = 'customer' | 'tasker';
 
+export const DASHBOARD_ROLE_OPTIONS: { value: DashboardSidebarRole; label: string }[] = [
+  { value: 'customer', label: 'Employer' },
+  { value: 'tasker', label: 'Freelancer' },
+];
+
+export function resolveDashboardSidebarRole(
+  role?: string | null,
+): DashboardSidebarRole {
+  return role === 'tasker' ? 'tasker' : 'customer';
+}
+
+export function getDashboardRoleLabel(role: DashboardSidebarRole): string {
+  return role === 'tasker' ? 'Freelancer' : 'Employer';
+}
+
 /** Main nav tabs for employer (customer) accounts — excludes profile (footer). */
 export const EMPLOYER_NAV_TABS: DashboardTab[] = [
   'dashboard',
@@ -98,7 +113,6 @@ export const FREELANCER_NAV_TABS: DashboardTab[] = [
   'dashboard',
   'proposals',
   'message',
-  'task',
   'services',
   'project',
   'statements',

@@ -61,12 +61,12 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
   return (
     <section
       id="blog-section"
-      className={`border-t border-neutral-100 bg-white px-6 py-16 sm:px-8 sm:py-20 lg:px-12 xl:px-16 ${className}`}
+      className={`border-t border-neutral-100 bg-white px-4 py-12 sm:px-8 sm:py-20 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-12">
           <motion.h2
-            className={`${discoverHeadline} text-3xl leading-tight text-[#131118] sm:text-4xl`}
+            className={`${discoverHeadline} text-2xl leading-tight text-[#131118] sm:text-3xl md:text-4xl`}
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

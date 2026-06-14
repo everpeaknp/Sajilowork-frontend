@@ -49,15 +49,15 @@ export default function JobAbout({ job }: JobAboutProps) {
   ];
 
   return (
-    <div className="mt-10">
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="mt-8 sm:mt-10">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
         {metaItems.map((item) => (
           <MetaItem key={item.label} icon={item.icon} label={item.label} value={item.value} />
         ))}
       </div>
 
-      <div className="mt-14">
-        <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">Description</h2>
+      <div className="mt-10 sm:mt-14">
+        <h2 className="text-base font-normal tracking-tight text-black sm:text-lg md:text-xl">Description</h2>
         <div
           className={`${discoverBody} mt-5 space-y-4 text-sm font-light leading-[1.65] text-neutral-600 antialiased sm:text-[15px] [&_p]:font-light [&_p]:text-neutral-600`}
         >

@@ -1,6 +1,7 @@
 import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import { MarketingProse, MarketingLead } from '@/components/marketing/MarketingProse';
 import MarketingCta from '@/components/marketing/MarketingCta';
+import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import { ABOUT_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
@@ -20,7 +21,7 @@ export default function AboutPage() {
       </MarketingLead>
       <MarketingProse sections={[...ABOUT_SECTIONS]} />
       <MarketingCta
-        primaryHref="/post-task"
+        primaryHref={POST_TASK_PATH}
         primaryLabel="Post a task"
         secondaryHref="/signup?role=tasker"
         secondaryLabel="Become a Tasker"

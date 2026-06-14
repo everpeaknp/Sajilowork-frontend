@@ -21,6 +21,16 @@ import type {
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
 import { buildReceiptId } from '@/lib/statementReceiptPdf';
 import StatementReceiptModal, { type StatementReceipt } from './StatementReceiptModal';
+import {
+  DASHBOARD_CARD,
+  DASHBOARD_HEADING,
+  DASHBOARD_PAGE_ROOT,
+  DASHBOARD_PAGINATION_ARROW,
+  DASHBOARD_PAGINATION_INNER,
+  DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_STAT_VALUE,
+  dashboardPageButtonClass,
+} from './dashboardResponsive';
 
 type Statement = StatementReceipt;
 
@@ -254,18 +264,11 @@ export default function DashboardStatements() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentStatements = filteredStatements.slice(indexOfFirstItem, indexOfLastItem);
 
-  const pageButtonClass = (page: number) =>
-    `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-sm font-normal transition-all ${
-      activePage === page
-        ? 'bg-[#52C47F] font-semibold text-white shadow-sm'
-        : 'bg-transparent text-black hover:text-[#52C47F]'
-    }`;
-
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
-      <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
+    <div className={DASHBOARD_PAGE_ROOT}>
+      <div className="mx-auto mb-6 flex max-w-7xl flex-col gap-5 pl-1 sm:mb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+          <h1 className={DASHBOARD_HEADING}>
             Statements
           </h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
@@ -298,7 +301,7 @@ export default function DashboardStatements() {
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               {direction === 'outgoing' ? 'Total Outgoing' : 'Net Income'}
             </span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+            <h3 className={DASHBOARD_STAT_VALUE}>
               {formatNPR(totalNetIncome, { compact: true })}
             </h3>
             <p className="font-sans text-[12px] font-normal leading-tight text-[#52C47F]">
@@ -319,7 +322,7 @@ export default function DashboardStatements() {
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Withdrawn
             </span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+            <h3 className={DASHBOARD_STAT_VALUE}>
               {formatNPR(Math.max(0, walletStats.withdrawn), { compact: true })}
             </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
@@ -337,7 +340,7 @@ export default function DashboardStatements() {
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Pending Clearance
             </span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+            <h3 className={DASHBOARD_STAT_VALUE}>
               {formatNPR(walletStats.pending, { compact: true })}
             </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
@@ -355,7 +358,7 @@ export default function DashboardStatements() {
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Available for Withdrawal
             </span>
-            <h3 className="text-3xl font-semibold tracking-tight text-neutral-900">
+            <h3 className={DASHBOARD_STAT_VALUE}>
               {formatNPR(walletStats.available, { compact: true })}
             </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
@@ -369,8 +372,8 @@ export default function DashboardStatements() {
         </div>
       </div>
 
-      <div className="mx-auto mb-5 flex max-w-7xl justify-end">
-        <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs">
+      <div className="mx-auto mb-5 flex max-w-7xl justify-stretch sm:justify-end">
+        <div className="flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:w-auto">
           <Filter className="h-3.5 w-3.5 text-neutral-400" />
           <span className="font-normal text-neutral-500">Payment Status:</span>
           <select
@@ -390,7 +393,7 @@ export default function DashboardStatements() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+      <div className={`${DASHBOARD_CARD} border-neutral-200/60`}>
         <div className="overflow-x-auto">
           <table className="w-full table-auto border-collapse text-left">
             <thead>
@@ -456,25 +459,25 @@ export default function DashboardStatements() {
         </div>
 
         {!loading && filteredStatements.length > 0 ? (
-          <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
-            <div className="flex items-center justify-center gap-6">
+          <div className={DASHBOARD_PAGINATION_OUTER}>
+            <div className={DASHBOARD_PAGINATION_INNER}>
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={activePage === 1}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW}
               >
                 <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 {totalPages <= 6 ? (
                   Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={pageButtonClass(page)}
+                      className={dashboardPageButtonClass(activePage === page)}
                     >
                       {page}
                     </button>
@@ -486,18 +489,18 @@ export default function DashboardStatements() {
                         key={page}
                         type="button"
                         onClick={() => setCurrentPage(page)}
-                        className={pageButtonClass(page)}
+                        className={dashboardPageButtonClass(activePage === page)}
                       >
                         {page}
                       </button>
                     ))}
-                    <span className="flex h-[44px] w-[44px] items-center justify-center text-sm font-normal text-neutral-400">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center text-sm font-normal text-neutral-400 sm:h-[44px] sm:w-[44px]">
                       ...
                     </span>
                     <button
                       type="button"
                       onClick={() => setCurrentPage(totalPages)}
-                      className={pageButtonClass(totalPages)}
+                      className={dashboardPageButtonClass(activePage === totalPages)}
                     >
                       {totalPages}
                     </button>
@@ -509,7 +512,7 @@ export default function DashboardStatements() {
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={activePage === totalPages}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW}
               >
                 <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>

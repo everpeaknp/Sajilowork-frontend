@@ -145,12 +145,12 @@ export default function Workflow({
 
   return (
     <section
-      className={`overflow-hidden bg-[#1a3f34] px-6 py-10 sm:px-8 sm:py-12 lg:px-12 lg:py-14 xl:px-16 ${className}`}
+      className={`overflow-hidden bg-[#1a3f34] px-4 py-10 sm:px-6 sm:py-12 lg:px-12 lg:py-14 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-8 md:mb-10">
           <motion.h2
-            className={`${discoverHeadline} mb-3 text-3xl text-white sm:text-4xl lg:text-[40px]`}
+            className={`${discoverHeadline} mb-3 text-2xl text-white sm:text-3xl lg:text-[40px]`}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

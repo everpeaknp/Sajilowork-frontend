@@ -22,6 +22,7 @@ import {
 } from '@/components/task/TaskBrowseSkeletons';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuth } from '@/hooks/useAuth';
+import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import { taskService } from '@/services/task.service';
 import type { SearchFilters, Task } from '@/types';
 import { filterAndSortTasks, hasActiveFilters, taskBudgetAmount } from '@/lib/taskFilters';
@@ -363,7 +364,7 @@ export default function MyTasksPage() {
           </p>
           {activeStatus === 'all' && !hasActiveFilters(searchFilters) && (
             <a
-              href="/post-task"
+              href={POST_TASK_PATH}
               className="rounded-full bg-brand-emerald px-6 py-2 font-semibold text-white hover:bg-brand-emerald/90"
             >
               Post Your First Task

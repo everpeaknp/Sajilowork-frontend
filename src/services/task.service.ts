@@ -141,20 +141,23 @@ export const taskService = {
   },
 
   /**
-   * Get bookmarked tasks
+   * Get bookmarked listings (all kinds).
    */
-  async getBookmarkedTasks(): Promise<ApiResponse<PaginatedResponse<Task>>> {
-    return apiClient.get<PaginatedResponse<Task>>('/tasks/bookmarked/');
+  async getBookmarkedTasks(): Promise<ApiResponse<PaginatedResponse<Task> | Task[]>> {
+    const { bookmarkService } = await import('./bookmark.service');
+    return bookmarkService.getBookmarked();
   },
 
-  /** Add bookmark (creates TaskBookmark row). */
+  /** Add bookmark (creates bookmark row). */
   async bookmarkTask(slug: string): Promise<ApiResponse<{ message?: string }>> {
-    return apiClient.post<{ message?: string }>(`/tasks/${slug}/bookmark/`);
+    const { bookmarkService } = await import('./bookmark.service');
+    return bookmarkService.bookmark(slug);
   },
 
   /** Remove bookmark. */
   async unbookmarkTask(slug: string): Promise<ApiResponse<{ message?: string }>> {
-    return apiClient.delete<{ message?: string }>(`/tasks/${slug}/bookmark/`);
+    const { bookmarkService } = await import('./bookmark.service');
+    return bookmarkService.unbookmark(slug);
   },
 
   /**

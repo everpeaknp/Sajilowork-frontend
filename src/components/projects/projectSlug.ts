@@ -1,4 +1,29 @@
 import { ALL_PROJECTS, type Project } from './projectListData';
+import type { Task } from '@/types';
+
+/** Minimal task shape for bid/proposal submission from a project listing. */
+export function projectToOfferTask(project: Project): Task {
+  const budgetAmount =
+    project.budgetMin > 0
+      ? project.budgetMin
+      : project.budgetMax > 0
+        ? project.budgetMax
+        : 0;
+
+  return {
+    id: project.id,
+    title: project.title,
+    slug: project.slug,
+    description: project.description,
+    budget_type: project.type === 'Hourly' ? 'hourly' : 'fixed',
+    budget_amount: budgetAmount,
+    budget_min: project.budgetMin,
+    budget_max: project.budgetMax,
+    location_type: project.location === 'Remote' ? 'remote' : 'in_person',
+    status: (project.status ?? 'open') as Task['status'],
+    owner: project.ownerId ? ({ id: project.ownerId } as Task['owner']) : undefined,
+  } as Task;
+}
 
 function slugify(text: string): string {
   return text

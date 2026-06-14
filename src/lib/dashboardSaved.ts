@@ -11,7 +11,7 @@ import { taskBudgetAmount } from '@/lib/taskFilters';
 import { getMediaUrl } from '@/lib/utils';
 import type { Task } from '@/types';
 
-export type SavedSubTab = 'services' | 'project' | 'jobs';
+export type SavedSubTab = 'services' | 'project' | 'jobs' | 'task';
 export type SavedItemKind = 'task' | 'job' | 'project' | 'service';
 
 export interface DashboardSavedItem {
@@ -97,7 +97,9 @@ export function mapTaskToDashboardSavedItem(task: Task): DashboardSavedItem {
     title: formatTaskDisplayTitle(task.title || 'Untitled task'),
     rating: Number.isFinite(rating) && rating > 0 ? rating : 0,
     reviewsCount: Number.isFinite(reviewsCount) ? reviewsCount : 0,
-    image: cardImageForKey(String(task.id || task.slug || '0')),
+    image:
+      getMediaUrl((task as Task & { primary_image?: string }).primary_image) ||
+      cardImageForKey(String(task.id || task.slug || '0')),
     authorName: ownerName(task),
     authorAvatar: ownerAvatar(task),
     price: taskBudgetAmount(task),
@@ -193,7 +195,10 @@ export function collectSavedItemsForTab(
   if (tab === 'project') {
     return resolveSavedProjects(savedProjectIds);
   }
-  return [...resolveSavedJobs(savedJobIds), ...taskBookmarks];
+  if (tab === 'jobs') {
+    return resolveSavedJobs(savedJobIds);
+  }
+  return taskBookmarks;
 }
 
 export function savedItemDetailPath(item: DashboardSavedItem): string {

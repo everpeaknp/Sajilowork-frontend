@@ -16,18 +16,43 @@ import VerifyMobileForm from './VerifyMobileForm';
 import LinkBankAccountForm from './LinkBankAccountForm';
 import BillingAddressForm from './BillingAddressForm';
 import BidForm from './BidForm';
+import JobApplyForm from './JobApplyForm';
 import { Task } from '@/types';
+import type { Project } from '@/components/projects/projectListData';
+import type { Job } from '@/components/jobs/jobListData';
+import { projectToOfferTask } from '@/components/projects/projectSlug';
+import { jobToOfferTask } from '@/components/jobs/jobSlug';
 import { DEFAULT_COUNTRY } from '@/lib/nepalLocale';
+
+type ListingKind = 'task' | 'project' | 'job';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
   onClose: () => void;
   task?: Task;
+  project?: Project;
+  job?: Job;
   /** Called after a bid is submitted successfully (before close) */
   onBidSuccess?: () => void;
 }
 
-export default function MakeOfferModal({ isOpen, onClose, task, onBidSuccess }: MakeOfferModalProps) {
+function resolveListingKind(task?: Task, project?: Project, job?: Job): ListingKind {
+  if (job && !task && !project) return 'job';
+  if (project && !task) return 'project';
+  return 'task';
+}
+
+export default function MakeOfferModal({
+  isOpen,
+  onClose,
+  task,
+  project,
+  job,
+  onBidSuccess,
+}: MakeOfferModalProps) {
+  const listingKind = resolveListingKind(task, project, job);
+  const offerTask =
+    task ?? (project ? projectToOfferTask(project) : job ? jobToOfferTask(job) : undefined);
   const { user, refreshUser, setUser } = useAuthStore();
 
   const syncProfileAcrossApp = async (updatedUser?: User | Record<string, unknown>) => {
@@ -340,13 +365,16 @@ export default function MakeOfferModal({ isOpen, onClose, task, onBidSuccess }: 
             >
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto px-10 py-10">
-              {showBidForm && task ? (
+              {showBidForm && listingKind === 'job' && job ? (
+                <JobApplyForm job={job} onSuccess={handleBidSuccess} onCancel={handleBidCancel} />
+              ) : showBidForm && offerTask ? (
                 <BidForm
-                  task={task}
+                  task={offerTask}
+                  listingKind={listingKind === 'project' ? 'project' : 'task'}
                   onSuccess={handleBidSuccess}
                   onCancel={handleBidCancel}
                 />
-              ) : showBidForm && !task ? (
+              ) : showBidForm && !offerTask ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600 mb-4">Task details are not available.</p>
                   <button
@@ -359,7 +387,7 @@ export default function MakeOfferModal({ isOpen, onClose, task, onBidSuccess }: 
                 </div>
               ) : !expandedField ? (
                 <>
-                  <ModalHeader />
+                  <ModalHeader listingKind={listingKind} />
                   <FieldsList
                     user={user}
                     hasProfilePicture={hasProfilePicture}

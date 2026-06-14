@@ -61,18 +61,18 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
     <div className="relative z-20 w-full max-w-[560px]">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`relative z-30 flex w-full items-center rounded-[12px] border bg-white p-1.5 shadow-sm transition-all duration-300 ${
+          className={`relative z-30 flex w-full flex-col gap-2 rounded-[12px] border bg-white p-1.5 shadow-sm transition-all duration-300 sm:flex-row sm:items-center sm:gap-0 ${
             isFocused ? 'border-neutral-300 ring-2 ring-[#52C47F]/10' : 'border-neutral-200/40'
           }`}
         >
-          <div className="flex flex-1 items-center py-1">
+          <div className="flex min-w-0 flex-1 items-center py-1">
             <div className="pl-3.5 pr-2.5 text-neutral-500">
               <SearchIcon className="h-5 w-5 stroke-[1.8]" />
             </div>
             <input
               id="project-search"
               type="text"
-              className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-0`}
+              className={`${discoverBody} w-full min-w-0 flex-1 border-none bg-transparent py-2 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-0`}
               placeholder="Search projects by title, skill, or company"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -83,7 +83,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
 
           <motion.button
             type="submit"
-            className={`${discoverMedium} ml-2 flex cursor-pointer items-center justify-center rounded-[8px] bg-[#52C47F] px-9 py-[11px] text-[14.5px] text-white transition-all duration-200 hover:bg-[#49b071]`}
+            className={`${discoverMedium} flex w-full shrink-0 cursor-pointer items-center justify-center rounded-[8px] bg-[#52C47F] px-9 py-[11px] text-[14.5px] text-white transition-all duration-200 hover:bg-[#49b071] sm:ml-2 sm:w-auto`}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
           >
@@ -133,10 +133,10 @@ interface HeroProps {
 
 export default function Hero({ className = '', onSearchSubmit }: HeroProps) {
   return (
-    <section className={`select-none bg-white px-4 pb-4 pt-8 sm:px-6 sm:pb-6 lg:px-8 ${className}`}>
+    <section className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[350px] w-full items-stretch overflow-hidden rounded-[24px] border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[380px] lg:min-h-[420px]">
-          <div className="pointer-events-none absolute -left-16 -top-10 z-0 h-44 w-44 select-none rounded-full bg-[#fcd074] sm:-left-20 sm:-top-12 sm:h-56 sm:w-56 lg:-left-24 lg:-top-16 lg:h-64 lg:w-64" />
+        <div className="relative flex min-h-[280px] w-full items-stretch overflow-hidden rounded-2xl border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[350px] sm:rounded-[24px] lg:min-h-[420px]">
+          <div className="pointer-events-none absolute -left-16 -top-10 z-0 hidden h-44 w-44 select-none rounded-full bg-[#fcd074] sm:block sm:-left-20 sm:-top-12 sm:h-56 sm:w-56 lg:-left-24 lg:-top-16 lg:h-64 lg:w-64" />
 
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.22] mix-blend-overlay">
             <svg
@@ -159,10 +159,10 @@ export default function Hero({ className = '', onSearchSubmit }: HeroProps) {
             </svg>
           </div>
 
-          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-8 pb-0 pl-12 pr-6 pt-10 sm:pl-24 sm:pr-12 md:pl-28 md:pr-16 lg:grid-cols-12 lg:pb-0 lg:pl-36 lg:pr-16 lg:pt-12">
-            <div className="flex flex-col justify-center pb-10 text-left lg:col-span-8 lg:pb-12">
+          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-6 px-4 pb-0 pt-8 sm:gap-8 sm:pl-24 sm:pr-12 sm:pt-10 md:pl-28 md:pr-16 lg:grid-cols-12 lg:pb-0 lg:pl-36 lg:pr-16 lg:pt-12">
+            <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-12">
               <motion.h1
-                className={`${discoverHeadline} mb-2 text-3xl font-bold leading-tight tracking-tight text-black sm:text-4xl md:text-[42px]`}
+                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-black sm:text-3xl md:text-[42px]`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -171,7 +171,7 @@ export default function Hero({ className = '', onSearchSubmit }: HeroProps) {
               </motion.h1>
 
               <motion.p
-                className={`${discoverBody} mb-8 max-w-xl text-xs font-normal leading-relaxed text-neutral-700 sm:text-sm md:text-base`}
+                className={`${discoverBody} mb-6 max-w-xl text-xs font-normal leading-relaxed text-neutral-700 sm:mb-8 sm:text-sm md:text-base`}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
@@ -188,11 +188,11 @@ export default function Hero({ className = '', onSearchSubmit }: HeroProps) {
               </motion.div>
             </div>
 
-            <div className="relative mt-4 flex h-[240px] w-full items-end justify-end self-end select-none sm:h-[300px] lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(400px,92%)] lg:max-w-[42%] lg:justify-center xl:right-10">
+            <div className="relative mt-2 flex h-[180px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:mt-4 sm:h-[240px] sm:justify-end lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(400px,92%)] lg:max-w-[42%] lg:justify-center xl:right-10">
               <motion.img
                 src={MAIN_PORTRAIT}
                 alt="Designer illustrator working on tablet screen"
-                className="relative z-10 block h-full w-auto object-contain object-bottom drop-shadow-md"
+                className="relative z-10 block h-full max-w-full w-auto object-contain object-bottom drop-shadow-md"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.3 }}

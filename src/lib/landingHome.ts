@@ -37,13 +37,15 @@ export type CategoryColumn = {
   links: { label: string; href: string }[];
 };
 
+import { postTaskHref as buildPostTaskHref } from '@/lib/postTaskPath';
+
 export function browseTasksHref(category?: string): string {
   return taskMapPathWithQuery(category);
 }
 
+/** Title-only helper for marketing/category links. */
 export function postTaskHref(title?: string): string {
-  if (!title?.trim()) return '/post-task';
-  return `/post-task?title=${encodeURIComponent(title.trim())}`;
+  return buildPostTaskHref(title ? { title } : undefined);
 }
 
 export function publicUserHref(user: Pick<User, 'id' | 'username'>): string {

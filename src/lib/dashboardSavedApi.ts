@@ -38,7 +38,8 @@ export function filterBookmarkedTasksByTab(
       const kind = getListingKind(task);
       if (tab === 'services') return kind === 'service';
       if (tab === 'project') return kind === 'project';
-      return kind === 'job' || kind === 'task';
+      if (tab === 'jobs') return kind === 'job';
+      return kind === 'task';
     })
     .map(mapBookmarkedTask);
 }

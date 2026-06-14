@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import { POST_TASK_PATH } from "@/lib/postTaskPath";
 import { IMAGES } from "../constants";
 import { landingBody, landingBodyMuted, landingHeadline, landingHeadlineSm } from "./landingTypography";
 
@@ -39,7 +40,7 @@ export default function Hero() {
 
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-4">
               <Link
-                href="/post-task"
+                href={POST_TASK_PATH}
                 className={`${landingBody} inline-flex min-h-12 w-full items-center justify-center rounded-full bg-white px-6 py-3.5 text-center text-sm font-bold text-brand-dark shadow-xl shadow-black/10 transition-all hover:bg-white/95 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:w-auto sm:px-8 sm:py-4 sm:text-base`}
               >
                 Post a task for free

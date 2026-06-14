@@ -98,14 +98,14 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
 
   return (
     <section
-      className={`relative w-full overflow-visible bg-white pb-6 pt-12 sm:pt-20 ${className}`}
+      className={`relative w-full overflow-hidden bg-white pb-6 pt-12 sm:pt-20 ${className}`}
     >
       <div className="absolute bottom-6 left-0 top-12 z-0 w-full rounded-tr-[40px] bg-[#faf1ed] sm:top-20 sm:rounded-tr-[60px] lg:w-[68%] lg:rounded-tr-[80px] xl:w-[70%]" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-end gap-10 px-6 sm:px-8 lg:grid-cols-12 lg:items-center lg:gap-8 lg:px-12 xl:px-16">
+      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-end gap-10 px-4 sm:px-8 lg:grid-cols-12 lg:items-center lg:gap-8 lg:px-12 xl:px-16">
         <div className="py-10 pr-0 sm:pr-4 lg:col-span-6 lg:py-16 lg:pr-8 xl:col-span-7">
           <motion.h2
-            className={`${discoverHeadline} mb-8 max-w-xl text-3xl leading-tight text-[#131118] sm:mb-10 sm:text-4xl`}
+            className={`${discoverHeadline} mb-8 max-w-xl text-2xl leading-tight text-[#131118] sm:mb-10 sm:text-3xl md:text-4xl`}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -149,8 +149,8 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
           <div className="mt-8 h-11 sm:mt-10" aria-hidden />
         </div>
 
-        <div className="relative z-20 flex w-full items-center justify-end overflow-visible lg:col-span-6 lg:mb-0 xl:col-span-5">
-          <div className="relative h-[360px] w-full max-w-full flex-shrink-0 overflow-visible bg-neutral-100 sm:h-[440px] lg:h-[520px]">
+        <div className="relative z-20 flex w-full items-center justify-end lg:col-span-6 lg:mb-0 xl:col-span-5">
+          <div className="relative h-[260px] w-full max-w-full flex-shrink-0 overflow-hidden bg-neutral-100 sm:h-[360px] sm:overflow-visible lg:h-[520px]">
             <img
               src="https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fabout-10.jpg&w=1920&q=75"
               alt="Tasker working on a laptop"
@@ -159,7 +159,7 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
             />
 
             <motion.div
-              className="absolute left-5 top-[52%] z-20 w-[min(280px,calc(100%-2.5rem))] -translate-y-1/2 rounded-[1.75rem] bg-[#1a3c34] p-7 text-white shadow-2xl sm:left-6 sm:top-[53%] sm:w-[min(300px,calc(100%-3rem))] sm:p-8 md:left-0 md:top-[54%] md:w-[325px] md:-translate-x-1/2 md:p-10"
+              className="absolute left-4 top-[52%] z-20 w-[min(280px,calc(100%-2rem))] -translate-y-1/2 rounded-[1.75rem] bg-[#1a3c34] p-5 text-white shadow-2xl sm:left-6 sm:top-[53%] sm:w-[min(300px,calc(100%-3rem))] sm:p-8 md:left-0 md:top-[54%] md:w-[325px] md:-translate-x-1/2 md:p-10"
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}

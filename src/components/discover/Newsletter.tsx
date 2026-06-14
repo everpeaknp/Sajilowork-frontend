@@ -27,7 +27,7 @@ export default function Newsletter({ className = '' }: NewsletterProps) {
 
   return (
     <section
-      className={`relative select-none overflow-hidden border-t border-neutral-100 bg-[#faf6f0] px-6 py-20 sm:px-8 lg:px-12 ${className}`}
+      className={`relative select-none overflow-hidden border-t border-neutral-100 bg-[#faf6f0] px-4 py-14 sm:px-8 sm:py-16 lg:px-12 ${className}`}
     >
       <div className="pointer-events-none absolute left-12 top-10 hidden -rotate-12 text-neutral-200/40 md:block">
         <Search className="h-12 w-12 stroke-[1]" aria-hidden />

@@ -21,6 +21,9 @@ interface TaskOffersProps {
   refreshKey?: number;
   onOfferAccepted?: () => void;
   enableWalletGate?: boolean;
+  /** Render inside tab panel — hides section chrome */
+  embedded?: boolean;
+  onCountChange?: (count: number) => void;
 }
 
 function MetaDivider() {
@@ -65,6 +68,8 @@ export default function TaskOffers({
   refreshKey = 0,
   onOfferAccepted,
   enableWalletGate = false,
+  embedded = false,
+  onCountChange,
 }: TaskOffersProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -165,11 +170,17 @@ export default function TaskOffers({
 
   const hiddenOfferCount = initialOfferCount > bids.length ? initialOfferCount : 0;
 
+  useEffect(() => {
+    onCountChange?.(bids.length);
+  }, [bids.length, onCountChange]);
+
   return (
-    <section className="border-t border-neutral-200 pt-10">
-      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
-        Offers ({bids.length})
-      </h2>
+    <section className={embedded ? '' : 'border-t border-neutral-200 pt-10'}>
+      {!embedded ? (
+        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+          Offers ({bids.length})
+        </h2>
+      ) : null}
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm font-normal text-neutral-500">

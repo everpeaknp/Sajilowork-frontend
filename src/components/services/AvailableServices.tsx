@@ -19,10 +19,10 @@ import { discoverBody, discoverHeadline, discoverMedium } from '@/components/Lan
 import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
 import { fetchPublicServices } from '@/lib/serviceApi';
+import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 import { ALL_SERVICES, type Service as ServiceItem } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
-import { toggleServiceSaved, useSavedServiceIds } from './serviceBookmarks';
 
 const BUDGET_MIN = 3000;
 const BUDGET_MAX = 20000;
@@ -47,7 +47,7 @@ export default function AvailableServices({
   searchCategory = '',
   onClearSearch,
 }: AvailableServicesProps) {
-  const savedServiceIds = useSavedServiceIds();
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
   const [servicesData, setServicesData] = useState<ServiceItem[]>(ALL_SERVICES);
   const [loadingServices, setLoadingServices] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,7 +94,9 @@ export default function AvailableServices({
     void fetchPublicServices(params)
       .then((items) => {
         if (cancelled) return;
-        setServicesData(items.length ? items : ALL_SERVICES);
+        const next = items.length ? items : ALL_SERVICES;
+        setServicesData(next);
+        setSavedSlugs(buildBookmarkSlugSet(next));
       })
       .catch(() => {
         if (!cancelled) setServicesData(ALL_SERVICES);
@@ -112,9 +114,18 @@ export default function AvailableServices({
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
+  const toggleFavorite = async (service: ServiceItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleServiceSaved(id);
+    const slug = resolveListingSlug(service.slug, service.id);
+    const isSaved = savedSlugs.has(slug);
+    const next = await toggleListingBookmark(slug, isSaved, 'service');
+    if (next === null) return;
+    setSavedSlugs((prev) => {
+      const updated = new Set(prev);
+      if (next) updated.add(slug);
+      else updated.delete(slug);
+      return updated;
+    });
   };
 
   const handleCardPrevSlide = (cardId: string, maxSlides: number, e: React.MouseEvent) => {
@@ -399,8 +410,8 @@ export default function AvailableServices({
           </div>
 
           <div className="flex-1">
-            <div className="mb-6 flex items-center justify-between pb-4">
-              <span className={`${discoverBody} text-base font-normal text-[#131118] md:text-lg`}>
+            <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+              <span className={`${discoverBody} text-sm font-normal text-[#131118] sm:text-base md:text-lg`}>
                 <span className="font-semibold text-black">{filteredServices.length}</span> services
                 available
               </span>
@@ -469,7 +480,8 @@ export default function AvailableServices({
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <AnimatePresence mode="popLayout">
                   {paginatedServices.map((card) => {
-                    const isFav = savedServiceIds.includes(card.id);
+                    const slug = resolveListingSlug(card.slug, card.id);
+                    const isFav = savedSlugs.has(slug);
                     const hasMultiImages = !!card.images && card.images.length > 0;
                     const activeSlideIdx = cardSlideIndex[card.id] ?? 0;
                     const displayImage =
@@ -532,7 +544,7 @@ export default function AvailableServices({
 
                           <button
                             type="button"
-                            onClick={(e) => toggleFavorite(card.id, e)}
+                            onClick={(e) => void toggleFavorite(card, e)}
                             className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow transition-all hover:scale-105 active:scale-95"
                             aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                           >
@@ -604,27 +616,27 @@ export default function AvailableServices({
             )}
 
             {totalPages > 1 ? (
-              <div className="mt-16 flex flex-col items-center justify-center gap-4 pt-5">
-                <div className="flex items-center gap-3">
+              <div className="mt-12 flex flex-col items-center justify-center gap-4 pt-5 sm:mt-16">
+                <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
                   <button
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={activePage === 1}
-                    className="flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition-all hover:border-neutral-400 hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition-all hover:border-neutral-400 hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-40 sm:h-[50px] sm:w-[50px]"
                     title="Previous Page"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="h-5 w-5" strokeWidth={2.5} />
                   </button>
 
-                  <div className="flex items-center gap-1.5 md:gap-2">
+                  <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 md:gap-2">
                     {totalPages <= 6 ? (
                       Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                         <button
                           key={page}
                           type="button"
                           onClick={() => setCurrentPage(page)}
-                          className={`flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
+                          className={`flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
                             activePage === page
                               ? 'bg-[#52B788] font-semibold text-white shadow-sm'
                               : 'font-normal text-neutral-800 hover:text-[#52B788]'
@@ -640,7 +652,7 @@ export default function AvailableServices({
                             key={page}
                             type="button"
                             onClick={() => setCurrentPage(page)}
-                            className={`flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
+                            className={`flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
                               activePage === page
                                 ? 'bg-[#52B788] font-semibold text-white shadow-sm'
                                 : 'font-normal text-neutral-800 hover:text-[#52B788]'
@@ -655,7 +667,7 @@ export default function AvailableServices({
                         <button
                           type="button"
                           onClick={() => setCurrentPage(totalPages)}
-                          className={`flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
+                          className={`flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
                             activePage === totalPages
                               ? 'bg-[#52B788] font-semibold text-white shadow-sm'
                               : 'font-normal text-neutral-800 hover:text-[#52B788]'
@@ -671,7 +683,7 @@ export default function AvailableServices({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={activePage === totalPages}
-                    className="flex h-[50px] w-[50px] cursor-pointer items-center justify-center rounded-full border border-black text-black transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full border border-black text-black transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
                     title="Next Page"
                     aria-label="Next page"
                   >

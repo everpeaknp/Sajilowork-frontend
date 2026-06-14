@@ -19,6 +19,8 @@ import {
   isTabAllowedForRole,
   tabFromPathname,
   type DashboardSidebarRole,
+  resolveDashboardSidebarRole,
+  getDashboardRoleLabel,
 } from './dashboardTabs';
 
 type DashboardRoleSwitchContextValue = {
@@ -36,15 +38,9 @@ export function DashboardRoleSwitchProvider({ children }: { children: ReactNode 
   const [switching, setSwitching] = useState(false);
   const [pendingRole, setPendingRole] = useState<DashboardSidebarRole | null>(null);
 
-  const currentRole: DashboardSidebarRole =
-    user?.role === 'tasker' ? 'tasker' : 'customer';
+  const currentRole = resolveDashboardSidebarRole(user?.role);
 
-  const pendingRoleLabel =
-    pendingRole === 'tasker'
-      ? 'Freelancer'
-      : pendingRole === 'customer'
-        ? 'Employer'
-        : '';
+  const pendingRoleLabel = pendingRole ? getDashboardRoleLabel(pendingRole) : '';
 
   const handleSwitch = useCallback(
     async (nextRole: DashboardSidebarRole) => {
@@ -134,5 +130,5 @@ export function useDashboardRoleSwitch() {
 
 export function useDashboardSidebarRole(): DashboardSidebarRole {
   const user = useAuthStore((s) => s.user);
-  return user?.role === 'tasker' ? 'tasker' : 'customer';
+  return resolveDashboardSidebarRole(user?.role);
 }

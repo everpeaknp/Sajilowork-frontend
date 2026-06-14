@@ -18,7 +18,7 @@ import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import { getJobDetailPath } from './jobSlug';
 import { fetchPublicJobs } from '@/lib/jobApi';
-import { toggleJobSaved, useSavedJobIds } from './jobBookmarks';
+import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 const FILTER_CATEGORIES = [
   { value: 'All', label: 'All Categories' },
@@ -82,6 +82,7 @@ export default function JobList({
       .then((items) => {
         if (cancelled) return;
         setJobs(items);
+        setSavedSlugs(buildBookmarkSlugSet(items));
       })
       .catch(() => {
         if (!cancelled) setJobs([]);
@@ -93,7 +94,7 @@ export default function JobList({
       cancelled = true;
     };
   }, []);
-  const savedJobIds = useSavedJobIds();
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedSalary, setSelectedSalary] = useState('All');
@@ -127,12 +128,18 @@ export default function JobList({
     setOpenDropdown((prev) => (prev === dropdownId ? null : dropdownId));
   };
 
-  const toggleStar = (jobId: string, event: React.MouseEvent) => {
+  const toggleStar = async (job: Job, event: React.MouseEvent) => {
     event.stopPropagation();
-    const saved = toggleJobSaved(jobId);
-    triggerAlert(
-      saved ? 'Added to your visual bookmarks list.' : 'Removed from visual bookmarks.',
-    );
+    const slug = resolveListingSlug(job.slug, job.id);
+    const isSaved = savedSlugs.has(slug);
+    const next = await toggleListingBookmark(slug, isSaved, 'job');
+    if (next === null) return;
+    setSavedSlugs((prev) => {
+      const updated = new Set(prev);
+      if (next) updated.add(slug);
+      else updated.delete(slug);
+      return updated;
+    });
   };
 
   const filteredJobsList = useMemo(() => {
@@ -247,7 +254,7 @@ export default function JobList({
           key={`page-${p}`}
           type="button"
           onClick={() => setCurrentPage(p as number)}
-          className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-[15px] font-medium transition-all ${
+          className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-all sm:h-10 sm:w-10 sm:text-[15px] ${
             isCurrent ? 'bg-[#45a874] font-medium text-white' : 'text-neutral-700 hover:bg-neutral-50'
           }`}
         >
@@ -269,7 +276,7 @@ export default function JobList({
         <AnimatePresence>
           {alertText && (
             <motion.div
-              className="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-2xl border border-[#45a874]/20 bg-[#193e32] px-6 py-4 text-white shadow-xl"
+              className="fixed bottom-20 left-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-[#45a874]/20 bg-[#193e32] px-5 py-3.5 text-white shadow-xl sm:bottom-8 sm:left-auto sm:right-8 sm:w-auto sm:px-6 sm:py-4"
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -284,9 +291,10 @@ export default function JobList({
 
         <div
           ref={filterRowRef}
-          className="mb-8 flex flex-col justify-between gap-5 pb-4 md:flex-row md:items-center"
+          className="mb-6 flex flex-col justify-between gap-4 pb-2 sm:mb-8 sm:gap-5 sm:pb-4 md:flex-row md:items-center"
         >
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
+            <div className="flex w-max max-w-full flex-nowrap items-center gap-2 sm:w-auto sm:flex-wrap">
             <FilterDropdown
               id="category"
               label="Category"
@@ -348,9 +356,10 @@ export default function JobList({
                 Reset
               </button>
             )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 self-end md:self-auto">
+          <div className="flex w-full items-center justify-between gap-1.5 md:w-auto md:justify-end md:self-auto">
             <span className={`${discoverBody} text-[13px] font-medium text-neutral-400`}>Sort by</span>
             <div className="relative">
               <button
@@ -438,7 +447,8 @@ export default function JobList({
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <AnimatePresence mode="popLayout">
               {paginatedJobsList.map((job) => {
-                const isStarred = savedJobIds.includes(job.id);
+                const slug = resolveListingSlug(job.slug, job.id);
+                const isStarred = savedSlugs.has(slug);
                 const employerHref = resolveEmployerProfileHref({
                   employerSlug: job.employerSlug,
                   companyName: job.companyName,
@@ -463,7 +473,7 @@ export default function JobList({
                 const employerHeader = (
                   <>
                     {employerAvatar}
-                    <span className="ml-3.5 text-[14px] font-medium text-[#45a874] hover:underline">
+                    <span className="ml-3.5 min-w-0 truncate text-sm font-medium text-[#45a874] hover:underline sm:text-[14px]">
                       {job.companyName}
                     </span>
                   </>
@@ -487,7 +497,7 @@ export default function JobList({
                           router.push(getJobDetailPath(job));
                         }
                       }}
-                      className="group relative flex min-h-[300px] cursor-pointer flex-col justify-between rounded-2xl border border-gray-200 bg-white p-8 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.02)]"
+                      className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.02)] sm:min-h-[300px] sm:p-8"
                     >
                     <div>
                       <div className="flex items-center justify-between">
@@ -504,7 +514,7 @@ export default function JobList({
                         )}
                         <button
                           type="button"
-                          onClick={(e) => toggleStar(job.id, e)}
+                          onClick={(e) => void toggleStar(job, e)}
                           className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
                             isStarred
                               ? 'border-amber-300 bg-amber-50 text-amber-500 shadow-sm'
@@ -525,21 +535,21 @@ export default function JobList({
                           </svg>
                         </button>
                       </div>
-                      <h3 className={`${discoverBody} mb-4.5 mt-6 text-[18px] font-normal leading-[1.35] tracking-tight text-black transition-colors group-hover:text-[#45a874]`}>
+                      <h3 className={`${discoverBody} mb-4 mt-5 line-clamp-2 text-base font-normal leading-[1.35] tracking-tight text-black transition-colors group-hover:text-[#45a874] sm:mb-4.5 sm:mt-6 sm:text-[18px]`}>
                         {job.title}
                       </h3>
-                      <div className={`${discoverBody} mb-6 flex items-center text-[13px] font-normal text-black`}>
+                      <div className={`${discoverBody} mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:mb-6 sm:flex-nowrap sm:gap-x-0 sm:text-[13px]`}>
                         <span>
                           {job.budgetLabel} {job.type}
                         </span>
-                        <span className="mx-2 text-neutral-300">|</span>
+                        <span className="hidden text-neutral-300 sm:inline">|</span>
                         <span>{job.duration}</span>
                       </div>
                     </div>
-                    <div className={`${discoverBody} mt-auto flex select-none items-center text-[13px] font-normal text-black`}>
-                      <div className="mr-2 h-3.5 w-px bg-black" />
+                    <div className={`${discoverBody} mt-auto flex flex-wrap select-none items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:flex-nowrap sm:gap-x-0 sm:text-[13px]`}>
+                      <div className="mr-2 hidden h-3.5 w-px bg-black sm:block" />
                       <span>{job.expenseLevel}</span>
-                      <span className="mx-2 text-neutral-300">|</span>
+                      <span className="text-neutral-300">|</span>
                       <span>{locationLabel(job.location)}</span>
                     </div>
                     </div>
@@ -551,29 +561,29 @@ export default function JobList({
         )}
 
         {filteredJobsList.length > 0 && (
-          <div className="mt-16 flex flex-col items-center justify-center pb-4">
-            <div className="flex items-center gap-3">
+          <div className="mt-12 flex flex-col items-center justify-center pb-4 sm:mt-16">
+            <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 sm:h-10 sm:w-10"
                 title="Previous Page"
               >
                 <ChevronLeft className="h-4.5 w-4.5" />
               </button>
-              <div className="flex items-center gap-2">{renderPageNumbers()}</div>
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">{renderPageNumbers()}</div>
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 sm:h-10 sm:w-10"
                 title="Next Page"
               >
                 <ChevronRight className="h-4.5 w-4.5" />
               </button>
             </div>
-            <div className={`${discoverBody} mt-4.5 text-[14.5px] font-normal tracking-wide text-zinc-500`}>
+            <div className={`${discoverBody} mt-4 text-center text-[13px] font-normal tracking-wide text-zinc-500 sm:mt-4.5 sm:text-[14.5px]`}>
               {startIdx} – {endIdx} of {totalJobs === 320 ? '300+' : totalJobs} jobs available
             </div>
           </div>
@@ -607,7 +617,7 @@ function FilterDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`${discoverMedium} flex cursor-pointer items-center gap-2 rounded-lg border bg-white px-4.5 py-2.5 text-[14.5px] transition-all hover:bg-neutral-50 ${
+        className={`${discoverMedium} flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border bg-white px-3 py-2 text-sm transition-all hover:bg-neutral-50 sm:gap-2 sm:px-4.5 sm:py-2.5 sm:text-[14.5px] ${
           active ? 'border-black font-bold text-black' : 'border-black/30 text-black'
         }`}
       >

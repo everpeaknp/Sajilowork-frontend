@@ -11,7 +11,7 @@ import {
 } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { Search, ArrowUpRight, Loader2 } from 'lucide-react';
+import { Search, ArrowUpRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { chatService } from '@/services/chat.service';
 import { useAuthStore } from '@/store/auth.store';
@@ -24,6 +24,10 @@ import {
 } from '@/lib/chatMessaging';
 import { formatChatApiError } from '@/lib/chatErrors';
 import { buildChatWebSocketUrl, isWebSocketsEnabled } from '@/lib/chatWebSocket';
+import {
+  DASHBOARD_MESSAGES_HEIGHT,
+  DASHBOARD_PAGE_ROOT,
+} from './dashboardResponsive';
 
 const DASHBOARD_MESSAGES_PATH = '/dashboard/message';
 const MY_AVATAR_FALLBACK =
@@ -232,6 +236,7 @@ function DashboardMessagesContent() {
   const { user, isAuthenticated, initialize } = useAuthStore();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobilePane, setMobilePane] = useState<'list' | 'thread'>('list');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deletedHistoryBackup, setDeletedHistoryBackup] = useState<UiMessage[] | null>(null);
   const [archivedConversationIds, setArchivedConversationIds] = useState<string[]>([]);
@@ -497,7 +502,10 @@ function DashboardMessagesContent() {
       const group = conversationGroups.find((g) =>
         g.conversations.some((c) => conversationKey(c) === conversationParam),
       );
-      if (group) setActivePersonKey(group.key);
+      if (group) {
+        setActivePersonKey(group.key);
+        setMobilePane('thread');
+      }
       return;
     }
 
@@ -513,7 +521,10 @@ function DashboardMessagesContent() {
           setSelectedId(id);
           setConversations((prev) => dedupeConversations([conv, ...prev]));
           const personKey = otherParticipantKey(conv, user?.id);
-          if (personKey) setActivePersonKey(personKey);
+          if (personKey) {
+            setActivePersonKey(personKey);
+            setMobilePane('thread');
+          }
           if (!isMessagingEnabledForConversation(conv)) {
             toast.info(messagingDisabledReason(getTaskStatusFromConversation(conv)));
           }
@@ -648,6 +659,7 @@ function DashboardMessagesContent() {
     if (latestId) setSelectedId(latestId);
     setDeletedHistoryBackup(null);
     setToastMessage(null);
+    setMobilePane('thread');
   };
 
   const handleSendMessage = async (e: FormEvent) => {
@@ -748,9 +760,11 @@ function DashboardMessagesContent() {
   const isTyping = sending;
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen bg-[#f0efec] p-4 font-sans text-black duration-300 select-none sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
-      <div className="mx-auto grid min-h-[640px] max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="flex h-[650px] flex-col rounded-2xl border border-neutral-100 bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.01)] lg:col-span-4">
+    <div className={DASHBOARD_PAGE_ROOT}>
+      <div className="mx-auto grid min-w-0 max-w-7xl grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
+        <div
+          className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-5 lg:col-span-4`}
+        >
           <div className="relative mb-5 flex items-center rounded-xl border border-neutral-100 bg-[#F9F9FB] px-4 py-1">
             <Search className="mr-2.5 h-[18px] w-[18px] shrink-0 text-neutral-400" />
             <input
@@ -831,9 +845,19 @@ function DashboardMessagesContent() {
           </div>
         </div>
 
-        <div className="relative flex h-[650px] flex-col rounded-2xl border border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] lg:col-span-8">
-          <div className="flex items-center justify-between rounded-t-2xl border-b border-neutral-100 bg-white px-6 py-4">
-            <div className="flex items-center gap-3.5">
+        <div
+          className={`${mobilePane === 'list' ? 'hidden lg:flex' : 'flex'} relative ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] lg:col-span-8`}
+        >
+          <div className="flex items-center justify-between gap-3 rounded-t-2xl border-b border-neutral-100 bg-white px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-3.5">
+              <button
+                type="button"
+                onClick={() => setMobilePane('list')}
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 lg:hidden"
+                aria-label="Back to conversations"
+              >
+                <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+              </button>
               <div className="relative h-11 w-11 shrink-0">
                 <img
                   src={activeContact.avatar}
@@ -860,7 +884,7 @@ function DashboardMessagesContent() {
               type="button"
               onClick={() => void handleDeleteConversation()}
               disabled={!selectedGroup || activeMessages.length === 0}
-              className="cursor-pointer text-[13px] font-normal text-red-500 underline decoration-red-100 transition-all hover:text-red-700 hover:decoration-red-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="shrink-0 cursor-pointer text-xs font-normal text-red-500 underline decoration-red-100 transition-all hover:text-red-700 hover:decoration-red-400 disabled:cursor-not-allowed disabled:opacity-40 sm:text-[13px]"
             >
               Delete Conversation
             </button>

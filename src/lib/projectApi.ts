@@ -271,6 +271,7 @@ export function mapTaskToPublicProject(task: Task): Project {
   return {
     id: task.id,
     slug: task.slug,
+    isBookmarked: Boolean(task.is_bookmarked),
     ownerId: resolveOwnerId(task),
     employerSlug,
     title: formatTaskDisplayTitle(task.title || ''),

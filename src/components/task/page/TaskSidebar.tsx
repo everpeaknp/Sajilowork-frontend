@@ -6,6 +6,7 @@ import UserAvatar from '@/components/common/UserAvatar';
 import { getProjectBuyerMeta, type Project } from '@/components/projects/projectListData';
 import { getMediaUrl } from '@/lib/utils';
 import { getTaskPosterProfileSlug } from '@/lib/taskUtils';
+import type { ReactNode } from 'react';
 import type { Task } from '@/types';
 
 export type SidebarPrimaryAction = {
@@ -21,9 +22,17 @@ interface TaskSidebarProps {
   onMakeOffer?: () => void;
   /** Custom sidebar CTA; `null` hides the button; omit for default “Make an Offer”. */
   primaryAction?: SidebarPrimaryAction | null;
+  /** Rendered below the “About the poster” card (e.g. More options). */
+  belowPoster?: ReactNode;
 }
 
-export default function TaskSidebar({ task, project, onMakeOffer, primaryAction }: TaskSidebarProps) {
+export default function TaskSidebar({
+  task,
+  project,
+  onMakeOffer,
+  primaryAction,
+  belowPoster,
+}: TaskSidebarProps) {
   const buyer = getProjectBuyerMeta(project);
   const profileSlug = getTaskPosterProfileSlug(task);
   const profileHref = profileSlug ? `/users/${encodeURIComponent(profileSlug)}` : null;
@@ -56,7 +65,7 @@ export default function TaskSidebar({ task, project, onMakeOffer, primaryAction 
   );
 
   return (
-    <aside className="mx-auto w-full max-w-[19.5rem] sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:self-start">
+    <aside className="mx-auto w-full max-w-none sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:max-w-[19.5rem] lg:self-start">
       <div className="space-y-5">
         <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
           <p className="text-[26px] font-normal tracking-tight text-black sm:text-[28px]">
@@ -119,6 +128,12 @@ export default function TaskSidebar({ task, project, onMakeOffer, primaryAction 
             </Link>
           ) : null}
         </div>
+
+        {belowPoster ? (
+          <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
+            {belowPoster}
+          </div>
+        ) : null}
       </div>
     </aside>
   );

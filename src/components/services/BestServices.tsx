@@ -8,10 +8,10 @@ import { discoverBody, discoverHeadline } from '@/components/LangingHome/landing
 import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
 import { fetchPublicServices } from '@/lib/serviceApi';
-import { ALL_SERVICES } from './serviceListData';
+import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
+import { ALL_SERVICES, type Service } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
-import { toggleServiceSaved, useSavedServiceIds } from './serviceBookmarks';
 
 const PAGINATION_DOTS = [0, 1, 2];
 
@@ -20,7 +20,7 @@ interface BestServicesProps {
 }
 
 export default function BestServices({ className = '' }: BestServicesProps) {
-  const savedServiceIds = useSavedServiceIds();
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [bestServices, setBestServices] = useState(ALL_SERVICES.slice(0, 7));
 
@@ -29,7 +29,9 @@ export default function BestServices({ className = '' }: BestServicesProps) {
     void fetchPublicServices({ ordering: '-views_count' })
       .then((items) => {
         if (cancelled) return;
-        setBestServices((items.length ? items : ALL_SERVICES).slice(0, 7));
+        const next = (items.length ? items : ALL_SERVICES).slice(0, 7);
+        setBestServices(next);
+        setSavedSlugs(buildBookmarkSlugSet(next));
       })
       .catch(() => {
         if (!cancelled) setBestServices(ALL_SERVICES.slice(0, 7));
@@ -41,9 +43,18 @@ export default function BestServices({ className = '' }: BestServicesProps) {
 
   const maxIndex = Math.max(0, bestServices.length - 1);
 
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
+  const toggleFavorite = async (service: Service, e: React.MouseEvent) => {
     e.stopPropagation();
-    toggleServiceSaved(id);
+    const slug = resolveListingSlug(service.slug, service.id);
+    const isSaved = savedSlugs.has(slug);
+    const next = await toggleListingBookmark(slug, isSaved, 'service');
+    if (next === null) return;
+    setSavedSlugs((prev) => {
+      const updated = new Set(prev);
+      if (next) updated.add(slug);
+      else updated.delete(slug);
+      return updated;
+    });
   };
 
   const handlePrev = () => {
@@ -59,10 +70,10 @@ export default function BestServices({ className = '' }: BestServicesProps) {
       className={`w-full select-none bg-white px-4 pb-4 pt-6 sm:px-6 sm:pb-6 sm:pt-8 md:px-8 lg:px-12 ${className}`}
     >
       <div className="mx-auto w-full max-w-full">
-        <div className="mb-10 flex items-center justify-between gap-6">
+        <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
-              className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-[#131118] sm:text-3xl`}
+              className={`${discoverHeadline} mb-2 text-xl font-bold leading-tight tracking-tight text-[#131118] sm:text-2xl md:text-3xl`}
             >
               Best Services
             </h2>
@@ -118,7 +129,8 @@ export default function BestServices({ className = '' }: BestServicesProps) {
             transition={{ type: 'spring', damping: 26, stiffness: 120 }}
           >
             {bestServices.map((card) => {
-              const isFav = savedServiceIds.includes(card.id);
+              const slug = resolveListingSlug(card.slug, card.id);
+              const isFav = savedSlugs.has(slug);
               return (
                 <div
                   key={card.id}
@@ -142,7 +154,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
 
                     <button
                       type="button"
-                      onClick={(e) => toggleFavorite(card.id, e)}
+                      onClick={(e) => void toggleFavorite(card, e)}
                       className="absolute right-3.5 top-3.5 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow-md transition-all hover:scale-105 active:scale-95"
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                     >

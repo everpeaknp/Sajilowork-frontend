@@ -124,7 +124,7 @@ export default function ProjectSidebar({
   );
 
   return (
-    <aside className="mx-auto w-full max-w-[19.5rem] sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:self-start">
+    <aside className="mx-auto w-full max-w-none sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:max-w-[19.5rem] lg:self-start">
       <div className="space-y-5">
         <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
           <p className="text-[26px] font-normal tracking-tight text-black sm:text-[28px]">

@@ -2,6 +2,8 @@ export interface Job {
   id: string;
   /** Backend task slug for API-backed jobs */
   slug?: string;
+  /** Whether the current user has bookmarked this job */
+  isBookmarked?: boolean;
   /** Task owner user id (for apply / ownership checks) */
   ownerId?: string;
   title: string;

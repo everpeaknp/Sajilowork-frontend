@@ -8,7 +8,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const protectedRoutes = [
-  '/post-task',
   '/my-tasks',
   '/tasker-dashboard',
   '/message',

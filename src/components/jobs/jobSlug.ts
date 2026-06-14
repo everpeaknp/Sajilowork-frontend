@@ -1,5 +1,30 @@
 import { getAllJobsIncludingPosted } from './jobStore';
 import type { Job } from './jobListData';
+import type { Task } from '@/types';
+
+/** Minimal task shape for bid/application submission from a job listing. */
+export function jobToOfferTask(job: Job): Task {
+  const budgetAmount =
+    job.budgetMin > 0
+      ? job.budgetMin
+      : job.budgetMax > 0
+        ? job.budgetMax
+        : 0;
+
+  return {
+    id: job.id,
+    title: job.title,
+    slug: job.slug,
+    description: job.description,
+    budget_type: job.type === 'Hourly' ? 'hourly' : 'fixed',
+    budget_amount: budgetAmount,
+    budget_min: job.budgetMin,
+    budget_max: job.budgetMax,
+    location_type: job.location === 'Remote' ? 'remote' : 'in_person',
+    status: 'open',
+    owner: job.ownerId ? ({ id: job.ownerId } as Task['owner']) : undefined,
+  } as Task;
+}
 
 function slugify(text: string): string {
   return text

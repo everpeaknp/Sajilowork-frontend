@@ -691,7 +691,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'space-y-10 pb-20',
+        'min-w-0 space-y-10 pb-20',
         activeTab === 'payouts' || activeTab === 'recharges' ? 'max-w-7xl' : 'max-w-4xl'
       )}
     >
@@ -762,7 +762,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
             <>
               {/* Wallet Card */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="relative overflow-hidden bg-brand-dark rounded-[40px] p-8 text-white shadow-2xl shadow-brand-dark/40">
+                <div className="relative overflow-hidden bg-brand-dark rounded-3xl p-5 text-white shadow-2xl shadow-brand-dark/40 sm:rounded-[40px] sm:p-8">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-brand-emerald/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                   <div className="relative z-10 flex flex-col h-full justify-between gap-10">
                     <div className="flex items-center justify-between">
@@ -825,7 +825,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                   </div>
                 </div>
 
-                <div className="flex flex-col justify-center gap-3 rounded-[32px] border border-gray-100 bg-white p-8 shadow-sm">
+                <div className="flex flex-col justify-center gap-3 rounded-[24px] border border-gray-100 bg-white p-5 shadow-sm sm:rounded-[32px] sm:p-8">
                   <div className="space-y-1">
                     <h3 className="text-lg font-bold text-brand-dark">Quick actions</h3>
                     <p className="text-sm text-gray-500">Recharge or withdraw from your wallet.</p>

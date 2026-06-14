@@ -7,6 +7,7 @@
 export { authService } from './auth.service';
 export { userService } from './user.service';
 export { taskService } from './task.service';
+export { bookmarkService } from './bookmark.service';
 export { serviceService } from './service.service';
 export { bidService } from './bid.service';
 export { paymentService } from './payment.service';

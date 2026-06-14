@@ -22,6 +22,17 @@ import { reviewService } from '@/services/review.service';
 import UserAvatar from '@/components/common/UserAvatar';
 import { useAuthStore } from '@/store';
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
+import {
+  DASHBOARD_CARD,
+  DASHBOARD_HEADING_MD,
+  DASHBOARD_PAGE_ROOT,
+  DASHBOARD_PAGINATION_ARROW_PLAIN,
+  DASHBOARD_PAGINATION_INNER,
+  DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
+  dashboardPageButtonClass,
+} from './dashboardResponsive';
 
 export default function DashboardReviews() {
   const user = useAuthStore((state) => state.user);
@@ -102,13 +113,6 @@ export default function DashboardReviews() {
     setReplyText('');
   };
 
-  const pageButtonClass = (page: number) =>
-    `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full border-0 text-sm font-normal outline-none transition-all focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 ${
-      activePage === page
-        ? 'bg-[#52C47F] font-medium text-white shadow-sm'
-        : 'bg-transparent text-black hover:text-[#52C47F]'
-    }`;
-
   const handleOpenReply = (id: string) => {
     setActiveReplyId(id);
     setReplyText('');
@@ -152,11 +156,11 @@ export default function DashboardReviews() {
     }`;
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
-      <div className="mb-8 max-w-7xl pl-1">
+    <div className={DASHBOARD_PAGE_ROOT}>
+      <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-normal leading-tight tracking-tight text-neutral-900">Reviews</h1>
+          <div className="min-w-0">
+            <h1 className={DASHBOARD_HEADING_MD}>Reviews</h1>
             <p className="mt-1 text-[15px] font-normal tracking-tight text-neutral-500">{subtitle}</p>
             {profileTabHint ? (
               <p className="mt-2 text-sm text-neutral-400">{profileTabHint}</p>
@@ -176,9 +180,9 @@ export default function DashboardReviews() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 flex items-center justify-between border-b border-neutral-100">
-          <div className="flex gap-8">
+      <div className={DASHBOARD_CARD}>
+        <div className={DASHBOARD_SUBTABS_WRAP}>
+          <div className={DASHBOARD_SUBTABS_ROW}>
             {visibleTabs.map((tab) => (
               <button
                 key={tab}
@@ -214,8 +218,8 @@ export default function DashboardReviews() {
             ) : (
               paginatedReviews.map((review) => (
                 <div key={review.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                       {review.authorAvatar ? (
                         <UserAvatar
                           src={review.authorAvatar}
@@ -331,25 +335,25 @@ export default function DashboardReviews() {
         )}
 
         {!loading && !loadError && activeReviews.length > 0 ? (
-          <div className="mt-10 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-12 font-sans">
-            <div className="flex items-center justify-center gap-6">
+          <div className={DASHBOARD_PAGINATION_OUTER}>
+            <div className={DASHBOARD_PAGINATION_INNER}>
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={activePage === 1}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
                 <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 {totalPages <= 6 ? (
                   Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={pageButtonClass(page)}
+                      className={dashboardPageButtonClass(activePage === page)}
                     >
                       {page}
                     </button>
@@ -361,18 +365,18 @@ export default function DashboardReviews() {
                         key={page}
                         type="button"
                         onClick={() => setCurrentPage(page)}
-                        className={pageButtonClass(page)}
+                        className={dashboardPageButtonClass(activePage === page)}
                       >
                         {page}
                       </button>
                     ))}
-                    <span className="pointer-events-none flex h-[44px] w-[44px] select-none items-center justify-center text-sm font-normal text-neutral-400">
+                    <span className="pointer-events-none flex h-9 w-9 shrink-0 select-none items-center justify-center text-sm font-normal text-neutral-400 sm:h-[44px] sm:w-[44px]">
                       ...
                     </span>
                     <button
                       type="button"
                       onClick={() => setCurrentPage(totalPages)}
-                      className={pageButtonClass(totalPages)}
+                      className={dashboardPageButtonClass(activePage === totalPages)}
                     >
                       {totalPages}
                     </button>
@@ -384,7 +388,7 @@ export default function DashboardReviews() {
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={activePage === totalPages}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
                 <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>

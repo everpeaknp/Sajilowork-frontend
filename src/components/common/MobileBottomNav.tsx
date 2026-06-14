@@ -1,17 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Briefcase, PlusCircle, Search } from 'lucide-react';
+import { Briefcase, ClipboardList, FolderKanban, UserCircle, Wrench } from 'lucide-react';
 import { TASK_BROWSE_PATH, TASK_MAP_PATH } from '@/lib/taskBrowsePath';
 import { useAuth } from '@/hooks/useAuth';
-import { taskService } from '@/services';
 import { cn } from '@/lib/utils';
 
 function navigateAuth(
   router: ReturnType<typeof useRouter>,
   isAuthenticated: boolean,
-  href: string
+  href: string,
 ) {
   if (!isAuthenticated) {
     router.push(`/signin?redirect=${encodeURIComponent(href)}`);
@@ -25,29 +24,29 @@ const HIDDEN_PATH_PREFIXES = [
   '/signup',
   '/forgot-password',
   '/reset-password',
-  '/post-task',
+  '/dashboard/task/postnewtask',
 ];
 
 function isHiddenPath(pathname: string) {
   return HIDDEN_PATH_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 }
 
 type NavItem = {
-  id: 'browse' | 'post' | 'my-tasks';
+  id: 'task' | 'projects' | 'account' | 'services' | 'jobs';
   label: string;
-  icon: typeof Search;
+  icon: typeof ClipboardList;
   href: string;
+  requiresAuth?: boolean;
   match: (pathname: string) => boolean;
-  primary?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
   {
-    id: 'browse',
-    label: 'Browse',
-    icon: Search,
+    id: 'task',
+    label: 'Task',
+    icon: ClipboardList,
     href: TASK_BROWSE_PATH,
     match: (pathname) =>
       pathname === TASK_BROWSE_PATH ||
@@ -55,20 +54,37 @@ const NAV_ITEMS: NavItem[] = [
       (pathname.startsWith('/task/') && !pathname.startsWith('/tasker-dashboard')),
   },
   {
-    id: 'post',
-    label: 'Post',
-    icon: PlusCircle,
-    href: '/post-task',
-    match: (pathname) => pathname === '/post-task' || pathname.startsWith('/post-task/'),
-    primary: true,
+    id: 'projects',
+    label: 'Projects',
+    icon: FolderKanban,
+    href: '/projects',
+    match: (pathname) =>
+      pathname === '/projects' || pathname.startsWith('/projects/'),
   },
   {
-    id: 'my-tasks',
-    label: 'My tasks',
-    icon: Briefcase,
-    href: '/my-tasks',
+    id: 'account',
+    label: 'My Account',
+    icon: UserCircle,
+    href: '/dashboard',
+    requiresAuth: true,
     match: (pathname) =>
-      pathname === '/my-tasks' || pathname.startsWith('/my-tasks/'),
+      pathname === '/dashboard' || pathname.startsWith('/dashboard/'),
+  },
+  {
+    id: 'services',
+    label: 'Services',
+    icon: Wrench,
+    href: '/services',
+    match: (pathname) =>
+      pathname === '/services' || pathname.startsWith('/services/'),
+  },
+  {
+    id: 'jobs',
+    label: 'Jobs',
+    icon: Briefcase,
+    href: '/jobs',
+    match: (pathname) =>
+      pathname === '/jobs' || pathname.startsWith('/jobs/'),
   },
 ];
 
@@ -76,25 +92,8 @@ export default function MobileBottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
-  const [myTasksCount, setMyTasksCount] = useState(0);
 
-  const visible = isAuthenticated && !isHiddenPath(pathname);
-
-  const fetchMyTasksCount = useCallback(async () => {
-    try {
-      const response = await taskService.getMyTasks();
-      if (response.success && response.data) {
-        setMyTasksCount(response.data.count ?? response.data.results?.length ?? 0);
-      }
-    } catch {
-      setMyTasksCount(0);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    void fetchMyTasksCount();
-  }, [isAuthenticated, fetchMyTasksCount, pathname]);
+  const visible = !isHiddenPath(pathname);
 
   useEffect(() => {
     if (!visible) return;
@@ -111,76 +110,38 @@ export default function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-[9990] border-t border-gray-200/80 bg-white/95 backdrop-blur-md md:hidden"
       aria-label="Main navigation"
     >
-      <div className="mx-auto flex h-[3.75rem] max-w-lg items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom,0px)]">
+      <div className="mx-auto flex h-[3.75rem] max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom,0px)]">
         {NAV_ITEMS.map((item) => {
           const active = item.match(pathname);
           const Icon = item.icon;
-          const showBadge = item.id === 'my-tasks' && myTasksCount > 0;
-
-          if (item.primary) {
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigateAuth(router, isAuthenticated, item.href)}
-                className="relative -mt-5 flex min-w-[4.5rem] flex-col items-center justify-end gap-0.5"
-                aria-label={item.label}
-                aria-current={active ? 'page' : undefined}
-              >
-                <span
-                  className={cn(
-                    'flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition active:scale-95',
-                    active
-                      ? 'bg-[#0047ff] text-white ring-4 ring-[#005fff]/20'
-                      : 'bg-[#005fff] text-white'
-                  )}
-                >
-                  <Icon className="h-6 w-6" strokeWidth={2.25} />
-                </span>
-                <span
-                  className={cn(
-                    'text-[10px] font-semibold',
-                    active ? 'text-[#005fff]' : 'text-[#3c4a6b]'
-                  )}
-                >
-                  {item.label}
-                </span>
-              </button>
-            );
-          }
 
           return (
             <button
               key={item.id}
               type="button"
               onClick={() => {
-                if (item.id === 'browse') {
-                  router.push(item.href);
+                if (item.requiresAuth) {
+                  navigateAuth(router, isAuthenticated, item.href);
                   return;
                 }
-                navigateAuth(router, isAuthenticated, item.href);
+                router.push(item.href);
               }}
-              className="relative flex min-w-[4.5rem] flex-1 flex-col items-center justify-center gap-0.5 py-1"
+              className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-0.5 py-1"
               aria-label={item.label}
               aria-current={active ? 'page' : undefined}
             >
               <span
                 className={cn(
-                  'relative flex h-9 w-9 items-center justify-center rounded-2xl transition',
-                  active ? 'bg-[#005fff]/10 text-[#005fff]' : 'text-[#3c4a6b]'
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition',
+                  active ? 'bg-[#005fff]/10 text-[#005fff]' : 'text-[#3c4a6b]',
                 )}
               >
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.25 : 2} />
-                {showBadge && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white">
-                    {myTasksCount > 9 ? '9+' : myTasksCount}
-                  </span>
-                )}
               </span>
               <span
                 className={cn(
-                  'text-[10px] font-semibold',
-                  active ? 'text-[#005fff]' : 'text-[#3c4a6b]'
+                  'max-w-full truncate text-center text-[9px] font-semibold leading-tight sm:text-[10px]',
+                  active ? 'text-[#005fff]' : 'text-[#3c4a6b]',
                 )}
               >
                 {item.label}

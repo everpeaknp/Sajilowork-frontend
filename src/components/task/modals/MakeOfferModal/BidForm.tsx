@@ -25,11 +25,12 @@ import {
 
 interface BidFormProps {
   task: Task;
+  listingKind?: 'task' | 'project';
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
+export default function BidForm({ task, listingKind = 'task', onSuccess, onCancel }: BidFormProps) {
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -54,7 +55,9 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
 
           if (existingBid) {
             toast.error(
-              'You already have a pending offer on this task. Withdraw it first if you want to submit a new one.',
+              listingKind === 'project'
+                ? 'You already have a pending proposal on this project. Withdraw it first if you want to submit a new one.'
+                : 'You already have a pending offer on this task. Withdraw it first if you want to submit a new one.',
             );
             onCancel();
             return;
@@ -155,7 +158,7 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
       }
 
       if (!canSubmitOfferOnTask(task, user?.id)) {
-        toast.error(getListingClosedOfferMessage(task.status, 'task'));
+        toast.error(getListingClosedOfferMessage(task.status, listingKind));
         onCancel();
         return;
       }
@@ -172,9 +175,13 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
         throw new Error(response.message || 'Failed to submit offer');
       }
 
-      toast.success('Thank you for sending your offer!', {
+      toast.success(
+        listingKind === 'project' ? 'Thank you for sending your proposal!' : 'Thank you for sending your offer!',
+        {
         description:
-          "We'll notify you when the task poster accepts your bid.",
+          listingKind === 'project'
+            ? "We'll notify you when the buyer accepts your proposal."
+            : "We'll notify you when the task poster accepts your bid.",
         duration: 6000,
       });
       onSuccess();
@@ -460,8 +467,8 @@ export default function BidForm({ task, onSuccess, onCancel }: BidFormProps) {
                 </>
               ) : (
                 <>
-                  <Send className="h-5 w-5" />
-                  Submit offer
+              <Send className="h-5 w-5" />
+              {listingKind === 'project' ? 'Submit proposal' : 'Submit offer'}
                 </>
               )}
             </button>

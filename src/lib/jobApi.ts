@@ -387,6 +387,8 @@ export function mapTaskToPublicJob(task: Task): Job {
 
     slug: task.slug,
 
+    isBookmarked: Boolean(task.is_bookmarked),
+
     ownerId: resolveOwnerId(task),
 
     title: task.title || '',

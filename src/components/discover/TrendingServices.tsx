@@ -101,10 +101,10 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
       className={`relative select-none overflow-hidden bg-[#1a3c34] px-4 py-16 sm:px-6 sm:py-24 lg:px-8 xl:px-10 ${className}`}
     >
       <div className="relative mx-auto w-full max-w-[1240px]">
-        <div className="relative z-10 mb-12 flex flex-row items-end justify-between">
-          <div>
+        <div className="relative z-10 mb-8 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
             <h2
-              className={`${discoverHeadline} mb-3 text-3xl leading-tight text-white sm:text-4xl`}
+              className={`${discoverHeadline} mb-2 text-2xl leading-tight text-white sm:mb-3 sm:text-3xl md:text-4xl`}
             >
               Trending Services
             </h2>
@@ -115,14 +115,14 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
 
           <Link
             href="/services"
-            className={`${discoverMedium} group flex items-center gap-2 text-sm text-white transition-colors duration-200 hover:text-[#4bbb80] sm:text-base`}
+            className={`${discoverMedium} group flex shrink-0 items-center gap-2 self-start text-sm text-white transition-colors duration-200 hover:text-[#4bbb80] sm:self-auto sm:text-base`}
           >
             <span>All Services</span>
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <div className="relative z-10 w-full overflow-visible">
+        <div className="relative z-10 w-full overflow-hidden">
           {loading ? (
             <p className={`${discoverBody} py-12 text-center text-sm text-[#a5bdbc]/90`}>
               Loading trending services…
@@ -136,7 +136,7 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
               <button
                 type="button"
                 onClick={() => scrollByCard('left')}
-                className="absolute -left-4 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-100/10 bg-white text-[#1a3c34] shadow-lg transition-all duration-150 hover:bg-[#4bbb80] hover:text-white active:scale-95 active:bg-[#3ca46d] sm:-left-8 lg:-left-12"
+                className="absolute left-1 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-100/10 bg-white text-[#1a3c34] shadow-lg transition-all duration-150 hover:bg-[#4bbb80] hover:text-white active:scale-95 active:bg-[#3ca46d] sm:left-0 sm:h-12 sm:w-12 md:-left-8 lg:-left-12"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
@@ -145,7 +145,7 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
               <button
                 type="button"
                 onClick={() => scrollByCard('right')}
-                className="absolute -right-4 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-100/10 bg-white text-[#1a3c34] shadow-lg transition-all duration-150 hover:bg-[#4bbb80] hover:text-white active:scale-95 active:bg-[#3ca46d] sm:-right-8 lg:-right-12"
+                className="absolute right-1 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-100/10 bg-white text-[#1a3c34] shadow-lg transition-all duration-150 hover:bg-[#4bbb80] hover:text-white active:scale-95 active:bg-[#3ca46d] sm:right-0 sm:h-12 sm:w-12 md:-right-8 lg:-right-12"
                 aria-label="Scroll right"
               >
                 <ChevronRight className="h-6 w-6 stroke-[2.5]" />
@@ -162,7 +162,7 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
                     <Link
                       key={`${service.id}-${idx}`}
                       href={getServiceDetailPath(service)}
-                      className="group flex h-[385px] w-[250px] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-none border-0 bg-white shadow-md transition-all duration-300 hover:no-underline hover:shadow-xl sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)]"
+                      className="group flex h-[360px] w-[min(82vw,250px)] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-none border-0 bg-white shadow-md transition-all duration-300 hover:no-underline hover:shadow-xl sm:h-[385px] sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)]"
                     >
                       <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden rounded-none bg-neutral-100 lg:h-[215px]">
                         <img

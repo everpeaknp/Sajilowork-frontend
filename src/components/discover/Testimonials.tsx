@@ -77,13 +77,13 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
   return (
     <section
       id="testimonials-section"
-      className={`flex select-none flex-col items-center justify-center overflow-hidden bg-white px-6 py-16 text-center sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
+      className={`flex select-none flex-col items-center justify-center overflow-hidden bg-white px-4 py-12 text-center sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-5xl">
         <div className="mb-6 sm:mb-8">
           <motion.h2
             id="testimonials-title"
-            className={`${discoverHeadline} mb-2.5 text-3xl text-[#131118] sm:text-4xl lg:text-[40px]`}
+            className={`${discoverHeadline} mb-2.5 text-2xl text-[#131118] sm:text-3xl lg:text-[40px]`}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -119,7 +119,7 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
           <AnimatePresence mode="wait">
             <motion.p
               key={activeId}
-              className={`${discoverMedium} text-center text-xl leading-[1.4] tracking-tight text-[#131118] sm:text-2xl md:text-[28px]`}
+              className={`${discoverMedium} text-center text-lg leading-[1.45] tracking-tight text-[#131118] sm:text-xl md:text-2xl lg:text-[28px]`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
@@ -152,7 +152,7 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
 
         <div
           id="testimonials-avatars-nav"
-          className="mt-4 flex items-center justify-center gap-4 sm:gap-6"
+          className="mt-4 flex items-center justify-center gap-3 overflow-x-auto px-2 pb-1 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0"
         >
           {testimonials.map((item) => (
             <button

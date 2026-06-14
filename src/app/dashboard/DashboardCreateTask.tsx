@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import PostTaskForm from '@/components/post-task/PostTaskForm';
 import type { TaskData } from '@/components/post-task/TitleDateStep';
 import { rulesService } from '@/services/rules.service';
 import { createPostTaskValidator } from '@/lib/postTaskValidation';
+import { consumeSimilarTaskPrefill } from '@/lib/similarTask';
+import { flattenCategoriesForSelect } from '@/lib/taskUtils';
 import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
 import type { Category } from '@/types';
 
@@ -50,6 +53,7 @@ export default function DashboardCreateTask({
   onSubmit,
 }: DashboardCreateTaskProps) {
   const isEdit = mode === 'edit';
+  const searchParams = useSearchParams();
   const [taskData, setTaskData] = useState<TaskData>(() => ({
     ...EMPTY_TASK_DATA,
     ...initialData,
@@ -64,6 +68,52 @@ export default function DashboardCreateTask({
       images: initialData?.images ?? prev.images ?? [],
     }));
   }, [initialData]);
+
+  useEffect(() => {
+    if (isEdit) return;
+
+    const fromSimilar = searchParams.get('from') === 'similar';
+    if (fromSimilar) {
+      const prefill = consumeSimilarTaskPrefill();
+      if (prefill) {
+        setTaskData((prev) => ({
+          ...prev,
+          ...prefill,
+          images: [],
+        }));
+        return;
+      }
+    }
+
+    const title = searchParams.get('title')?.trim();
+    if (title) {
+      setTaskData((prev) => (prev.title ? prev : { ...prev, title }));
+    }
+  }, [isEdit, searchParams]);
+
+  useEffect(() => {
+    if (isEdit || !categoriesLoaded) return;
+
+    const categoryParam = searchParams.get('category')?.trim();
+    if (!categoryParam) return;
+
+    setTaskData((prev) => {
+      if (prev.categoryId) return prev;
+      const match = flattenCategoriesForSelect(categories).find(
+        (category) =>
+          category.name.toLowerCase() === categoryParam.toLowerCase() ||
+          category.id === categoryParam,
+      );
+      if (!match) {
+        return { ...prev, categoryName: categoryParam };
+      }
+      return {
+        ...prev,
+        categoryId: match.id,
+        categoryName: match.name,
+      };
+    });
+  }, [isEdit, categoriesLoaded, categories, searchParams]);
 
   useEffect(() => {
     let cancelled = false;

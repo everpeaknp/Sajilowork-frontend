@@ -15,6 +15,8 @@ export interface Service {
   id: string;
   /** Backend task slug for API-backed services */
   slug?: string;
+  /** Whether the current user has bookmarked this service */
+  isBookmarked?: boolean;
   category: string;
   title: string;
   rating: number;

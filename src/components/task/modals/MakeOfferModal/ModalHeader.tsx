@@ -1,8 +1,23 @@
-export default function ModalHeader() {
+export default function ModalHeader({
+  listingKind = 'task',
+}: {
+  listingKind?: 'task' | 'project' | 'job';
+}) {
+  const title =
+    listingKind === 'project'
+      ? 'Before you submit a proposal'
+      : listingKind === 'job'
+        ? 'Before you apply for this job'
+        : 'Before you make an offer';
+
   return (
     <div className="mb-8">
-      <h2 id="make-offer-modal-title" className="text-4xl font-bold text-brand-dark mb-3">Before you make an offer</h2>
-      <p className="text-on-surface-variant text-base">Help us keep tasknepal safe and fun, and fill in a few details.</p>
+      <h2 id="make-offer-modal-title" className="text-4xl font-bold text-brand-dark mb-3">
+        {title}
+      </h2>
+      <p className="text-on-surface-variant text-base">
+        Help us keep tasknepal safe and fun, and fill in a few details.
+      </p>
     </div>
   );
 }

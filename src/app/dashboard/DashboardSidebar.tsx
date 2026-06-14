@@ -16,8 +16,6 @@ import {
   CircleUser,
   Settings,
   Wallet,
-  Loader2,
-  ChevronDown,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
@@ -25,10 +23,11 @@ import UserAvatar from '@/components/common/UserAvatar';
 import {
   getDashboardHref,
   getNavTabsForRole,
+  resolveDashboardSidebarRole,
   type DashboardSidebarRole,
   type DashboardTab,
 } from './dashboardTabs';
-import { useDashboardRoleSwitch } from './DashboardRoleSwitchContext';
+import AccountRoleMode from '@/components/common/AccountRoleMode';
 
 export type { DashboardTab };
 
@@ -54,59 +53,12 @@ interface DashboardSidebarProps {
   onClose?: () => void;
 }
 
-const ROLE_OPTIONS: { value: DashboardSidebarRole; label: string }[] = [
-  { value: 'customer', label: 'Employer' },
-  { value: 'tasker', label: 'Freelancer' },
-];
-
 function DashboardRoleDropdown({
   isProfileActive,
 }: {
   isProfileActive: boolean;
 }) {
-  const user = useAuthStore((s) => s.user);
-  const { requestRoleSwitch, switching } = useDashboardRoleSwitch();
-
-  const currentRole: DashboardSidebarRole =
-    user?.role === 'tasker' ? 'tasker' : 'customer';
-
-  const shellClass = isProfileActive
-    ? 'border-white/20 bg-white/10 text-white'
-    : 'border-neutral-200 bg-white text-neutral-900';
-
-  return (
-    <div className="relative mr-2 shrink-0">
-      {switching ? (
-        <span className="flex h-8 w-[6.5rem] items-center justify-center">
-          <Loader2
-            className={`h-4 w-4 animate-spin ${isProfileActive ? 'text-white' : 'text-neutral-700'}`}
-          />
-        </span>
-      ) : (
-        <>
-          <select
-            value={currentRole}
-            onChange={(event) => requestRoleSwitch(event.target.value as DashboardSidebarRole)}
-            disabled={switching || !user}
-            aria-label="Account type"
-            className={`h-8 w-[6.5rem] cursor-pointer appearance-none rounded-md border py-1 pl-2 pr-7 text-[11px] font-semibold tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-[#52C47F]/40 ${shellClass}`}
-          >
-            {ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className={`pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 ${
-              isProfileActive ? 'text-white/80' : 'text-neutral-500'
-            }`}
-            strokeWidth={2}
-          />
-        </>
-      )}
-    </div>
-  );
+  return <AccountRoleMode variant="sidebar" isProfileActive={isProfileActive} />;
 }
 
 const NAV_ITEM_LOOKUP: Record<DashboardTab, NavigationItem> = {

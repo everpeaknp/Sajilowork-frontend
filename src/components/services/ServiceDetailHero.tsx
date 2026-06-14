@@ -36,10 +36,10 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
         </svg>
       </div>
 
-      <div className="relative z-10 grid w-full grid-cols-1 items-center gap-4 px-8 py-5 sm:px-12 md:px-16 lg:grid-cols-12 lg:gap-4 lg:px-20 lg:py-6">
+      <div className="relative z-10 grid w-full grid-cols-1 items-center gap-4 px-4 py-5 sm:px-8 md:px-12 lg:grid-cols-12 lg:gap-4 lg:px-16 lg:py-6 xl:px-20">
         <div className="flex flex-col justify-center lg:col-span-7 lg:pr-4">
           <motion.h1
-            className="max-w-2xl text-2xl font-normal leading-tight tracking-tight text-black sm:text-3xl md:text-[34px]"
+            className="max-w-2xl text-lg font-normal leading-tight tracking-tight text-black sm:text-2xl md:text-[28px] lg:text-[34px]"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -48,7 +48,7 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
           </motion.h1>
 
           <motion.div
-            className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-normal text-black sm:gap-x-6"
+            className="mt-3 flex flex-col gap-2 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:text-sm md:gap-x-6"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.12 }}

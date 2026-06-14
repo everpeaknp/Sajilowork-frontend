@@ -15,15 +15,15 @@ export default function JobSkillsRequired({ job }: JobSkillsRequiredProps) {
   if (!skills.length) return null;
 
   return (
-    <section className="border-t border-neutral-200 pt-10">
-      <h2 className="mb-5 text-xl font-normal tracking-tight text-black sm:text-2xl">
+    <section className="border-t border-neutral-200 pt-8 sm:pt-10">
+      <h2 className="mb-4 text-lg font-normal tracking-tight text-black sm:mb-5 sm:text-xl md:text-2xl">
         Skills Required
       </h2>
       <div className="flex flex-wrap gap-3">
         {skills.map((skill) => (
           <span
             key={skill}
-            className="rounded-full bg-[#ffede8] px-5 py-2.5 text-sm font-normal tracking-tight text-black"
+            className="rounded-full bg-[#ffede8] px-4 py-2 text-sm font-normal tracking-tight text-black sm:px-5 sm:py-2.5"
           >
             {skill}
           </span>

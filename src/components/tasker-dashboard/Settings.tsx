@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'next/navigation';
+import {
+  DASHBOARD_CARD,
+  DASHBOARD_HEADING,
+  DASHBOARD_PAGE_ROOT,
+} from '@/app/dashboard/dashboardResponsive';
 import { 
   Bell, 
   Lock, 
@@ -166,8 +171,7 @@ const AccordionItem = ({
   );
 };
 
-const DASHBOARD_CARD_CLASS =
-  'mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8';
+const DASHBOARD_CARD_CLASS = DASHBOARD_CARD.replace('border-neutral-100', 'border-neutral-200/60');
 
 export default function Settings({
   appearance = 'tasker',
@@ -1393,9 +1397,9 @@ export default function Settings({
 
   if (isDashboard) {
     return (
-      <div className="animate-in fade-in relative -mx-4 -my-6 min-h-screen bg-[#f0efec] px-4 py-4 font-sans text-black duration-300 sm:-mx-6 sm:px-6 sm:py-4 md:-mx-8 md:px-8">
-        <div className="mx-auto mb-8 max-w-7xl pl-1">
-          <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900">Settings</h1>
+      <div className={DASHBOARD_PAGE_ROOT}>
+        <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
+          <h1 className={DASHBOARD_HEADING}>Settings</h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
             Manage your email, phone, verification, payment methods, password, and notifications.
           </p>

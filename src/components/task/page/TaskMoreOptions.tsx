@@ -10,6 +10,8 @@ interface TaskMoreOptionsProps {
   onSetUpAlerts: () => void;
   onRaiseDispute: () => void;
   onReport: () => void;
+  /** Sidebar layout — no top border / extra spacing */
+  embedded?: boolean;
 }
 
 export default function TaskMoreOptions({
@@ -18,6 +20,7 @@ export default function TaskMoreOptions({
   onSetUpAlerts,
   onRaiseDispute,
   onReport,
+  embedded = false,
 }: TaskMoreOptionsProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,7 +36,7 @@ export default function TaskMoreOptions({
   }, []);
 
   return (
-    <section className="mt-12 border-t border-neutral-200 pt-10">
+    <section className={embedded ? '' : 'mt-12 border-t border-neutral-200 pt-10'}>
       <div ref={containerRef} className="space-y-3">
         <button
           type="button"

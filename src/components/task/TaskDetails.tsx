@@ -10,6 +10,7 @@ import SingleTaskPage from '@/components/task/page/SingleTaskPage';
 import ReportTaskModal from '@/components/task/modals/ReportTaskModal';
 import SetUpAlertsModal from '@/components/task/modals/SetUpAlertsModal';
 import { TASK_BROWSE_PATH } from '@/lib/taskBrowsePath';
+import { POST_TASK_PATH, postTaskHref, postTaskSignInRedirect } from '@/lib/postTaskPath';
 import { saveSimilarTaskPrefill, suggestTaskAlertKeyword } from '@/lib/similarTask';
 import notificationService from '@/services/notification.service';
 import { taskService } from '@/services/task.service';
@@ -86,11 +87,11 @@ export default function TaskDetails({ task, onClose, onTaskUpdated }: TaskDetail
   );
 
   const handlePostSimilar = useCallback(() => {
-    if (!requireSignedIn('Please sign in to post a task', '/post-task?from=similar')) {
+    if (!requireSignedIn('Please sign in to post a task', postTaskSignInRedirect({ from: 'similar' }))) {
       return;
     }
     saveSimilarTaskPrefill(viewTask);
-    router.push('/post-task?from=similar');
+    router.push(postTaskHref({ from: 'similar' }));
   }, [requireSignedIn, router, viewTask]);
 
   const handleSetUpAlerts = useCallback(() => {

@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Heart, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Project } from './projectListData';
 import { getProjectDetailPath } from './projectSlug';
-import { toggleProjectSaved, useSavedProjectIds } from './projectBookmarks';
+import { resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 interface ProjectShareSaveActionsProps {
   project: Project;
@@ -15,9 +15,14 @@ const circleClass =
   'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 transition-colors group-hover:border-neutral-300';
 
 export default function ProjectShareSaveActions({ project }: ProjectShareSaveActionsProps) {
-  const savedProjectIds = useSavedProjectIds();
-  const isSaved = savedProjectIds.includes(project.id);
+  const slug = resolveListingSlug(project.slug, project.id);
+  const [isSaved, setIsSaved] = useState(Boolean(project.isBookmarked));
   const [shareLoading, setShareLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  useEffect(() => {
+    setIsSaved(Boolean(project.isBookmarked));
+  }, [project.isBookmarked, project.id]);
 
   const shareUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
@@ -58,13 +63,18 @@ export default function ProjectShareSaveActions({ project }: ProjectShareSaveAct
     }
   };
 
-  const handleSave = () => {
-    const next = toggleProjectSaved(project.id);
-    toast.success(next ? 'Project saved' : 'Removed from saved projects');
+  const handleSave = async () => {
+    setSaveLoading(true);
+    try {
+      const next = await toggleListingBookmark(slug, isSaved, 'project');
+      if (next !== null) setIsSaved(next);
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   return (
-    <div className="flex items-center gap-8">
+    <div className="flex w-full items-center justify-end gap-4 sm:gap-8">
       <button
         type="button"
         onClick={() => void handleShare()}
@@ -79,23 +89,28 @@ export default function ProjectShareSaveActions({ project }: ProjectShareSaveAct
             <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
           )}
         </span>
-        <span className="text-sm font-normal text-neutral-900">Share</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Share</span>
       </button>
 
       <button
         type="button"
-        onClick={handleSave}
-        className="group flex cursor-pointer items-center gap-2.5 outline-none transition-opacity hover:opacity-80"
+        onClick={() => void handleSave()}
+        disabled={saveLoading}
+        className="group flex cursor-pointer items-center gap-2.5 outline-none transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
         aria-label={isSaved ? 'Remove saved project' : 'Save project'}
         aria-pressed={isSaved}
       >
         <span className={circleClass}>
-          <Heart
-            className={`h-4 w-4 ${isSaved ? 'fill-neutral-900 text-neutral-900' : ''}`}
-            strokeWidth={1.5}
-          />
+          {saveLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Heart
+              className={`h-4 w-4 ${isSaved ? 'fill-neutral-900 text-neutral-900' : ''}`}
+              strokeWidth={1.5}
+            />
+          )}
         </span>
-        <span className="text-sm font-normal text-neutral-900">Save</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Save</span>
       </button>
     </div>
   );

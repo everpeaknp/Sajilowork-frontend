@@ -26,7 +26,6 @@ import { fetchPublicProjects } from '@/lib/projectApi';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectDetailPath } from './projectSlug';
-import { toggleProjectSaved, useSavedProjectIds } from './projectBookmarks';
 
 const CustomLogo: React.FC<{
   type: Project['companyIconType'];
@@ -193,7 +192,8 @@ export default function ProjectList({
     void fetchPublicProjects()
       .then((items) => {
         if (cancelled) return;
-        setProjects(items.length ? items : ALL_PROJECTS);
+        const next = items.length ? items : ALL_PROJECTS;
+        setProjects(next);
       })
       .catch(() => {
         if (!cancelled) setProjects(ALL_PROJECTS);
@@ -205,13 +205,6 @@ export default function ProjectList({
       cancelled = true;
     };
   }, []);
-
-  const savedProjectIds = useSavedProjectIds();
-
-  const toggleSave = (projectId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    toggleProjectSaved(projectId);
-  };
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     category: false,
@@ -511,7 +504,7 @@ export default function ProjectList({
         <AnimatePresence>
           {alertText && (
             <motion.div
-              className="fixed bottom-8 right-8 z-50 flex items-center gap-3 rounded-xl border border-[#52C47F]/25 bg-[#1D3E35] px-6 py-3.5 text-white shadow-xl"
+              className="fixed bottom-20 left-4 right-4 z-50 flex items-center gap-3 rounded-xl border border-[#52C47F]/25 bg-[#1D3E35] px-5 py-3.5 text-white shadow-xl sm:bottom-8 sm:left-auto sm:right-8 sm:w-auto sm:px-6"
               initial={{ opacity: 0, scale: 0.9, y: 30 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -572,8 +565,8 @@ export default function ProjectList({
           </div>
 
           <div className="space-y-5 lg:col-span-3">
-            <div className="mb-5 flex min-h-[40px] items-center justify-between">
-              <p className={`${discoverBody} text-base font-medium text-neutral-800`}>
+            <div className="mb-5 flex min-h-[40px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className={`${discoverBody} text-sm font-medium text-neutral-800 sm:text-base`}>
                 <span className={`${discoverMedium} font-bold text-neutral-900`}>{totalProjects}</span>{' '}
                 projects available
               </p>
@@ -665,7 +658,6 @@ export default function ProjectList({
               <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
                   {paginatedProjectsList.map((project) => {
-                    const isSaved = savedProjectIds.includes(project.id);
                     const employerHref = resolveEmployerProfileHref({
                       employerSlug: project.employerSlug,
                       companyName: project.companyName,
@@ -703,9 +695,9 @@ export default function ProjectList({
                               router.push(getProjectDetailPath(project));
                             }
                           }}
-                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[8px] border border-neutral-200/90 bg-white p-6 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
+                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[8px] border border-neutral-200/90 bg-white p-4 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
                         >
-                        <div className="flex min-h-0 min-w-0 flex-1 gap-5 overflow-hidden">
+                        <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
                           {employerHref ? (
                             <Link
                               href={employerHref}
@@ -727,49 +719,25 @@ export default function ProjectList({
                           <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
                             <div className="flex items-start justify-between gap-2">
                               <h3
-                                className={`${discoverBody} block truncate text-[18.5px] !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F]`}
+                                className={`${discoverBody} block line-clamp-2 text-base !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F] sm:truncate sm:text-[18.5px]`}
                               >
                                 {project.title}
                               </h3>
-                              <button
-                                type="button"
-                                onClick={(e) => toggleSave(project.id, e)}
-                                className={`flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
-                                  isSaved
-                                    ? 'border-amber-300 bg-amber-50 text-amber-500 shadow-sm'
-                                    : 'border-[#45a874]/20 bg-white text-[#45a874] hover:bg-[#45a874]/5'
-                                }`}
-                                title={isSaved ? 'Saved project' : 'Save project'}
-                                aria-label={isSaved ? 'Remove saved project' : 'Save project'}
-                                aria-pressed={isSaved}
-                              >
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  className={`h-3.5 w-3.5 ${isSaved ? 'fill-amber-500 text-amber-500' : 'text-[#45a874]'}`}
-                                  stroke="currentColor"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                </svg>
-                              </button>
                             </div>
 
                             <div
-                              className={`${discoverBody} mt-1.5 flex flex-wrap items-center text-[13px] font-normal text-neutral-700`}
+                              className={`${discoverBody} mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-neutral-700 sm:gap-x-0 sm:text-[13px]`}
                             >
                               <span className="flex items-center gap-1.5">
                                 <MapPin className="h-4 w-4 stroke-[1.6] text-neutral-500" />
                                 {formatProjectLocation(project)}
                               </span>
-                              <span className="mx-3.5 select-none font-light text-neutral-300">|</span>
+                              <span className="hidden select-none font-light text-neutral-300 sm:mx-3.5 sm:inline">|</span>
                               <span className="flex items-center gap-1.5">
                                 <Calendar className="h-4 w-4 stroke-[1.6] text-neutral-500" />
                                 {formatProjectListDate(project)}
                               </span>
-                              <span className="mx-3.5 select-none font-light text-neutral-300">|</span>
+                              <span className="hidden select-none font-light text-neutral-300 sm:mx-3.5 sm:inline">|</span>
                               <span className="flex items-center gap-1.5">
                                 <FileText className="h-4 w-4 stroke-[1.6] text-neutral-500" />
                                 {formatProposalsLabel(project)}
@@ -800,10 +768,10 @@ export default function ProjectList({
                           </div>
                         </div>
 
-                        <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0">
-                          <div className="flex h-full min-w-[240px] flex-col items-end justify-between gap-4 lg:min-w-[260px]">
-                            <div className="w-full text-right">
-                              <span className={`${discoverBody} block text-[21px] font-normal leading-none tracking-tight text-black`}>
+                        <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-4 sm:pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0">
+                          <div className="flex h-full w-full min-w-0 flex-col items-stretch justify-between gap-4 sm:items-end lg:min-w-[260px]">
+                            <div className="w-full text-left sm:text-right">
+                              <span className={`${discoverBody} block text-lg font-normal leading-none tracking-tight text-black sm:text-[21px]`}>
                                 {project.budgetLabel}
                               </span>
                               <span className={`${discoverBody} mt-1.5 block text-[13px] font-normal text-neutral-700`}>
@@ -835,28 +803,28 @@ export default function ProjectList({
 
             {filteredProjectsList.length > 0 && (
               <div className="flex flex-col items-center justify-center pb-4 pt-8">
-                <div className="flex items-center gap-3">
+                <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
                   <button
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10"
                     title="Previous Page"
                   >
                     <ChevronLeft className="h-4.5 w-4.5" />
                   </button>
-                  <div className="flex items-center gap-1.5">{renderPageNumbers()}</div>
+                  <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">{renderPageNumbers()}</div>
                   <button
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10"
                     title="Next Page"
                   >
                     <ChevronRight className="h-4.5 w-4.5" />
                   </button>
                 </div>
-                <div className={`${discoverBody} mt-3.5 select-none text-[13.5px] font-medium text-zinc-400`}>
+                <div className={`${discoverBody} mt-3 text-center text-xs font-medium text-zinc-400 sm:mt-3.5 sm:text-[13.5px]`}>
                   Showing {startIdx} – {endIdx} of {totalProjects} projects available
                 </div>
               </div>

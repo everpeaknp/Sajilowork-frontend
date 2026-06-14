@@ -38,15 +38,15 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
   }, []);
 
   return (
-    <div className="select-none bg-white pb-12 pt-8 font-normal text-black antialiased [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
+    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-5 flex justify-end">
+        <div className="mb-4 flex justify-end sm:mb-5">
           <ServiceShareSaveActions service={service} />
         </div>
 
         <ServiceDetailHero service={service} />
 
-        <div className="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="mt-8 grid grid-cols-1 items-start gap-8 sm:mt-10 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-8">
             <ServiceInfoBar service={service} />
 
@@ -64,7 +64,7 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
             <ServiceReviews service={service} />
           </div>
 
-          <aside className="mx-auto w-full max-w-[19.5rem] sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:self-start">
+          <aside className="mx-auto w-full max-w-none sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:max-w-[19.5rem] lg:self-start">
             <div className="space-y-5">
               <div ref={planCardRef} className="scroll-mt-24">
                 <ServicePlanCard
@@ -78,7 +78,7 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
           </aside>
         </div>
 
-        <div className="mt-14 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <p className="text-sm font-normal text-neutral-500">
             Browse more services on the full marketplace directory.
           </p>

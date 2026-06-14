@@ -13,8 +13,19 @@ import {
 } from '@/lib/dashboardSaved';
 import { filterBookmarkedTasksByTab } from '@/lib/dashboardSavedApi';
 import { extractTaskList } from '@/lib/taskUtils';
-import { taskService } from '@/services';
+import { bookmarkService } from '@/services/bookmark.service';
 import type { Task } from '@/types';
+import {
+  DASHBOARD_CARD,
+  DASHBOARD_HEADING_MD,
+  DASHBOARD_PAGE_ROOT,
+  DASHBOARD_PAGINATION_ARROW_PLAIN,
+  DASHBOARD_PAGINATION_INNER,
+  DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
+  dashboardPageButtonClass,
+} from './dashboardResponsive';
 
 function SavedCard({
   item,
@@ -139,7 +150,7 @@ export default function DashboardSaved() {
   const loadTaskBookmarks = useCallback(async () => {
     setTasksLoading(true);
     try {
-      const response = await taskService.getBookmarkedTasks();
+      const response = await bookmarkService.getBookmarked();
       if (response.success && response.data) {
         setBookmarkedTasks(extractTaskList(response.data));
       } else {
@@ -171,7 +182,7 @@ export default function DashboardSaved() {
 
     setRemoving(true);
     try {
-      const response = await taskService.unbookmarkTask(deleteTarget.slug);
+      const response = await bookmarkService.unbookmark(deleteTarget.slug);
       if (response.success) {
         setBookmarkedTasks((prev) => prev.filter((task) => String(task.id) !== deleteTarget.id));
         toast.success('Removed from saved');
@@ -192,7 +203,13 @@ export default function DashboardSaved() {
   };
 
   const activeLabel =
-    activeSubTab === 'services' ? 'services' : activeSubTab === 'project' ? 'projects' : 'jobs';
+    activeSubTab === 'services'
+      ? 'services'
+      : activeSubTab === 'project'
+        ? 'projects'
+        : activeSubTab === 'jobs'
+          ? 'jobs'
+          : 'tasks';
 
   const totalItems = allItems.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
@@ -203,13 +220,6 @@ export default function DashboardSaved() {
 
   const showLoading = tasksLoading && totalItems === 0;
 
-  const pageButtonClass = (page: number) =>
-    `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full border-0 text-sm font-normal outline-none transition-all focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 ${
-      safePage === page
-        ? 'bg-[#52C47F] font-medium text-white shadow-sm'
-        : 'bg-transparent text-black hover:text-[#52C47F]'
-    }`;
-
   const subTabClass = (tab: SavedSubTab) =>
     `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
       activeSubTab === tab
@@ -218,10 +228,17 @@ export default function DashboardSaved() {
     }`;
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
-      <div className="mx-auto max-w-7xl rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 flex items-center justify-between border-b border-neutral-100">
-          <div className="flex gap-8">
+    <div className={DASHBOARD_PAGE_ROOT}>
+      <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
+        <h1 className={DASHBOARD_HEADING_MD}>Saved</h1>
+        <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          Your bookmarked services, projects, jobs, and tasks.
+        </p>
+      </div>
+
+      <div className={DASHBOARD_CARD}>
+        <div className={DASHBOARD_SUBTABS_WRAP}>
+          <div className={DASHBOARD_SUBTABS_ROW}>
             <button type="button" onClick={() => handleTabChange('services')} className={subTabClass('services')}>
               Services
             </button>
@@ -230,6 +247,9 @@ export default function DashboardSaved() {
             </button>
             <button type="button" onClick={() => handleTabChange('jobs')} className={subTabClass('jobs')}>
               Jobs
+            </button>
+            <button type="button" onClick={() => handleTabChange('task')} className={subTabClass('task')}>
+              Tasks
             </button>
           </div>
         </div>
@@ -253,25 +273,25 @@ export default function DashboardSaved() {
               ))}
             </div>
 
-            <div className="mt-10 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-12 font-sans">
-              <div className="flex items-center justify-center gap-6">
+            <div className={DASHBOARD_PAGINATION_OUTER}>
+              <div className={DASHBOARD_PAGINATION_INNER}>
                 <button
                   type="button"
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={safePage === 1}
-                  className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                  className={DASHBOARD_PAGINATION_ARROW_PLAIN}
                 >
                   <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
                 </button>
 
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   {[1, 2, 3, 4, 5].map((page) =>
                     totalPages >= page ? (
                       <button
                         key={page}
                         type="button"
                         onClick={() => setCurrentPage(page)}
-                        className={pageButtonClass(page)}
+                        className={dashboardPageButtonClass(safePage === page)}
                       >
                         {page}
                       </button>
@@ -279,7 +299,7 @@ export default function DashboardSaved() {
                   )}
 
                   {totalPages > 5 ? (
-                    <span className="pointer-events-none flex h-[44px] w-[44px] select-none items-center justify-center text-sm font-normal text-neutral-400">
+                    <span className="pointer-events-none flex h-9 w-9 shrink-0 select-none items-center justify-center text-sm font-normal text-neutral-400 sm:h-[44px] sm:w-[44px]">
                       ...
                     </span>
                   ) : null}
@@ -288,7 +308,7 @@ export default function DashboardSaved() {
                     <button
                       type="button"
                       onClick={() => setCurrentPage(totalPages)}
-                      className={pageButtonClass(totalPages)}
+                      className={dashboardPageButtonClass(safePage === totalPages)}
                     >
                       {totalPages}
                     </button>
@@ -299,7 +319,7 @@ export default function DashboardSaved() {
                   type="button"
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={safePage === totalPages}
-                  className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                  className={DASHBOARD_PAGINATION_ARROW_PLAIN}
                 >
                   <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
                 </button>

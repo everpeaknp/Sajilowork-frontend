@@ -76,28 +76,30 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
     <div className="w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`flex items-center rounded-lg border bg-white p-2 shadow-sm transition-all duration-300 ${
+          className={`flex flex-col gap-2 rounded-lg border bg-white p-2 shadow-sm transition-all duration-300 sm:flex-row sm:items-center ${
             isFocused ? 'border-black ring-1 ring-black/5' : 'border-black'
           } relative z-30 w-full`}
         >
-          <div className="pl-4 pr-3 text-black">
-            <SearchIcon className="h-5 w-5 stroke-[2]" />
-          </div>
+          <div className="flex min-w-0 flex-1 items-center">
+            <div className="shrink-0 pl-3 pr-2 text-black sm:pl-4 sm:pr-3">
+              <SearchIcon className="h-5 w-5 stroke-[2]" />
+            </div>
 
-          <input
-            id="market-search"
-            type="text"
-            className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2 text-base font-medium text-black outline-none placeholder:text-black focus:ring-0 md:text-lg`}
-            placeholder="What do you need done?"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-          />
+            <input
+              id="market-search"
+              type="text"
+              className={`${discoverBody} w-full min-w-0 flex-1 border-none bg-transparent py-2.5 text-base font-medium text-black outline-none placeholder:text-black focus:ring-0 sm:py-2 md:text-lg`}
+              placeholder="What do you need done?"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            />
+          </div>
 
           <motion.button
             type="submit"
-            className={`${discoverMedium} flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-black bg-[#193e32] px-5 py-2.5 text-white transition-all duration-200 hover:bg-neutral-900 md:px-8 md:py-3`}
+            className={`${discoverMedium} flex w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-black bg-[#193e32] px-5 py-3 text-white transition-all duration-200 hover:bg-neutral-900 sm:w-auto sm:py-2.5 md:px-8 md:py-3`}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
           >
@@ -176,7 +178,7 @@ function GraphicSection() {
 
   return (
     <div
-      className="relative mx-auto flex w-full max-w-2xl select-none items-end justify-center leading-none"
+      className="relative mx-auto flex w-full max-w-[min(100%,520px)] select-none items-end justify-center overflow-hidden leading-none sm:max-w-xl lg:max-w-2xl"
       id="hero-graphic"
     >
       <div className="pointer-events-none absolute inset-0 z-10">
@@ -242,11 +244,11 @@ function GraphicSection() {
         </div>
       </div>
 
-      <div className="relative z-20 flex w-[108%] max-w-[620px] items-end justify-center sm:w-full lg:w-[124%] xl:w-[128%]">
+      <div className="relative z-20 flex w-full items-end justify-center sm:w-full lg:w-[124%] xl:w-[128%]">
         <motion.img
           src={MAIN_PORTRAIT}
           alt="Local tasker ready to help"
-          className="pointer-events-none relative z-20 block h-auto w-full max-h-[min(540px,68vh)] select-none object-contain object-bottom drop-shadow-xl sm:max-h-[min(580px,71vh)] lg:max-h-[min(640px,78vh)]"
+          className="pointer-events-none relative z-20 block h-auto w-full max-h-[min(380px,52vh)] select-none object-contain object-bottom drop-shadow-xl sm:max-h-[min(480px,60vh)] lg:max-h-[min(640px,78vh)]"
           initial={{ opacity: 0, y: 35 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -256,7 +258,7 @@ function GraphicSection() {
       </div>
 
       <motion.div
-        className="absolute left-[3%] top-[30%] z-30 h-20 w-20 overflow-hidden rounded-full"
+        className="absolute left-[6%] top-[32%] z-30 h-14 w-14 overflow-hidden rounded-full sm:left-[3%] sm:top-[30%] sm:h-20 sm:w-20"
         initial={{ opacity: 0, scale: 0.8, x: -20 }}
         animate={{ opacity: 1, scale: 1, x: 0, y: [0, -8, 0] }}
         transition={{
@@ -276,7 +278,7 @@ function GraphicSection() {
       </motion.div>
 
       <motion.div
-        className="absolute right-[7%] top-[5%] z-30 h-[84px] w-[84px] overflow-hidden rounded-full"
+        className="absolute right-[8%] top-[8%] z-30 h-16 w-16 overflow-hidden rounded-full sm:right-[7%] sm:top-[5%] sm:h-[84px] sm:w-[84px]"
         initial={{ opacity: 0, scale: 0.8, y: -20 }}
         animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
         transition={{
@@ -295,7 +297,7 @@ function GraphicSection() {
       </motion.div>
 
       <motion.div
-        className="absolute -right-[1%] top-[49%] z-30 h-20 w-20 overflow-hidden rounded-full"
+        className="absolute right-[2%] top-[50%] z-30 h-14 w-14 overflow-hidden rounded-full sm:-right-[1%] sm:top-[49%] sm:h-20 sm:w-20"
         initial={{ opacity: 0, scale: 0.8, x: 20 }}
         animate={{ opacity: 1, scale: 1, x: 0, y: [0, -8, 0] }}
         transition={{
@@ -315,7 +317,7 @@ function GraphicSection() {
       </motion.div>
 
       <motion.div
-        className="absolute -left-[5%] bottom-[28%] z-30 flex min-w-[230px] cursor-pointer flex-col justify-center rounded-none border border-neutral-100/80 bg-white py-5 pl-10 pr-8 shadow-2xl"
+        className="absolute bottom-[24%] left-[2%] z-30 hidden max-w-[calc(100%-1rem)] flex-col justify-center rounded-none border border-neutral-100/80 bg-white py-3 pl-8 pr-4 shadow-2xl min-[420px]:flex sm:bottom-[28%] sm:-left-[5%] sm:min-w-[210px] sm:py-5 sm:pl-10 sm:pr-8 md:min-w-[230px]"
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0, y: [0, -8, 0] }}
         transition={{
@@ -339,7 +341,7 @@ function GraphicSection() {
       </motion.div>
 
       <motion.div
-        className="absolute -right-[2%] bottom-[12%] z-30 flex min-w-[210px] cursor-pointer flex-col justify-center rounded-none border border-neutral-100/80 bg-white py-5 pl-10 pr-8 shadow-2xl"
+        className="absolute bottom-[8%] right-[2%] z-30 hidden max-w-[calc(100%-1rem)] flex-col justify-center rounded-none border border-neutral-100/80 bg-white py-3 pl-8 pr-4 shadow-2xl min-[420px]:flex sm:-right-[2%] sm:bottom-[12%] sm:min-w-[190px] sm:py-5 sm:pl-10 sm:pr-8 md:min-w-[210px]"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: [0, -8, 0] }}
         transition={{
@@ -366,27 +368,28 @@ function GraphicSection() {
 
 export default function Hero({ onSearchSubmit }: HeroProps) {
   return (
-    <section className="relative flex min-h-[calc(100vh-64px)] flex-col justify-start overflow-hidden bg-white px-6 pb-0 pt-4 sm:px-8 sm:pt-6 lg:px-12 lg:pt-8 xl:px-16">
+    <section className="relative flex flex-col justify-start overflow-hidden bg-white px-4 pb-10 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:min-h-[calc(100dvh-4rem)] lg:px-12 lg:pt-8 xl:px-16">
       <div
-        className="pointer-events-none absolute inset-y-0 right-0 z-0 w-[32%] bg-[#faf7ee] sm:w-[30%] lg:w-[28%]"
+        className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-[28%] bg-[#faf7ee] lg:block"
         aria-hidden
       />
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col">
-        <div className="grid flex-1 grid-cols-1 items-end gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="mt-4 flex flex-col justify-start self-start text-left sm:mt-5 lg:col-span-7 lg:mt-0 lg:translate-y-2 lg:justify-center lg:self-center">
+        <div className="grid flex-1 grid-cols-1 items-end gap-8 lg:grid-cols-12 lg:gap-16">
+          <div className="flex flex-col justify-start self-start text-left lg:col-span-7 lg:mt-0 lg:translate-y-2 lg:justify-center lg:self-center">
             <motion.h1
-              className={`${discoverHeadline} mb-6 text-3xl leading-[1.15] text-brand-dark sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[54px]`}
+              className={`${discoverHeadline} mb-4 text-[1.75rem] leading-[1.12] text-brand-dark sm:mb-6 sm:text-3xl md:text-4xl lg:text-[46px] xl:text-[54px]`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              With talented <span className="relative inline-block text-brand-emerald">taskers</span>
-              <br />
+              With talented <span className="relative inline-block text-brand-emerald">taskers</span>{' '}
+              <span className="lg:hidden"> </span>
+              <br className="hidden sm:block" />
               get more done.
             </motion.h1>
 
             <motion.p
-              className={`${discoverBody} mb-8 max-w-lg text-sm font-medium leading-relaxed text-neutral-500 sm:text-base md:text-lg`}
+              className={`${discoverBody} mb-6 max-w-lg text-sm font-medium leading-relaxed text-neutral-500 sm:mb-8 sm:text-base md:text-lg`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -404,11 +407,22 @@ export default function Hero({ onSearchSubmit }: HeroProps) {
             </motion.div>
           </div>
 
-          <div className="relative flex w-full items-end lg:col-span-5 lg:self-end">
+          <div className="relative flex w-full items-end justify-center overflow-hidden lg:col-span-5 lg:self-end">
             <GraphicSection />
           </div>
+
+          <div className="grid grid-cols-2 gap-3 min-[420px]:hidden">
+            <div className="rounded-lg border border-neutral-100 bg-white px-4 py-3 shadow-sm">
+              <p className={`${discoverBody} text-base font-medium text-neutral-900`}>4.9/5</p>
+              <p className={`${discoverBody} mt-0.5 text-xs text-neutral-500`}>Clients rate taskers</p>
+            </div>
+            <div className="rounded-lg border border-neutral-100 bg-white px-4 py-3 shadow-sm">
+              <p className={`${discoverBody} text-base font-medium text-neutral-900`}>12K+</p>
+              <p className={`${discoverBody} mt-0.5 text-xs text-neutral-500`}>Tasks completed</p>
+            </div>
+          </div>
         </div>
-        </div>
-      </section>
+      </div>
+    </section>
   );
 }

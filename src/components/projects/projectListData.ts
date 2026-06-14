@@ -14,6 +14,8 @@ export interface Project {
   id: string;
   /** Backend task slug when loaded from API */
   slug?: string;
+  /** Whether the current user has bookmarked this project */
+  isBookmarked?: boolean;
   title: string;
   category: string;
   companyName: string;

@@ -16,6 +16,7 @@ import Partners from '@/components/discover/Partners';
 import Newsletter from '@/components/discover/Newsletter';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
+import { postTaskHref } from '@/lib/postTaskPath';
 
 const sectionPad = '!py-12 sm:!py-14';
 const sectionPadLoose = '!py-12 sm:!py-16';
@@ -25,7 +26,7 @@ export default function DiscoverPage() {
 
   return (
     <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white selection:bg-brand-emerald selection:text-white`}
+      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-brand-emerald selection:text-white md:pb-0`}
     >
       <Navbar />
       <main className="pb-2 md:pb-0">
@@ -45,7 +46,7 @@ export default function DiscoverPage() {
         <GridCategories
           className={sectionPad}
           onSelectGridCategory={(name) => {
-            router.push(`/post-task?title=${encodeURIComponent(name)}`);
+            router.push(postTaskHref({ title: name }));
           }}
         />
         <PopularServices className={sectionPad} />

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PaymentMethods from '@/components/tasker-dashboard/PaymentMethods';
+import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
 type WalletSection = 'wallet' | 'recharges' | 'payouts';
 
@@ -54,7 +55,11 @@ function DashboardWalletInner({
     return null;
   }
 
-  return <PaymentMethods initialTab={resolvedTab} />;
+  return (
+    <div className={`${DASHBOARD_PAGE_ROOT} min-w-0`}>
+      <PaymentMethods initialTab={resolvedTab} />
+    </div>
+  );
 }
 
 export default function DashboardWallet(props: { initialTab?: WalletSection }) {

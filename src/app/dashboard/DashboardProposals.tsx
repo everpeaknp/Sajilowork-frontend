@@ -24,6 +24,17 @@ import { bidService, extractBidList, sortBidsByIdAlphanumeric } from '@/services
 import type { Bid, BidStatus } from '@/types';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { getDashboardProposalDetailHref } from './dashboardTabs';
+import {
+  DASHBOARD_CARD_PLAIN,
+  DASHBOARD_HEADING_PROPOSALS,
+  DASHBOARD_PAGE_ROOT,
+  DASHBOARD_PAGINATION_ARROW_PLAIN,
+  DASHBOARD_PAGINATION_INNER,
+  DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
+  dashboardPageButtonClass,
+} from './dashboardResponsive';
 
 type ProposalFilter = 'pending' | 'accepted' | 'cancelled';
 
@@ -404,13 +415,6 @@ export default function DashboardProposals() {
         : 'text-neutral-400 hover:text-neutral-900'
     }`;
 
-  const pageButtonClass = (page: number) =>
-    `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full border-0 text-sm font-normal outline-none transition-all focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 ${
-      currentPage === page
-        ? 'bg-[#52C47F] text-white shadow-sm'
-        : 'bg-transparent text-black hover:text-[#52C47F]'
-    }`;
-
   const pageNumbers = useMemo(() => {
     const pages: number[] = [];
     for (let page = 1; page <= totalPages && page <= 5; page += 1) {
@@ -420,16 +424,17 @@ export default function DashboardProposals() {
   }, [totalPages]);
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen space-y-6 bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
+    <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="font-sans text-3xl font-normal tracking-tight text-black">My Proposals</h2>
+          <h2 className={DASHBOARD_HEADING_PROPOSALS}>My Proposals</h2>
           <p className="mt-1.5 font-sans text-sm text-neutral-800">{subtitle}</p>
         </div>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-8 md:p-10">
-        <div className="mb-6 flex flex-wrap gap-2">
+      <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-10`}>
+        <div className="mb-6 overflow-x-auto pb-1">
+          <div className="flex w-max min-w-full flex-nowrap gap-2">
           {PROPOSAL_TYPE_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -443,10 +448,11 @@ export default function DashboardProposals() {
               {tab.label}
             </button>
           ))}
+          </div>
         </div>
 
-        <div className="mb-8 flex items-center border-b border-neutral-100">
-          <div className="flex flex-wrap gap-6 sm:gap-8">
+        <div className={DASHBOARD_SUBTABS_WRAP}>
+          <div className={DASHBOARD_SUBTABS_ROW}>
             {PROPOSAL_FILTER_TABS.map((tab) => (
               <button
                 key={tab.key}
@@ -463,7 +469,7 @@ export default function DashboardProposals() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none">
+        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid">
           <div className="col-span-12 md:col-span-5">Name</div>
           <div className="col-span-6 md:col-span-2">Type</div>
           <div className="col-span-6 md:col-span-2">Status</div>
@@ -482,7 +488,7 @@ export default function DashboardProposals() {
             </div>
           ) : isCustomer ? (
             (currentItems as EmployerRow[]).map((row) => (
-              <div key={row.id} className="grid grid-cols-12 items-center gap-4 py-7">
+              <div key={row.id} className="grid grid-cols-12 items-center gap-3 py-5 sm:gap-4 sm:py-7">
                 <div className="col-span-12 md:col-span-5">
                   <div className="flex items-center gap-4">
                     <ProposalListAvatar row={row} variant="employer" />
@@ -514,18 +520,20 @@ export default function DashboardProposals() {
                   </div>
                 </div>
 
-                <div className="col-span-6 md:col-span-2">
+                <div className="col-span-12 flex flex-wrap items-center gap-2 md:contents">
+                  <div className="md:col-span-2">
                   <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-700">
                     {PROPOSAL_TYPE_LABELS[row.listingType]}
                   </span>
                 </div>
 
-                <div className="col-span-6 md:col-span-2">
+                <div className="md:col-span-2">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-1 text-xs font-normal capitalize ${statusBadgeClass(row.rawStatus)}`}
                   >
                     {row.status}
                   </span>
+                </div>
                 </div>
 
                 <div className="col-span-12 md:col-span-3">
@@ -544,7 +552,7 @@ export default function DashboardProposals() {
             ))
           ) : (
             (currentItems as FreelancerRow[]).map((row) => (
-              <div key={row.id} className="grid grid-cols-12 items-center gap-4 py-7">
+              <div key={row.id} className="grid grid-cols-12 items-center gap-3 py-5 sm:gap-4 sm:py-7">
                 <div className="col-span-12 md:col-span-5">
                   <div className="flex items-center gap-4">
                     <ProposalListAvatar row={row} variant="freelancer" />
@@ -571,18 +579,20 @@ export default function DashboardProposals() {
                   </div>
                 </div>
 
-                <div className="col-span-6 md:col-span-2">
+                <div className="col-span-12 flex flex-wrap items-center gap-2 md:contents">
+                  <div className="md:col-span-2">
                   <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-700">
                     {PROPOSAL_TYPE_LABELS[row.listingType]}
                   </span>
                 </div>
 
-                <div className="col-span-6 md:col-span-2">
+                <div className="md:col-span-2">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-1 text-xs font-normal capitalize ${statusBadgeClass(row.rawStatus)}`}
                   >
                     {row.status}
                   </span>
+                </div>
                 </div>
 
                 <div className="col-span-12 md:col-span-3">
@@ -613,24 +623,24 @@ export default function DashboardProposals() {
         </div>
 
         {rows.length > 0 ? (
-          <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
-            <div className="flex items-center justify-center gap-6">
+          <div className={DASHBOARD_PAGINATION_OUTER}>
+            <div className={DASHBOARD_PAGINATION_INNER}>
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
                 <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 {pageNumbers.map((page) => (
                   <button
                     key={page}
                     type="button"
                     onClick={() => setCurrentPage(page)}
-                    className={pageButtonClass(page)}
+                    className={dashboardPageButtonClass(currentPage === page)}
                   >
                     {page}
                   </button>
@@ -641,7 +651,7 @@ export default function DashboardProposals() {
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] outline-none transition-all hover:bg-neutral-50 focus-visible:ring-2 focus-visible:ring-[#52C47F]/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
                 <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>

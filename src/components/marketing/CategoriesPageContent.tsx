@@ -8,6 +8,7 @@ import { buildCategoryColumns, postTaskHref, type CategoryColumn } from '@/lib/l
 import { extractCategoryList } from '@/lib/taskUtils';
 import { landingHeadlineSm } from '@/components/LangingHome/landingTypography';
 import MarketingCta from './MarketingCta';
+import { POST_TASK_PATH } from '@/lib/postTaskPath';
 
 function fallbackColumns(): CategoryColumn[] {
   return TOP_CATEGORIES.map((group) => ({
@@ -75,7 +76,7 @@ export default function CategoriesPageContent() {
       </div>
 
       <MarketingCta
-        primaryHref="/post-task"
+        primaryHref={POST_TASK_PATH}
         primaryLabel="Post a task"
         secondaryHref="/task"
         secondaryLabel="Browse tasks"

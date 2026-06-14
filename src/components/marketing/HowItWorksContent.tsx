@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 import MarketingCta from './MarketingCta';
+import { POST_TASK_PATH } from '@/lib/postTaskPath';
 
 const STEPS = [
   {
@@ -61,7 +62,7 @@ export default function HowItWorksContent() {
       </ol>
 
       <MarketingCta
-        primaryHref="/post-task"
+        primaryHref={POST_TASK_PATH}
         primaryLabel="Post your task for free"
         secondaryHref="/task"
         secondaryLabel="Browse open tasks"

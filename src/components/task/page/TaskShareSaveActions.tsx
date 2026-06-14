@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { ExternalLink, Heart, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTaskDetailPath } from '@/lib/taskPageApi';
-import { taskService } from '@/services/task.service';
+import { resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 import type { Task } from '@/types';
 
 interface TaskShareSaveActionsProps {
@@ -23,7 +23,7 @@ export default function TaskShareSaveActions({
   const [saveLoading, setSaveLoading] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
 
-  const slug = task.slug?.trim() || task.id;
+  const slug = resolveListingSlug(task.slug, task.id);
 
   const shareUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
@@ -69,28 +69,17 @@ export default function TaskShareSaveActions({
 
     setSaveLoading(true);
     try {
-      const nextSaved = !isSaved;
-      const response = nextSaved
-        ? await taskService.bookmarkTask(slug)
-        : await taskService.unbookmarkTask(slug);
-
-      if (!response.success) {
-        toast.error(response.message || 'Could not update bookmark');
-        return;
-      }
-
-      setIsSaved(nextSaved);
-      onBookmarkChange?.(nextSaved);
-      toast.success(nextSaved ? 'Task saved' : 'Removed from saved tasks');
-    } catch {
-      toast.error('Could not update bookmark');
+      const next = await toggleListingBookmark(slug, isSaved, 'task');
+      if (next === null) return;
+      setIsSaved(next);
+      onBookmarkChange?.(next);
     } finally {
       setSaveLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-8">
+    <div className="flex w-full items-center justify-end gap-4 sm:gap-8">
       <button
         type="button"
         onClick={() => void handleShare()}
@@ -105,7 +94,7 @@ export default function TaskShareSaveActions({
             <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
           )}
         </span>
-        <span className="text-sm font-normal text-neutral-900">Share</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Share</span>
       </button>
 
       <button
@@ -126,7 +115,7 @@ export default function TaskShareSaveActions({
             />
           )}
         </span>
-        <span className="text-sm font-normal text-neutral-900">Save</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Save</span>
       </button>
     </div>
   );

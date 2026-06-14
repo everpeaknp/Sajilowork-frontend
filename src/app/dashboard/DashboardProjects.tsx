@@ -14,6 +14,17 @@ import { getDashboardCreateHref, getDashboardEditHref } from './dashboardTabs';
 import ProjectTable from './ProjectTable';
 import type { Project } from './types';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import {
+  DASHBOARD_CARD,
+  DASHBOARD_HEADING,
+  DASHBOARD_PAGE_ROOT,
+  DASHBOARD_PAGINATION_ARROW,
+  DASHBOARD_PAGINATION_INNER,
+  DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
+  dashboardPageButtonClass,
+} from './dashboardResponsive';
 
 type ProjectStatus = Project['status'];
 
@@ -69,13 +80,6 @@ export default function DashboardProjects() {
     return filteredProjects.slice(start, start + itemsPerPage);
   }, [filteredProjects, activePage, itemsPerPage]);
 
-  const pageButtonClass = (page: number) =>
-    `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-sm font-normal transition-all ${
-      activePage === page
-        ? 'bg-[#52C47F] font-semibold text-white shadow-sm'
-        : 'bg-transparent text-black hover:text-[#52C47F]'
-    }`;
-
   const openCreatePage = () => {
     router.push(getDashboardCreateHref('project'));
   };
@@ -115,10 +119,10 @@ export default function DashboardProjects() {
     }`;
 
   return (
-    <div className="animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8">
-      <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
+    <div className={DASHBOARD_PAGE_ROOT}>
+      <div className="mx-auto mb-6 flex max-w-7xl flex-col gap-5 pl-1 sm:mb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+          <h1 className={DASHBOARD_HEADING}>
             Manage Project
           </h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
@@ -129,16 +133,16 @@ export default function DashboardProjects() {
         <button
           type="button"
           onClick={openCreatePage}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.99]"
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-6 py-3.5 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.99] sm:w-auto sm:py-4"
         >
           <Plus className="h-4 w-4" />
           <span>Post New Project</span>
         </button>
       </div>
 
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
-        <div className="mb-8 flex items-center justify-between border-b border-neutral-100">
-          <div className="flex flex-wrap gap-6 sm:gap-8">
+      <div className={DASHBOARD_CARD}>
+        <div className={DASHBOARD_SUBTABS_WRAP}>
+          <div className={DASHBOARD_SUBTABS_ROW}>
             {STATUS_TABS.map((tab) => (
               <button
                 key={tab}
@@ -171,25 +175,25 @@ export default function DashboardProjects() {
         )}
 
         {!loading && filteredProjects.length > 0 ? (
-          <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
-            <div className="flex items-center justify-center gap-6">
+          <div className={DASHBOARD_PAGINATION_OUTER}>
+            <div className={DASHBOARD_PAGINATION_INNER}>
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={activePage === 1}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW}
               >
                 <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 {totalPages <= 6 ? (
                   Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={pageButtonClass(page)}
+                      className={dashboardPageButtonClass(activePage === page)}
                     >
                       {page}
                     </button>
@@ -201,7 +205,7 @@ export default function DashboardProjects() {
                         key={page}
                         type="button"
                         onClick={() => setCurrentPage(page)}
-                        className={pageButtonClass(page)}
+                        className={dashboardPageButtonClass(activePage === page)}
                       >
                         {page}
                       </button>
@@ -210,7 +214,7 @@ export default function DashboardProjects() {
                     <button
                       type="button"
                       onClick={() => setCurrentPage(totalPages)}
-                      className={pageButtonClass(totalPages)}
+                      className={dashboardPageButtonClass(activePage === totalPages)}
                     >
                       {totalPages}
                     </button>
@@ -222,7 +226,7 @@ export default function DashboardProjects() {
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={activePage === totalPages}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className={DASHBOARD_PAGINATION_ARROW}
               >
                 <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
               </button>

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { taskService } from "@/services/task.service";
 import { browseTasksHref, postTaskHref, topCategoryNames } from "@/lib/landingHome";
+import { POST_TASK_PATH } from "@/lib/postTaskPath";
 import type { Category } from "@/types";
 import { landingBody, landingBodyMuted, landingHeadline, landingHeadlineSm } from "./landingTypography";
 
@@ -144,7 +145,7 @@ export default function ServiceFeatures() {
           </div>
 
           <div className="mt-8 sm:mt-10">
-            <Link href="/post-task" className="block w-full sm:inline-block sm:w-auto">
+            <Link href={POST_TASK_PATH} className="block w-full sm:inline-block sm:w-auto">
               <motion.span
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

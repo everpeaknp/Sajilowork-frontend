@@ -51,9 +51,9 @@ const EMPTY_OVERVIEW: DashboardOverviewPayload = {
     direct: 0,
     referral: 0,
     organic: 0,
-    direct_percent: 50,
-    referral_percent: 25,
-    organic_percent: 25,
+    direct_percent: 0,
+    referral_percent: 0,
+    organic_percent: 0,
   },
   most_viewed_services: [],
   recent_purchases: [],
@@ -166,6 +166,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
   }, [chartMax]);
 
   const traffic = overview.traffic;
+  const trafficTotal = traffic.direct + traffic.referral + traffic.organic;
   const circumference = 439.82;
   const directDash = (traffic.direct_percent / 100) * circumference;
   const referralDash = (traffic.referral_percent / 100) * circumference;
@@ -405,6 +406,14 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
             </div>
 
             <div className="relative flex items-center justify-center py-4">
+              {trafficTotal === 0 ? (
+                <div className="flex h-60 w-60 max-w-full flex-col items-center justify-center rounded-full border border-dashed border-neutral-200 bg-neutral-50/80 px-6 text-center">
+                  <p className="text-sm font-medium text-neutral-600">No listing views yet</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-neutral-400">
+                    Traffic appears when people view your tasks, jobs, projects, or services.
+                  </p>
+                </div>
+              ) : (
               <svg className="h-60 w-60 max-w-full overflow-visible" viewBox="0 0 200 200">
                 <g transform="rotate(-90 100 100)">
                   <circle
@@ -445,11 +454,14 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                   <line x1="17" y1="100" x2="43" y2="100" stroke="white" strokeWidth="2.5" />
                 </g>
               </svg>
+              )}
             </div>
           </div>
 
           <div className="mt-2 rounded-lg border border-neutral-100/50 bg-neutral-50/50 py-2 text-center text-[10px] font-medium tracking-wide text-neutral-400">
-            Analytics breakdown calculated based on client page referrers.
+            {trafficTotal > 0
+              ? `${trafficTotal} listing views in the last 12 months, grouped by referrer.`
+              : 'Analytics breakdown calculated from listing page views and referrers.'}
           </div>
         </div>
       </div>

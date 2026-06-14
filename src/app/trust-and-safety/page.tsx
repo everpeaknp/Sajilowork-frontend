@@ -2,6 +2,7 @@ import Link from 'next/link';
 import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import { MarketingProse, MarketingLead } from '@/components/marketing/MarketingProse';
 import MarketingCta from '@/components/marketing/MarketingCta';
+import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import { TRUST_SAFETY_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
@@ -28,7 +29,7 @@ export default function TrustAndSafetyPage() {
         for refunds and dispute guidance.
       </p>
       <MarketingCta
-        primaryHref="/post-task"
+        primaryHref={POST_TASK_PATH}
         primaryLabel="Post your task for free"
         secondaryHref="/help"
         secondaryLabel="Visit help centre"

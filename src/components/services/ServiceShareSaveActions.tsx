@@ -1,13 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Heart, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Service } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
-import { setServiceSaved, toggleServiceSaved, useSavedServiceIds } from './serviceBookmarks';
-import { taskService } from '@/services';
-import { useAuthStore } from '@/store/auth.store';
+import { resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 interface ServiceShareSaveActionsProps {
   service: Service;
@@ -17,11 +15,14 @@ const circleClass =
   'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 transition-colors group-hover:border-neutral-300';
 
 export default function ServiceShareSaveActions({ service }: ServiceShareSaveActionsProps) {
-  const savedServiceIds = useSavedServiceIds();
-  const isSaved = savedServiceIds.includes(service.id);
+  const slug = resolveListingSlug(service.slug, service.id);
+  const [isSaved, setIsSaved] = useState(Boolean(service.isBookmarked));
   const [shareLoading, setShareLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  useEffect(() => {
+    setIsSaved(Boolean(service.isBookmarked));
+  }, [service.isBookmarked, service.id]);
 
   const shareUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
@@ -63,32 +64,17 @@ export default function ServiceShareSaveActions({ service }: ServiceShareSaveAct
   };
 
   const handleSave = async () => {
-    if (service.slug && isAuthenticated) {
-      setSaveLoading(true);
-      try {
-        const response = isSaved
-          ? await taskService.unbookmarkTask(service.slug)
-          : await taskService.bookmarkTask(service.slug);
-        if (response.success) {
-          setServiceSaved(service.id, !isSaved);
-          toast.success(isSaved ? 'Removed from saved services' : 'Service saved');
-        } else {
-          toast.error(response.message || 'Could not update saved services');
-        }
-      } catch {
-        toast.error('Could not update saved services');
-      } finally {
-        setSaveLoading(false);
-      }
-      return;
+    setSaveLoading(true);
+    try {
+      const next = await toggleListingBookmark(slug, isSaved, 'service');
+      if (next !== null) setIsSaved(next);
+    } finally {
+      setSaveLoading(false);
     }
-
-    const next = toggleServiceSaved(service.id);
-    toast.success(next ? 'Service saved' : 'Removed from saved services');
   };
 
   return (
-    <div className="flex items-center gap-8">
+    <div className="flex w-full items-center justify-end gap-4 sm:gap-8">
       <button
         type="button"
         onClick={() => void handleShare()}
@@ -103,7 +89,7 @@ export default function ServiceShareSaveActions({ service }: ServiceShareSaveAct
             <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
           )}
         </span>
-        <span className="text-sm font-normal text-neutral-900">Share</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Share</span>
       </button>
 
       <button
@@ -124,7 +110,7 @@ export default function ServiceShareSaveActions({ service }: ServiceShareSaveAct
             />
           )}
         </span>
-        <span className="text-sm font-normal text-neutral-900">Save</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Save</span>
       </button>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import type { MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import Link from 'next/link';
 import { discoverBody } from '@/components/LangingHome/landingTypography';
 import JobCompanyLogo from './JobCompanyLogo';
@@ -11,7 +11,7 @@ import {
   type Job,
 } from './jobListData';
 import { getJobsLiveSubtitle } from '@/lib/jobApi';
-import { toggleJobSaved, useSavedJobIds } from './jobBookmarks';
+import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 interface JobRelatedJobsProps {
   job: Job;
@@ -24,33 +24,47 @@ function MetaDivider() {
 
 export default function JobRelatedJobs({ job, relatedJobs = [] }: JobRelatedJobsProps) {
   const related = relatedJobs;
-  const savedJobIds = useSavedJobIds();
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
 
-  const toggleStar = (jobId: string, e: MouseEvent) => {
+  useEffect(() => {
+    setSavedSlugs(buildBookmarkSlugSet(related));
+  }, [related]);
+
+  const toggleStar = async (relatedJob: Job, e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleJobSaved(jobId);
+    const slug = resolveListingSlug(relatedJob.slug, relatedJob.id);
+    const isSaved = savedSlugs.has(slug);
+    const next = await toggleListingBookmark(slug, isSaved, 'job');
+    if (next === null) return;
+    setSavedSlugs((prev) => {
+      const updated = new Set(prev);
+      if (next) updated.add(slug);
+      else updated.delete(slug);
+      return updated;
+    });
   };
 
   if (related.length === 0) return null;
 
   return (
-    <section className="mt-16">
-      <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">Related Jobs</h2>
+    <section className="mt-12 sm:mt-16">
+      <h2 className="text-base font-normal tracking-tight text-black sm:text-lg md:text-xl">Related Jobs</h2>
       <p className="mt-1 text-sm font-light text-neutral-500">
         {getJobsLiveSubtitle(related.length > 0 ? related.length + 1 : 1)}
       </p>
 
       <ul className={`${discoverBody} mt-6 list-none space-y-4 p-0`}>
         {related.map((relatedJob) => {
-          const isStarred = savedJobIds.includes(relatedJob.id);
+          const slug = resolveListingSlug(relatedJob.slug, relatedJob.id);
+          const isStarred = savedSlugs.has(slug);
           const locationLabel = getJobLocationLabel(relatedJob.location);
 
           return (
             <li key={relatedJob.id}>
               <Link
                 href={getJobDetailPath(relatedJob)}
-                className="group block rounded-xl border border-gray-200 bg-white p-5 transition-colors hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                className="group block rounded-xl border border-gray-200 bg-white p-4 transition-colors hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] sm:p-5"
               >
                 <div className="flex items-start gap-4">
                   <div className="relative shrink-0">
@@ -70,12 +84,12 @@ export default function JobRelatedJobs({ job, relatedJobs = [] }: JobRelatedJobs
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-[15px] font-normal leading-snug text-black transition-colors group-hover:text-[#45a874]">
+                      <p className="line-clamp-2 text-sm font-normal leading-snug text-black transition-colors group-hover:text-[#45a874] sm:text-[15px]">
                         {relatedJob.title}
                       </p>
                       <button
                         type="button"
-                        onClick={(e) => toggleStar(relatedJob.id, e)}
+                        onClick={(e) => void toggleStar(relatedJob, e)}
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors ${
                           isStarred
                             ? 'border-amber-300 bg-amber-50 text-amber-500'
