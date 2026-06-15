@@ -1,21 +1,30 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { AlertCircle, Loader2, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { mapTaskQuestionToProjectItem } from '@/lib/projectApi';
-import { taskService } from '@/services/task.service';
 import {
-  buildProjectQuestions,
+  askListingQuestion,
+  answerListingQuestion,
+  fetchListingQuestions,
+  notifyListingQuestionsChanged,
+  resolveListingQuestionKind,
+  type ListingQuestionKind,
+} from '@/lib/listingQuestions';
+import {
   type Project,
   type ProjectQuestionItem,
 } from '@/components/projects/projectListData';
+import UserAvatar from '@/components/common/UserAvatar';
+import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 
 interface TaskQuestionsProps {
   project: Project;
+  listingKind?: ListingQuestionKind;
   /** Render inside tab panel — hides section chrome */
   embedded?: boolean;
   onCountChange?: (count: number) => void;
@@ -32,6 +41,7 @@ function formatRelativeTime(iso?: string): string {
 
 export default function TaskQuestions({
   project,
+  listingKind = 'task',
   embedded = false,
   onCountChange,
 }: TaskQuestionsProps) {
@@ -39,10 +49,11 @@ export default function TaskQuestions({
   const { user } = useAuth();
   const posterName = project.companyName;
   const taskSlug = project.slug;
+  const resolvedKind = resolveListingQuestionKind(listingKind);
+  const listingLabel = resolvedKind === 'project' ? 'project' : 'task';
+  const applicantLabel = resolvedKind === 'project' ? 'freelancers' : 'taskers';
 
-  const seedQuestions = useMemo(() => buildProjectQuestions(project), [project]);
-
-  const [questions, setQuestions] = useState<ProjectQuestionItem[]>(seedQuestions);
+  const [questions, setQuestions] = useState<ProjectQuestionItem[]>([]);
   const [questionText, setQuestionText] = useState('');
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
@@ -60,27 +71,30 @@ export default function TaskQuestions({
 
     setLoadingQuestions(true);
     try {
-      const response = await taskService.getTaskQuestions(taskSlug);
+      const response = await fetchListingQuestions(taskSlug, resolvedKind);
       if (response.success && response.data) {
         setQuestions(
           response.data.map((item) => mapTaskQuestionToProjectItem(item, posterName)),
         );
+      } else {
+        setQuestions([]);
       }
     } catch {
-      // Non-blocking: keep seed/empty state
+      setQuestions([]);
     } finally {
       setLoadingQuestions(false);
     }
-  }, [posterName, taskSlug]);
+  }, [posterName, resolvedKind, taskSlug]);
 
   useEffect(() => {
-    setQuestions(seedQuestions);
     setQuestionText('');
     setAnswerDrafts({});
     if (taskSlug) {
       void loadQuestions();
+    } else {
+      setQuestions([]);
     }
-  }, [project.id, taskSlug, seedQuestions, loadQuestions]);
+  }, [project.id, taskSlug, loadQuestions]);
 
   const handleAskQuestion = useCallback(async () => {
     const trimmed = questionText.trim();
@@ -92,22 +106,27 @@ export default function TaskQuestions({
     }
 
     if (isOwner) {
-      toast.error('You cannot ask questions on your own task.');
+      toast.error(
+        resolvedKind === 'project'
+          ? 'You cannot ask questions on your own project.'
+          : 'You cannot ask questions on your own task.',
+      );
       return;
     }
 
     if (!taskSlug) {
-      toast.error('Questions are not available for this task.');
+      toast.error(`Questions are not available for this ${listingLabel}.`);
       return;
     }
 
     setSubmittingQuestion(true);
     try {
-      const response = await taskService.askQuestion(taskSlug, trimmed);
+      const response = await askListingQuestion(taskSlug, trimmed, resolvedKind);
       if (response.success && response.data) {
         setQuestionText('');
         toast.success('Question posted');
         await loadQuestions();
+        notifyListingQuestionsChanged();
       } else {
         toast.error(response.message || 'Failed to post question');
       }
@@ -120,7 +139,7 @@ export default function TaskQuestions({
     } finally {
       setSubmittingQuestion(false);
     }
-  }, [isOwner, loadQuestions, questionText, router, taskSlug, user]);
+  }, [isOwner, listingLabel, loadQuestions, questionText, resolvedKind, router, taskSlug, user]);
 
   const handleAnswerQuestion = useCallback(
     async (questionId: string) => {
@@ -128,18 +147,23 @@ export default function TaskQuestions({
       if (!trimmed) return;
 
       if (!canAnswer) {
-        toast.error('Only the task poster can reply to questions.');
+        toast.error(`Only the ${listingLabel} poster can reply to questions.`);
         return;
       }
 
       if (!taskSlug) {
-        toast.error('Questions are not available for this task.');
+        toast.error(`Questions are not available for this ${listingLabel}.`);
         return;
       }
 
       setSubmittingAnswerId(questionId);
       try {
-        const response = await taskService.answerQuestion(taskSlug, questionId, trimmed);
+        const response = await answerListingQuestion(
+          taskSlug,
+          questionId,
+          trimmed,
+          resolvedKind,
+        );
         if (response.success && response.data) {
           setQuestions((prev) =>
             prev.map((q) =>
@@ -154,6 +178,7 @@ export default function TaskQuestions({
             return next;
           });
           toast.success('Reply posted');
+          notifyListingQuestionsChanged();
         } else {
           toast.error(response.message || 'Failed to post reply');
         }
@@ -167,7 +192,7 @@ export default function TaskQuestions({
         setSubmittingAnswerId(null);
       }
     },
-    [answerDrafts, canAnswer, posterName, taskSlug],
+    [answerDrafts, canAnswer, listingLabel, posterName, resolvedKind, taskSlug],
   );
 
   const unansweredCount = questions.filter((q) => !q.answer?.trim()).length;
@@ -189,12 +214,14 @@ export default function TaskQuestions({
             <span className="text-base font-normal text-neutral-500">({questions.length})</span>
           </h2>
           <p className="mt-1 text-sm font-normal text-neutral-500">
-            Ask about scope, timing, or requirements before you make an offer.
+            Ask about scope, timing, or requirements before you{' '}
+          {resolvedKind === 'project' ? 'send a proposal' : 'make an offer'}.
           </p>
         </div>
       ) : (
         <p className="mb-4 text-sm font-normal text-neutral-500">
-          Ask about scope, timing, or requirements before you make an offer.
+          Ask about scope, timing, or requirements before you{' '}
+          {resolvedKind === 'project' ? 'send a proposal' : 'make an offer'}.
         </p>
       )}
 
@@ -233,7 +260,7 @@ export default function TaskQuestions({
                 type="button"
                 disabled={!questionText.trim() || submittingQuestion}
                 onClick={() => void handleAskQuestion()}
-                className="absolute bottom-3 right-3 rounded-full bg-[#222222] p-2.5 text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="absolute bottom-3 right-3 rounded-full bg-[#52C47F] p-2.5 text-white transition-colors hover:bg-[#49b071] disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Post question"
               >
                 {submittingQuestion ? (
@@ -246,15 +273,16 @@ export default function TaskQuestions({
           </div>
         ) : (
           <div className="rounded-lg border border-neutral-200 bg-neutral-50/80 px-5 py-4 text-sm font-normal text-neutral-600">
-            You posted this task. Taskers can ask questions here — reply in the list below when
+            You posted this {listingLabel}. {applicantLabel.charAt(0).toUpperCase()}
+            {applicantLabel.slice(1)} can ask questions here — reply in the list below when
             questions come in.
           </div>
         )}
 
         {canAnswer && unansweredCount > 0 ? (
           <p className="text-sm font-normal text-neutral-600">
-            Reply to {unansweredCount} open question{unansweredCount === 1 ? '' : 's'} so taskers
-            know more about your task.
+            Reply to {unansweredCount} open question{unansweredCount === 1 ? '' : 's'} so{' '}
+            {applicantLabel} know more about your {listingLabel}.
           </p>
         ) : null}
 
@@ -270,7 +298,7 @@ export default function TaskQuestions({
             </div>
           ) : questions.length === 0 ? (
             <p className="text-sm font-normal text-neutral-500">
-              No questions yet. Be the first to ask about this task.
+              No questions yet. Be the first to ask about this {listingLabel}.
             </p>
           ) : (
             questions.map((q) => (
@@ -279,14 +307,12 @@ export default function TaskQuestions({
                 className="rounded-lg border border-neutral-200 bg-white px-5 py-5 sm:px-6 sm:py-6"
               >
                 <div className="flex items-start gap-4">
-                  <img
-                    src={
-                      q.askedByImage ||
-                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150'
-                    }
+                  <UserAvatar
+                    src={q.askedByImage}
+                    name={q.askedByName}
                     alt={q.askedByName}
-                    className="h-11 w-11 shrink-0 rounded-full border border-neutral-100 object-cover"
-                    referrerPolicy="no-referrer"
+                    size="md"
+                    className="h-11 w-11 shrink-0"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -306,8 +332,17 @@ export default function TaskQuestions({
                 {q.answer?.trim() ? (
                   <div className="ml-4 mt-4 border-l-2 border-neutral-200 pl-4 sm:ml-14 sm:pl-6">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-xs font-normal text-white">
-                        {posterName.charAt(0)}
+                      <div className="relative shrink-0">
+                        <EmployerAvatarCircle
+                          name={project.employerLogoText || posterName}
+                          avatarUrl={project.ownerAvatarUrl}
+                          avatarBg={project.companyLogoBg}
+                          verified={project.verified}
+                          sizeClass="h-9 w-9"
+                          textClass="text-xs font-semibold"
+                          useDemoIcon={!project.slug}
+                          iconType={project.companyIconType}
+                        />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -343,7 +378,7 @@ export default function TaskQuestions({
                         type="button"
                         disabled={!(answerDrafts[q.id] || '').trim() || submittingAnswerId === q.id}
                         onClick={() => void handleAnswerQuestion(q.id)}
-                        className="absolute bottom-3 right-3 rounded-full bg-[#222222] p-2 text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="absolute bottom-3 right-3 rounded-full bg-[#52C47F] p-2 text-white transition-colors hover:bg-[#49b071] disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="Post reply"
                       >
                         {submittingAnswerId === q.id ? (
@@ -356,7 +391,7 @@ export default function TaskQuestions({
                   </div>
                 ) : (
                   <p className="ml-4 mt-3 text-xs font-normal italic text-neutral-500 sm:ml-14 sm:text-sm">
-                    Waiting for the task poster to reply.
+                    Waiting for the {listingLabel} poster to reply.
                   </p>
                 )}
               </article>

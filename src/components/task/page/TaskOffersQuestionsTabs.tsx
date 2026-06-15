@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Project } from '@/components/projects/projectListData';
+import {
+  fetchListingQuestions,
+  type ListingQuestionKind,
+} from '@/lib/listingQuestions';
 import TaskOffers from './TaskOffers';
 import TaskQuestions from './TaskQuestions';
 
@@ -9,6 +13,7 @@ type TabId = 'offers' | 'questions';
 
 interface TaskOffersQuestionsTabsProps {
   project: Project;
+  listingKind?: ListingQuestionKind;
   taskStatus?: string;
   initialOfferCount?: number;
   offerRefreshKey?: number;
@@ -18,6 +23,7 @@ interface TaskOffersQuestionsTabsProps {
 
 export default function TaskOffersQuestionsTabs({
   project,
+  listingKind = 'task',
   taskStatus,
   initialOfferCount = 0,
   offerRefreshKey = 0,
@@ -26,18 +32,37 @@ export default function TaskOffersQuestionsTabs({
 }: TaskOffersQuestionsTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('offers');
   const [offerCount, setOfferCount] = useState(initialOfferCount);
-  const [questionCount, setQuestionCount] = useState(project.questions?.length ?? 0);
+  const [questionCount, setQuestionCount] = useState(0);
+
+  useEffect(() => {
+    if (!project.slug) {
+      setQuestionCount(0);
+      return;
+    }
+
+    let cancelled = false;
+    void fetchListingQuestions(project.slug, listingKind).then((response) => {
+      if (cancelled) return;
+      if (response.success && response.data) {
+        setQuestionCount(response.data.length);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [listingKind, project.slug]);
 
   const tabButtonClass = (tab: TabId) =>
     `flex-1 min-w-0 rounded-full px-4 py-2.5 text-sm font-semibold transition-all sm:px-8 sm:py-3 sm:text-base ${
       activeTab === tab
-        ? 'bg-[#000d45] text-white shadow-md'
-        : 'bg-transparent text-[#000d45]/70 hover:bg-[#fff3bf] hover:text-[#000d45]'
+        ? 'bg-[#52C47F] text-white shadow-md'
+        : 'bg-transparent text-neutral-600 hover:bg-[#52C47F]/10 hover:text-[#218F56]'
     }`;
 
   return (
     <section className="mt-12 border-t border-neutral-200 pt-10">
-      <div className="mb-6 flex w-full max-w-full rounded-full bg-[#fff9db] p-1">
+      <div className="mb-6 flex w-full max-w-full rounded-full bg-[#EBF9F1] p-1">
         <button type="button" onClick={() => setActiveTab('offers')} className={tabButtonClass('offers')}>
           Offers
           <span className={activeTab === 'offers' ? 'ml-1.5 opacity-80' : 'ml-1.5 opacity-50'}>
@@ -68,7 +93,12 @@ export default function TaskOffersQuestionsTabs({
           onCountChange={setOfferCount}
         />
       ) : (
-        <TaskQuestions project={project} embedded onCountChange={setQuestionCount} />
+        <TaskQuestions
+          project={project}
+          listingKind={listingKind}
+          embedded
+          onCountChange={setQuestionCount}
+        />
       )}
     </section>
   );

@@ -54,6 +54,8 @@ export interface Project {
   questions?: ProjectQuestionItem[];
   /** Task listing status (open, assigned, in_progress, completed, cancelled, …) */
   status?: string;
+  /** From API `is_open` — true when status is open and bids are allowed */
+  isOpenForBids?: boolean;
 }
 
 export function getProjectSchedule(project: Project): ProjectScheduleInfo | null {

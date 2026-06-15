@@ -117,7 +117,7 @@ export default function FreelancerSlugPage() {
         return;
       }
 
-      router.push(`/message?conversation=${conversationRes.data.id}`);
+      router.push(dashboardMessageConversationHref(conversationRes.data.id));
     } catch {
       triggerNotification(`Could not send your message to ${name}. Please try again.`);
     }

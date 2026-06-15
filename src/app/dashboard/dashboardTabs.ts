@@ -4,6 +4,7 @@ export const DASHBOARD_TABS = [
   'saved',
   'message',
   'reviews',
+  'questions',
   'statements',
   'wallet',
   'services',
@@ -44,6 +45,7 @@ export function tabFromPathname(pathname: string): DashboardTab {
   const segment = rest.split('/')[0];
 
   if (!segment) return 'dashboard';
+  if (segment === 'qustions') return 'questions';
   if (isDashboardTab(segment) && segment !== 'dashboard') return segment;
 
   return 'dashboard';
@@ -104,6 +106,7 @@ export const EMPLOYER_NAV_TABS: DashboardTab[] = [
   'statements',
   'wallet',
   'reviews',
+  'questions',
   'saved',
   'settings',
 ];
@@ -118,6 +121,7 @@ export const FREELANCER_NAV_TABS: DashboardTab[] = [
   'statements',
   'wallet',
   'reviews',
+  'questions',
   'saved',
   'settings',
 ];

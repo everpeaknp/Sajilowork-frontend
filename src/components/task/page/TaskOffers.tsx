@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { bidService, extractBidList } from '@/services/bid.service';
 import { paymentService } from '@/services/payment.service';
 import { formatNPR } from '@/lib/nepalLocale';
+import { dashboardMessageBidHref } from '@/lib/dashboardChat';
 import { isListingOpenForBids } from '@/lib/taskUtils';
 import { getMediaUrl } from '@/lib/utils';
 import type { Bid } from '@/types';
@@ -314,7 +315,7 @@ export default function TaskOffers({
                             toast.error('Could not open messaging for this offer');
                             return;
                           }
-                          router.push(`/message?bid=${bid.id}&tasker=${taskerId}`);
+                          router.push(dashboardMessageBidHref(bid.id, taskerId));
                         }}
                         className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-md border border-[#52C47F] bg-white px-5 py-2.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#52C47F] hover:text-white"
                       >

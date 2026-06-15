@@ -9,7 +9,9 @@ import {
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
 
-const SUGGESTIONS_DATABASE = [
+import { fetchSearchSuggestions } from '@/lib/listingSearchApi';
+
+const FALLBACK_SUGGESTIONS = [
   'Furniture assembly',
   'House cleaning',
   'Moving help',
@@ -35,14 +37,23 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
-    if (!query.trim()) {
+    if (!query.trim() || query.trim().length < 2) {
       setSuggestions([]);
       return;
     }
-    const filtered = SUGGESTIONS_DATABASE.filter((item) =>
-      item.toLowerCase().includes(query.toLowerCase()),
-    ).slice(0, 5);
-    setSuggestions(filtered);
+    const timer = window.setTimeout(() => {
+      void fetchSearchSuggestions(query, 5).then((items) => {
+        if (items.length) {
+          setSuggestions(items);
+          return;
+        }
+        const filtered = FALLBACK_SUGGESTIONS.filter((item) =>
+          item.toLowerCase().includes(query.toLowerCase()),
+        ).slice(0, 5);
+        setSuggestions(filtered);
+      });
+    }, 250);
+    return () => window.clearTimeout(timer);
   }, [query]);
 
   const performSearch = (selectedQuery: string) => {

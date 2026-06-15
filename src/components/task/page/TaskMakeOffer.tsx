@@ -10,7 +10,7 @@ import { bidService, getMyBidForTask } from '@/services/bid.service';
 import { formatNPR } from '@/lib/nepalLocale';
 import {
   getListingClosedOfferMessage,
-  isListingOpenForBids,
+  isProjectOpenForBids,
 } from '@/lib/taskUtils';
 import type { Bid } from '@/types';
 import type { Project } from '@/components/projects/projectListData';
@@ -45,7 +45,7 @@ export default function TaskMakeOffer({ project, onSubmitted }: TaskMakeOfferPro
   const isOwner =
     Boolean(user?.id) && Boolean(project.ownerId) && String(user.id) === String(project.ownerId);
 
-  const offersOpen = isListingOpenForBids(project.status);
+  const offersOpen = isProjectOpenForBids(project);
 
   const loadExistingBid = useCallback(async () => {
     if (!user || isOwner || !project.id || !offersOpen) {
@@ -76,7 +76,7 @@ export default function TaskMakeOffer({ project, onSubmitted }: TaskMakeOfferPro
     }
 
     if (!offersOpen) {
-      toast.error(getListingClosedOfferMessage(project.status, 'task'));
+      toast.error(getListingClosedOfferMessage(project.status, 'task', project.isOpenForBids));
       return;
     }
 
@@ -156,7 +156,7 @@ export default function TaskMakeOffer({ project, onSubmitted }: TaskMakeOfferPro
         <p className="text-sm font-normal text-neutral-600">
           {offersOpen
             ? 'You posted this task. Taskers submit offers here — review them in the list above or under Dashboard → My Offers.'
-            : getListingClosedOfferMessage(project.status, 'task')}
+            : getListingClosedOfferMessage(project.status, 'task', project.isOpenForBids)}
         </p>
       </section>
     );
@@ -169,7 +169,7 @@ export default function TaskMakeOffer({ project, onSubmitted }: TaskMakeOfferPro
           Make an Offer
         </h2>
         <p className="text-sm font-normal text-neutral-600">
-          {getListingClosedOfferMessage(project.status, 'task')}
+          {getListingClosedOfferMessage(project.status, 'task', project.isOpenForBids)}
         </p>
       </section>
     );

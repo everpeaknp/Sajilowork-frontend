@@ -20,7 +20,8 @@ export function projectToOfferTask(project: Project): Task {
     budget_min: project.budgetMin,
     budget_max: project.budgetMax,
     location_type: project.location === 'Remote' ? 'remote' : 'in_person',
-    status: (project.status ?? 'open') as Task['status'],
+    status: (project.status ?? 'draft') as Task['status'],
+    is_open: project.isOpenForBids ?? project.status === 'open',
     owner: project.ownerId ? ({ id: project.ownerId } as Task['owner']) : undefined,
   } as Task;
 }

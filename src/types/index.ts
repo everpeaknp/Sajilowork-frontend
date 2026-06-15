@@ -270,6 +270,7 @@ export interface Bid {
   task_owner_logo_text?: string | null;
   task_owner_logo_color?: string | null;
   task_owner_business_name?: string | null;
+  task_owner_name?: string | null;
   tasker: User;
   amount: number;
   currency?: string;

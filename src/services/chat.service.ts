@@ -54,6 +54,8 @@ export const chatService = {
     task?: string;
     bid?: string;
     archived?: boolean;
+    /** employer = listing owner inbox; tasker = freelancer inbox */
+    view?: 'employer' | 'tasker';
   }): Promise<ApiResponse<PaginatedResponse<Conversation>>> {
     return apiClient.get<PaginatedResponse<Conversation>>('/chat/conversations/', { params });
   },

@@ -18,6 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTaskerDashboardNavOptional } from '@/context/TaskerDashboardNavContext';
 import { useAuth } from '@/hooks/useAuth';
 import { TASK_BROWSE_PATH, TASK_MAP_PATH } from '@/lib/taskBrowsePath';
+import { dashboardMessageConversationHref, DASHBOARD_MESSAGES_PATH } from '@/lib/dashboardChat';
 import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -78,8 +79,8 @@ function getNotificationHref(notification: NotificationType): string {
 
   if (notification.notification_type === 'message_received') {
     const convId = data?.conversation_id ?? data?.conversation;
-    if (convId) return `/message?conversation=${convId}`;
-    return '/message';
+    if (convId) return dashboardMessageConversationHref(String(convId));
+    return DASHBOARD_MESSAGES_PATH;
   }
 
   if (
@@ -324,7 +325,7 @@ export default function Navbar() {
 
   const openConversation = (conversationId: string) => {
     setMessagesOpen(false);
-    router.push(`/message?conversation=${conversationId}`);
+    router.push(dashboardMessageConversationHref(conversationId));
   };
 
   const handleLogout = async () => {
@@ -719,7 +720,7 @@ export default function Navbar() {
                           <button
                             onClick={() => {
                               setMessagesOpen(false);
-                              router.push('/message');
+                              router.push(DASHBOARD_MESSAGES_PATH);
                             }}
                             className="w-full text-center text-xs font-bold text-brand-emerald hover:underline pt-2 cursor-pointer"
                           >

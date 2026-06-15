@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowUpRight, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { isListingOpenForBids } from '@/lib/taskUtils';
+import { isProjectOpenForBids } from '@/lib/taskUtils';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectBuyerMeta, type Project } from './projectListData';
@@ -85,7 +85,7 @@ export default function ProjectSidebar({
 }: ProjectSidebarProps) {
   const { user } = useAuth();
   const buyer = getProjectBuyerMeta(project);
-  const offersOpen = isListingOpenForBids(project.status);
+  const offersOpen = isProjectOpenForBids(project);
   const isOwner =
     Boolean(user?.id) && Boolean(project.ownerId) && String(user.id) === String(project.ownerId);
   const employerHref = resolveEmployerProfileHref({

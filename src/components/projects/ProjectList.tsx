@@ -21,7 +21,7 @@ import {
   formatProjectLocation,
   locationDisplay,
 } from './projectListData';
-import { fetchPublicProjects } from '@/lib/projectApi';
+import { searchBrowseProjects } from '@/lib/listingSearchApi';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectDetailPath } from './projectSlug';
@@ -185,25 +185,8 @@ export default function ProjectList({
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingProjects(true);
-    void fetchPublicProjects()
-      .then((items) => {
-        if (cancelled) return;
-        setProjects(items);
-      })
-      .catch(() => {
-        if (!cancelled) setProjects([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingProjects(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const [totalProjects, setTotalProjects] = useState(0);
+  const itemsPerPage = 8;
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     category: false,
@@ -245,6 +228,67 @@ export default function ProjectList({
   ]);
 
   useEffect(() => {
+    let cancelled = false;
+    setLoadingProjects(true);
+
+    const categoryQuery = selectedCategory !== 'All' ? selectedCategory : '';
+    const skillQuery = selectedSkill !== 'All' ? selectedSkill : '';
+    const queryParts = [searchQuery.trim(), categoryQuery, skillQuery].filter(Boolean);
+
+    void searchBrowseProjects({
+      query: queryParts.join(' ').trim() || undefined,
+      location: searchLocation.trim() || undefined,
+      page: currentPage,
+      page_size: itemsPerPage,
+      sort_by: sortBy === 'budget-high' ? 'budget_high' : 'newest',
+    })
+      .then((result) => {
+        if (cancelled) return;
+        let items = result.items;
+        if (selectedType !== 'All') {
+          items = items.filter((p) => p.type === selectedType);
+        }
+        if (selectedLevel !== 'All') {
+          items = items.filter((p) => p.experienceLevel === selectedLevel);
+        }
+        if (selectedLocation !== 'All') {
+          items = items.filter((p) => p.location === selectedLocation);
+        }
+        setProjects(items);
+        setTotalProjects(result.total);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProjects([]);
+          setTotalProjects(0);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingProjects(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    searchQuery,
+    searchLocation,
+    selectedCategory,
+    selectedType,
+    selectedLevel,
+    selectedLocation,
+    selectedSkill,
+    sortBy,
+    currentPage,
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalProjects / itemsPerPage));
+  const startIdx = totalProjects === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endIdx = Math.min(currentPage * itemsPerPage, totalProjects);
+
+  const paginatedProjectsList = projects;
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (sortMenuRef.current && !sortMenuRef.current.contains(event.target as Node)) {
         setSortDropdownOpen(false);
@@ -262,103 +306,6 @@ export default function ProjectList({
   const toggleAccordion = (key: string) => {
     setOpenAccordions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  const filteredProjectsList = useMemo(() => {
-    let result = [...projects];
-
-    if (selectedCategory !== 'All') {
-      result = result.filter((p) => p.category === selectedCategory);
-    }
-
-    if (selectedSalary !== 'All') {
-      if (selectedSalary === '0-1500') {
-        result = result.filter((p) => p.budgetMax < 1500);
-      } else if (selectedSalary === '1500-2500') {
-        result = result.filter((p) => p.budgetMax >= 1500 && p.budgetMax <= 2500);
-      } else if (selectedSalary === '2500-4000') {
-        result = result.filter((p) => p.budgetMax >= 2500 && p.budgetMax <= 4000);
-      } else if (selectedSalary === '4000+') {
-        result = result.filter((p) => p.budgetMin >= 4000);
-      }
-    }
-
-    if (selectedType !== 'All') {
-      result = result.filter((p) => p.type === selectedType);
-    }
-
-    if (selectedLevel !== 'All') {
-      result = result.filter((p) => p.experienceLevel === selectedLevel);
-    }
-
-    if (selectedLocation !== 'All') {
-      result = result.filter((p) => p.location === selectedLocation);
-    }
-
-    if (selectedSkill !== 'All') {
-      result = result.filter((p) => p.skills.includes(selectedSkill));
-    }
-
-    if (selectedLanguage !== 'All') {
-      result = result.filter((_p, idx) => {
-        const lang = idx % 3 === 0 ? 'English' : idx % 3 === 1 ? 'Hindi' : 'Nepali';
-        return lang === selectedLanguage;
-      });
-    }
-
-    const query = searchQuery.trim().toLowerCase();
-    if (query) {
-      result = result.filter(
-        (p) =>
-          p.title.toLowerCase().includes(query) ||
-          p.companyName.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query) ||
-          p.skills.some((skill) => skill.toLowerCase().includes(query)),
-      );
-    }
-
-    const location = searchLocation.trim().toLowerCase();
-    if (location) {
-      result = result.filter((p) => {
-        const workLocation = p.location.toLowerCase();
-        const displayLocation = locationDisplay(p.location).toLowerCase();
-        return workLocation.includes(location) || displayLocation.includes(location);
-      });
-    }
-
-    if (sortBy === 'budget-high') {
-      result.sort((a, b) => b.budgetMax - a.budgetMax);
-    } else if (sortBy === 'duration-low') {
-      result.sort((a, b) => a.duration.localeCompare(b.duration));
-    } else {
-      result.sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    return result;
-  }, [
-    projects,
-    selectedCategory,
-    selectedSalary,
-    selectedType,
-    selectedLevel,
-    selectedLocation,
-    selectedLanguage,
-    selectedSkill,
-    sortBy,
-    searchQuery,
-    searchLocation,
-  ]);
-
-  const itemsPerPage = 8;
-  const totalProjects = filteredProjectsList.length;
-  const totalPages = Math.max(1, Math.ceil(totalProjects / itemsPerPage));
-  const startIdx = totalProjects === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-  const endIdx = Math.min(currentPage * itemsPerPage, totalProjects);
-
-  const paginatedProjectsList = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredProjectsList.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredProjectsList, currentPage]);
 
   const renderPageNumbers = () => {
     const pages: (number | string)[] = [];
@@ -636,7 +583,7 @@ export default function ProjectList({
 
             {loadingProjects ? (
               <MarketplaceBrowseRowListSkeleton count={4} />
-            ) : filteredProjectsList.length === 0 ? (
+            ) : paginatedProjectsList.length === 0 ? (
               <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
                 <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
                 <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35]`}>
@@ -802,7 +749,7 @@ export default function ProjectList({
               </div>
             )}
 
-            {!loadingProjects && filteredProjectsList.length > 0 && (
+            {!loadingProjects && paginatedProjectsList.length > 0 && (
               <div className="flex flex-col items-center justify-center pb-4 pt-8">
                 <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
                   <button

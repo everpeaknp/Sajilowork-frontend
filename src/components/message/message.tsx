@@ -17,7 +17,9 @@ import { toast } from 'sonner';
 import UserAvatar from '@/components/common/UserAvatar';
 import { chatService } from '@/services/chat.service';
 import { useAuthStore } from '@/store/auth.store';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useMultiConversationWebSocket } from '@/hooks/useMultiConversationWebSocket';
+import { useChatTyping } from '@/hooks/useChatTyping';
+import type { WebSocketMessage } from '@/hooks/useWebSocket';
 import type { Conversation, Message, PaginatedResponse } from '@/types';
 import {
   getTaskStatusFromConversation,
@@ -25,7 +27,7 @@ import {
   messagingDisabledReason,
 } from '@/lib/chatMessaging';
 import { formatChatApiError } from '@/lib/chatErrors';
-import { buildChatWebSocketUrl, isWebSocketsEnabled } from '@/lib/chatWebSocket';
+import { isWebSocketsEnabled } from '@/lib/chatWebSocket';
 
 function extractList<T>(data: PaginatedResponse<T> | T[] | null | undefined): T[] {
   if (!data) return [];
@@ -443,18 +445,14 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
     [user?.full_name]
   );
 
-  // One stable socket per person (latest thread) — avoids reconnect errors when switching task reply.
-  const wsConversationId = useMemo(() => {
+  const wsConversationIds = useMemo(() => {
     if (selectedGroup) {
-      return conversationKey(selectedGroup.latest) ?? selectedId;
+      return selectedGroup.conversations
+        .map((c) => conversationKey(c))
+        .filter((id): id is string => Boolean(id));
     }
-    return selectedId;
+    return selectedId ? [selectedId] : [];
   }, [selectedGroup, selectedId]);
-
-  const wsUrl =
-    isWebSocketsEnabled() && wsConversationId
-      ? buildChatWebSocketUrl(wsConversationId)
-      : null;
 
   const loadGroupMessages = useCallback(
     async (convs: Conversation[], options?: { silent?: boolean }) => {
@@ -473,10 +471,14 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
         const merged = sortMessages(batches.flat()) as MessageWithTask[];
         if (options?.silent) {
           setMessages((prev) => {
-            if (messagesContentSignature(prev) === messagesContentSignature(merged)) {
+            const byId = new Map<string, MessageWithTask>();
+            for (const msg of prev) byId.set(String(msg.id), msg);
+            for (const msg of merged) byId.set(String(msg.id), msg);
+            const next = sortMessages([...byId.values()]) as MessageWithTask[];
+            if (messagesContentSignature(prev) === messagesContentSignature(next)) {
               return prev;
             }
-            return merged;
+            return next;
           });
         } else {
           shouldScrollToBottomRef.current = true;
@@ -492,8 +494,23 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
     []
   );
 
+  const activeConversationId = replyConversationId ?? selectedId;
+
+  const sendWsMessageRef = useRef<(conversationId: string, message: WebSocketMessage) => void>(
+    () => undefined,
+  );
+
+  const { otherUserTyping, notifyTyping, stopTyping, clearOtherUserTyping, handleRealtimeEvent } = useChatTyping({
+    activeConversationId,
+    currentUserId: user?.id,
+    canSend: canSendMessages,
+    sendWsMessage: (conversationId, message) => sendWsMessageRef.current(conversationId, message),
+  });
+
   const handleRealtimeMessage = useCallback(
-    (payload: { type: string; message?: Message }) => {
+    (payload: WebSocketMessage & { type: string; message?: Message }) => {
+      handleRealtimeEvent(payload);
+
       if (payload.type === 'error') {
         const errText =
           typeof payload.message === 'string'
@@ -533,16 +550,22 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
       patchConversationPreview(conversationId, previewContent, previewTime);
 
       if (String(incoming.sender?.id) !== String(user?.id)) {
+        clearOtherUserTyping(String(incoming.sender?.id));
         void chatService.markAllAsRead(conversationId).catch(() => undefined);
       }
     },
-    [selectedGroup, user?.id, patchConversationPreview, loadConversations]
+    [selectedGroup, user?.id, patchConversationPreview, loadConversations, handleRealtimeEvent, clearOtherUserTyping],
   );
 
-  const { isConnected: wsConnected } = useWebSocket(wsUrl, {
-    enabled: Boolean(isAuthenticated && wsConversationId),
-    onMessage: (msg) => handleRealtimeMessage(msg as any),
-  });
+  const { isConnected: wsConnected, sendMessage: sendWsMessage } = useMultiConversationWebSocket(
+    wsConversationIds,
+    {
+      enabled: Boolean(isAuthenticated && isWebSocketsEnabled() && wsConversationIds.length > 0),
+      onMessage: (msg) => handleRealtimeMessage(msg as { type: string; message?: Message }),
+    },
+  );
+
+  sendWsMessageRef.current = sendWsMessage;
 
   useEffect(() => {
     void initialize();
@@ -707,15 +730,24 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
   useEffect(() => {
     if (!selectedGroupSignature) return;
 
-    const pollMs = wsConnected ? 45000 : 20000;
-    const interval = setInterval(() => {
+    const pollMs = wsConnected ? 45000 : 4000;
+    const poll = () => {
       if (document.visibilityState === 'hidden') return;
       const group = findGroupBySignature(selectedGroupSignature);
       if (!group) return;
       void loadGroupMessages(group.conversations, { silent: true });
-    }, pollMs);
-
-    return () => clearInterval(interval);
+    };
+    const interval = setInterval(poll, pollMs);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') poll();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', poll);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', poll);
+    };
   }, [selectedGroupSignature, findGroupBySignature, loadGroupMessages, wsConnected]);
 
   useEffect(() => {
@@ -784,6 +816,7 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
     };
 
     setMessageText('');
+    stopTyping();
     shouldScrollToBottomRef.current = true;
     setMessages((prev) => sortMessages([...prev, optimisticMessage]) as MessageWithTask[]);
     patchConversationPreview(sendConversationId, trimmed, optimisticCreatedAt);
@@ -1111,6 +1144,27 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
                   );
                 })
               )}
+              {otherUserTyping ? (
+                <div className="flex items-center gap-2 px-1 pb-2 text-xs text-on-surface-variant">
+                  <span className="flex items-center gap-1">
+                    <span
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <span
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary"
+                      style={{ animationDelay: '150ms' }}
+                    />
+                    <span
+                      className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary"
+                      style={{ animationDelay: '300ms' }}
+                    />
+                  </span>
+                  <span>
+                    {otherUserTyping.userName} is typing...
+                  </span>
+                </div>
+              ) : null}
               <div ref={messagesEndRef} />
             </div>
 
@@ -1141,7 +1195,12 @@ export default function MessagesSection({ basePath = '/message' }: MessagesSecti
                   <input
                     ref={inputRef}
                     value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setMessageText(value);
+                      if (value.trim()) notifyTyping();
+                      else stopTyping();
+                    }}
                     onKeyDown={handleKeyDown}
                     placeholder={
                       canSendMessages ? 'Type a message...' : 'Messaging is closed for this task'

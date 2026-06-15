@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import UserAvatar from '@/components/common/UserAvatar';
 import { resolveOwnerAvatarBg, resolveOwnerInitials } from '@/lib/employerAvatarUtils';
 import { formatNPR, shortenCommaSeparatedLocation } from '@/lib/nepalLocale';
 import { getMediaUrl } from '@/lib/utils';
@@ -193,35 +194,30 @@ function ProposalListAvatar({
 
   if (variant === 'employer') {
     const employerRow = row as EmployerRow;
-    if (avatarSrc) {
-      return (
-        <img
-          src={avatarSrc}
-          alt=""
-          className="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-neutral-100"
-          referrerPolicy="no-referrer"
-        />
-      );
-    }
     return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal-600 text-sm font-semibold text-white ring-1 ring-neutral-100">
-        {resolveOwnerInitials(employerRow.freelancerName)}
-      </div>
-    );
-  }
-
-  if (avatarSrc) {
-    return (
-      <img
-        src={avatarSrc}
-        alt=""
-        className="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-neutral-100"
-        referrerPolicy="no-referrer"
+      <UserAvatar
+        src={avatarSrc || undefined}
+        name={employerRow.freelancerName}
+        alt={employerRow.freelancerName}
+        size="lg"
+        className="h-14 w-14 shrink-0 ring-1 ring-neutral-100"
       />
     );
   }
 
-  const displayName = row.ownerName?.trim() || row.projectTitle;
+  const displayName = row.ownerName?.trim() || 'Employer';
+  if (avatarSrc) {
+    return (
+      <UserAvatar
+        src={avatarSrc}
+        name={displayName}
+        alt={displayName}
+        size="lg"
+        className="h-14 w-14 shrink-0 ring-1 ring-neutral-100"
+      />
+    );
+  }
+
   const initials = (row.logoText?.trim() || resolveOwnerInitials(displayName)).slice(0, 2).toUpperCase();
   if (initials) {
     return (
@@ -313,7 +309,10 @@ export default function DashboardProposals() {
       avatarUrl: bid.task_owner_logo_url || undefined,
       logoText: bid.task_owner_logo_text || undefined,
       logoColor: bid.task_owner_logo_color || undefined,
-      ownerName: bid.task_owner_business_name || bid.task_title || undefined,
+      ownerName:
+        bid.task_owner_business_name?.trim() ||
+        bid.task_owner_name?.trim() ||
+        undefined,
       location: formatProposalLocation(bid.task_city),
       date: formatDisplayDate(bid.created_at),
       status: statusLabel(bid.status),

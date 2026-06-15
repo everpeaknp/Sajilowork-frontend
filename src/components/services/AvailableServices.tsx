@@ -18,7 +18,7 @@ import {
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
-import { fetchPublicServices } from '@/lib/serviceApi';
+import { searchBrowseServices } from '@/lib/listingSearchApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 import type { Service as ServiceItem } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
@@ -88,15 +88,21 @@ export default function AvailableServices({
   useEffect(() => {
     let cancelled = false;
     setLoadingServices(true);
-    const params: Record<string, string> = {};
-    if (searchQuery.trim()) params.search = searchQuery.trim();
-    if (searchCategory.trim()) params.category = searchCategory.trim();
 
-    void fetchPublicServices(params)
-      .then((items) => {
+    const categoryQuery =
+      searchCategory.trim() && searchCategory !== 'Choose Category' ? searchCategory.trim() : '';
+
+    void searchBrowseServices({
+      query: [searchQuery.trim(), categoryQuery].filter(Boolean).join(' ') || undefined,
+      page: currentPage,
+      page_size: ITEMS_PER_PAGE,
+      max_budget: maxBudget < BUDGET_DEFAULT ? maxBudget : undefined,
+      sort_by: sortBy === 'budget-high' ? 'budget_high' : 'newest',
+    })
+      .then((result) => {
         if (cancelled) return;
-        setServicesData(items);
-        setSavedSlugs(buildBookmarkSlugSet(items));
+        setServicesData(result.items);
+        setSavedSlugs(buildBookmarkSlugSet(result.items));
       })
       .catch(() => {
         if (!cancelled) setServicesData([]);
@@ -108,7 +114,18 @@ export default function AvailableServices({
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, searchCategory]);
+  }, [
+    searchQuery,
+    searchCategory,
+    deliveryTime,
+    maxBudget,
+    selectedTools,
+    selectedLocations,
+    selectedLanguages,
+    selectedLevels,
+    sortBy,
+    currentPage,
+  ]);
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));

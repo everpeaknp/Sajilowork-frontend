@@ -5,6 +5,7 @@ import DashboardProposals from './DashboardProposals';
 import DashboardSaved from './DashboardSaved';
 import DashboardMessages from './DashboardMessages';
 import DashboardReviews from './DashboardReviews';
+import DashboardQuestions from './DashboardQuestions';
 import DashboardStatements from './DashboardStatements';
 import DashboardWallet from './DashboardWallet';
 import DashboardServices from './DashboardServices';
@@ -27,6 +28,7 @@ const TAB_LABELS: Record<string, string> = {
   saved: 'Saved',
   message: 'Message',
   reviews: 'Reviews',
+  questions: 'Questions',
   statements: 'Statements',
   wallet: 'Wallet',
   services: 'Manage Services',
@@ -67,6 +69,10 @@ export default function DashboardTabContent() {
 
   if (activeTab === 'reviews') {
     return <DashboardReviews />;
+  }
+
+  if (activeTab === 'questions') {
+    return <DashboardQuestions />;
   }
 
   if (activeTab === 'statements') {

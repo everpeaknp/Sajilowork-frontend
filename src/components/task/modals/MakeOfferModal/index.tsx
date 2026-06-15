@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { userService, paymentService } from '@/services';
 import { toast } from 'sonner';
 import { notifyUserProfileUpdated, normalizeUserFromApi } from '@/lib/userProfileSync';
+import { canSubmitOfferOnTask, getListingClosedOfferMessage } from '@/lib/taskUtils';
 import { User } from '@/types';
 import ModalHeader from './ModalHeader';
 import FieldsList from './FieldsList';
@@ -318,6 +319,17 @@ export default function MakeOfferModal({
   const handleContinueToOffer = () => {
     if (!allFieldsCompleted) {
       toast.error('Please complete all required fields');
+      return;
+    }
+
+    if (offerTask && !canSubmitOfferOnTask(offerTask, user?.id)) {
+      toast.error(
+        getListingClosedOfferMessage(
+          offerTask.status,
+          listingKind === 'project' ? 'project' : 'task',
+          offerTask.is_open,
+        ),
+      );
       return;
     }
     

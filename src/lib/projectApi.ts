@@ -315,7 +315,8 @@ export function mapTaskToPublicProject(task: Task): Project {
     ownerReviews: task.bids_count ?? 0,
     schedule: resolveProjectSchedule(task, form),
     questions,
-    status: task.status || 'open',
+    status: task.status,
+    isOpenForBids: task.is_open ?? task.status === 'open',
   };
 }
 

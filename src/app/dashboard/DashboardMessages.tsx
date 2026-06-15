@@ -15,7 +15,9 @@ import { Search, ArrowUpRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { chatService } from '@/services/chat.service';
 import { useAuthStore } from '@/store/auth.store';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useMultiConversationWebSocket } from '@/hooks/useMultiConversationWebSocket';
+import { useChatTyping } from '@/hooks/useChatTyping';
+import type { WebSocketMessage } from '@/hooks/useWebSocket';
 import type { Conversation, Message, PaginatedResponse } from '@/types';
 import {
   getTaskStatusFromConversation,
@@ -23,13 +25,25 @@ import {
   messagingDisabledReason,
 } from '@/lib/chatMessaging';
 import { formatChatApiError } from '@/lib/chatErrors';
-import { buildChatWebSocketUrl, isWebSocketsEnabled } from '@/lib/chatWebSocket';
+import { isWebSocketsEnabled } from '@/lib/chatWebSocket';
 import {
+  DASHBOARD_MESSAGES_PATH,
+  dashboardMessageHref,
+  chatInboxViewParam,
+} from '@/lib/dashboardChat';
+import {
+  dashboardMessagesViewForRole,
+  emptyMessagesMessage,
+  messagesPageSubtitle,
+  otherParticipantRoleLabel,
+} from '@/lib/dashboardMessages';
+import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
+import {
+  DASHBOARD_HEADING_MD,
   DASHBOARD_MESSAGES_HEIGHT,
   DASHBOARD_PAGE_ROOT,
 } from './dashboardResponsive';
 
-const DASHBOARD_MESSAGES_PATH = '/dashboard/message';
 const MY_AVATAR_FALLBACK =
   'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
 const BADGE_COLORS = ['#27AE60', '#2D9CDB', '#F2994A', '#EB5757', '#52C47F'];
@@ -140,14 +154,15 @@ function profileImageForConversation(conv: Conversation, currentUserId?: string)
   return conv.participants?.find((p) => String(p.id) !== String(currentUserId))?.profile_image;
 }
 
-function groupSubtitle(group: PersonConversationGroup): string {
+function groupSubtitle(group: PersonConversationGroup, messagesView: 'employer' | 'tasker'): string {
   const titles = group.conversations
     .map((c) => c.task_title?.trim())
     .filter((t): t is string => Boolean(t));
   const unique = [...new Set(titles)];
-  if (unique.length === 0) return 'Conversation';
-  if (unique.length === 1) return unique[0];
-  return `${unique.length} tasks`;
+  const roleLabel = otherParticipantRoleLabel(messagesView);
+  if (unique.length === 0) return roleLabel;
+  if (unique.length === 1) return `${roleLabel} · ${unique[0]}`;
+  return `${roleLabel} · ${unique.length} listings`;
 }
 
 function groupConversationsByPerson(
@@ -205,6 +220,14 @@ function messagesHref(
   basePath: string,
   params?: Record<string, string | null | undefined>,
 ): string {
+  if (basePath === DASHBOARD_MESSAGES_PATH) {
+    return dashboardMessageHref({
+      conversation: params?.conversation ?? undefined,
+      bid: params?.bid ?? undefined,
+      task: params?.task ?? undefined,
+      tasker: params?.tasker ?? undefined,
+    });
+  }
   const sp = new URLSearchParams();
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -215,12 +238,16 @@ function messagesHref(
   return qs ? `${basePath}?${qs}` : basePath;
 }
 
-function groupToContact(group: PersonConversationGroup, index: number): Contact {
+function groupToContact(
+  group: PersonConversationGroup,
+  index: number,
+  messagesView: 'employer' | 'tasker',
+): Contact {
   const latest = group.latest;
   return {
     id: group.key,
     name: group.name,
-    role: groupSubtitle(group),
+    role: groupSubtitle(group, messagesView),
     avatar: group.avatar || MY_AVATAR_FALLBACK,
     lastMessage: latest.last_message?.content || 'No messages yet',
     time: formatMessageTime(latest.last_message?.created_at || latest.last_message_at),
@@ -234,6 +261,11 @@ function DashboardMessagesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated, initialize } = useAuthStore();
+  const sidebarRole = useDashboardSidebarRole();
+  const dashboardRole = sidebarRole === 'customer' ? 'customer' : 'tasker';
+  const messagesView = chatInboxViewParam(dashboardRole);
+  const pageSubtitle = messagesPageSubtitle(messagesView);
+  const emptyInboxMessage = emptyMessagesMessage(messagesView);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [mobilePane, setMobilePane] = useState<'list' | 'thread'>('list');
@@ -281,8 +313,8 @@ function DashboardMessagesContent() {
   }, [conversationGroups, searchQuery]);
 
   const contacts = useMemo(
-    () => filteredGroups.map((group, index) => groupToContact(group, index)),
-    [filteredGroups],
+    () => filteredGroups.map((group, index) => groupToContact(group, index, messagesView)),
+    [filteredGroups, messagesView],
   );
 
   const selectedGroup = useMemo(
@@ -311,8 +343,8 @@ function DashboardMessagesContent() {
       );
     }
     const index = conversationGroups.findIndex((g) => g.key === selectedGroup.key);
-    return groupToContact(selectedGroup, index >= 0 ? index : 0);
-  }, [selectedGroup, contacts, conversationGroups]);
+    return groupToContact(selectedGroup, index >= 0 ? index : 0, messagesView);
+  }, [selectedGroup, contacts, conversationGroups, messagesView]);
 
   const replyConversation = useMemo(() => {
     const id = replyConversationId ?? selectedId;
@@ -325,9 +357,15 @@ function DashboardMessagesContent() {
     getTaskStatusFromConversation(replyConversation),
   );
 
-  const activeMessages: UiMessage[] = useMemo(
-    () =>
-      sortMessages(apiMessages).map((msg) => {
+  const activeMessages: UiMessage[] = useMemo(() => {
+    let source = apiMessages;
+    if (selectedGroup && selectedGroup.conversations.length > 1) {
+      const threadId = replyConversationId ?? selectedId;
+      if (threadId) {
+        source = apiMessages.filter((m) => String(m.conversation) === String(threadId));
+      }
+    }
+    return sortMessages(source).map((msg) => {
         const isMe = String(msg.sender?.id) === String(user?.id);
         const senderName = isMe
           ? 'You'
@@ -342,14 +380,16 @@ function DashboardMessagesContent() {
           text: msg.content || '',
           time: formatMessageTime(msg.created_at) || 'Just now',
         };
-      }),
-    [apiMessages, user?.id, myAvatar, activeContact.avatar],
-  );
+      });
+  }, [apiMessages, user?.id, myAvatar, activeContact.avatar, selectedGroup, replyConversationId, selectedId]);
 
   const loadConversations = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoadingConversations(true);
     try {
-      const response = await chatService.getConversations();
+      const response = await chatService.getConversations({
+        view: messagesView,
+        page_size: 100,
+      });
       if (response.success && response.data) {
         setConversations(dedupeConversations(extractList(response.data)));
       }
@@ -358,7 +398,7 @@ function DashboardMessagesContent() {
     } finally {
       if (!options?.silent) setLoadingConversations(false);
     }
-  }, []);
+  }, [messagesView]);
 
   const patchConversationPreview = useCallback(
     (conversationId: string, content: string, createdAt: string) => {
@@ -397,10 +437,21 @@ function DashboardMessagesContent() {
           }),
         );
         const merged = sortMessages(batches.flat());
-        if (!options?.silent) {
+        if (options?.silent) {
+          setApiMessages((prev) => {
+            const byId = new Map<string, Message>();
+            for (const msg of prev) byId.set(String(msg.id), msg);
+            for (const msg of merged) byId.set(String(msg.id), msg);
+            const next = sortMessages([...byId.values()]);
+            if (next.length === prev.length && next.every((m, i) => String(m.id) === String(prev[i]?.id))) {
+              return prev;
+            }
+            return next;
+          });
+        } else {
           shouldScrollToBottomRef.current = true;
+          setApiMessages(merged);
         }
-        setApiMessages(merged);
       } catch {
         if (!options?.silent) toast.error('Failed to load messages');
         setApiMessages([]);
@@ -411,18 +462,32 @@ function DashboardMessagesContent() {
     [],
   );
 
-  const wsConversationId = useMemo(() => {
-    if (selectedGroup) return conversationKey(selectedGroup.latest) ?? selectedId;
-    return selectedId;
+  const wsConversationIds = useMemo(() => {
+    if (selectedGroup) {
+      return selectedGroup.conversations
+        .map((c) => conversationKey(c))
+        .filter((id): id is string => Boolean(id));
+    }
+    return selectedId ? [selectedId] : [];
   }, [selectedGroup, selectedId]);
 
-  const wsUrl =
-    isWebSocketsEnabled() && wsConversationId
-      ? buildChatWebSocketUrl(wsConversationId)
-      : null;
+  const activeConversationId = replyConversationId ?? selectedId;
+
+  const sendWsMessageRef = useRef<(conversationId: string, message: WebSocketMessage) => void>(
+    () => undefined,
+  );
+
+  const { otherUserTyping, notifyTyping, stopTyping, clearOtherUserTyping, handleRealtimeEvent } = useChatTyping({
+    activeConversationId,
+    currentUserId: user?.id,
+    canSend: canSendMessages,
+    sendWsMessage: (conversationId, message) => sendWsMessageRef.current(conversationId, message),
+  });
 
   const handleRealtimeMessage = useCallback(
-    (payload: { type: string; message?: Message }) => {
+    (payload: WebSocketMessage & { type: string; message?: Message }) => {
+      handleRealtimeEvent(payload);
+
       if (payload.type === 'error') {
         toast.error(
           typeof payload.message === 'string'
@@ -458,16 +523,22 @@ function DashboardMessagesContent() {
       );
 
       if (String(incoming.sender?.id) !== String(user?.id)) {
+        clearOtherUserTyping(String(incoming.sender?.id));
         void chatService.markAllAsRead(conversationId).catch(() => undefined);
       }
     },
-    [selectedGroup, user?.id, patchConversationPreview, loadConversations],
+    [selectedGroup, user?.id, patchConversationPreview, loadConversations, handleRealtimeEvent, clearOtherUserTyping],
   );
 
-  const { isConnected: wsConnected } = useWebSocket(wsUrl, {
-    enabled: Boolean(isAuthenticated && wsConversationId),
-    onMessage: (msg) => handleRealtimeMessage(msg as { type: string; message?: Message }),
-  });
+  const { isConnected: wsConnected, sendMessage: sendWsMessage } = useMultiConversationWebSocket(
+    wsConversationIds,
+    {
+      enabled: Boolean(isAuthenticated && isWebSocketsEnabled() && wsConversationIds.length > 0),
+      onMessage: (msg) => handleRealtimeMessage(msg as { type: string; message?: Message }),
+    },
+  );
+
+  sendWsMessageRef.current = sendWsMessage;
 
   useEffect(() => {
     void initialize();
@@ -482,6 +553,29 @@ function DashboardMessagesContent() {
   useEffect(() => {
     if (isAuthenticated || user) void loadConversations();
   }, [isAuthenticated, user, loadConversations]);
+
+  useEffect(() => {
+    setConversations([]);
+    setSelectedId(null);
+    setActivePersonKey(null);
+    setReplyConversationId(null);
+    loadedMessagesForRef.current = null;
+    resolvedDeepLinkRef.current = null;
+    setMobilePane('list');
+  }, [messagesView]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const stillVisible = conversationGroups.some((group) =>
+      group.conversations.some((conv) => conversationKey(conv) === selectedId),
+    );
+    if (!stillVisible) {
+      setSelectedId(null);
+      setActivePersonKey(null);
+      setReplyConversationId(null);
+      setMobilePane('list');
+    }
+  }, [conversationGroups, selectedId]);
 
   useEffect(() => {
     const conversationParam = searchParams.get('conversation');
@@ -631,13 +725,29 @@ function DashboardMessagesContent() {
 
   useEffect(() => {
     if (!selectedGroup) return;
-    const pollMs = wsConnected ? 45000 : 20000;
-    const interval = setInterval(() => {
+    const pollMs = wsConnected ? 45000 : 4000;
+    const poll = () => {
       if (document.visibilityState === 'hidden') return;
       void loadGroupMessages(selectedGroup.conversations, { silent: true });
-    }, pollMs);
-    return () => clearInterval(interval);
+    };
+    const interval = setInterval(poll, pollMs);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') poll();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', poll);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', poll);
+    };
   }, [selectedGroup, loadGroupMessages, wsConnected]);
+
+  useEffect(() => {
+    if (otherUserTyping) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [otherUserTyping]);
 
   useEffect(() => {
     if (shouldScrollToBottomRef.current) {
@@ -686,6 +796,7 @@ function DashboardMessagesContent() {
     };
 
     setInputText('');
+    stopTyping();
     shouldScrollToBottomRef.current = true;
     setApiMessages((prev) => sortMessages([...prev, optimisticMessage]));
     patchConversationPreview(sendConversationId, textContent, optimisticCreatedAt);
@@ -757,10 +868,21 @@ function DashboardMessagesContent() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const isTyping = sending;
+  const handleInputChange = (value: string) => {
+    setInputText(value);
+    if (value.trim()) notifyTyping();
+    else stopTyping();
+  };
+
+  const typingDisplayName = otherUserTyping?.userName || activeContact.name;
 
   return (
     <div className={DASHBOARD_PAGE_ROOT}>
+      <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
+        <h1 className={DASHBOARD_HEADING_MD}>Message</h1>
+        <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">{pageSubtitle}</p>
+      </div>
+
       <div className="mx-auto grid min-w-0 max-w-7xl grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
         <div
           className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-5 lg:col-span-4`}
@@ -771,7 +893,7 @@ function DashboardMessagesContent() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Serach"
+              placeholder="Search conversations"
               className="w-full border-0 bg-transparent py-3 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
             />
           </div>
@@ -783,7 +905,7 @@ function DashboardMessagesContent() {
               </div>
             ) : contacts.length === 0 ? (
               <div className="py-12 text-center font-sans text-xs text-neutral-400">
-                No conversations yet. Message someone from a task or offer.
+                {emptyInboxMessage}
               </div>
             ) : (
               contacts.map((contact) => {
@@ -905,6 +1027,46 @@ function DashboardMessagesContent() {
             </div>
           ) : null}
 
+          {selectedGroup && selectedGroup.conversations.length > 1 ? (
+            <div className="flex gap-2 overflow-x-auto border-b border-neutral-100 bg-white px-4 py-2 sm:px-6">
+              {selectedGroup.conversations.map((conv) => {
+                const id = conversationKey(conv);
+                if (!id) return null;
+                const isActive = (replyConversationId ?? selectedId) === id;
+                const label = conv.task_title?.trim() || 'Listing thread';
+                const canSend = isMessagingEnabledForConversation(conv);
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      setReplyConversationId(id);
+                      setSelectedId(id);
+                      loadedMessagesForRef.current = null;
+                      void loadGroupMessages([conv]);
+                      void chatService.markAllAsRead(id).catch(() => undefined);
+                    }}
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'bg-[#52C47F] text-white'
+                        : canSend
+                          ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                          : 'bg-neutral-50 text-neutral-400'
+                    }`}
+                    title={canSend ? label : messagingDisabledReason(getTaskStatusFromConversation(conv))}
+                  >
+                    {label}
+                    {(conv.unread_count ?? 0) > 0 ? (
+                      <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-white/90 px-1 text-[10px] font-semibold text-[#52C47F]">
+                        {conv.unread_count}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
           <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-6 overflow-y-auto bg-[#FAF9F7]/10 p-6">
             {loadingMessages ? (
               <div className="flex h-full items-center justify-center">
@@ -999,19 +1161,19 @@ function DashboardMessagesContent() {
               })
             )}
 
-            {isTyping ? (
+            {otherUserTyping ? (
               <div className="flex animate-pulse flex-col items-start space-y-2">
                 <div className="flex items-center gap-2">
                   <img
                     src={activeContact.avatar}
-                    alt={activeContact.name}
+                    alt={typingDisplayName}
                     className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover"
                     referrerPolicy="no-referrer"
                   />
                   <span className="text-[13px] font-medium text-neutral-700">
-                    {activeContact.name}
+                    {typingDisplayName}
                   </span>
-                  <span className="text-[11px] text-neutral-400">sending...</span>
+                  <span className="text-[11px] text-neutral-400">is typing...</span>
                 </div>
                 <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-none border border-neutral-100/40 bg-[#F9F9FB] px-5 py-3">
                   <span
@@ -1046,7 +1208,7 @@ function DashboardMessagesContent() {
             <input
               type="text"
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               disabled={sending || !selectedGroup || !canSendMessages}
               placeholder="Type a Message"
               className="flex-1 border-0 bg-transparent px-1.5 py-3 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 disabled:opacity-50"

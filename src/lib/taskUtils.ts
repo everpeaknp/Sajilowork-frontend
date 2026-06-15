@@ -208,24 +208,48 @@ export function isListingOpenForBids(
   status?: string | null,
   isOpen?: boolean | null,
 ): boolean {
-  if ((status || '').toLowerCase() !== 'open') return false;
-  if (isOpen === false) return false;
-  return true;
+  if (typeof isOpen === 'boolean') {
+    return isOpen;
+  }
+  return (status || '').toLowerCase() === 'open';
+}
+
+export function isProjectOpenForBids(project: {
+  status?: string | null;
+  isOpenForBids?: boolean | null;
+}): boolean {
+  if (typeof project.isOpenForBids === 'boolean') {
+    return project.isOpenForBids;
+  }
+  return isListingOpenForBids(project.status);
 }
 
 export function getListingClosedOfferMessage(
   status?: string | null,
   listingKind: 'task' | 'project' = 'task',
+  isOpen?: boolean | null,
 ): string {
   const normalized = (status || '').toLowerCase();
   const noun = listingKind === 'project' ? 'project' : 'task';
+  const offerWord = listingKind === 'project' ? 'proposals' : 'offers';
   if (normalized === 'completed') {
-    return `This ${noun} is completed and no longer accepting ${listingKind === 'project' ? 'proposals' : 'offers'}.`;
+    return `This ${noun} is completed and no longer accepting ${offerWord}.`;
   }
   if (normalized === 'cancelled') {
-    return `This ${noun} was cancelled and is no longer accepting ${listingKind === 'project' ? 'proposals' : 'offers'}.`;
+    return `This ${noun} was cancelled and is no longer accepting ${offerWord}.`;
   }
-  return `This ${noun} is not accepting ${listingKind === 'project' ? 'proposals' : 'offers'} right now.`;
+  if (normalized === 'draft') {
+    return `This ${noun} is not live yet and is not accepting ${offerWord}.`;
+  }
+  if (
+    ['assigned', 'funded', 'in_progress', 'pending_approval', 'disputed'].includes(normalized)
+  ) {
+    return `This ${noun} is already in progress and is no longer accepting ${offerWord}.`;
+  }
+  if (isOpen === false) {
+    return `This ${noun} is not accepting ${offerWord} right now. The poster may have closed applications.`;
+  }
+  return `This ${noun} is not accepting ${offerWord} right now.`;
 }
 
 export function canSubmitOfferOnTask(task: Task, userId: string | undefined): boolean {

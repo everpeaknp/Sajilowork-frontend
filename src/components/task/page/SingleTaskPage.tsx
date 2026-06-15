@@ -14,7 +14,7 @@ import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { useAuth } from '@/hooks/useAuth';
 import { TASK_BROWSE_PATH } from '@/lib/taskBrowsePath';
 import { mapTaskToTaskPageView, getTaskDetailPath } from '@/lib/taskPageApi';
-import { isListingOpenForBids } from '@/lib/taskUtils';
+import { isListingOpenForBids, getListingClosedOfferMessage } from '@/lib/taskUtils';
 import type { Task } from '@/types';
 import TaskAbout from './TaskAbout';
 import TaskOffersQuestionsTabs from './TaskOffersQuestionsTabs';
@@ -104,6 +104,10 @@ export default function SingleTaskPage({
       router.push(`/signin?redirect=${encodeURIComponent(redirectPath)}`);
       return;
     }
+    if (!isListingOpenForBids(task.status, task.is_open)) {
+      toast.error(getListingClosedOfferMessage(task.status, 'task', task.is_open));
+      return;
+    }
     setShowMakeOfferModal(true);
   }, [router, task, user]);
 
@@ -170,6 +174,7 @@ export default function SingleTaskPage({
             <div className="mt-12">
               <TaskOffersQuestionsTabs
                 project={project}
+                listingKind="task"
                 taskStatus={task.status}
                 initialOfferCount={initialOfferCount}
                 offerRefreshKey={offerRefreshKey}

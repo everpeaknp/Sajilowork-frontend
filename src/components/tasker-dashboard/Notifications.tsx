@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { TASK_BROWSE_PATH } from '@/lib/taskBrowsePath';
+import {
+  dashboardMessageConversationHref,
+  DASHBOARD_MESSAGES_PATH,
+} from '@/lib/dashboardChat';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
@@ -76,8 +80,8 @@ function getNotificationHref(notification: NotificationItem): string {
 
   if (notification.notification_type === 'message_received') {
     const convId = data?.conversation_id ?? data?.conversation;
-    if (convId) return `/message?conversation=${convId}`;
-    return '/message';
+    if (convId) return dashboardMessageConversationHref(String(convId));
+    return DASHBOARD_MESSAGES_PATH;
   }
 
   if (

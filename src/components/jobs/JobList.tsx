@@ -12,12 +12,12 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
+import { searchBrowseJobs } from '@/lib/listingSearchApi';
 import { type Job } from './jobListData';
 import JobCompanyLogo from './JobCompanyLogo';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import { getJobDetailPath } from './jobSlug';
-import { fetchPublicJobs } from '@/lib/jobApi';
 import { MarketplaceJobGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
@@ -75,26 +75,7 @@ export default function JobList({
   const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoadingJobs(true);
-    void fetchPublicJobs()
-      .then((items) => {
-        if (cancelled) return;
-        setJobs(items);
-        setSavedSlugs(buildBookmarkSlugSet(items));
-      })
-      .catch(() => {
-        if (!cancelled) setJobs([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingJobs(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const [totalJobs, setTotalJobs] = useState(0);
   const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -105,6 +86,75 @@ export default function JobList({
   const [currentPage, setCurrentPage] = useState(1);
   const [alertText, setAlertText] = useState<string | null>(null);
   const filterRowRef = useRef<HTMLDivElement>(null);
+
+  const itemsPerPage = 16;
+
+  function salaryRange(): { min_budget?: number; max_budget?: number } {
+    switch (selectedSalary) {
+      case '0-50k':
+        return { max_budget: 50000 };
+      case '50k-100k':
+        return { min_budget: 50000, max_budget: 100000 };
+      case '100k-150k':
+        return { min_budget: 100001, max_budget: 150000 };
+      case '150k+':
+        return { min_budget: 150000 };
+      default:
+        return {};
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingJobs(true);
+
+    const categoryQuery = selectedCategory !== 'All' ? selectedCategory : '';
+    const queryParts = [searchQuery.trim(), categoryQuery].filter(Boolean);
+
+    void searchBrowseJobs({
+      query: queryParts.join(' ').trim() || undefined,
+      location: searchLocation.trim() || undefined,
+      page: currentPage,
+      page_size: itemsPerPage,
+      sort_by: sortBy === 'budget-high' ? 'budget_high' : 'newest',
+      ...salaryRange(),
+    })
+      .then((result) => {
+        if (cancelled) return;
+        let items = result.items;
+        if (selectedType !== 'All') {
+          items = items.filter((j) => j.type === selectedType);
+        }
+        if (selectedLevel !== 'All') {
+          items = items.filter((j) => j.experienceLevel === selectedLevel);
+        }
+        setJobs(items);
+        setTotalJobs(result.total);
+        setSavedSlugs(buildBookmarkSlugSet(items));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setJobs([]);
+          setTotalJobs(0);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingJobs(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    searchQuery,
+    searchLocation,
+    selectedCategory,
+    selectedSalary,
+    selectedType,
+    selectedLevel,
+    sortBy,
+    currentPage,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -143,69 +193,11 @@ export default function JobList({
     });
   };
 
-  const filteredJobsList = useMemo(() => {
-    let result = [...jobs];
-
-    if (selectedCategory !== 'All') {
-      result = result.filter((j) => j.category === selectedCategory);
-    }
-    if (selectedSalary !== 'All') {
-      if (selectedSalary === '0-50k') result = result.filter((j) => j.budgetMax < 50000);
-      else if (selectedSalary === '50k-100k')
-        result = result.filter((j) => j.budgetMax >= 50000 && j.budgetMax <= 100000);
-      else if (selectedSalary === '100k-150k')
-        result = result.filter((j) => j.budgetMax > 100000 && j.budgetMax <= 150000);
-      else if (selectedSalary === '150k+') result = result.filter((j) => j.budgetMin >= 150000);
-    }
-    if (selectedType !== 'All') {
-      result = result.filter((j) => j.type === selectedType);
-    }
-    if (selectedLevel !== 'All') {
-      result = result.filter((j) => j.experienceLevel === selectedLevel);
-    }
-
-    const query = searchQuery.trim().toLowerCase();
-    if (query) {
-      result = result.filter(
-        (j) =>
-          j.title.toLowerCase().includes(query) ||
-          j.companyName.toLowerCase().includes(query) ||
-          j.category.toLowerCase().includes(query) ||
-          j.description.toLowerCase().includes(query) ||
-          j.skills.some((skill) => skill.toLowerCase().includes(query)),
-      );
-    }
-
-    const location = searchLocation.trim().toLowerCase();
-    if (location) {
-      result = result.filter((j) => {
-        const city = j.city?.toLowerCase() ?? '';
-        const workLocation = j.location.toLowerCase();
-        return city.includes(location) || workLocation.includes(location);
-      });
-    }
-
-    if (sortBy === 'budget-high') {
-      result.sort((a, b) => b.budgetMax - a.budgetMax);
-    } else if (sortBy === 'duration-low') {
-      result.sort((a, b) => a.duration.localeCompare(b.duration));
-    } else {
-      result.sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    return result;
-  }, [jobs, selectedCategory, selectedSalary, selectedType, selectedLevel, sortBy, searchQuery, searchLocation]);
-
-  const itemsPerPage = 16;
-  const totalJobs = filteredJobsList.length;
   const totalPages = Math.max(1, Math.ceil(totalJobs / itemsPerPage));
   const startIdx = totalJobs === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIdx = Math.min(currentPage * itemsPerPage, totalJobs);
 
-  const paginatedJobsList = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredJobsList.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredJobsList, currentPage]);
+  const paginatedJobsList = jobs;
 
   const hasActiveSearch = Boolean(searchQuery.trim() || searchLocation.trim());
   const activeSearchLabel =
@@ -423,7 +415,7 @@ export default function JobList({
 
         {loadingJobs ? (
           <MarketplaceJobGridSkeleton count={8} className="mt-2" />
-        ) : filteredJobsList.length === 0 ? (
+        ) : paginatedJobsList.length === 0 ? (
           <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
             <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
             <span className={`${discoverHeadline} mb-1 block text-lg text-[#193e32]`}>
@@ -559,7 +551,7 @@ export default function JobList({
           </div>
         )}
 
-        {!loadingJobs && filteredJobsList.length > 0 && (
+        {!loadingJobs && paginatedJobsList.length > 0 && (
           <div className="mt-12 flex flex-col items-center justify-center pb-4 sm:mt-16">
             <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
               <button

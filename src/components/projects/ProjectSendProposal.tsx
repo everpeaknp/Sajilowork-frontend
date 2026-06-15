@@ -10,7 +10,7 @@ import { bidService, getMyBidForTask } from '@/services/bid.service';
 import { formatNPR } from '@/lib/nepalLocale';
 import {
   getListingClosedOfferMessage,
-  isListingOpenForBids,
+  isProjectOpenForBids,
 } from '@/lib/taskUtils';
 import type { Bid } from '@/types';
 import type { Project } from './projectListData';
@@ -45,7 +45,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
   const isOwner =
     Boolean(user?.id) && Boolean(project.ownerId) && String(user.id) === String(project.ownerId);
 
-  const offersOpen = isListingOpenForBids(project.status);
+  const offersOpen = isProjectOpenForBids(project);
 
   const loadExistingBid = useCallback(async () => {
     if (!user || isOwner || !project.id || !offersOpen) {
@@ -76,7 +76,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
     }
 
     if (!offersOpen) {
-      toast.error(getListingClosedOfferMessage(project.status, 'project'));
+      toast.error(getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids));
       return;
     }
 
@@ -156,7 +156,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
         <p className="text-sm font-normal text-neutral-600">
           {offersOpen
             ? 'You posted this project. Freelancers submit proposals here — review them in the list above or under Dashboard → My Proposals.'
-            : getListingClosedOfferMessage(project.status, 'project')}
+            : getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids)}
         </p>
       </section>
     );
@@ -169,7 +169,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
           Send Your Proposal
         </h2>
         <p className="text-sm font-normal text-neutral-600">
-          {getListingClosedOfferMessage(project.status, 'project')}
+          {getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids)}
         </p>
       </section>
     );

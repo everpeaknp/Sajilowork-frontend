@@ -7,16 +7,16 @@ import { ArrowUpRight } from 'lucide-react';
 import { toast } from 'sonner';
 import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { useAuth } from '@/hooks/useAuth';
+import { getListingClosedOfferMessage, isProjectOpenForBids } from '@/lib/taskUtils';
 import ProjectProfileHero from './ProjectProfileHero';
 import ProjectAbout from './ProjectAbout';
 import ProjectSidebar from './ProjectSidebar';
 import ProjectSkillsRequired from './ProjectSkillsRequired';
 import ProjectAttachments from './ProjectAttachments';
 import ProjectGallery from './ProjectGallery';
-import ProjectProposals from './ProjectProposals';
 import ProjectSendProposal from './ProjectSendProposal';
-import ProjectQuestions from './ProjectQuestions';
 import ProjectShareSaveActions from './ProjectShareSaveActions';
+import TaskOffersQuestionsTabs from '@/components/task/page/TaskOffersQuestionsTabs';
 import TaskStatusTimeline from '@/components/common/TaskStatusTimeline';
 import { getProjectDetailPath } from './projectSlug';
 import type { Project } from './projectListData';
@@ -65,6 +65,10 @@ export default function SingleProjectPage({
           ? `${window.location.pathname}${window.location.search}`
           : getProjectDetailPath(project);
       router.push(`/signin?redirect=${encodeURIComponent(redirectPath)}`);
+      return;
+    }
+    if (!isProjectOpenForBids(project)) {
+      toast.error(getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids));
       return;
     }
     setShowProposalModal(true);
@@ -116,7 +120,14 @@ export default function SingleProjectPage({
             <ProjectAttachments project={project} />
             <ProjectGallery project={project} />
             <div className="mt-12">
-              <ProjectProposals project={project} refreshKey={proposalRefreshKey} />
+              <TaskOffersQuestionsTabs
+                project={project}
+                listingKind="project"
+                taskStatus={project.status}
+                initialOfferCount={project.ownerReviews ?? 0}
+                offerRefreshKey={proposalRefreshKey}
+                onOfferAccepted={handleProposalSubmitted}
+              />
             </div>
             {!hideSendProposal && !useProposalModal ? (
               <div
@@ -127,7 +138,6 @@ export default function SingleProjectPage({
                 <ProjectSendProposal project={project} onSubmitted={handleProposalSubmitted} />
               </div>
             ) : null}
-            <ProjectQuestions project={project} />
           </div>
 
           <ProjectSidebar

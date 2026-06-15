@@ -5,7 +5,7 @@ import { Calendar, FileText, Loader2, Star } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { bidService, extractBidList } from '@/services/bid.service';
 import { formatNPR } from '@/lib/nepalLocale';
-import { isListingOpenForBids } from '@/lib/taskUtils';
+import { isProjectOpenForBids } from '@/lib/taskUtils';
 import { getMediaUrl } from '@/lib/utils';
 import type { Bid } from '@/types';
 import type { Project } from './projectListData';
@@ -51,7 +51,7 @@ export default function ProjectProposals({ project, refreshKey = 0 }: ProjectPro
   const isOwner =
     Boolean(user?.id) && Boolean(project.ownerId) && String(user?.id) === String(project.ownerId);
 
-  const offersOpen = isListingOpenForBids(project.status);
+  const offersOpen = isProjectOpenForBids(project);
 
   const loadBids = useCallback(async () => {
     if (!project.id) {

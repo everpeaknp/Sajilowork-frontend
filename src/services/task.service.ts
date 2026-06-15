@@ -236,6 +236,18 @@ export const taskService = {
   },
 
   /**
+   * Dashboard inbox — received (on your listings) or asked (by you).
+   */
+  async getDashboardQuestions(
+    view: 'received' | 'asked' = 'received',
+  ): Promise<ApiResponse<TaskQuestion[] | PaginatedResponse<TaskQuestion>>> {
+    return apiClient.get<TaskQuestion[] | PaginatedResponse<TaskQuestion>>(
+      '/tasks/dashboard_questions/',
+      { params: { view } },
+    );
+  },
+
+  /**
    * Report task
    */
   async reportTask(

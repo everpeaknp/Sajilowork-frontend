@@ -211,8 +211,8 @@ export default function TaskDetails({
     if (response.success) {
       toast.success(`Alert saved for "${keyword}"`);
       setShowAlertsModal(false);
-      return;
-    }
+        return;
+      }
     toast.error(response.message || 'Failed to save alert');
     throw new Error(response.message || 'Failed to save alert');
   };
@@ -392,7 +392,7 @@ export default function TaskDetails({
       return null;
     }
     if (!canMakeOffer) {
-      return null;
+    return null;
     }
     return undefined;
   }, [
@@ -438,7 +438,7 @@ export default function TaskDetails({
 
   if (!viewTask && loadingDetailTask) {
     return (
-      <motion.div
+            <motion.div
         initial={variant === 'overlay' ? { opacity: 0, y: 16 } : undefined}
         animate={{ opacity: 1, y: 0 }}
         exit={variant === 'overlay' ? { opacity: 0, y: 16 } : undefined}
@@ -448,8 +448,8 @@ export default function TaskDetails({
         <div className="flex flex-1 items-center justify-center gap-2 text-sm text-neutral-500">
           <Loader2 className="h-5 w-5 animate-spin" />
           Loading task…
-        </div>
-      </motion.div>
+              </div>
+            </motion.div>
     );
   }
 
@@ -464,22 +464,22 @@ export default function TaskDetails({
       className={shellClassName}
     >
       {variant === 'overlay' ? (
-        <button
+      <button
           type="button"
-          onClick={onClose}
+        onClick={onClose}
           className="absolute right-3 top-3 z-[60] rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 sm:right-4 sm:top-4"
-          title="Close"
-          aria-label="Close task details"
-        >
+        title="Close"
+        aria-label="Close task details"
+      >
           <X className="h-5 w-5 sm:h-6 sm:w-6" />
-        </button>
+      </button>
       ) : null}
 
       {loadingDetailTask && !detailTask ? (
         <div className="flex flex-1 items-center justify-center gap-2 text-sm text-neutral-500">
           <Loader2 className="h-5 w-5 animate-spin" />
           Loading task…
-        </div>
+              </div>
       ) : (
         <SingleTaskPage
           task={viewTask}

@@ -40,6 +40,7 @@ function receiptFilename(receiptId: string) {
 }
 
 function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 48;

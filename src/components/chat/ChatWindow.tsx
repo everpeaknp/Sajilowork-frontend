@@ -93,22 +93,22 @@ export default function ChatWindow({
         });
         break;
 
-      case 'typing':
-        // Show typing indicator
-        if (!wsMessage?.data) break;
-        if ((wsMessage.data as any).user_id !== user?.id) {
+      case 'typing_indicator':
+        if (wsMessage.user_id != null && String(wsMessage.user_id) !== String(user?.id)) {
+          if (wsMessage.is_typing === false) {
+            setIsTyping(false);
+            break;
+          }
           setIsTyping(true);
-          
-          // Clear existing timeout
+
           if (typingTimeout) {
             clearTimeout(typingTimeout);
           }
 
-          // Hide typing indicator after 3 seconds
           const timeout = setTimeout(() => {
             setIsTyping(false);
-          }, 3000);
-          
+          }, 4000);
+
           setTypingTimeout(timeout);
         }
         break;
@@ -157,14 +157,7 @@ export default function ChatWindow({
   };
 
   const handleTyping = () => {
-    // Send typing indicator via WebSocket
-    sendMessage({
-      type: 'typing',
-      data: {
-        user_id: user?.id,
-        task_id: taskId,
-      },
-    });
+    sendMessage({ type: 'typing_start' });
   };
 
   return (

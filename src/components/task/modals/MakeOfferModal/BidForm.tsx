@@ -47,6 +47,12 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
         return;
       }
 
+      if (!canSubmitOfferOnTask(task, user?.id)) {
+        toast.error(getListingClosedOfferMessage(task.status, listingKind, task.is_open));
+        onCancel();
+        return;
+      }
+
       try {
         const response = await bidService.getMyBids('pending');
         if (response.success && response.data) {
@@ -158,7 +164,7 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
       }
 
       if (!canSubmitOfferOnTask(task, user?.id)) {
-        toast.error(getListingClosedOfferMessage(task.status, listingKind));
+        toast.error(getListingClosedOfferMessage(task.status, listingKind, task.is_open));
         onCancel();
         return;
       }

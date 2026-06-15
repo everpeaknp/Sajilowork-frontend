@@ -12,6 +12,7 @@ const WALLET_SECTION_REDIRECTS: Record<string, string> = {
 
 const LEGACY_TAB_REDIRECTS: Record<string, string> = {
   invoice: '/dashboard/statements',
+  qustions: '/dashboard/questions',
 };
 
 export default function DashboardTabPage() {

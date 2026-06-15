@@ -17,6 +17,7 @@ import {
   Settings,
   Wallet,
   Plus,
+  CircleHelp,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
@@ -91,6 +92,7 @@ const NAV_ITEM_LOOKUP: Record<DashboardTab, NavigationItem> = {
   statements: { id: 'statements', label: 'Statements', icon: TrendingUp },
   wallet: { id: 'wallet', label: 'Wallet', icon: Wallet },
   reviews: { id: 'reviews', label: 'Reviews', icon: MessageSquare },
+  questions: { id: 'questions', label: 'Questions', icon: CircleHelp },
   saved: { id: 'saved', label: 'Saved', icon: Heart },
   settings: { id: 'settings', label: 'Settings', icon: Settings },
   profile: { id: 'profile', label: 'My Profile', icon: CircleUser },

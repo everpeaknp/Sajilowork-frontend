@@ -96,8 +96,8 @@ export default function DashboardReviews() {
 
   const subtitle =
     sidebarRole === 'customer'
-      ? 'Reviews shown on your public employer profile and grouped by listing type.'
-      : 'Reviews shown on your public freelancer profile and grouped by listing type.';
+      ? 'Reviews shown on your public employer profile.'
+      : 'Reviews shown on your public freelancer profile.';
 
   const profileTabHint =
     activeSubTab === 'profile' && publicProfileHref
@@ -181,20 +181,22 @@ export default function DashboardReviews() {
       </div>
 
       <div className={DASHBOARD_CARD}>
-        <div className={DASHBOARD_SUBTABS_WRAP}>
-          <div className={DASHBOARD_SUBTABS_ROW}>
-            {visibleTabs.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => handleTabChange(tab)}
-                className={subTabClass(tab)}
-              >
-                {REVIEWS_TAB_LABELS[tab]}
-              </button>
-            ))}
+        {visibleTabs.length > 1 ? (
+          <div className={DASHBOARD_SUBTABS_WRAP}>
+            <div className={DASHBOARD_SUBTABS_ROW}>
+              {visibleTabs.map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => handleTabChange(tab)}
+                  className={subTabClass(tab)}
+                >
+                  {REVIEWS_TAB_LABELS[tab]}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {loading ? (
           <div className="py-20 text-center text-sm text-neutral-400">Loading reviews…</div>

@@ -19,9 +19,8 @@ import { discoverBody, discoverHeadline, discoverMedium } from '@/components/Lan
 import { mapTaskToPublicProject } from '@/lib/projectApi';
 import { getTaskDetailPath } from '@/lib/taskPageApi';
 import { TASK_MAP_PATH } from '@/lib/taskBrowsePath';
-import { getListingKind } from '@/lib/dashboardListingApi';
+import { searchBrowseTasks } from '@/lib/listingSearchApi';
 import {
-  fetchPublicTasks,
   formatTaskBudgetLabel,
   formatTaskListDate,
   formatTaskOffersLabel,
@@ -29,7 +28,7 @@ import {
   taskBrowseDisplayTags,
   taskListTitle,
 } from '@/lib/taskBrowseApi';
-import { filterAndSortTasks, hasActiveFilters } from '@/lib/taskFilters';
+import { hasActiveFilters } from '@/lib/taskFilters';
 import { extractCategoryList } from '@/lib/taskUtils';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
@@ -54,30 +53,54 @@ export default function TaskList({
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
+  const [totalTasks, setTotalTasks] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [alertText, setAlertText] = useState<string | null>(null);
 
+  const itemsPerPage = 8;
+
   useEffect(() => {
     let cancelled = false;
     setLoadingTasks(true);
-    void fetchPublicTasks()
-      .then((items) => {
+
+    const params = {
+      query: searchQuery.trim() || filters.query,
+      location: searchLocation.trim() || filters.location,
+      category: categoryFromUrl.trim() || filters.category,
+      page: currentPage,
+      page_size: itemsPerPage,
+      min_budget: filters.budget_min,
+      max_budget: filters.budget_max,
+      work_type: filters.work_type,
+      sort_by: filters.sort_by,
+      user_latitude: filters.user_latitude,
+      user_longitude: filters.user_longitude,
+      radius: filters.distance_km,
+    };
+
+    void searchBrowseTasks(params)
+      .then((result) => {
         if (cancelled) return;
-        setTasks(items);
+        setTasks(result.items);
+        setTotalTasks(result.total);
       })
       .catch(() => {
-        if (!cancelled) setTasks([]);
+        if (!cancelled) {
+          setTasks([]);
+          setTotalTasks(0);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoadingTasks(false);
       });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [searchQuery, searchLocation, categoryFromUrl, filters, currentPage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,28 +155,18 @@ export default function TaskList({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+  }, [searchQuery, searchLocation, categoryFromUrl, filters]);
 
   const triggerAlert = (text: string) => {
     setAlertText(text);
     setTimeout(() => setAlertText(null), 3500);
   };
 
-  const filteredTasks = useMemo(
-    () => filterAndSortTasks(tasks.filter((task) => getListingKind(task) === 'task'), filters),
-    [tasks, filters],
-  );
-
-  const itemsPerPage = 8;
-  const totalTasks = filteredTasks.length;
   const totalPages = Math.max(1, Math.ceil(totalTasks / itemsPerPage));
   const startIdx = totalTasks === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIdx = Math.min(currentPage * itemsPerPage, totalTasks);
 
-  const paginatedTasks = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredTasks.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredTasks, currentPage]);
+  const paginatedTasks = tasks;
 
   const renderPageNumbers = () => {
     const pages: (number | string)[] = [];
@@ -277,7 +290,7 @@ export default function TaskList({
 
             {loadingTasks ? (
               <MarketplaceBrowseRowListSkeleton count={4} />
-            ) : filteredTasks.length === 0 ? (
+            ) : paginatedTasks.length === 0 ? (
               <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
                 <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
                 <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35]`}>
@@ -440,7 +453,7 @@ export default function TaskList({
               </div>
             )}
 
-            {!loadingTasks && filteredTasks.length > 0 ? (
+            {!loadingTasks && paginatedTasks.length > 0 ? (
               <div className="flex flex-col items-center justify-center pb-4 pt-8">
                 <div className="flex w-full max-w-full items-center justify-center gap-2 overflow-x-auto px-1 pb-1 sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
                   <button

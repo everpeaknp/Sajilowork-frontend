@@ -25,8 +25,8 @@ export interface DashboardReviewItem {
 }
 
 export const REVIEWS_TABS_BY_ROLE: Record<DashboardSidebarRole, ReviewsSubTab[]> = {
-  tasker: ['profile', 'services'],
-  customer: ['profile', 'project', 'jobs'],
+  tasker: ['profile'],
+  customer: ['profile'],
 };
 
 export const REVIEWS_TAB_LABELS: Record<ReviewsSubTab, string> = {
