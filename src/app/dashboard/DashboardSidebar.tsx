@@ -23,6 +23,7 @@ import {
   HandCoins,
   PanelLeft,
   PanelLeftClose,
+  ShoppingBag,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
@@ -125,6 +126,7 @@ const NAV_ITEM_LOOKUP: Record<DashboardTab, NavigationItem> = {
   contracts: { id: 'contracts', label: 'Contracts', icon: ScrollText },
   message: { id: 'message', label: 'Messages', icon: MessageSquareMore },
   services: { id: 'services', label: 'My Services', icon: Monitor },
+  orders: { id: 'orders', label: 'Orders', icon: ShoppingBag, href: getDashboardHref('orders') },
   jobs: { id: 'jobs', label: 'My Jobs', icon: Briefcase, href: getDashboardHref('jobs') },
   task: { id: 'task', label: 'My Tasks', icon: ListTodo, href: getDashboardHref('task') },
   project: { id: 'project', label: 'My Projects', icon: ClipboardList, href: getDashboardHref('project') },

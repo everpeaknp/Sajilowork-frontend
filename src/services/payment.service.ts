@@ -37,6 +37,9 @@ export interface PaymentHistoryItem {
   direction: PaymentHistoryDirection;
   created_at: string;
   task_id?: string | null;
+  counterparty_name?: string;
+  counterparty_email?: string;
+  counterparty_location?: string;
 }
 
 export interface FeePreview {

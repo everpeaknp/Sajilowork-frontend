@@ -2,6 +2,7 @@ import { jsPDF } from 'jspdf';
 import { formatNPR } from '@/lib/nepalLocale';
 import { RECEIPT_DOCUMENT_STYLES } from '@/lib/receiptDocumentStyles';
 import type { PaymentHistoryDirection } from '@/services/payment.service';
+import type { BillingParty } from '@/lib/receiptBillingParties';
 
 export interface StatementReceiptData {
   receiptId: string;
@@ -18,9 +19,8 @@ export interface StatementReceiptData {
   platformFee: number;
   netAmount: number;
   taskId?: string | null;
-  accountName: string;
-  accountEmail: string;
-  accountLocation?: string;
+  billedFrom: BillingParty;
+  billedTo: BillingParty;
   descriptionHeading?: string;
   totalLabel?: string;
   feeLabel?: string;
@@ -97,7 +97,7 @@ function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
   doc.line(margin, y, pageWidth - margin, y);
   y += 28;
 
-  // Two columns: Billed to / Payment details
+  // Two columns: Billed from / Billed to
   const colGap = 24;
   const colWidth = (contentWidth - colGap) / 2;
 
@@ -109,46 +109,60 @@ function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
     return startY + 16;
   };
 
-  let leftY = sectionLabel('BILLED TO', margin, y);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.setTextColor(dark);
-  doc.text(data.accountName, margin, leftY);
-  leftY += 14;
+  const drawParty = (party: BillingParty, x: number, startY: number) => {
+    let partyY = startY;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(dark);
+    doc.text(party.name, x, partyY);
+    partyY += 14;
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(muted);
-  doc.text(data.accountEmail, margin, leftY);
-  leftY += 12;
-  if (data.accountLocation) {
-    doc.text(data.accountLocation, margin, leftY);
-  }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(muted);
+    doc.text(party.email, x, partyY);
+    partyY += 12;
+    doc.text(party.location, x, partyY);
+    return partyY;
+  };
+
+  let leftY = sectionLabel('BILLED FROM', margin, y);
+  leftY = drawParty(data.billedFrom, margin, leftY);
 
   const rightX = margin + colWidth + colGap;
-  let rightY = sectionLabel('PAYMENT DETAILS', rightX, y);
+  let rightY = sectionLabel('BILLED TO', rightX, y);
+  rightY = drawParty(data.billedTo, rightX, rightY);
+
+  y = Math.max(leftY, rightY) + 24;
+
+  // Payment details
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(lightMuted);
+  doc.text('PAYMENT DETAILS', margin, y);
+  y += 16;
+
   doc.setFillColor(5, 150, 105);
-  doc.circle(rightX + 2, rightY - 3, 2, 'F');
+  doc.circle(margin + 2, y - 3, 2, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(success);
-  doc.text(statusLabel(data.status), rightX + 8, rightY);
-  rightY += 14;
+  doc.text(statusLabel(data.status), margin + 8, y);
+  y += 14;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(muted);
-  doc.text(data.type, rightX, rightY);
-  rightY += 12;
+  doc.text(data.type, margin, y);
+  y += 12;
   doc.text(
     data.direction === 'outgoing' ? 'Outgoing payment' : 'Earned release',
-    rightX,
-    rightY
+    margin,
+    y
   );
-  rightY += 12;
-  doc.text(`Currency: ${data.currency || 'NPR'}`, rightX, rightY);
-
-  y = Math.max(leftY, rightY) + 24;
+  y += 12;
+  doc.text(`Currency: ${data.currency || 'NPR'}`, margin, y);
+  y += 24;
 
   // Description box
   doc.setFillColor(250, 250, 250);

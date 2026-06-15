@@ -169,6 +169,9 @@ function mapPaymentToStatement(
     status: item.status,
     currency: item.currency || 'NPR',
     taskId: item.task_id,
+    counterpartyName: item.counterparty_name,
+    counterpartyEmail: item.counterparty_email,
+    counterpartyLocation: item.counterparty_location,
   };
 }
 

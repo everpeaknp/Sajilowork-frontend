@@ -218,8 +218,9 @@ function ContractRowAvatar({
   );
 }
 
-export default function DashboardContracts() {
+export default function DashboardContracts({ variant = 'contracts' }: { variant?: 'contracts' | 'orders' }) {
   const { isCustomer, isAuthenticated } = useAuth();
+  const isOrdersView = variant === 'orders';
   const [loading, setLoading] = useState(true);
   const [contracts, setContracts] = useState<Bid[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -243,7 +244,11 @@ export default function DashboardContracts() {
       }
       const accepted = extractBidList(response.data).filter((bid) => {
         if (bid.status !== 'accepted') return false;
+        if (isOrdersView) {
+          return bid.task_listing_kind === 'service';
+        }
         if (isCustomer && !isTaskOrProjectListing(bid.task_listing_kind)) return false;
+        if (!isCustomer && bid.task_listing_kind === 'service') return false;
         return true;
       });
       setContracts(accepted);
@@ -254,21 +259,28 @@ export default function DashboardContracts() {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, isCustomer]);
+  }, [isAuthenticated, isCustomer, isOrdersView]);
 
   useEffect(() => {
     void loadContracts();
   }, [loadContracts]);
 
-  const subtitle = useMemo(
-    () =>
-      isCustomer
-        ? 'Accepted bids on your tasks and projects — active agreements with freelancers.'
-        : 'Work you are under contract to deliver after an accepted proposal.',
-    [isCustomer],
-  );
+  const subtitle = useMemo(() => {
+    if (isOrdersView) {
+      return isCustomer
+        ? 'Services you have purchased — track delivery and escrow payment status.'
+        : 'Accepted service orders from buyers — track delivery and order status.';
+    }
+    return isCustomer
+      ? 'Accepted bids on your tasks and projects — active agreements with freelancers.'
+      : 'Work you are under contract to deliver after an accepted proposal.';
+  }, [isCustomer, isOrdersView]);
 
-  const typeFilterOptions = isCustomer ? EMPLOYER_TYPE_FILTER_OPTIONS : FREELANCER_TYPE_FILTER_OPTIONS;
+  const typeFilterOptions = isOrdersView
+    ? []
+    : isCustomer
+      ? EMPLOYER_TYPE_FILTER_OPTIONS
+      : FREELANCER_TYPE_FILTER_OPTIONS;
 
   const filteredContracts = useMemo(() => {
     return contracts.filter((bid) => {
@@ -315,23 +327,40 @@ export default function DashboardContracts() {
     };
   }, [filteredContracts]);
 
+  const pageTitle = isOrdersView ? 'Orders' : 'Contracts';
+  const countLabel = isOrdersView ? 'Active orders' : 'Active contracts';
+  const countHint = isOrdersView ? 'Accepted service orders' : 'Accepted agreements';
+  const valueLabel = isOrdersView ? 'Order value' : 'Contract value';
+  const valueHint = isOrdersView ? 'Total order amount' : 'Total offer amount';
+  const emptyTitle = isOrdersView ? 'No active orders yet' : 'No active contracts yet';
+  const emptyDescription = isOrdersView
+    ? isCustomer
+      ? 'When you purchase a service, your order will appear here.'
+      : 'When a buyer accepts your service offer, the order shows up here.'
+    : isCustomer
+      ? 'Accepted bids on your tasks and projects will appear here.'
+      : 'When an employer accepts your proposal, the contract shows up here.';
+  const filterEmptyTitle = isOrdersView ? 'No orders match your search' : 'No contracts match your search';
+  const paginationLabel = isOrdersView ? 'orders' : 'contracts';
+  const detailFrom = isOrdersView ? 'orders' : 'contracts';
+
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       <div>
-        <h1 className={DASHBOARD_HEADING_MD}>Contracts</h1>
+        <h1 className={DASHBOARD_HEADING_MD}>{pageTitle}</h1>
         <p className="mt-2 text-sm text-neutral-500">{subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Active contracts</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{countLabel}</p>
           <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.count}</p>
-          <p className="mt-1 text-xs text-neutral-500">Accepted agreements</p>
+          <p className="mt-1 text-xs text-neutral-500">{countHint}</p>
         </div>
         <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Contract value</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{valueLabel}</p>
           <p className="mt-2 text-2xl font-semibold text-neutral-900">{formatNPR(totals.totalValue)}</p>
-          <p className="mt-1 text-xs text-neutral-500">Total offer amount</p>
+          <p className="mt-1 text-xs text-neutral-500">{valueHint}</p>
         </div>
       </div>
 
@@ -342,9 +371,13 @@ export default function DashboardContracts() {
           setCurrentPage(1);
         }}
         searchPlaceholder={
-          isCustomer
-            ? 'Search by title, freelancer, location, or contract #'
-            : 'Search by title, employer, location, or contract #'
+          isOrdersView
+            ? isCustomer
+              ? 'Search by service, seller, location, or order #'
+              : 'Search by service, buyer, location, or order #'
+            : isCustomer
+              ? 'Search by title, freelancer, location, or contract #'
+              : 'Search by title, employer, location, or contract #'
         }
         filterStatus={typeFilter}
         onFilterChange={(value) => {
@@ -353,6 +386,7 @@ export default function DashboardContracts() {
         }}
         filterOptions={typeFilterOptions}
         filterLabel="Listing type:"
+        hidePrimaryFilter={isOrdersView}
       />
 
       <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-8`}>
@@ -373,16 +407,12 @@ export default function DashboardContracts() {
             </div>
           ) : contracts.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium text-neutral-900">No active contracts yet</p>
-              <p className="mt-2 text-sm text-neutral-500">
-                {isCustomer
-                  ? 'Accepted bids on your tasks and projects will appear here.'
-                  : 'When an employer accepts your proposal, the contract shows up here.'}
-              </p>
+              <p className="text-sm font-medium text-neutral-900">{emptyTitle}</p>
+              <p className="mt-2 text-sm text-neutral-500">{emptyDescription}</p>
             </div>
           ) : isEmptyFromFilters ? (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium text-neutral-900">No contracts match your search</p>
+              <p className="text-sm font-medium text-neutral-900">{filterEmptyTitle}</p>
               <p className="mt-2 text-sm text-neutral-500">
                 Try a different keyword{hasActiveFilters ? ' or clear the filters' : ''}.
               </p>
@@ -393,9 +423,13 @@ export default function DashboardContracts() {
               const counterpartyName = getContractCounterpartyName(bid, isCustomer);
               const detailHref = bid.task_slug
                 ? isCustomer && bid.id
-                  ? getEmployerBidDetailHref(bid.task_slug, bid.id, 'contracts')
+                  ? getEmployerBidDetailHref(
+                      bid.task_slug,
+                      bid.id,
+                      isOrdersView ? 'orders' : 'contracts',
+                    )
                   : !isCustomer && bid.id
-                    ? getFreelancerBidDetailHref(bid.task_slug, bid.id, 'contracts')
+                    ? getFreelancerBidDetailHref(bid.task_slug, bid.id, detailFrom as 'contracts' | 'orders')
                     : null
                 : null;
 
@@ -532,7 +566,7 @@ export default function DashboardContracts() {
 
             <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
               {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, filteredContracts.length)} of{' '}
-              {filteredContracts.length} contracts
+              {filteredContracts.length} {paginationLabel}
             </div>
           </div>
         ) : null}

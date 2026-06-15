@@ -61,6 +61,9 @@ export const RECEIPT_DOCUMENT_STYLES = `
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  margin-bottom: 20px;
+}
+.tn-receipt-payment-details {
   margin-bottom: 24px;
 }
 @media (max-width: 480px) {

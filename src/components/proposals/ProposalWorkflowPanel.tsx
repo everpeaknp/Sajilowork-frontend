@@ -9,6 +9,12 @@ import {
   isTaskReadyToStart,
   resolveMyTaskRoles,
 } from '@/lib/taskUtils';
+import {
+  isServiceOrderBid,
+  canServiceOrderSellerStart,
+  canServiceOrderPartyComplete,
+  isServiceOrderBuyer,
+} from '@/lib/proposalDetailUtils';
 import { resolveBidListingKind } from '@/lib/buildFreelancerCvData';
 import type { Bid, BidStatus, Task } from '@/types';
 
@@ -20,6 +26,7 @@ type ProposalWorkflowPanelProps = {
   actionLoading?: boolean;
   embedded?: boolean;
   canManageWorkflow?: boolean;
+  isServiceOrder?: boolean;
   onStart?: () => void;
   onComplete?: () => void;
   onCancel?: () => void;
@@ -363,35 +370,41 @@ function WorkflowStepper({ steps }: { steps: TimelineStepWithState[] }) {
 
 function ContractActions({
   task,
+  bid,
   userId,
   actionLoading,
   onStart,
   onComplete,
   onCancel,
   canManageWorkflow = true,
+  isServiceOrder = false,
   isJobApplication = false,
 }: {
   task: Task;
+  bid: Bid;
   userId?: string;
   actionLoading?: boolean;
   onStart?: () => void;
   onComplete?: () => void;
   onCancel?: () => void;
   canManageWorkflow?: boolean;
+  isServiceOrder?: boolean;
   isJobApplication?: boolean;
 }) {
   if (!canManageWorkflow) {
     return null;
   }
 
-  const { isOwner, isAssignee } = resolveMyTaskRoles(task, userId);
+  const { isOwner } = resolveMyTaskRoles(task, userId);
   const rawStatus = task.status;
-  const canActAsEmployer = isJobApplication ? isOwner : isAssignee || isOwner;
+  const isServiceOrderWorkflow =
+    isServiceOrder || isServiceOrderBid(bid, task);
   const canStart =
     !isJobApplication &&
     Boolean(onStart) &&
-    canActAsEmployer &&
-    isTaskReadyToStart(rawStatus);
+    (isServiceOrderWorkflow
+      ? canServiceOrderSellerStart(bid, task, userId)
+      : isOwner && isTaskReadyToStart(rawStatus));
   const canHire =
     isJobApplication &&
     Boolean(onComplete) &&
@@ -400,7 +413,9 @@ function ContractActions({
   const canComplete =
     !isJobApplication &&
     Boolean(onComplete) &&
-    canConfirmWorkComplete(task, userId);
+    (isServiceOrderWorkflow
+      ? canServiceOrderPartyComplete(bid, task, userId)
+      : canConfirmWorkComplete(task, userId));
   const canCancel =
     Boolean(onCancel) &&
     (isJobApplication ? isOwner && canCancelMyTask(task, userId) : canCancelMyTask(task, userId));
@@ -441,7 +456,13 @@ function ContractActions({
             onClick={onComplete}
             className="rounded-lg bg-[#52C47F] px-4 py-2 text-sm text-white transition-colors hover:bg-[#49b071] disabled:opacity-60"
           >
-            {actionLoading ? 'Processing…' : isOwner ? 'Complete' : 'Mark complete'}
+            {actionLoading
+              ? 'Processing…'
+              : isServiceOrderWorkflow && isServiceOrderBuyer(bid, task, userId)
+                ? 'Complete'
+                : isOwner
+                  ? 'Complete'
+                  : 'Mark complete'}
           </button>
         ) : null}
         {canCancel ? (
@@ -526,6 +547,7 @@ function WorkflowBody({
   actionLoading,
   embedded,
   canManageWorkflow = true,
+  isServiceOrder = false,
   onStart,
   onComplete,
   onCancel,
@@ -555,9 +577,11 @@ function WorkflowBody({
       {isAcceptedContract && task ? (
         <ContractActions
           task={task}
+          bid={bid}
           userId={userId}
           actionLoading={actionLoading}
           canManageWorkflow={canManageWorkflow}
+          isServiceOrder={isServiceOrder}
           isJobApplication={isJobApplication}
           onStart={onStart}
           onComplete={onComplete}

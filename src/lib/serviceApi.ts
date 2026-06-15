@@ -417,6 +417,13 @@ export function mapTaskToPublicService(task: Task): Service {
 
     slug: task.slug,
 
+    ownerId:
+      task.owner && typeof task.owner === 'object'
+        ? String((task.owner as User).id)
+        : typeof task.owner === 'string'
+          ? task.owner
+          : undefined,
+
     isBookmarked: Boolean(task.is_bookmarked),
 
     category: resolveCategoryName(task),

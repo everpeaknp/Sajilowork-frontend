@@ -8,9 +8,16 @@ interface ServicePlanCardProps {
   service: Service;
   selectedPackageId: ServicePackage['id'];
   onSelectPackage: (packageId: ServicePackage['id']) => void;
+  onPurchase?: (pkg: ServicePackage) => void;
 }
 
-function PackagePanel({ pkg }: { pkg: ServicePackage }) {
+function PackagePanel({
+  pkg,
+  onPurchase,
+}: {
+  pkg: ServicePackage;
+  onPurchase?: (pkg: ServicePackage) => void;
+}) {
   return (
     <>
       <p className="text-[28px] font-normal tracking-tight text-black">
@@ -41,6 +48,7 @@ function PackagePanel({ pkg }: { pkg: ServicePackage }) {
 
       <button
         type="button"
+        onClick={() => onPurchase?.(pkg)}
         className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-[#52C47F] px-6 py-3.5 text-[15px] font-normal text-white transition-colors hover:bg-[#49b071]"
       >
         Continue {formatNPR(pkg.price)}
@@ -54,6 +62,7 @@ export default function ServicePlanCard({
   service,
   selectedPackageId,
   onSelectPackage,
+  onPurchase,
 }: ServicePlanCardProps) {
   const packages = getServicePackages(service);
 
@@ -90,7 +99,7 @@ export default function ServicePlanCard({
               }`}
               aria-hidden={!isActive}
             >
-              <PackagePanel pkg={pkg} />
+              <PackagePanel pkg={pkg} onPurchase={onPurchase} />
             </div>
           );
         })}

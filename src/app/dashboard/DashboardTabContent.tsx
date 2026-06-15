@@ -15,6 +15,7 @@ import DashboardFreelancerProjects from './DashboardFreelancerProjects';
 import DashboardProfile from './DashboardProfile';
 import DashboardSettings from './DashboardSettings';
 import DashboardContracts from './DashboardContracts';
+import DashboardOrders from './DashboardOrders';
 import DashboardEmployerBids from './DashboardEmployerBids';
 import DashboardEmployerApplications from './DashboardEmployerApplications';
 import { useEffect } from 'react';
@@ -36,6 +37,7 @@ const TAB_LABELS: Record<string, string> = {
   statements: 'Statements',
   wallet: 'Wallet',
   services: 'Manage Services',
+  orders: 'Orders',
   jobs: 'Manage Jobs',
   task: 'Manage Tasks',
   project: 'Manage Project',
@@ -109,6 +111,10 @@ export default function DashboardTabContent() {
 
   if (activeTab === 'services') {
     return <DashboardServices />;
+  }
+
+  if (activeTab === 'orders') {
+    return <DashboardOrders />;
   }
 
   if (activeTab === 'jobs') {

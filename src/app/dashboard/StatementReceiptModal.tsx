@@ -15,6 +15,11 @@ import { toast } from 'sonner';
 import type { PaymentHistoryDirection } from '@/services/payment.service';
 import { useAuthStore } from '@/store/auth.store';
 
+import {
+  resolveBillingParties,
+  type BillingParty,
+} from '@/lib/receiptBillingParties';
+
 export interface StatementReceipt {
   id: string;
   receiptId: string;
@@ -34,6 +39,11 @@ export interface StatementReceipt {
   status: string;
   currency: string;
   taskId?: string | null;
+  billedFrom?: BillingParty;
+  billedTo?: BillingParty;
+  counterpartyName?: string;
+  counterpartyEmail?: string;
+  counterpartyLocation?: string;
 }
 
 export interface ReceiptLabelOverrides {
@@ -97,6 +107,32 @@ export default function StatementReceiptModal({
   const accountEmail = user?.email || '—';
   const accountLocation = [user?.city, user?.country].filter(Boolean).join(', ') || 'Nepal';
 
+  const account: BillingParty = useMemo(
+    () => ({
+      name: accountName,
+      email: accountEmail,
+      location: accountLocation,
+    }),
+    [accountName, accountEmail, accountLocation]
+  );
+
+  const { billedFrom, billedTo } = useMemo(
+    () =>
+      resolveBillingParties({
+        direction,
+        statementType: statement.type,
+        account,
+        counterparty: {
+          name: statement.counterpartyName,
+          email: statement.counterpartyEmail,
+          location: statement.counterpartyLocation,
+        },
+        billedFrom: statement.billedFrom,
+        billedTo: statement.billedTo,
+      }),
+    [direction, statement, account]
+  );
+
   const receiptData: StatementReceiptData = useMemo(
     () => ({
       receiptId,
@@ -113,14 +149,13 @@ export default function StatementReceiptModal({
       platformFee: statement.feeVal,
       netAmount: statement.amountVal,
       taskId: statement.taskId,
-      accountName,
-      accountEmail,
-      accountLocation,
+      billedFrom,
+      billedTo,
       descriptionHeading: labels?.descriptionHeading,
       totalLabel: labels?.totalLabel,
       feeLabel: labels?.feeLabel,
     }),
-    [statement, direction, receiptId, accountName, accountEmail, accountLocation, labels]
+    [statement, direction, receiptId, billedFrom, billedTo, labels]
   );
 
   const handleDownloadPdf = useCallback(async () => {
@@ -231,29 +266,36 @@ export default function StatementReceiptModal({
 
                     <div className="tn-receipt-grid">
                       <div>
-                        <p className="tn-receipt-section-title">Billed to</p>
-                        <p className="tn-receipt-name">{accountName}</p>
-                        <p className="tn-receipt-sub">{accountEmail}</p>
-                        <p className="tn-receipt-sub">{accountLocation}</p>
+                        <p className="tn-receipt-section-title">Billed from</p>
+                        <p className="tn-receipt-name">{billedFrom.name}</p>
+                        <p className="tn-receipt-sub">{billedFrom.email}</p>
+                        <p className="tn-receipt-sub">{billedFrom.location}</p>
                       </div>
                       <div>
-                        <p className="tn-receipt-section-title">Payment details</p>
-                        <div className="tn-receipt-status-row">
-                          <span className={statusBadgeClass(statement.status)}>
-                            <span className="tn-receipt-badge-dot" aria-hidden />
-                            {statusLabel(statement.status)}
-                          </span>
-                          <span className="tn-receipt-badge tn-receipt-badge--neutral">
-                            {statement.type}
-                          </span>
-                          <span className="tn-receipt-badge tn-receipt-badge--neutral">
-                            {directionLabel}
-                          </span>
-                        </div>
-                        <p className="tn-receipt-sub" style={{ marginTop: 10 }}>
-                          Currency: {statement.currency || 'NPR'}
-                        </p>
+                        <p className="tn-receipt-section-title">Billed to</p>
+                        <p className="tn-receipt-name">{billedTo.name}</p>
+                        <p className="tn-receipt-sub">{billedTo.email}</p>
+                        <p className="tn-receipt-sub">{billedTo.location}</p>
                       </div>
+                    </div>
+
+                    <div className="tn-receipt-payment-details">
+                      <p className="tn-receipt-section-title">Payment details</p>
+                      <div className="tn-receipt-status-row">
+                        <span className={statusBadgeClass(statement.status)}>
+                          <span className="tn-receipt-badge-dot" aria-hidden />
+                          {statusLabel(statement.status)}
+                        </span>
+                        <span className="tn-receipt-badge tn-receipt-badge--neutral">
+                          {statement.type}
+                        </span>
+                        <span className="tn-receipt-badge tn-receipt-badge--neutral">
+                          {directionLabel}
+                        </span>
+                      </div>
+                      <p className="tn-receipt-sub" style={{ marginTop: 10 }}>
+                        Currency: {statement.currency || 'NPR'}
+                      </p>
                     </div>
 
                     <div className="tn-receipt-desc-box">

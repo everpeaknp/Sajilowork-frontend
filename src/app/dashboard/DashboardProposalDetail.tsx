@@ -29,6 +29,8 @@ import {
   getEmployerAvatarBg,
   getEmployerAvatarSrc,
   getEmployerDisplayName,
+  isServiceOrderBid,
+  canManageServiceOrderWorkflow,
 } from '@/lib/proposalDetailUtils';
 
 interface DashboardProposalDetailProps {
@@ -337,19 +339,28 @@ export default function DashboardProposalDetail({
     ? resolveEmployerBidDetailFrom(bid?.status ?? 'pending', searchParams.get('from'))
     : resolveFreelancerBidDetailFrom(bid?.status ?? 'pending', searchParams.get('from'));
   const detailCopy = isCustomer
-    ? getEmployerBidDetailCopy(detailFrom as 'contracts' | 'applications' | 'bids')
-    : getFreelancerBidDetailCopy(detailFrom as 'contracts' | 'proposals' | 'bids');
+    ? getEmployerBidDetailCopy(
+        detailFrom as 'contracts' | 'applications' | 'bids' | 'orders',
+      )
+    : getFreelancerBidDetailCopy(
+        detailFrom as 'contracts' | 'proposals' | 'bids' | 'orders',
+      );
   const sectionHref = getDashboardHref(detailCopy.sectionTab);
   const listingKind = bid ? resolveBidListingKind(bid) : null;
+  const isServiceOrder = bid ? isServiceOrderBid(bid, task) : false;
   const listingMiddleHref = isCustomer
     ? detailFrom === 'bids'
       ? getDashboardBidsListingHref(projectSlug)
       : detailFrom === 'applications'
         ? getDashboardHref('applications')
-        : getDashboardHref('contracts')
+        : detailFrom === 'orders'
+          ? getDashboardHref('orders')
+          : getDashboardHref('contracts')
     : detailFrom === 'bids'
       ? getDashboardBidsListingHref(projectSlug)
-      : getDashboardHref('proposals');
+      : detailFrom === 'orders'
+        ? getDashboardHref('orders')
+        : getDashboardHref('proposals');
 
   if (!bid) {
     return (
@@ -426,7 +437,14 @@ export default function DashboardProposalDetail({
         taskLoading={taskLoading}
         userId={user?.id}
         workflowLoading={workflowLoading}
-        canManageWorkflow={isJobProposal ? isCustomer : true}
+        canManageWorkflow={
+          isJobProposal
+            ? isCustomer
+            : isServiceOrder
+              ? canManageServiceOrderWorkflow(bid, task, user?.id, isCustomer)
+              : isCustomer
+        }
+        isServiceOrder={isServiceOrder}
         onStart={
           bid.status === 'accepted' && !isJobProposal
             ? () => void handleWorkflowStart()

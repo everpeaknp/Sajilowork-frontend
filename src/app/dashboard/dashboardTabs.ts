@@ -11,6 +11,7 @@ export const DASHBOARD_TABS = [
   'statements',
   'wallet',
   'services',
+  'orders',
   'jobs',
   'project',
   'task',
@@ -45,7 +46,7 @@ export function getDashboardProposalDetailHref(projectSlug: string, bidId: strin
   return `/dashboard/proposals/${encodeURIComponent(projectSlug)}/${encodeURIComponent(bidId)}`;
 }
 
-export type EmployerBidDetailFrom = 'contracts' | 'applications' | 'bids';
+export type EmployerBidDetailFrom = 'contracts' | 'applications' | 'bids' | 'orders';
 
 export function getEmployerBidDetailHref(
   projectSlug: string,
@@ -55,7 +56,7 @@ export function getEmployerBidDetailHref(
   return `${getDashboardProposalDetailHref(projectSlug, bidId)}?from=${from}`;
 }
 
-export type FreelancerBidDetailFrom = 'contracts' | 'proposals' | 'bids';
+export type FreelancerBidDetailFrom = 'contracts' | 'proposals' | 'bids' | 'orders';
 
 export function getFreelancerBidDetailHref(
   projectSlug: string,
@@ -69,7 +70,12 @@ export function resolveFreelancerBidDetailFrom(
   status: string,
   fromParam: string | null,
 ): FreelancerBidDetailFrom {
-  if (fromParam === 'contracts' || fromParam === 'proposals' || fromParam === 'bids') {
+  if (
+    fromParam === 'contracts' ||
+    fromParam === 'proposals' ||
+    fromParam === 'bids' ||
+    fromParam === 'orders'
+  ) {
     return fromParam;
   }
   if (status === 'accepted') return 'contracts';
@@ -116,6 +122,16 @@ export function getFreelancerBidDetailCopy(from: FreelancerBidDetailFrom): {
         loadingLabel: 'Loading proposal…',
         notFoundLabel: 'Proposal not found.',
       };
+    case 'orders':
+      return {
+        sectionTab: 'orders',
+        sectionLabel: 'Orders',
+        titlePrefix: 'Order for',
+        listBackLabel: 'Back to orders',
+        panelDescription: 'Order reference, buyer contact, and acceptance timeline.',
+        loadingLabel: 'Loading order…',
+        notFoundLabel: 'Order not found.',
+      };
   }
 }
 
@@ -123,7 +139,7 @@ export function resolveEmployerBidDetailFrom(
   status: string,
   fromParam: string | null,
 ): EmployerBidDetailFrom {
-  if (fromParam === 'contracts' || fromParam === 'applications' || fromParam === 'bids') {
+  if (fromParam === 'contracts' || fromParam === 'applications' || fromParam === 'bids' || fromParam === 'orders') {
     return fromParam;
   }
   if (status === 'accepted') return 'contracts';
@@ -170,6 +186,16 @@ export function getEmployerBidDetailCopy(from: EmployerBidDetailFrom): {
         panelDescription: 'Bid reference, freelancer contact, and submission timeline.',
         loadingLabel: 'Loading bid…',
         notFoundLabel: 'Bid not found.',
+      };
+    case 'orders':
+      return {
+        sectionTab: 'orders',
+        sectionLabel: 'Orders',
+        titlePrefix: 'Order for',
+        listBackLabel: 'Back to orders',
+        panelDescription: 'Order reference, seller contact, and purchase timeline.',
+        loadingLabel: 'Loading order…',
+        notFoundLabel: 'Order not found.',
       };
   }
 }
@@ -244,6 +270,7 @@ export const EMPLOYER_NAV_TABS: DashboardTab[] = [
   'applications',
   'bids',
   'contracts',
+  'orders',
   'message',
   'wallet',
   'reviews',
@@ -259,6 +286,7 @@ export const FREELANCER_NAV_TABS: DashboardTab[] = [
   'contracts',
   'message',
   'services',
+  'orders',
   'wallet',
   'reviews',
   'questions',
@@ -302,6 +330,7 @@ export function getNavLabelForRole(tab: DashboardTab, role: DashboardSidebarRole
     applications: 'Applications',
     bids: 'Bids',
     contracts: 'Contracts',
+    orders: 'Orders',
     message: 'Messages',
     statements: 'Statements',
     wallet: 'Wallet',
@@ -315,6 +344,7 @@ export function getNavLabelForRole(tab: DashboardTab, role: DashboardSidebarRole
     proposals: 'My Proposals',
     contracts: 'Contracts',
     services: 'My Services',
+    orders: 'Orders',
     project: 'Projects',
     message: 'Messages',
     statements: 'Statements',
@@ -341,6 +371,7 @@ const NAV_ITEM_DEFAULT_LABELS: Partial<Record<DashboardTab, string>> = {
   statements: 'Statements',
   wallet: 'Wallet',
   services: 'My Services',
+  orders: 'Orders',
   jobs: 'My Jobs',
   task: 'My Tasks',
   project: 'My Projects',

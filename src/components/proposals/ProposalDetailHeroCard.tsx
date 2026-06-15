@@ -29,6 +29,7 @@ type ProposalDetailHeroCardProps = {
   userId?: string;
   workflowLoading?: boolean;
   canManageWorkflow?: boolean;
+  isServiceOrder?: boolean;
   headerActions?: ReactNode;
   onStart?: () => void;
   onComplete?: () => void;
@@ -49,6 +50,7 @@ export default function ProposalDetailHeroCard({
   userId,
   workflowLoading = false,
   canManageWorkflow = true,
+  isServiceOrder = false,
   headerActions,
   onStart,
   onComplete,
@@ -209,6 +211,7 @@ export default function ProposalDetailHeroCard({
           userId={userId}
           actionLoading={workflowLoading}
           canManageWorkflow={canManageWorkflow}
+          isServiceOrder={isServiceOrder}
           embedded
           onStart={onStart}
           onComplete={onComplete}

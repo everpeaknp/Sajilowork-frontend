@@ -41,14 +41,24 @@ function resolveActiveTab(
   const fromPath = tabFromPathname(pathname);
 
   if (sidebarRole === 'customer' && /^\/dashboard\/proposals\/[^/]+\/[^/]+$/.test(pathname)) {
-    if (fromParam === 'contracts' || fromParam === 'applications' || fromParam === 'bids') {
+    if (
+      fromParam === 'contracts' ||
+      fromParam === 'applications' ||
+      fromParam === 'bids' ||
+      fromParam === 'orders'
+    ) {
       return fromParam;
     }
     return 'applications';
   }
 
   if (sidebarRole === 'tasker' && /^\/dashboard\/proposals\/[^/]+\/[^/]+$/.test(pathname)) {
-    if (fromParam === 'contracts' || fromParam === 'proposals' || fromParam === 'bids') {
+    if (
+      fromParam === 'contracts' ||
+      fromParam === 'proposals' ||
+      fromParam === 'bids' ||
+      fromParam === 'orders'
+    ) {
       return fromParam;
     }
     return 'proposals';

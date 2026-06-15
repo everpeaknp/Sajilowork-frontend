@@ -1,8 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/auth.store';
 import ServiceDetailHero from './ServiceDetailHero';
 import ServiceInfoBar from './ServiceInfoBar';
 import ServiceGallery from './ServiceGallery';
@@ -13,18 +14,24 @@ import ServiceComparePackages from './ServiceComparePackages';
 import ServiceFaq from './ServiceFaq';
 import ServiceReviews from './ServiceReviews';
 import ServiceShareSaveActions from './ServiceShareSaveActions';
+import ServicePurchaseModal from './ServicePurchaseModal';
 import { getServiceMeta, getServicePackages, type Service, type ServicePackage } from './serviceListData';
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 
 interface SingleServicePageProps {
   service: Service;
 }
 
 export default function SingleServicePage({ service }: SingleServicePageProps) {
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
   const meta = getServiceMeta(service);
   const packages = getServicePackages(service);
   const [selectedPackageId, setSelectedPackageId] = useState(
     packages[0]?.id ?? 'basic',
   );
+  const [purchasePackage, setPurchasePackage] = useState<ServicePackage | null>(null);
   const planCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,6 +43,29 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
     setSelectedPackageId(packageId);
     planCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, []);
+
+  const handlePurchasePackage = useCallback(
+    (pkg: ServicePackage) => {
+      if (!user) {
+        toast.message('Sign in to purchase this service');
+        router.push(`/login?redirect=${encodeURIComponent(`/services/${service.slug ?? ''}`)}`);
+        return;
+      }
+
+      if (service.ownerId && user.id === service.ownerId) {
+        toast.error('You cannot purchase your own service.');
+        return;
+      }
+
+      if (!service.slug) {
+        toast.error('This service is not available for purchase yet.');
+        return;
+      }
+
+      setPurchasePackage(pkg);
+    },
+    [router, service.ownerId, service.slug, user],
+  );
 
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
@@ -71,6 +101,7 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
                   service={service}
                   selectedPackageId={selectedPackageId}
                   onSelectPackage={handleSelectPackage}
+                  onPurchase={handlePurchasePackage}
                 />
               </div>
               <ServiceSellerCard service={service} />
@@ -91,6 +122,14 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
           </Link>
         </div>
       </div>
+
+      {purchasePackage ? (
+        <ServicePurchaseModal
+          service={service}
+          package={purchasePackage}
+          onClose={() => setPurchasePackage(null)}
+        />
+      ) : null}
     </div>
   );
 }

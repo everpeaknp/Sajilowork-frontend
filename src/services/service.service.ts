@@ -36,6 +36,43 @@ export const serviceService = {
   async deleteService(slug: string): Promise<ApiResponse<void>> {
     return apiClient.delete(`/services/${slug}/`);
   },
+
+  async getPurchasePreview(
+    slug: string,
+    packageId: string,
+  ): Promise<
+    ApiResponse<{
+      package: { id: string; name: string; price: string | number };
+      amount: string | number;
+      hold_amount: string | number;
+      currency: string;
+      wallet_available: string | number;
+      wallet_sufficient: boolean;
+      seller_name: string;
+    }>
+  > {
+    return apiClient.get(`/services/${slug}/purchase-preview/`, {
+      params: { package_id: packageId },
+    });
+  },
+
+  async purchaseService(
+    slug: string,
+    data: { package_id: string; note?: string },
+  ): Promise<
+    ApiResponse<{
+      order_task_id: string;
+      order_task_slug: string;
+      bid_id: string;
+      payment_id: string | null;
+      conversation_id: string | null;
+      hold_amount: string;
+      parent_service_slug: string;
+      message: string;
+    }>
+  > {
+    return apiClient.post(`/services/${slug}/purchase/`, data);
+  },
 };
 
 export default serviceService;
