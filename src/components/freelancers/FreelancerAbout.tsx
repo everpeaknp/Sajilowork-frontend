@@ -30,6 +30,7 @@ interface FreelancerAboutProps {
   freelancer: Freelancer;
   profileExtras?: FreelancerProfileExtras;
   onContact?: (name: string, message: string) => void | Promise<void>;
+  embedded?: boolean;
 }
 
 interface MetricItem {
@@ -52,7 +53,12 @@ function MetricIconWrap({ children }: { children: ReactNode }) {
   );
 }
 
-export default function FreelancerAbout({ freelancer, profileExtras, onContact }: FreelancerAboutProps) {
+export default function FreelancerAbout({
+  freelancer,
+  profileExtras,
+  onContact,
+  embedded = false,
+}: FreelancerAboutProps) {
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
   const [messageSent, setMessageSent] = useState(false);
@@ -274,7 +280,7 @@ export default function FreelancerAbout({ freelancer, profileExtras, onContact }
       : null,
   ].flatMap((row) => (row ? [row] : []));
 
-  const showHourlyRate = !usingApiProfile || freelancer.rate > 0;
+  const showHourlyRate = !embedded && (!usingApiProfile || freelancer.rate > 0);
 
   const handleMessageSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -297,8 +303,14 @@ export default function FreelancerAbout({ freelancer, profileExtras, onContact }
   };
 
   return (
-    <section className="select-none border-b border-neutral-100 bg-white px-4 pb-16 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl">
+    <section
+      className={`select-none bg-white ${
+        embedded
+          ? 'px-4 pb-6 sm:px-6 lg:px-8'
+          : 'border-b border-neutral-100 px-4 pb-16 sm:px-6 lg:px-8'
+      }`}
+    >
+      <div className={`mx-auto w-full ${embedded ? '' : 'max-w-7xl'}`}>
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="flex flex-col pt-2 lg:col-span-8">
             {visibleMetrics.length > 0 ? (
@@ -351,7 +363,13 @@ export default function FreelancerAbout({ freelancer, profileExtras, onContact }
 
           <div className="lg:col-span-4">
             <div className="w-full max-w-[21rem] sm:max-w-[22rem]">
-            <div className="rounded-none border border-neutral-200/65 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-sm md:p-8">
+            <div
+              className={`w-full max-w-[21rem] p-6 sm:max-w-[22rem] md:p-8 ${
+                embedded
+                  ? 'rounded-2xl bg-neutral-50/80'
+                  : 'rounded-none border border-neutral-200/65 bg-white shadow-sm transition-all duration-300 hover:shadow-sm'
+              }`}
+            >
               {showHourlyRate ? (
                 <div className="flex items-baseline border-b border-neutral-100 pb-6">
                   <span className="text-3xl font-normal tracking-tight text-black sm:text-4xl">
@@ -369,16 +387,18 @@ export default function FreelancerAbout({ freelancer, profileExtras, onContact }
                 </div>
               ) : null}
 
-              <button
-                type="button"
-                onClick={() => setShowContactModal(true)}
-                className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-none bg-[#52C47F] py-4 text-sm font-normal text-white shadow-sm transition-all hover:bg-[#43a86c] hover:shadow-md active:scale-[0.98]"
-              >
-                <span>Contact Me</span>
-                <svg className="h-4 w-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-                  <path d="M7 17L17 7M17 7H7M17 7V17" />
-                </svg>
-              </button>
+              {!embedded ? (
+                <button
+                  type="button"
+                  onClick={() => setShowContactModal(true)}
+                  className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-none bg-[#52C47F] py-4 text-sm font-normal text-white shadow-sm transition-all hover:bg-[#43a86c] hover:shadow-md active:scale-[0.98]"
+                >
+                  <span>Contact Me</span>
+                  <svg className="h-4 w-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  </svg>
+                </button>
+              ) : null}
             </div>
             </div>
           </div>
@@ -386,7 +406,7 @@ export default function FreelancerAbout({ freelancer, profileExtras, onContact }
       </div>
 
       <AnimatePresence>
-        {showContactModal ? (
+        {!embedded && showContactModal ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/40 p-4 backdrop-blur-sm">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}

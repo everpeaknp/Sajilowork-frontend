@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Briefcase, Calendar, Loader2, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,18 +10,44 @@ import { mapTaskToPublicProject } from '@/lib/projectApi';
 import { getMediaUrl } from '@/lib/utils';
 import { jobService } from '@/services/job.service';
 import { projectService } from '@/services/project.service';
-import { bidService, extractBidList, sortBidsByIdAlphanumeric } from '@/services/bid.service';
+import { serviceService } from '@/services/service.service';
+import { taskService } from '@/services/task.service';
+import { bidService, extractBidList, getBidTaskId, sortBidsByIdAlphanumeric } from '@/services/bid.service';
 import type { Task } from '@/types';
-import type { Bid } from '@/types';
+import type { Bid, BidStatus } from '@/types';
 import {
   getDashboardHref,
-  getDashboardProposalDetailHref,
+  getEmployerBidDetailHref,
+  type EmployerBidDetailFrom,
 } from './dashboardTabs';
+import WalletTableToolbar from './WalletTableToolbar';
+import { matchesSearchQuery } from './dashboardListSearch';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
 interface DashboardProposalsProjectProps {
   projectSlug: string;
+  backHref?: string;
+  backLabel?: string;
+  listingKinds?: Array<'task' | 'project' | 'job' | 'service'>;
+  detailFrom?: EmployerBidDetailFrom;
 }
+
+type BidStatusFilter = 'all' | BidStatus;
+type PriceSort = 'lowest' | 'highest';
+
+const BID_STATUS_FILTER_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'accepted', label: 'Accepted' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'withdrawn', label: 'Withdrawn' },
+  { value: 'expired', label: 'Expired' },
+];
+
+const PRICE_SORT_OPTIONS = [
+  { value: 'lowest', label: 'Lowest first' },
+  { value: 'highest', label: 'Highest first' },
+];
 
 function formatDisplayDate(value?: string): string {
   if (!value) return '—';
@@ -34,15 +60,43 @@ function formatDisplayDate(value?: string): string {
   });
 }
 
-async function resolveListingBySlug(slug: string): Promise<Task | null> {
-  const projectResponse = await projectService.getProjectBySlug(slug);
-  if (projectResponse.success && projectResponse.data) {
-    return projectResponse.data;
+async function resolveListingBySlug(
+  slug: string,
+  listingKinds?: Array<'task' | 'project' | 'job' | 'service'>,
+): Promise<Task | null> {
+  const allowProject = !listingKinds || listingKinds.includes('project');
+  const allowTask = !listingKinds || listingKinds.includes('task');
+  const allowJob = !listingKinds || listingKinds.includes('job');
+  const allowService = !listingKinds || listingKinds.includes('service');
+
+  if (allowProject) {
+    const projectResponse = await projectService.getProjectBySlug(slug);
+    if (projectResponse.success && projectResponse.data) {
+      return projectResponse.data;
+    }
   }
-  const jobResponse = await jobService.getJobBySlug(slug);
-  if (jobResponse.success && jobResponse.data) {
-    return jobResponse.data;
+
+  if (allowTask) {
+    const taskResponse = await taskService.getTaskBySlug(slug);
+    if (taskResponse.success && taskResponse.data) {
+      return taskResponse.data;
+    }
   }
+
+  if (allowJob) {
+    const jobResponse = await jobService.getJobBySlug(slug);
+    if (jobResponse.success && jobResponse.data) {
+      return jobResponse.data;
+    }
+  }
+
+  if (allowService) {
+    const serviceResponse = await serviceService.getServiceBySlug(slug);
+    if (serviceResponse.success && serviceResponse.data) {
+      return serviceResponse.data;
+    }
+  }
+
   return null;
 }
 
@@ -53,18 +107,48 @@ function taskerName(bid: Bid): string {
   return full || tasker.username || tasker.email || 'Freelancer';
 }
 
-export default function DashboardProposalsProject({ projectSlug }: DashboardProposalsProjectProps) {
+export default function DashboardProposalsProject({
+  projectSlug,
+  backHref,
+  backLabel,
+  listingKinds,
+  detailFrom = 'applications',
+}: DashboardProposalsProjectProps) {
   const { isCustomer, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [projectTitle, setProjectTitle] = useState('');
   const [projectLocation, setProjectLocation] = useState('');
+  const [listingKind, setListingKind] = useState<'task' | 'project' | 'job' | 'service' | ''>('');
   const [ownerId, setOwnerId] = useState<string | undefined>();
   const [bids, setBids] = useState<Bid[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BidStatusFilter>('all');
+  const [priceSort, setPriceSort] = useState<PriceSort>('lowest');
+
+  const isBidsView = detailFrom === 'bids';
+  const isApplicationsView = detailFrom === 'applications';
+  const showListToolbar = isBidsView || isApplicationsView;
+  const resolvedBackHref =
+    backHref ??
+    getDashboardHref(
+      isBidsView ? 'bids' : isApplicationsView ? 'applications' : isCustomer ? 'applications' : 'proposals',
+    );
+  const resolvedBackLabel =
+    backLabel ??
+    (isBidsView
+      ? isCustomer
+        ? 'Back to Bids'
+        : 'Back to My bids'
+      : isApplicationsView
+        ? 'Back to Applications'
+        : isCustomer
+          ? 'Back to Applications'
+          : 'Back to My Proposals');
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const task = await resolveListingBySlug(projectSlug);
+      const task = await resolveListingBySlug(projectSlug, listingKinds);
       if (!task) {
         throw new Error('Listing not found');
       }
@@ -83,17 +167,39 @@ export default function DashboardProposalsProject({ projectSlug }: DashboardProp
           ? 'Remote'
           : shortenCommaSeparatedLocation(rawLocation, 1),
       );
+      setListingKind(
+        task.listing_kind === 'project' ||
+          task.listing_kind === 'task' ||
+          task.listing_kind === 'job' ||
+          task.listing_kind === 'service'
+          ? task.listing_kind
+          : '',
+      );
       setOwnerId(resolvedOwnerId);
 
-      if (user?.id && resolvedOwnerId && String(user.id) !== String(resolvedOwnerId)) {
-        toast.error('You can only review proposals on your own projects.');
-        setBids([]);
+      if (isCustomer) {
+        if (user?.id && resolvedOwnerId && String(user.id) !== String(resolvedOwnerId)) {
+          toast.error('You can only review proposals on your own listings.');
+          setBids([]);
+          return;
+        }
+
+        const bidsResponse = await bidService.getTaskBids(task.id);
+        if (bidsResponse.success && bidsResponse.data) {
+          setBids(sortBidsByIdAlphanumeric(extractBidList(bidsResponse.data)));
+        } else {
+          setBids([]);
+        }
         return;
       }
 
-      const bidsResponse = await bidService.getTaskBids(task.id);
-      if (bidsResponse.success && bidsResponse.data) {
-        setBids(sortBidsByIdAlphanumeric(extractBidList(bidsResponse.data)));
+      const myBidsResponse = await bidService.getMyBids();
+      if (myBidsResponse.success && myBidsResponse.data) {
+        const taskId = String(task.id);
+        const mine = extractBidList(myBidsResponse.data).filter(
+          (bid) => bid.task_slug === projectSlug || getBidTaskId(bid) === taskId,
+        );
+        setBids(sortBidsByIdAlphanumeric(mine));
       } else {
         setBids([]);
       }
@@ -104,14 +210,43 @@ export default function DashboardProposalsProject({ projectSlug }: DashboardProp
     } finally {
       setLoading(false);
     }
-  }, [projectSlug, user?.id]);
+  }, [isCustomer, listingKinds, projectSlug, user?.id]);
 
   useEffect(() => {
-    if (!isCustomer) return;
-    void loadData();
-  }, [isCustomer, loadData]);
+    if (isBidsView || isCustomer) {
+      void loadData();
+    }
+  }, [isBidsView, isCustomer, loadData]);
 
-  if (!isCustomer) {
+  const filteredBids = useMemo(() => {
+    const filtered = bids.filter((bid) => {
+      if (statusFilter !== 'all' && bid.status !== statusFilter) return false;
+      const name = taskerName(bid);
+      return matchesSearchQuery(
+        searchQuery,
+        name,
+        bid.tasker?.email,
+        bid.tasker?.username,
+        bid.proposal,
+        bid.cover_letter,
+        bid.status,
+        String(bid.amount),
+        formatNPR(Number(bid.amount) || 0),
+      );
+    });
+
+    return [...filtered].sort((a, b) => {
+      const amountA = Number(a.amount) || 0;
+      const amountB = Number(b.amount) || 0;
+      return priceSort === 'lowest' ? amountA - amountB : amountB - amountA;
+    });
+  }, [bids, priceSort, searchQuery, statusFilter]);
+
+  const hasActiveFilters =
+    searchQuery.trim().length > 0 || statusFilter !== 'all' || priceSort !== 'lowest';
+  const isEmptyFromFilters = !loading && bids.length > 0 && filteredBids.length === 0;
+
+  if (!isCustomer && !isBidsView) {
     return (
       <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-600">
         Proposal review is available for employer accounts.
@@ -123,41 +258,86 @@ export default function DashboardProposalsProject({ projectSlug }: DashboardProp
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       <div className="flex flex-col gap-4">
         <Link
-          href={getDashboardHref('proposals')}
+          href={resolvedBackHref}
           className="inline-flex w-fit items-center gap-2 text-sm font-normal text-neutral-700 hover:text-black"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to My Proposals
+          {resolvedBackLabel}
         </Link>
 
         <div>
           <h2 className="font-sans text-3xl font-normal tracking-tight text-black">
-            {projectTitle || 'Project proposals'}
+            {projectTitle || (isApplicationsView ? 'Job applications' : 'Listing bids')}
           </h2>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-sm text-neutral-800">
+            {listingKind ? (
+              <>
+                <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs capitalize text-neutral-700">
+                  {listingKind}
+                </span>
+                <span className="text-neutral-300">|</span>
+              </>
+            ) : null}
             <span className="inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5 text-neutral-500" />
               {projectLocation}
             </span>
             <span className="text-neutral-300">|</span>
-            <span>{bids.length} proposal{bids.length === 1 ? '' : 's'}</span>
+            <span>
+              {hasActiveFilters
+                ? `${filteredBids.length} of ${bids.length} bid${bids.length === 1 ? '' : 's'}`
+                : `${bids.length} bid${bids.length === 1 ? '' : 's'}`}
+            </span>
           </p>
         </div>
       </div>
+
+      {showListToolbar ? (
+        <WalletTableToolbar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder={
+            isApplicationsView
+              ? 'Search applications by freelancer, amount, or proposal'
+              : isCustomer
+                ? 'Search bids by freelancer, amount, or proposal'
+                : 'Search your bid by amount or proposal'
+          }
+          filterStatus={statusFilter}
+          onFilterChange={(value) => setStatusFilter(value as BidStatusFilter)}
+          filterOptions={BID_STATUS_FILTER_OPTIONS}
+          filterLabel={isApplicationsView ? 'Application status:' : 'Bid status:'}
+          secondaryFilterStatus={priceSort}
+          onSecondaryFilterChange={(value) => setPriceSort(value as PriceSort)}
+          secondaryFilterOptions={PRICE_SORT_OPTIONS}
+          secondaryFilterLabel="Price:"
+        />
+      ) : null}
 
       <div className="rounded-xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-8">
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-16 text-sm text-neutral-500">
             <Loader2 className="h-4 w-4 animate-spin" />
-            Loading proposals…
+            Loading {isApplicationsView ? 'applications' : 'proposals'}…
           </div>
         ) : bids.length === 0 ? (
           <p className="py-12 text-center text-sm text-neutral-500">
-            No proposals received for this project yet.
+            {isApplicationsView
+              ? 'No applications received for this job yet.'
+              : isCustomer
+                ? 'No bids received for this listing yet.'
+                : 'You have not submitted a bid on this listing yet.'}
           </p>
+        ) : isEmptyFromFilters ? (
+          <div className="py-12 text-center text-sm text-neutral-500">
+            <p className="font-medium text-neutral-900">
+              No {isApplicationsView ? 'applications' : 'bids'} match your search
+            </p>
+            <p className="mt-2">Try a different keyword or clear the filters.</p>
+          </div>
         ) : (
           <div className="divide-y divide-neutral-100">
-            {bids.map((bid) => (
+            {filteredBids.map((bid) => (
               <div
                 key={bid.id}
                 className="grid grid-cols-12 items-center gap-4 py-6 first:pt-0 last:pb-0"
@@ -199,12 +379,21 @@ export default function DashboardProposalsProject({ projectSlug }: DashboardProp
                 </div>
 
                 <div className="col-span-12 md:col-span-2 md:text-right">
-                  <Link
-                    href={getDashboardProposalDetailHref(projectSlug, bid.id)}
-                    className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
-                  >
-                    View
-                  </Link>
+                  {isCustomer ? (
+                    <Link
+                      href={getEmployerBidDetailHref(projectSlug, bid.id, detailFrom)}
+                      className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                    >
+                      View
+                    </Link>
+                  ) : (
+                    <Link
+                      href={getEmployerBidDetailHref(projectSlug, bid.id, 'bids')}
+                      className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                    >
+                      View offer
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}

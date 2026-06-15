@@ -8,10 +8,11 @@ import { isDashboardTab } from '../dashboardTabs';
 const WALLET_SECTION_REDIRECTS: Record<string, string> = {
   payouts: 'payouts',
   recharges: 'recharges',
+  statements: 'statements',
 };
 
 const LEGACY_TAB_REDIRECTS: Record<string, string> = {
-  invoice: '/dashboard/statements',
+  invoice: '/dashboard/wallet?section=statements',
   qustions: '/dashboard/questions',
 };
 

@@ -48,6 +48,15 @@ export function getMediaUrl(path: string | null | undefined): string {
     normalizedPath = `/media${normalizedPath}`;
   }
 
+  // Employer logo uploads
+  if (
+    !normalizedPath.startsWith('/media/') &&
+    (normalizedPath.includes('/employer_logos/') ||
+      normalizedPath.startsWith('/employer_logos/'))
+  ) {
+    normalizedPath = `/media${normalizedPath}`;
+  }
+
   return `${baseUrl}${normalizedPath}`;
 }
 

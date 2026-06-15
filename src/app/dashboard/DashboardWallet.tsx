@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import PaymentMethods from '@/components/tasker-dashboard/PaymentMethods';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
-type WalletSection = 'wallet' | 'recharges' | 'payouts';
+type WalletSection = 'wallet' | 'recharges' | 'payouts' | 'statements';
 
-const WALLET_SECTIONS = new Set<WalletSection>(['wallet', 'recharges', 'payouts']);
+const WALLET_SECTIONS = new Set<WalletSection>(['wallet', 'recharges', 'payouts', 'statements']);
 
 function parseWalletSection(value: string | null): WalletSection | undefined {
   if (!value || !WALLET_SECTIONS.has(value as WalletSection)) {
@@ -18,7 +18,7 @@ function parseWalletSection(value: string | null): WalletSection | undefined {
 
 function WalletFallback() {
   return (
-    <div className="max-w-7xl animate-pulse space-y-6 pb-6">
+    <div className="max-w-7xl mx-auto w-full animate-pulse space-y-6 pb-6">
       <div className="space-y-4">
         <div className="h-3 w-24 rounded bg-neutral-200" />
         <div className="h-10 w-56 rounded-lg bg-neutral-200" />

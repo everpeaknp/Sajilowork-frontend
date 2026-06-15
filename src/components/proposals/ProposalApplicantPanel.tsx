@@ -1,30 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { UserRound } from 'lucide-react';
-import type { FreelancerCvPreviewData } from '@/app/dashboard/FreelancerCvPreview';
-import FreelancerCvDetailsView from '@/components/proposals/FreelancerCvDetailsView';
+import { useState } from 'react';
+import { Building2, UserRound } from 'lucide-react';
 import {
+  ProposalCollapsiblePanel,
   ProposalDetailPanel,
   ProposalFileLink,
-  ProposalLoadingState,
+  ProposalHighlightStat,
   ProposalProse,
   ProposalSection,
 } from '@/components/proposals/ProposalDetailUi';
-import {
-  buildFreelancerCvDataFromBid,
-  buildFreelancerCvDataFromUser,
-} from '@/lib/buildFreelancerCvData';
-import { fetchApplicantProfile } from '@/lib/fetchApplicantProfile';
+import ProposalEmployerProfile from '@/components/proposals/ProposalEmployerProfile';
+import ProposalFreelancerProfile from '@/components/proposals/ProposalFreelancerProfile';
 import { formatNPR } from '@/lib/nepalLocale';
 import { getMediaUrl } from '@/lib/utils';
-import type { Bid } from '@/types';
+import type { Bid, Task } from '@/types';
+import UserAvatar from '@/components/common/UserAvatar';
 
 type ProposalApplicantPanelVariant = 'job' | 'offer';
 
 type ProposalApplicantPanelProps = {
   bid: Bid;
+  task?: Task | null;
   variant?: ProposalApplicantPanelVariant;
+  profileSubject?: 'freelancer' | 'employer';
+  showOfferContent?: boolean;
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
 };
 
 const PANEL_COPY: Record<
@@ -41,8 +43,8 @@ const PANEL_COPY: Record<
   }
 > = {
   job: {
-    title: 'Applicant details',
-    description: 'Profile information submitted with this job application.',
+    title: 'Freelancer profile',
+    description: 'Public profile, experience, and qualifications from this applicant.',
     amountLabel: 'Expected salary',
     messageTitle: 'Application message',
     messageDescription: 'Submitted with this proposal',
@@ -52,7 +54,7 @@ const PANEL_COPY: Record<
   },
   offer: {
     title: 'Freelancer profile',
-    description: 'Profile information and offer from this tasker.',
+    description: 'Public profile, experience, and qualifications from this tasker.',
     amountLabel: 'Offer amount',
     messageTitle: 'Proposal',
     messageDescription: 'Submitted with this offer',
@@ -60,6 +62,12 @@ const PANEL_COPY: Record<
     attachmentsDescription: 'Documents attached to this offer',
     loadingMessage: 'Loading freelancer profile…',
   },
+};
+
+const EMPLOYER_PANEL_COPY = {
+  title: 'Employer profile',
+  description: 'Public business profile and contact details for this employer.',
+  loadingMessage: 'Loading employer profile…',
 };
 
 function attachmentLabel(url: string, index: number): string {
@@ -72,66 +80,29 @@ function attachmentLabel(url: string, index: number): string {
   return `Attachment ${index + 1}`;
 }
 
-export default function ProposalApplicantPanel({
+function taskerDisplayName(bid: Bid): string {
+  const tasker = bid.tasker;
+  if (!tasker) return 'Applicant';
+  const full = [tasker.first_name, tasker.last_name].filter(Boolean).join(' ').trim();
+  return full || tasker.username || tasker.email || 'Applicant';
+}
+
+export function ProposalOfferSections({
   bid,
   variant = 'job',
-}: ProposalApplicantPanelProps) {
+}: {
+  bid: Bid;
+  variant?: ProposalApplicantPanelVariant;
+}) {
   const copy = PANEL_COPY[variant];
-  const [cvData, setCvData] = useState<FreelancerCvPreviewData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    const taskerId = bid.tasker?.id;
-
-    const finish = (data: FreelancerCvPreviewData) => {
-      if (!cancelled) {
-        setCvData(data);
-        setLoading(false);
-      }
-    };
-
-    if (!taskerId) {
-      finish(buildFreelancerCvDataFromBid(bid));
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    setLoading(true);
-    void fetchApplicantProfile(bid.tasker)
-      .then((profile) => {
-        if (profile) {
-          finish(buildFreelancerCvDataFromUser(profile, bid.tasker));
-          return;
-        }
-        finish(buildFreelancerCvDataFromBid(bid));
-      })
-      .catch(() => {
-        finish(buildFreelancerCvDataFromBid(bid));
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [bid]);
+  const amount = Number(bid.amount) || 0;
 
   return (
-    <ProposalDetailPanel
-      title={copy.title}
-      description={copy.description}
-      icon={UserRound}
-    >
-      {loading ? (
-        <ProposalLoadingState message={copy.loadingMessage} />
-      ) : cvData ? (
-        <FreelancerCvDetailsView
-          data={cvData}
-          expectedSalary={
-            Number(bid.amount) > 0 ? formatNPR(Number(bid.amount)) : undefined
-          }
-          offerAmountLabel={copy.amountLabel}
-        />
+    <>
+      {amount > 0 ? (
+        <div className="mt-6 border-t border-neutral-100 pt-6">
+          <ProposalHighlightStat label={copy.amountLabel} value={formatNPR(amount)} />
+        </div>
       ) : null}
 
       {bid.proposal?.trim() ? (
@@ -160,6 +131,82 @@ export default function ProposalApplicantPanel({
           </ul>
         </ProposalSection>
       ) : null}
+    </>
+  );
+}
+
+export default function ProposalApplicantPanel({
+  bid,
+  task = null,
+  variant = 'job',
+  profileSubject = 'freelancer',
+  showOfferContent = true,
+  collapsible = false,
+  defaultExpanded = true,
+}: ProposalApplicantPanelProps) {
+  const copy = PANEL_COPY[variant];
+  const employerCopy = EMPLOYER_PANEL_COPY;
+  const isEmployerProfile = profileSubject === 'employer';
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  const profileContent = isEmployerProfile ? (
+    <ProposalEmployerProfile bid={bid} task={task} loadingMessage={employerCopy.loadingMessage} />
+  ) : (
+    <ProposalFreelancerProfile bid={bid} loadingMessage={copy.loadingMessage} />
+  );
+
+  const name = isEmployerProfile
+    ? bid.task_owner_business_name?.trim() || bid.task_owner_name?.trim() || 'Employer'
+    : taskerDisplayName(bid);
+  const avatarSrc = isEmployerProfile
+    ? bid.task_owner_logo_url?.trim()
+      ? getMediaUrl(bid.task_owner_logo_url)
+      : undefined
+    : bid.tasker?.profile_image
+      ? getMediaUrl(bid.tasker.profile_image)
+      : undefined;
+
+  const headerTrailing = isEmployerProfile ? (
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 ring-2 ring-white">
+      {avatarSrc ? (
+        <img src={avatarSrc} alt={name} className="h-full w-full object-cover" />
+      ) : (
+        <Building2 className="h-4 w-4 text-neutral-500" />
+      )}
+    </div>
+  ) : (
+    <UserAvatar
+      src={avatarSrc}
+      name={name}
+      alt={name}
+      size="sm"
+      className="!h-9 !w-9 ring-2 ring-white"
+    />
+  );
+
+  const panelTitle = isEmployerProfile ? employerCopy.title : copy.title;
+  const panelDescription = isEmployerProfile ? employerCopy.description : copy.description;
+  const panelIcon = isEmployerProfile ? Building2 : UserRound;
+
+  if (collapsible) {
+    return (
+      <ProposalCollapsiblePanel
+        title={panelTitle}
+        description={panelDescription}
+        icon={panelIcon}
+        isOpen={expanded}
+        onToggle={() => setExpanded((open) => !open)}
+        trailing={headerTrailing}
+      >
+        {profileContent}
+      </ProposalCollapsiblePanel>
+    );
+  }
+
+  return (
+    <ProposalDetailPanel title={panelTitle} description={panelDescription} icon={panelIcon}>
+      {profileContent}
+      {showOfferContent ? <ProposalOfferSections bid={bid} variant={variant} /> : null}
     </ProposalDetailPanel>
   );
 }

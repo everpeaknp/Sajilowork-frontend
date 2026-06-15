@@ -174,7 +174,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
   const organicDash = (traffic.organic_percent / 100) * circumference;
   const middleCardTitle =
     role === 'tasker' ? 'Recently Done Projects' : 'Recent Purchased Services';
-  const viewAllHref = role === 'tasker' ? '/dashboard/project' : '/dashboard/jobs';
+  const viewAllHref = role === 'tasker' ? '/dashboard/contracts' : '/dashboard/jobs';
 
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>

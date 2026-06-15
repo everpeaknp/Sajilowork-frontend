@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { FileText, type LucideIcon } from 'lucide-react';
+import { ChevronDown, FileText, type LucideIcon } from 'lucide-react';
 
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-amber-50 text-amber-800 ring-amber-200/80',
@@ -52,6 +52,81 @@ export function ProposalDetailPanel({
         </div>
       </div>
       <div className="px-6 py-6 sm:px-8 sm:py-7">{children}</div>
+    </section>
+  );
+}
+
+type ProposalCollapsiblePanelProps = {
+  title: string;
+  description?: string;
+  icon?: LucideIcon;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+  className?: string;
+  trailing?: ReactNode;
+};
+
+export function ProposalCollapsiblePanel({
+  title,
+  description,
+  icon: Icon,
+  isOpen,
+  onToggle,
+  children,
+  className = '',
+  trailing,
+}: ProposalCollapsiblePanelProps) {
+  return (
+    <section
+      className={`min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.04)] ${className}`}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="flex w-full items-start justify-between gap-4 border-b border-neutral-100 bg-gradient-to-r from-[#f8faf9] via-white to-white px-6 py-5 text-left transition-colors hover:bg-neutral-50/80 sm:px-8"
+      >
+        <div className="flex min-w-0 items-start gap-3">
+          {Icon ? (
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 transition-colors ${
+                isOpen
+                  ? 'bg-[#52C47F] text-white ring-[#52C47F]/20'
+                  : 'bg-[#EAF6F0] text-[#2d6b4f] ring-[#52C47F]/15'
+              }`}
+            >
+              <Icon className="h-5 w-5" strokeWidth={1.75} />
+            </div>
+          ) : null}
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#52C47F]">
+              Profile
+            </p>
+            <h3 className="mt-0.5 text-lg font-semibold tracking-tight text-neutral-900 sm:text-xl">
+              {title}
+            </h3>
+            {description ? (
+              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-neutral-500">
+                {description}
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-3 pt-1">
+          {trailing}
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-600">
+            {isOpen ? 'Hide' : 'Show'}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+              strokeWidth={2}
+            />
+          </span>
+        </div>
+      </button>
+      {isOpen ? (
+        <div className="px-6 py-6 sm:px-8 sm:py-7">{children}</div>
+      ) : null}
     </section>
   );
 }

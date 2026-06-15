@@ -8,7 +8,9 @@ import { motion } from 'motion/react';
 import { Wallet, ArrowRight, ArrowDownLeft, ArrowUpRight, Zap, TrendingUp, MessageCircle, X, CircleDollarSign, Clock } from 'lucide-react';
 import DashboardPayouts, { type Payout, type PayoutStatus } from '@/app/dashboard/DashboardPayouts';
 import DashboardRecharges, { type Recharge } from '@/app/dashboard/DashboardRecharges';
+import DashboardStatements from '@/app/dashboard/DashboardStatements';
 import { DashboardMetricCards } from '@/app/dashboard/DashboardMetricCards';
+import { useDashboardSidebarRole } from '@/app/dashboard/DashboardRoleSwitchContext';
 
 const fieldLabelClass = 'text-sm font-semibold text-gray-600';
 const fieldInputClass =
@@ -92,7 +94,7 @@ interface WithdrawalRecord {
   completed_at: string | null;
 }
 
-type PaymentMethodsTab = 'wallet' | 'recharges' | 'payouts';
+type PaymentMethodsTab = 'wallet' | 'recharges' | 'payouts' | 'statements';
 
 function mapTransactionStatus(status: string, index: number): PayoutStatus {
   switch (status) {
@@ -121,6 +123,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isDashboardWallet = pathname.startsWith('/dashboard/wallet');
+  const sidebarRole = useDashboardSidebarRole();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<PaymentMethodsTab>(initialTab);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodData[]>([]);
@@ -767,28 +770,47 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
     ];
   }, [walletData, walletSummary]);
 
+  const tabHeading = useMemo(() => {
+    switch (activeTab) {
+      case 'recharges':
+        return {
+          title: 'Recharges',
+          subtitle: 'View recharge history and add funds to your wallet.',
+        };
+      case 'payouts':
+        return {
+          title: 'Payout',
+          subtitle: 'View payout history and request withdrawals.',
+        };
+      case 'statements':
+        return {
+          title: 'Statements',
+          subtitle:
+            sidebarRole === 'customer'
+              ? 'Task payments and outgoing transactions.'
+              : 'Earnings and releases from completed work.',
+        };
+      case 'wallet':
+      default:
+        return {
+          title: 'My Wallet',
+          subtitle: 'View balances, recharge funds, and withdraw earnings.',
+        };
+    }
+  }, [activeTab, sidebarRole]);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn('min-w-0 max-w-7xl space-y-8 pb-6')}
+      className={cn('mx-auto min-w-0 w-full max-w-7xl space-y-8 pb-6')}
     >
       <header className="space-y-6">
         <div className="flex flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className={DASHBOARD_HEADING}>
-              {activeTab === 'wallet'
-                ? 'My Wallet'
-                : activeTab === 'recharges'
-                  ? 'Recharges'
-                  : 'Payouts'}
-            </h1>
+            <h1 className={DASHBOARD_HEADING}>{tabHeading.title}</h1>
             <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
-              {activeTab === 'wallet'
-                ? 'View balances, recharge funds, and withdraw earnings.'
-                : activeTab === 'recharges'
-                  ? 'View recharge history and add funds to your wallet.'
-                  : 'View payout history and request withdrawals.'}
+              {tabHeading.subtitle}
             </p>
           </div>
 
@@ -873,6 +895,21 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               <Wallet className="h-4 w-4" />
               My Wallet
             </button>
+            {isDashboardWallet ? (
+              <button
+                type="button"
+                onClick={() => selectTab('statements')}
+                className={cn(
+                  'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
+                  activeTab === 'statements'
+                    ? 'bg-white text-brand-dark shadow-sm'
+                    : 'text-gray-600 hover:text-brand-dark'
+                )}
+              >
+                <TrendingUp className="h-4 w-4" />
+                Statements
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => selectTab('recharges')}
@@ -897,7 +934,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               )}
             >
               <ArrowUpRight className="h-4 w-4" />
-              Payouts
+              Payout
             </button>
           </div>
         </div>
@@ -946,6 +983,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
           onCancelPayout={handleCancelWithdrawal}
           walletSummary={walletSummary}
         />
+      ) : activeTab === 'statements' ? (
+        <DashboardStatements embedded />
       ) : null}
 
       {showWithdrawModal &&

@@ -16,7 +16,8 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const isLoading = useAuthStore((s) => s.isLoading);
   const pathname = usePathname();
   const router = useRouter();
-  const { activeTab, setActiveTab, mobileOpen, setMobileOpen } = useDashboardTab();
+  const { activeTab, setActiveTab, mobileOpen, setMobileOpen, sidebarCollapsed, toggleSidebarCollapsed } =
+    useDashboardTab();
 
   useEffect(() => {
     void initialize();
@@ -53,29 +54,35 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       <Navbar />
 
       <nav
-        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-full max-w-[17.5rem] bg-white shadow-xl transition-transform duration-300 ease-out lg:z-40 lg:translate-x-0 lg:shadow-none ${
+        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-[17.5rem] overflow-hidden bg-white shadow-xl transition-[width,transform] duration-300 ease-in-out sm:top-16 sm:h-[calc(100dvh-4rem)] lg:z-40 lg:translate-x-0 lg:shadow-none ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        } ${sidebarCollapsed ? 'lg:w-[4.75rem]' : 'lg:w-[17.5rem]'}`}
       >
         <DashboardSidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
           isOpen={mobileOpen}
           onClose={() => setMobileOpen(false)}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={toggleSidebarCollapsed}
         />
       </nav>
 
       {mobileOpen ? (
         <button
           type="button"
-          className="fixed inset-0 top-14 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 top-14 z-40 bg-black/50 transition-opacity duration-300 ease-in-out sm:top-16 lg:hidden"
           aria-label="Close navigation"
           onClick={() => setMobileOpen(false)}
         />
       ) : null}
 
-      <main className="min-w-0 overflow-x-clip bg-[#f0efec] lg:pl-[17.5rem]">
-        <div className="mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8">
+      <main
+        className={`min-w-0 overflow-x-clip bg-[#f0efec] transition-[padding-left] duration-300 ease-in-out ${
+          sidebarCollapsed ? 'lg:pl-[4.75rem]' : 'lg:pl-[17.5rem]'
+        }`}
+      >
+        <div className="mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8 lg:pt-3">
           <div className="mb-4 flex items-center gap-3 lg:hidden">
             <button
               type="button"

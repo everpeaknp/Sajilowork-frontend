@@ -261,7 +261,7 @@ export type BidStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn' | 'exp
 
 export interface Bid {
   id: string;
-  task: string;
+  task: string | Task;
   task_title?: string;
   task_slug?: string;
   task_city?: string;
@@ -271,6 +271,8 @@ export interface Bid {
   task_owner_logo_color?: string | null;
   task_owner_business_name?: string | null;
   task_owner_name?: string | null;
+  task_image?: string | null;
+  task_status?: TaskStatus;
   tasker: User;
   amount: number;
   currency?: string;
@@ -427,6 +429,7 @@ export interface Task {
   due_date?: string;
   flexible_date?: boolean;
   estimated_duration?: number;
+  start_date?: string | null;
   
   // Status & Assignment
   status: TaskStatus;

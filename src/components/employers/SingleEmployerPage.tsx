@@ -29,6 +29,7 @@ interface SingleEmployerPageProps {
   reviews?: SingleReview[];
   useMockProjects?: boolean;
   useMockJobs?: boolean;
+  embedded?: boolean;
   onContact?: (name: string) => void;
   onNotification?: (message: string) => void;
   onProjectSelect?: (project: EmployerListingCard) => void;
@@ -266,6 +267,7 @@ export default function SingleEmployerPage({
   reviews,
   useMockProjects = false,
   useMockJobs = false,
+  embedded = false,
   onContact,
   onNotification,
   onProjectSelect,
@@ -297,7 +299,13 @@ export default function SingleEmployerPage({
     : 'Company details and how to reach this employer directly.';
 
   const aboutMeCard = (
-    <div className="relative flex h-full flex-col border border-neutral-100 bg-white p-6 text-left shadow-xl sm:p-8">
+    <div
+      className={`relative flex h-full flex-col bg-white p-6 text-left sm:p-8 ${
+        embedded
+          ? 'rounded-2xl bg-neutral-50/80'
+          : 'border border-neutral-100 shadow-xl'
+      }`}
+    >
       <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black">{aboutTitle}</h3>
       <p className="mb-5 text-sm font-normal leading-relaxed text-neutral-900 sm:mb-6 sm:text-base">
         {aboutSubtitle}
@@ -373,29 +381,43 @@ export default function SingleEmployerPage({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => setShowContactModal(true)}
-        className="mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-emerald px-6 py-3 text-sm font-normal tracking-tight text-white shadow-sm transition-all hover:bg-[#3d9665] focus:outline-none"
-        id="btn-sidebar-contact-me"
-      >
-        <span>Contact Me</span>
-        <ArrowUpRight className="h-4 w-4 stroke-[2.5]" />
-      </button>
+      {!embedded ? (
+        <button
+          type="button"
+          onClick={() => setShowContactModal(true)}
+          className="mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-emerald px-6 py-3 text-sm font-normal tracking-tight text-white shadow-sm transition-all hover:bg-[#3d9665] focus:outline-none"
+          id="btn-sidebar-contact-me"
+        >
+          <span>Contact Me</span>
+          <ArrowUpRight className="h-4 w-4 stroke-[2.5]" />
+        </button>
+      ) : null}
     </div>
   );
 
   return (
     <section
-      className="animate-in fade-in w-full min-w-0 select-none pb-16 text-black antialiased [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal"
+      className={`animate-in fade-in w-full min-w-0 select-none text-black antialiased [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal ${
+        embedded ? 'pb-6' : 'pb-16'
+      }`}
       id="employer-profile-section"
     >
       <div className="w-full">
-        <div className="relative w-full px-4 pt-4 sm:px-6 sm:pt-6 md:px-10 lg:px-12 xl:px-16">
-          <div className="relative mx-auto flex w-full max-w-[1600px] flex-col lg:block lg:min-h-[28rem]">
+        <div
+          className={`relative w-full ${
+            embedded ? 'px-0 pt-0' : 'px-4 pt-4 sm:px-6 sm:pt-6 md:px-10 lg:px-12 xl:px-16'
+          }`}
+        >
+          <div
+            className={`relative mx-auto flex w-full max-w-[1600px] flex-col ${
+              embedded ? 'gap-6' : 'lg:block lg:min-h-[28rem]'
+            }`}
+          >
             <div
               id="single-employer-hero"
-              className="relative z-0 order-1 w-full overflow-hidden rounded-3xl border border-[#F2ECE6] bg-[#FDF8F3] sm:rounded-[2rem]"
+              className={`relative z-0 w-full overflow-hidden rounded-3xl bg-[#FDF8F3] sm:rounded-[2rem] ${
+                embedded ? '' : 'border border-[#F2ECE6]'
+              } ${embedded ? 'order-none' : 'order-1'}`}
             >
               <OrganicYellowBlob />
               <OrganicTerracottaBlob />
@@ -404,7 +426,11 @@ export default function SingleEmployerPage({
 
               <div className="relative z-10 w-full px-4 py-6 sm:px-6 sm:py-7 lg:px-10 lg:py-8 xl:px-12">
                 <motion.div
-                  className="text-left sm:ml-10 lg:ml-16 lg:pr-[min(380px,36%)] xl:ml-24"
+                  className={
+                    embedded
+                      ? 'text-left'
+                      : 'text-left sm:ml-10 lg:ml-16 lg:pr-[min(380px,36%)] xl:ml-24'
+                  }
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5 }}
@@ -446,7 +472,11 @@ export default function SingleEmployerPage({
             </div>
 
             <motion.div
-              className="relative z-20 order-3 mt-6 w-full lg:absolute lg:right-6 lg:top-20 lg:order-none lg:mt-0 lg:max-w-[380px] lg:translate-y-0 xl:right-12 2xl:right-20"
+              className={
+                embedded
+                  ? 'relative z-10 w-full'
+                  : 'relative z-20 order-3 mt-6 w-full lg:absolute lg:right-6 lg:top-20 lg:order-none lg:mt-0 lg:max-w-[380px] lg:translate-y-0 xl:right-12 2xl:right-20'
+              }
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -454,7 +484,13 @@ export default function SingleEmployerPage({
               {aboutMeCard}
             </motion.div>
 
-            <div className="relative z-10 order-2 w-full min-w-0 pb-10 pt-6 lg:order-none lg:pt-8 lg:pr-[calc(380px+3rem)] xl:pr-[calc(380px+4.5rem)] 2xl:pr-[calc(380px+6.5rem)]">
+            <div
+              className={
+                embedded
+                  ? 'relative z-10 w-full min-w-0 pb-6 pt-0'
+                  : 'relative z-10 order-2 w-full min-w-0 pb-10 pt-6 lg:order-none lg:pt-8 lg:pr-[calc(380px+3rem)] xl:pr-[calc(380px+4.5rem)] 2xl:pr-[calc(380px+6.5rem)]'
+              }
+            >
               <div className="space-y-6">
                 <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">
                   {isIndividual ? 'About' : 'About company'}
@@ -540,7 +576,9 @@ export default function SingleEmployerPage({
               </div>
             </div>
 
-            <div className="relative z-10 order-4 w-full min-w-0 pb-10 pt-8 lg:order-none">
+            <div
+              className={`relative z-10 w-full min-w-0 pb-10 ${embedded ? 'pt-0' : 'order-4 pt-8 lg:order-none'}`}
+            >
               <EmployerJobsAt
                 employerName={employer.name}
                 logoColor={employer.logoColor}

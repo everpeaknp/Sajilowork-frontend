@@ -24,7 +24,7 @@ import { getMediaUrl } from '@/lib/utils';
 import { bidService, extractBidList, sortBidsByIdAlphanumeric } from '@/services/bid.service';
 import type { Bid, BidStatus } from '@/types';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import { getDashboardProposalDetailHref } from './dashboardTabs';
+import { getEmployerBidDetailHref, getFreelancerBidDetailHref } from './dashboardTabs';
 import {
   DASHBOARD_CARD_PLAIN,
   DASHBOARD_HEADING_PROPOSALS,
@@ -136,22 +136,20 @@ function resolveProposalType(listingKind?: string | null): ProposalType {
   return 'task';
 }
 
+const FREELANCER_APPLIED_LISTING_KINDS = new Set(['job', 'service', 'project', 'task']);
+
+function isFreelancerAppliedListingKind(kind?: string | null): boolean {
+  if (!kind) return true;
+  return FREELANCER_APPLIED_LISTING_KINDS.has(kind);
+}
+
+function isFreelancerAppliedBid(bid: Bid): boolean {
+  return bid.status === 'pending' && isFreelancerAppliedListingKind(bid.task_listing_kind);
+}
+
 function matchesProposalType(listingType: ProposalType, filter: ProposalTypeFilter): boolean {
   if (filter === 'all') return true;
   return listingType === filter;
-}
-
-function getPublicListingHref(type: ProposalType, slug: string): string {
-  switch (type) {
-    case 'job':
-      return `/jobs/${slug}`;
-    case 'service':
-      return `/services/${slug}`;
-    case 'project':
-      return `/projects/${slug}`;
-    case 'task':
-      return `/task/${slug}`;
-  }
 }
 
 function proposalTypeIcon(type: ProposalType) {
@@ -248,21 +246,33 @@ function emptyMessageForFilter(
   statusFilter: ProposalFilter,
   typeFilter: ProposalTypeFilter,
   isCustomer: boolean,
+  freelancerAppliedOnly = false,
 ): string {
-  const scope = isCustomer ? 'proposals on your listings' : 'proposals';
+  const scope = isCustomer ? 'proposals on your listings' : 'applications';
   const typeLabel =
     typeFilter === 'all' ? '' : ` ${PROPOSAL_TYPE_LABELS[typeFilter].toLowerCase()}`;
+  if (freelancerAppliedOnly) {
+    return `No applied${typeLabel} listings yet. Browse jobs, services, projects, or tasks and submit an offer.`;
+  }
   if (statusFilter === 'pending') return `No pending${typeLabel} ${scope}.`;
   if (statusFilter === 'accepted') return `No accepted${typeLabel} ${scope}.`;
   return `No cancelled${typeLabel} ${scope}.`;
 }
 
-export default function DashboardProposals() {
+export type EmployerOffersView = 'applications' | 'bids';
+
+export default function DashboardProposals({
+  employerView,
+}: {
+  employerView?: EmployerOffersView;
+} = {}) {
   const { isCustomer, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [employerRows, setEmployerRows] = useState<EmployerRow[]>([]);
   const [freelancerRows, setFreelancerRows] = useState<FreelancerRow[]>([]);
-  const [activeFilter, setActiveFilter] = useState<ProposalFilter>('pending');
+  const [activeFilter, setActiveFilter] = useState<ProposalFilter>(
+    employerView === 'applications' ? 'pending' : 'pending',
+  );
   const [activeTypeFilter, setActiveTypeFilter] = useState<ProposalTypeFilter>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
@@ -293,20 +303,22 @@ export default function DashboardProposals() {
     setEmployerRows(sortBidsByIdAlphanumeric(rows));
   }, []);
 
+  const isFreelancerProposals = !isCustomer && !employerView;
+
   const loadFreelancerRows = useCallback(async () => {
     const response = await bidService.getMyBids();
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to load proposals');
     }
 
-    const bids = extractBidList(response.data);
+    const bids = extractBidList(response.data).filter(isFreelancerAppliedBid);
 
     const rows = bids.map((bid: Bid) => ({
       id: bid.id,
       listingType: resolveProposalType(bid.task_listing_kind),
       projectTitle: bid.task_title || 'Listing',
       projectSlug: bid.task_slug,
-      avatarUrl: bid.task_owner_logo_url || undefined,
+      avatarUrl: bid.task_owner_logo_url || bid.task_image || undefined,
       logoText: bid.task_owner_logo_text || undefined,
       logoColor: bid.task_owner_logo_color || undefined,
       ownerName:
@@ -358,12 +370,21 @@ export default function DashboardProposals() {
 
   const rows = useMemo(() => {
     const source = isCustomer ? employerRows : freelancerRows;
-    return source.filter(
-      (row) =>
-        matchesProposalFilter(row.rawStatus, activeFilter) &&
-        matchesProposalType(row.listingType, activeTypeFilter),
-    );
-  }, [activeFilter, activeTypeFilter, employerRows, freelancerRows, isCustomer]);
+    return source.filter((row) => {
+      const matchesType = matchesProposalType(row.listingType, activeTypeFilter);
+      if (isFreelancerProposals) {
+        return matchesType && row.rawStatus === 'pending';
+      }
+      return matchesProposalFilter(row.rawStatus, activeFilter) && matchesType;
+    });
+  }, [
+    activeFilter,
+    activeTypeFilter,
+    employerRows,
+    freelancerRows,
+    isCustomer,
+    isFreelancerProposals,
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / ITEMS_PER_PAGE));
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
@@ -394,11 +415,33 @@ export default function DashboardProposals() {
   };
 
   const subtitle = useMemo(() => {
+    if (employerView === 'applications') {
+      return 'New applications and offers waiting for your review on jobs, projects, tasks, and services.';
+    }
+    if (employerView === 'bids') {
+      return 'All bids and offers received on your listings — pending, accepted, and closed.';
+    }
     if (isCustomer) {
       return 'Review proposals on your jobs, services, projects, and tasks — accept or reject from the detail view.';
     }
-    return 'Proposals you have submitted on marketplace jobs, services, projects, and tasks.';
-  }, [isCustomer]);
+    return 'Applied offers on jobs, services, projects, and tasks that are waiting for a response.';
+  }, [employerView, isCustomer]);
+
+  const pageTitle = useMemo(() => {
+    if (employerView === 'applications') return 'Applications';
+    if (employerView === 'bids') return 'Bids';
+    return isCustomer ? 'Applicants' : 'My Proposals';
+  }, [employerView, isCustomer]);
+
+  const statusTabs = useMemo(() => {
+    if (employerView === 'applications') {
+      return PROPOSAL_FILTER_TABS.filter((tab) => tab.key === 'pending');
+    }
+    if (isFreelancerProposals) {
+      return [];
+    }
+    return PROPOSAL_FILTER_TABS;
+  }, [employerView, isFreelancerProposals]);
 
   const typeTabClass = (filter: ProposalTypeFilter) =>
     `cursor-pointer rounded-full px-4 py-2 text-sm font-normal transition-all outline-none ${
@@ -426,7 +469,7 @@ export default function DashboardProposals() {
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className={DASHBOARD_HEADING_PROPOSALS}>My Proposals</h2>
+          <h2 className={DASHBOARD_HEADING_PROPOSALS}>{pageTitle}</h2>
           <p className="mt-1.5 font-sans text-sm text-neutral-800">{subtitle}</p>
         </div>
       </div>
@@ -450,23 +493,25 @@ export default function DashboardProposals() {
           </div>
         </div>
 
-        <div className={DASHBOARD_SUBTABS_WRAP}>
-          <div className={DASHBOARD_SUBTABS_ROW}>
-            {PROPOSAL_FILTER_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => {
-                  setActiveFilter(tab.key);
-                  setCurrentPage(1);
-                }}
-                className={filterTabClass(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {statusTabs.length > 0 ? (
+          <div className={DASHBOARD_SUBTABS_WRAP}>
+            <div className={DASHBOARD_SUBTABS_ROW}>
+              {statusTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setActiveFilter(tab.key);
+                    setCurrentPage(1);
+                  }}
+                  className={filterTabClass(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid">
           <div className="col-span-12 md:col-span-5">Name</div>
@@ -483,7 +528,12 @@ export default function DashboardProposals() {
             </div>
           ) : currentItems.length === 0 ? (
             <div className="py-12 text-center text-sm text-neutral-500">
-              {emptyMessageForFilter(activeFilter, activeTypeFilter, isCustomer)}
+              {emptyMessageForFilter(
+                activeFilter,
+                activeTypeFilter,
+                isCustomer,
+                isFreelancerProposals,
+              )}
             </div>
           ) : isCustomer ? (
             (currentItems as EmployerRow[]).map((row) => (
@@ -539,7 +589,11 @@ export default function DashboardProposals() {
                   <div className="flex md:justify-end">
                     {row.projectSlug ? (
                       <Link
-                        href={getDashboardProposalDetailHref(row.projectSlug, row.id)}
+                        href={getEmployerBidDetailHref(
+                          row.projectSlug,
+                          row.id,
+                          employerView === 'bids' ? 'bids' : 'applications',
+                        )}
                         className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC]"
                       >
                         View
@@ -598,7 +652,7 @@ export default function DashboardProposals() {
                   <div className="flex gap-2.5 md:justify-end">
                     {row.projectSlug ? (
                       <Link
-                        href={getPublicListingHref(row.listingType, row.projectSlug)}
+                        href={getFreelancerBidDetailHref(row.projectSlug, row.id, 'proposals')}
                         className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-neutral-100 px-3 py-2.5 text-sm font-normal text-neutral-800 transition-all hover:bg-neutral-200"
                       >
                         View
@@ -658,7 +712,7 @@ export default function DashboardProposals() {
 
             <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
               {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, rows.length)} of {rows.length}{' '}
-              proposals
+              {isFreelancerProposals ? 'applied listings' : 'proposals'}
             </div>
           </div>
         ) : null}

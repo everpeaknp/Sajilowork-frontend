@@ -19,10 +19,33 @@ import { buildReceiptId } from '@/lib/statementReceiptPdf';
 import { mapRechargeToInvoice, type WalletInvoiceView } from '@/lib/walletInvoice';
 import { DashboardMetricCards } from './DashboardMetricCards';
 import StatementReceiptModal from './StatementReceiptModal';
+import WalletTableToolbar from './WalletTableToolbar';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 import { StatusBadge, type PayoutStatus } from './DashboardPayouts';
 
 export type RechargeStatus = PayoutStatus;
+
+function rechargeStatusFilterKind(status: RechargeStatus): 'approved' | 'pending' | 'failed' | 'other' {
+  if (status === 'Approved') return 'approved';
+  if (status === 'Pending Orange' || status === 'Pending Blue' || status === 'Processing') {
+    return 'pending';
+  }
+  if (status === 'Cancelled' || status === 'Rejected' || status === 'Failed') return 'failed';
+  return 'other';
+}
+
+function matchesRechargeSearch(item: Recharge, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+  return (
+    buildReceiptId(item.id).toLowerCase().includes(normalized) ||
+    item.amount.toLowerCase().includes(normalized) ||
+    item.date.toLowerCase().includes(normalized) ||
+    item.rechargeMethod.toLowerCase().includes(normalized) ||
+    item.status.toLowerCase().includes(normalized) ||
+    (item.referenceNumber?.toLowerCase().includes(normalized) ?? false)
+  );
+}
 
 export interface Recharge {
   id: string;
@@ -89,14 +112,24 @@ export default function DashboardRecharges({
   const [newStatus, setNewStatus] = useState<'Pending Orange' | 'Pending Blue'>('Pending Orange');
   const [successNote, setSuccessNote] = useState<string | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<WalletInvoiceView | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+
+  const filteredRecharges = useMemo(() => {
+    return recharges.filter((item) => {
+      const textMatch = matchesRechargeSearch(item, searchQuery);
+      if (filterStatus === 'All') return textMatch;
+      return textMatch && rechargeStatusFilterKind(item.status) === filterStatus;
+    });
+  }, [recharges, searchQuery, filterStatus]);
 
   const itemsPerPage = 10;
-  const totalPages = Math.max(1, Math.ceil(recharges.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredRecharges.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
 
   const indexOfLastItem = activePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentRecharges = recharges.slice(indexOfFirstItem, indexOfLastItem);
+  const currentRecharges = filteredRecharges.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalApproved = useMemo(
     () => sumWalletAmountsByStatus(recharges, 'approved'),
@@ -234,6 +267,20 @@ export default function DashboardRecharges({
 
       <DashboardMetricCards cards={statCards} />
 
+      <WalletTableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search recharge"
+        filterStatus={filterStatus}
+        onFilterChange={(value) => {
+          setFilterStatus(value);
+          setCurrentPage(1);
+        }}
+      />
+
       <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
         {loading ? (
           <div className="py-16 text-center text-sm text-neutral-500">Loading recharges…</div>
@@ -254,7 +301,9 @@ export default function DashboardRecharges({
                 {currentRecharges.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-sm text-neutral-500">
-                      No recharges yet. Create your first recharge to get started.
+                      {recharges.length === 0
+                        ? 'No recharges yet. Create your first recharge to get started.'
+                        : 'No matching recharges found. Try a different search or payment status filter.'}
                     </td>
                   </tr>
                 ) : (
@@ -289,7 +338,7 @@ export default function DashboardRecharges({
           </div>
         )}
 
-        {!loading && recharges.length > 0 ? (
+        {!loading && filteredRecharges.length > 0 ? (
           <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
             <div className="flex items-center justify-center gap-6">
               <button
@@ -339,7 +388,8 @@ export default function DashboardRecharges({
             </div>
 
             <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, recharges.length)} of {recharges.length} recharges
+              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, filteredRecharges.length)} of{' '}
+              {filteredRecharges.length} recharges
             </div>
           </div>
         ) : null}

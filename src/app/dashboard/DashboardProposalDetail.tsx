@@ -2,44 +2,38 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, ClipboardList, Loader2, X } from 'lucide-react';
-import {
-  ProposalDetailPanel,
-  ProposalMetaCard,
-  ProposalMetaGrid,
-  ProposalStatusPill,
-} from '@/components/proposals/ProposalDetailUi';
-import { toast } from 'sonner';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Loader2, X } from 'lucide-react';
 import ProposalApplicantPanel from '@/components/proposals/ProposalApplicantPanel';
+import ProposalDetailHeroCard from '@/components/proposals/ProposalDetailHeroCard';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/lib/api/client';
 import { resolveBidListingKind } from '@/lib/buildFreelancerCvData';
 import { formatNPR } from '@/lib/nepalLocale';
-import { bidService, formatBidDisplayId } from '@/services/bid.service';
+import { bidService } from '@/services/bid.service';
 import { paymentService } from '@/services/payment.service';
-import type { Bid } from '@/types';
+import { taskService } from '@/services/task.service';
+import type { Bid, Task, TaskStatus } from '@/types';
 import {
-  getDashboardProposalProjectHref,
+  getDashboardBidsListingHref,
   getDashboardHref,
+  getEmployerBidDetailCopy,
+  getFreelancerBidDetailCopy,
+  resolveEmployerBidDetailFrom,
+  resolveFreelancerBidDetailFrom,
 } from './dashboardTabs';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
+import {
+  canUserViewBid,
+  getEmployerAvatarBg,
+  getEmployerAvatarSrc,
+  getEmployerDisplayName,
+} from '@/lib/proposalDetailUtils';
 
 interface DashboardProposalDetailProps {
   projectSlug: string;
   bidId: string;
-}
-
-function formatDisplayDate(value?: string): string {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('en-US', {
-    month: 'long',
-    day: '2-digit',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
 }
 
 function taskerName(bid: Bid | null): string {
@@ -61,6 +55,18 @@ function getApiErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function getListingLabel(kind: string | null): string {
+  if (kind === 'job') return 'Job';
+  if (kind === 'project') return 'Project';
+  return 'Task';
+}
+
+function getPublicListingHref(kind: string | null, slug: string): string {
+  if (kind === 'job') return `/jobs/${slug}`;
+  if (kind === 'project') return `/projects/${slug}`;
+  return `/tasks/${slug}`;
+}
+
 function getTaskStatusFromBid(bid: Bid): string | null {
   if (typeof bid.task === 'object' && bid.task && 'status' in bid.task) {
     const status = (bid.task as { status?: string }).status;
@@ -74,10 +80,14 @@ export default function DashboardProposalDetail({
   bidId,
 }: DashboardProposalDetailProps) {
   const router = useRouter();
-  const { isCustomer } = useAuth();
+  const searchParams = useSearchParams();
+  const { isCustomer, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [bid, setBid] = useState<Bid | null>(null);
+  const [task, setTask] = useState<Task | null>(null);
+  const [taskLoading, setTaskLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [workflowLoading, setWorkflowLoading] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showInsufficientWalletModal, setShowInsufficientWalletModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -101,10 +111,40 @@ export default function DashboardProposalDetail({
     }
   }, [bidId]);
 
+  const loadTask = useCallback(async (slug: string) => {
+    setTaskLoading(true);
+    try {
+      const response = await taskService.getTaskBySlug(slug);
+      if (response.success && response.data) {
+        setTask(response.data);
+      } else {
+        setTask(null);
+      }
+    } catch {
+      setTask(null);
+    } finally {
+      setTaskLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    if (!isCustomer) return;
+    if (!bid) {
+      setTask(null);
+      return;
+    }
+    const slug =
+      bid.task_slug ||
+      (typeof bid.task === 'object' && bid.task && 'slug' in bid.task
+        ? String((bid.task as { slug?: string }).slug || '')
+        : '') ||
+      projectSlug;
+    if (!slug) return;
+    void loadTask(slug);
+  }, [bid, loadTask, projectSlug]);
+
+  useEffect(() => {
     void loadBid();
-  }, [isCustomer, loadBid]);
+  }, [loadBid]);
 
   const fetchWalletPreview = useCallback(async (amount: number) => {
     const [walletRes, feeRes] = await Promise.all([
@@ -189,40 +229,160 @@ export default function DashboardProposalDetail({
     }
   };
 
-  if (!isCustomer) {
+  const applyTaskStatusUpdate = async (newStatus: TaskStatus) => {
+    const slug = task?.slug || projectSlug;
+    if (!slug) return;
+    const response = await taskService.updateTaskStatus(slug, newStatus);
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to update status');
+    }
+    if (response.data?.task) {
+      setTask(response.data.task);
+    } else {
+      await loadTask(slug);
+    }
+  };
+
+  const confirmWorkComplete = async () => {
+    const slug = task?.slug || projectSlug;
+    if (!slug) return;
+    const response = await apiClient.post<{
+      task?: Task;
+      message?: string;
+      error?: string;
+    }>(`/tasks/${slug}/confirm_work_complete/`);
+    if (response.data?.error) {
+      throw new Error(response.data.error);
+    }
+    if (response.data?.task) {
+      setTask(response.data.task);
+    } else {
+      await loadTask(slug);
+    }
+    toast.success(
+      response.data?.message ||
+        'Completion recorded. Waiting for the other party to confirm if needed.',
+    );
+  };
+
+  const handleWorkflowStart = async () => {
+    setWorkflowLoading(true);
+    try {
+      await applyTaskStatusUpdate('in_progress');
+      toast.success('Contract marked as in progress');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to start contract'));
+    } finally {
+      setWorkflowLoading(false);
+    }
+  };
+
+  const handleWorkflowComplete = async () => {
+    setWorkflowLoading(true);
+    try {
+      if (bid && resolveBidListingKind(bid) === 'job' && isCustomer) {
+        await applyTaskStatusUpdate('completed');
+        toast.success('Applicant hired');
+        await loadBid();
+        return;
+      }
+      await confirmWorkComplete();
+    } catch (error) {
+      toast.error(
+        getApiErrorMessage(
+          error,
+          bid && resolveBidListingKind(bid) === 'job' ? 'Failed to mark as hired' : 'Failed to complete contract',
+        ),
+      );
+    } finally {
+      setWorkflowLoading(false);
+    }
+  };
+
+  const handleWorkflowCancel = async () => {
+    const slug = task?.slug || projectSlug;
+    if (!slug) return;
+    setWorkflowLoading(true);
+    try {
+      const response = await taskService.cancelTask(slug);
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to cancel contract');
+      }
+      toast.success('Contract cancelled');
+      await loadTask(slug);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Failed to cancel contract'));
+    } finally {
+      setWorkflowLoading(false);
+    }
+  };
+
+  if (loading) {
+    const loadingCopy = isCustomer
+      ? getEmployerBidDetailCopy(
+          resolveEmployerBidDetailFrom('pending', searchParams.get('from')),
+        )
+      : getFreelancerBidDetailCopy(
+          resolveFreelancerBidDetailFrom('pending', searchParams.get('from')),
+        );
     return (
-      <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-600">
-        Proposal review is available for employer accounts.
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-sm text-neutral-500">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        {loadingCopy.loadingLabel}
       </div>
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-sm text-neutral-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading proposal…
-      </div>
-    );
-  }
+  const detailFrom = isCustomer
+    ? resolveEmployerBidDetailFrom(bid?.status ?? 'pending', searchParams.get('from'))
+    : resolveFreelancerBidDetailFrom(bid?.status ?? 'pending', searchParams.get('from'));
+  const detailCopy = isCustomer
+    ? getEmployerBidDetailCopy(detailFrom as 'contracts' | 'applications' | 'bids')
+    : getFreelancerBidDetailCopy(detailFrom as 'contracts' | 'proposals' | 'bids');
+  const sectionHref = getDashboardHref(detailCopy.sectionTab);
+  const listingKind = bid ? resolveBidListingKind(bid) : null;
+  const listingMiddleHref = isCustomer
+    ? detailFrom === 'bids'
+      ? getDashboardBidsListingHref(projectSlug)
+      : detailFrom === 'applications'
+        ? getDashboardHref('applications')
+        : getDashboardHref('contracts')
+    : detailFrom === 'bids'
+      ? getDashboardBidsListingHref(projectSlug)
+      : getDashboardHref('proposals');
 
   if (!bid) {
     return (
       <div className="space-y-4">
         <Link
-          href={getDashboardProposalProjectHref(projectSlug)}
+          href={sectionHref}
           className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-black"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to project proposals
+          {detailCopy.listBackLabel}
         </Link>
-        <p className="text-sm text-neutral-600">Proposal not found.</p>
+        <p className="text-sm text-neutral-600">{detailCopy.notFoundLabel}</p>
+      </div>
+    );
+  }
+
+  if (!canUserViewBid(bid, user?.id, isCustomer)) {
+    return (
+      <div className="space-y-4">
+        <Link
+          href={sectionHref}
+          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-black"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {detailCopy.listBackLabel}
+        </Link>
+        <p className="text-sm text-neutral-600">You do not have permission to view this proposal.</p>
       </div>
     );
   }
 
   const isPending = bid.status === 'pending';
-  const isJobProposal = resolveBidListingKind(bid) === 'job';
+  const isJobProposal = listingKind === 'job';
   const requiredHoldAmount = escrowHoldAmount ?? (Number(bid.amount) || 0);
   const taskTitle =
     bid.task_title ||
@@ -230,42 +390,58 @@ export default function DashboardProposalDetail({
       ? String((bid.task as { title?: string }).title || '')
       : '') ||
     'Project';
+  const counterpartyName = isCustomer ? taskerName(bid) : getEmployerDisplayName(bid);
+  const counterpartyAvatarSrc = isCustomer ? undefined : getEmployerAvatarSrc(bid, task);
+  const counterpartyAvatarBg = isCustomer ? undefined : getEmployerAvatarBg(bid, task);
 
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href={getDashboardHref('proposals')}
-            className="inline-flex items-center gap-2 text-sm font-normal text-neutral-700 hover:text-black"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            My Proposals
-          </Link>
-          <span className="text-neutral-300">/</span>
-          <Link
-            href={getDashboardProposalProjectHref(projectSlug)}
-            className="text-sm font-normal text-neutral-700 hover:text-black"
-          >
-            {taskTitle}
-          </Link>
-        </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          href={sectionHref}
+          className="inline-flex items-center gap-2 text-sm font-normal text-neutral-700 hover:text-black"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {detailCopy.sectionLabel}
+        </Link>
+        <span className="text-neutral-300">/</span>
+        <Link
+          href={listingMiddleHref}
+          className="text-sm font-normal text-neutral-700 hover:text-black"
+        >
+          {taskTitle}
+        </Link>
+      </div>
 
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-          <div>
-            <h2 className="font-sans text-3xl font-normal tracking-tight text-black">
-              Proposal from {taskerName(bid)}
-            </h2>
-            <p className="mt-1.5 text-sm capitalize text-neutral-700">Status: {bid.status}</p>
-          </div>
-
-          {isPending ? (
-            <div className="flex flex-wrap gap-2">
+      <ProposalDetailHeroCard
+        bid={bid}
+        task={task}
+        taskTitle={taskTitle}
+        counterpartyName={counterpartyName}
+        counterpartyAvatarSrc={counterpartyAvatarSrc}
+        counterpartyAvatarBg={counterpartyAvatarBg}
+        counterpartyLabel={isCustomer ? 'Freelancer' : 'Employer'}
+        counterpartyMode={isCustomer ? 'freelancer' : 'employer'}
+        offerLabel={isJobProposal ? 'Expected salary' : 'Offer amount'}
+        taskLoading={taskLoading}
+        userId={user?.id}
+        workflowLoading={workflowLoading}
+        canManageWorkflow={isJobProposal ? isCustomer : true}
+        onStart={
+          bid.status === 'accepted' && !isJobProposal
+            ? () => void handleWorkflowStart()
+            : undefined
+        }
+        onComplete={bid.status === 'accepted' ? () => void handleWorkflowComplete() : undefined}
+        onCancel={bid.status === 'accepted' ? () => void handleWorkflowCancel() : undefined}
+        headerActions={
+          isCustomer && isPending ? (
+            <>
               <button
                 type="button"
                 disabled={actionLoading}
                 onClick={() => void handleAcceptClick()}
-                className="rounded-lg bg-[#52C47F] px-5 py-2.5 text-sm font-normal text-white transition-colors hover:bg-[#49b071] disabled:opacity-60"
+                className="rounded-lg bg-[#52C47F] px-4 py-2 text-sm font-normal text-white transition-colors hover:bg-[#49b071] disabled:opacity-60"
               >
                 {actionLoading ? 'Processing…' : 'Accept'}
               </button>
@@ -273,49 +449,24 @@ export default function DashboardProposalDetail({
                 type="button"
                 disabled={actionLoading}
                 onClick={() => setShowRejectModal(true)}
-                className="rounded-lg border border-red-200 bg-white px-5 py-2.5 text-sm font-normal text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-normal text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
               >
                 Reject
               </button>
-            </div>
-          ) : null}
-        </div>
-      </div>
+            </>
+          ) : null
+        }
+      />
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-2">
-        <ProposalDetailPanel
-          title="Basic Information"
-          description="Proposal reference, applicant contact, and submission timeline."
-          icon={ClipboardList}
-        >
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            <ProposalStatusPill status={bid.status} />
-            <span className="inline-flex items-center rounded-lg bg-neutral-100 px-3 py-1.5 font-mono text-xs font-medium tracking-wide text-neutral-600">
-              {formatBidDisplayId(bid.id)}
-            </span>
-          </div>
-
-          <ProposalMetaGrid>
-            <ProposalMetaCard
-              label={isJobProposal ? 'Job' : 'Project'}
-              value={taskTitle}
-              highlight
-            />
-            <ProposalMetaCard label="Freelancer" value={taskerName(bid)} />
-            <ProposalMetaCard label="Email" value={bid.tasker?.email || '—'} />
-            <ProposalMetaCard label="Submitted" value={formatDisplayDate(bid.created_at)} />
-            <ProposalMetaCard label="Last updated" value={formatDisplayDate(bid.updated_at)} />
-            {bid.accepted_at ? (
-              <ProposalMetaCard label="Accepted" value={formatDisplayDate(bid.accepted_at)} />
-            ) : null}
-            {bid.rejected_at ? (
-              <ProposalMetaCard label="Rejected" value={formatDisplayDate(bid.rejected_at)} />
-            ) : null}
-          </ProposalMetaGrid>
-        </ProposalDetailPanel>
-
-        <ProposalApplicantPanel bid={bid} variant={isJobProposal ? 'job' : 'offer'} />
-      </div>
+      <ProposalApplicantPanel
+        bid={bid}
+        task={task}
+        variant={isJobProposal ? 'job' : 'offer'}
+        profileSubject={isCustomer ? 'freelancer' : 'employer'}
+        showOfferContent={false}
+        collapsible
+        defaultExpanded={false}
+      />
 
       {bid.rejection_reason ? (
         <section className="rounded-xl border border-red-100 bg-white p-6 sm:p-8">
@@ -329,16 +480,16 @@ export default function DashboardProposalDetail({
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          onClick={() => router.push(getDashboardProposalProjectHref(projectSlug))}
+          onClick={() => router.push(sectionHref)}
           className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50"
         >
-          Back to all proposals
+          {detailCopy.listBackLabel}
         </button>
         <Link
-          href={isJobProposal ? `/jobs/${projectSlug}` : `/projects/${projectSlug}`}
+          href={getPublicListingHref(listingKind, projectSlug)}
           className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50"
         >
-          {isJobProposal ? 'View public job page' : 'View public project page'}
+          View public {getListingLabel(listingKind).toLowerCase()} page
         </Link>
       </div>
 

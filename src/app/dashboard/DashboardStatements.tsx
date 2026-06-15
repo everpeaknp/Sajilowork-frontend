@@ -2,14 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Search,
   ChevronLeft,
   ChevronRight,
   TrendingUp,
   Wallet,
   Clock,
   CircleDollarSign,
-  Filter,
   Eye,
 } from 'lucide-react';
 import { formatNPR } from '@/lib/nepalLocale';
@@ -21,6 +19,7 @@ import type {
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
 import { buildReceiptId } from '@/lib/statementReceiptPdf';
 import StatementReceiptModal, { type StatementReceipt } from './StatementReceiptModal';
+import WalletTableToolbar from './WalletTableToolbar';
 import {
   DASHBOARD_CARD,
   DASHBOARD_HEADING,
@@ -173,7 +172,7 @@ function mapPaymentToStatement(
   };
 }
 
-export default function DashboardStatements() {
+export default function DashboardStatements({ embedded = false }: { embedded?: boolean }) {
   const role = useDashboardSidebarRole();
   const direction: PaymentHistoryDirection = role === 'customer' ? 'outgoing' : 'earned';
 
@@ -264,36 +263,29 @@ export default function DashboardStatements() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentStatements = filteredStatements.slice(indexOfFirstItem, indexOfLastItem);
 
+  const statementFilterOptions = useMemo(
+    () => [
+      { value: 'All', label: 'All Statuses' },
+      { value: 'paid', label: 'Paid' },
+      { value: 'held', label: 'Held' },
+      { value: 'pending', label: 'Pending' },
+      { value: 'failed', label: 'Failed' },
+    ],
+    [],
+  );
+
   return (
-    <div className={DASHBOARD_PAGE_ROOT}>
-      <div className="mx-auto mb-6 flex max-w-7xl flex-col gap-5 pl-1 sm:mb-8 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className={DASHBOARD_HEADING}>
-            Statements
-          </h1>
+    <div className={embedded ? 'animate-in fade-in duration-300 font-sans text-black' : DASHBOARD_PAGE_ROOT}>
+      {!embedded ? (
+        <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
+          <h1 className={DASHBOARD_HEADING}>Statements</h1>
           <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
             {direction === 'outgoing'
               ? 'Task payments and outgoing transactions.'
               : 'Earnings and releases from completed work.'}
           </p>
         </div>
-
-        <div className="flex w-full flex-col items-center gap-3 sm:flex-row md:w-auto">
-          <div className="relative flex w-full items-center rounded-xl border border-neutral-200/80 bg-white px-3.5 shadow-sm sm:w-[260px]">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search Statements"
-              className="w-full border-0 bg-transparent py-3 text-xs font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
-            />
-            <Search className="ml-1.5 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} />
-          </div>
-        </div>
-      </div>
+      ) : null}
 
       <div className="mx-auto mb-8 grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
@@ -372,26 +364,20 @@ export default function DashboardStatements() {
         </div>
       </div>
 
-      <div className="mx-auto mb-5 flex max-w-7xl justify-stretch sm:justify-end">
-        <div className="flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:w-auto">
-          <Filter className="h-3.5 w-3.5 text-neutral-400" />
-          <span className="font-normal text-neutral-500">Payment Status:</span>
-          <select
-            value={filterStatus}
-            onChange={(e) => {
-              setFilterStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="cursor-pointer border-none bg-transparent p-0 font-bold text-neutral-800 outline-none focus:outline-none focus:ring-0"
-          >
-            <option value="All">All Statuses</option>
-            <option value="paid">Paid</option>
-            <option value="held">Held</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-          </select>
-        </div>
-      </div>
+      <WalletTableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search statements"
+        filterStatus={filterStatus}
+        onFilterChange={(value) => {
+          setFilterStatus(value);
+          setCurrentPage(1);
+        }}
+        filterOptions={statementFilterOptions}
+      />
 
       <div className={`${DASHBOARD_CARD} border-neutral-200/60`}>
         <div className="overflow-x-auto">

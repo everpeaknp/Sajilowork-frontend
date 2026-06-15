@@ -1,20 +1,44 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Star, MapPin, Calendar } from 'lucide-react';
-import UserAvatar from '@/components/common/UserAvatar';
 import { formatFreelancerRating } from '@/lib/freelancerProfileFromApi';
+import { getMediaUrl } from '@/lib/utils';
 import type { Freelancer } from './freelancerData';
 
 interface FreelancerProfileHeroProps {
   freelancer: Freelancer;
+  embedded?: boolean;
 }
 
-export default function FreelancerProfileHero({ freelancer }: FreelancerProfileHeroProps) {
+export default function FreelancerProfileHero({ freelancer, embedded = false }: FreelancerProfileHeroProps) {
   const ringParts = freelancer.ringColor.split(' ');
+  const avatarSrc = freelancer.avatar?.trim() ? getMediaUrl(freelancer.avatar) : '';
+  const [imageError, setImageError] = useState(false);
+  const showAvatarImage = Boolean(avatarSrc) && !imageError;
+
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarSrc]);
+
+  const initials = freelancer.name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className="relative mb-8 flex min-h-[220px] w-full items-stretch overflow-hidden rounded-[24px] border border-neutral-200/20 bg-[#FEF0EA] shadow-sm sm:min-h-[240px] lg:min-h-[280px]">
+    <div
+      className={`relative flex w-full items-stretch overflow-hidden rounded-[24px] bg-[#FEF0EA] ${
+        embedded
+          ? 'mb-0 min-h-[180px] border-0 shadow-none sm:min-h-[200px]'
+          : 'mb-8 min-h-[220px] border border-neutral-200/20 shadow-sm sm:min-h-[240px] lg:min-h-[280px]'
+      }`}
+    >
       <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 select-none">
         <svg
           viewBox="0 0 120 400"
@@ -72,16 +96,23 @@ export default function FreelancerProfileHero({ freelancer }: FreelancerProfileH
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
         >
-          <div className="relative shrink-0 select-none">
+          <div className="relative z-20 shrink-0 select-none">
             <div
-              className={`flex h-[68px] w-[68px] items-center justify-center overflow-hidden rounded-full border-2 p-1 shadow-sm sm:h-[76px] sm:w-[76px] ${ringParts.join(' ')}`}
+              className={`flex h-[68px] w-[68px] items-center justify-center overflow-hidden rounded-full border-2 bg-white p-1 shadow-sm sm:h-[76px] sm:w-[76px] ${ringParts.join(' ')}`}
             >
-              <UserAvatar
-                src={freelancer.avatar || undefined}
-                name={freelancer.name}
-                size="lg"
-                className="h-full w-full"
-              />
+              {showAvatarImage ? (
+                <img
+                  src={avatarSrc}
+                  alt={freelancer.name}
+                  className="h-full w-full rounded-full object-cover bg-white"
+                  referrerPolicy="no-referrer"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald text-base font-bold text-white sm:text-lg">
+                  {initials || '?'}
+                </div>
+              )}
             </div>
             {freelancer.availableNow ? (
               <span className="absolute bottom-0.5 right-0.5 inline-block h-3 w-3 rounded-full border-2 border-white bg-[#52C47F] shadow-sm sm:h-3.5 sm:w-3.5" />

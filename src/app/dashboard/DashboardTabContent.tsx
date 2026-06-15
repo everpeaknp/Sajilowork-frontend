@@ -6,7 +6,6 @@ import DashboardSaved from './DashboardSaved';
 import DashboardMessages from './DashboardMessages';
 import DashboardReviews from './DashboardReviews';
 import DashboardQuestions from './DashboardQuestions';
-import DashboardStatements from './DashboardStatements';
 import DashboardWallet from './DashboardWallet';
 import DashboardServices from './DashboardServices';
 import DashboardJobs from './DashboardJobs';
@@ -15,6 +14,9 @@ import DashboardProjects from './DashboardProjects';
 import DashboardFreelancerProjects from './DashboardFreelancerProjects';
 import DashboardProfile from './DashboardProfile';
 import DashboardSettings from './DashboardSettings';
+import DashboardContracts from './DashboardContracts';
+import DashboardEmployerBids from './DashboardEmployerBids';
+import DashboardEmployerApplications from './DashboardEmployerApplications';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboardTab } from './DashboardTabContext';
@@ -24,7 +26,9 @@ import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
 
 const TAB_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
-  proposals: 'My Proposals',
+  applications: 'Applications',
+  bids: 'Bids',
+  contracts: 'Contracts',
   saved: 'Saved',
   message: 'Message',
   reviews: 'Reviews',
@@ -46,6 +50,14 @@ export default function DashboardTabContent() {
   const router = useRouter();
 
   useEffect(() => {
+    if (activeTab === 'statements') {
+      router.replace('/dashboard/wallet?section=statements');
+      return;
+    }
+    if (sidebarRole === 'customer' && activeTab === 'proposals') {
+      router.replace('/dashboard/applications');
+      return;
+    }
     if (!isTabAllowedForRole(activeTab, sidebarRole as DashboardSidebarRole)) {
       router.replace('/dashboard');
     }
@@ -53,6 +65,18 @@ export default function DashboardTabContent() {
 
   if (activeTab === 'dashboard') {
     return <DashboardOverview onTabChange={setActiveTab} />;
+  }
+
+  if (activeTab === 'applications') {
+    return <DashboardEmployerApplications />;
+  }
+
+  if (activeTab === 'bids') {
+    return <DashboardEmployerBids />;
+  }
+
+  if (activeTab === 'contracts') {
+    return <DashboardContracts />;
   }
 
   if (activeTab === 'proposals') {
@@ -76,7 +100,7 @@ export default function DashboardTabContent() {
   }
 
   if (activeTab === 'statements') {
-    return <DashboardStatements />;
+    return null;
   }
 
   if (activeTab === 'wallet') {

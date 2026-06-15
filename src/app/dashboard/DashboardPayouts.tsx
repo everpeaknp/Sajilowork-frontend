@@ -26,6 +26,7 @@ import { buildReceiptId } from '@/lib/statementReceiptPdf';
 import { mapPayoutToInvoice, type WalletInvoiceView } from '@/lib/walletInvoice';
 import { DashboardMetricCards } from './DashboardMetricCards';
 import StatementReceiptModal from './StatementReceiptModal';
+import WalletTableToolbar from './WalletTableToolbar';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
 export type PayoutStatus =
@@ -127,6 +128,28 @@ function buildPayouts(): Payout[] {
   return list;
 }
 
+function payoutStatusFilterKind(status: PayoutStatus): 'approved' | 'pending' | 'failed' | 'other' {
+  if (status === 'Approved') return 'approved';
+  if (status === 'Pending Orange' || status === 'Pending Blue' || status === 'Processing') {
+    return 'pending';
+  }
+  if (status === 'Cancelled' || status === 'Rejected' || status === 'Failed') return 'failed';
+  return 'other';
+}
+
+function matchesPayoutSearch(item: Payout, query: string): boolean {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+  return (
+    buildReceiptId(item.id).toLowerCase().includes(normalized) ||
+    item.amount.toLowerCase().includes(normalized) ||
+    item.date.toLowerCase().includes(normalized) ||
+    item.payoutMethod.toLowerCase().includes(normalized) ||
+    item.status.toLowerCase().includes(normalized) ||
+    (item.rawStatus?.toLowerCase().includes(normalized) ?? false)
+  );
+}
+
 export function StatusBadge({ status }: { status: PayoutStatus }) {
   if (status === 'Pending Orange') {
     return (
@@ -204,14 +227,24 @@ export default function DashboardPayouts({
   const [successNote, setSuccessNote] = useState<string | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<WalletInvoiceView | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
+
+  const filteredPayouts = useMemo(() => {
+    return payouts.filter((item) => {
+      const textMatch = matchesPayoutSearch(item, searchQuery);
+      if (filterStatus === 'All') return textMatch;
+      return textMatch && payoutStatusFilterKind(item.status) === filterStatus;
+    });
+  }, [payouts, searchQuery, filterStatus]);
 
   const itemsPerPage = 10;
-  const totalPages = Math.max(1, Math.ceil(payouts.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredPayouts.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
 
   const indexOfLastItem = activePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPayouts = payouts.slice(indexOfFirstItem, indexOfLastItem);
+  const currentPayouts = filteredPayouts.slice(indexOfFirstItem, indexOfLastItem);
 
   const totalApproved = useMemo(
     () => sumWalletAmountsByStatus(payouts, 'approved'),
@@ -394,6 +427,20 @@ export default function DashboardPayouts({
 
       <DashboardMetricCards cards={statCards} />
 
+      <WalletTableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search payout"
+        filterStatus={filterStatus}
+        onFilterChange={(value) => {
+          setFilterStatus(value);
+          setCurrentPage(1);
+        }}
+      />
+
       <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
         {loading ? (
           <div className="py-16 text-center text-sm text-neutral-500">Loading payouts…</div>
@@ -414,7 +461,9 @@ export default function DashboardPayouts({
                 {currentPayouts.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-sm text-neutral-500">
-                      No payouts yet. Create your first payout to get started.
+                      {payouts.length === 0
+                        ? 'No payouts yet. Create your first payout to get started.'
+                        : 'No matching payouts found. Try a different search or payment status filter.'}
                     </td>
                   </tr>
                 ) : (
@@ -467,7 +516,7 @@ export default function DashboardPayouts({
           </div>
         )}
 
-        {!loading && payouts.length > 0 ? (
+        {!loading && filteredPayouts.length > 0 ? (
           <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
             <div className="flex items-center justify-center gap-6">
               <button
@@ -517,7 +566,8 @@ export default function DashboardPayouts({
             </div>
 
             <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, payouts.length)} of {payouts.length} payouts
+              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, filteredPayouts.length)} of{' '}
+              {filteredPayouts.length} payouts
             </div>
           </div>
         ) : null}
