@@ -6,18 +6,11 @@ export function dashboardMessagesViewForRole(
   return role === 'tasker' ? 'tasker' : 'employer';
 }
 
-export function messagesPageSubtitle(view: DashboardMessagesView): string {
-  if (view === 'employer') {
-    return 'Messages from freelancers and taskers on your listings.';
-  }
-  return 'Messages with employers about tasks, jobs, and projects you applied to.';
-}
-
 export function emptyMessagesMessage(view: DashboardMessagesView): string {
   if (view === 'employer') {
-    return 'No messages from freelancers yet. Conversations start after you accept an offer or proposal.';
+    return 'No messages yet. Conversations start after offers are accepted or someone contacts you.';
   }
-  return 'No messages yet. Message an employer from a task, job, or project you applied to.';
+  return 'No messages yet. Contact a seller from a service page or message from a task, job, or project.';
 }
 
 export function otherParticipantRoleLabel(view: DashboardMessagesView): string {

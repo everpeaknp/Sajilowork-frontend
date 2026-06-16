@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import type { Project } from '@/components/projects/projectListData';
-import { resolveOwnerAvatarBg, resolveOwnerInitials } from '@/lib/employerAvatarUtils';
+import { resolveEmployerLogoLabel, resolveOwnerAvatarBg } from '@/lib/employerAvatarUtils';
 
 type EmployerAvatarCircleProps = {
   name: string;
@@ -42,7 +42,7 @@ export default function EmployerAvatarCircle({
         ) : showDemoIcon ? (
           renderIcon!(iconType!, 'h-6 w-6 text-white')
         ) : (
-          <span className={textClass}>{resolveOwnerInitials(name)}</span>
+          <span className={textClass}>{resolveEmployerLogoLabel(name)}</span>
         )}
       </div>
       {verified ? (

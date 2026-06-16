@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowUpRight } from 'lucide-react';
 import { toast } from 'sonner';
-import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { useAuth } from '@/hooks/useAuth';
+import { getCheckoutHref } from '@/lib/checkout';
+import { useCheckoutProfileGate } from '@/hooks/useCheckoutProfileGate';
+import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { getJobDetailPath, getJobEditHref, isJobOwner } from './jobSlug';
 import JobAbout from './JobAbout';
 import JobKeyResponsibilities from './JobKeyResponsibilities';
@@ -37,22 +39,13 @@ export default function SingleJobPage({
   const router = useRouter();
   const { user } = useAuth();
   const useApplicationModal = applicationPresentation === 'modal';
-  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const { showProfilePopup, goToCheckout, completeProfileGate, cancelProfileGate } =
+    useCheckoutProfileGate();
   const applySectionRef = useRef<HTMLDivElement>(null);
   const isOwner = isJobOwner(job, user?.id);
   const editHref = getJobEditHref(job);
 
-  const scrollToApply = useCallback(() => {
-    applySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.setTimeout(() => {
-      const field = document.getElementById('job-offer-amount');
-      if (field instanceof HTMLElement) {
-        field.focus({ preventScroll: true });
-      }
-    }, 450);
-  }, []);
-
-  const openApplicationModal = useCallback(() => {
+  const openApplicationCheckout = useCallback(() => {
     if (!user) {
       toast.error('Please sign in to apply for this job.');
       const redirectPath =
@@ -69,33 +62,32 @@ export default function SingleJobPage({
       return;
     }
 
-    setShowApplicationModal(true);
-  }, [job, router, user]);
+    if (!job.slug) {
+      toast.error('This job is not available for applications yet.');
+      return;
+    }
+
+    goToCheckout(getCheckoutHref('job', job.slug));
+  }, [goToCheckout, job, router, user]);
 
   const handleApplyClick = useCallback(() => {
     if (isOwner) {
       router.push(editHref);
       return;
     }
-    if (useApplicationModal) {
-      openApplicationModal();
-      return;
-    }
-    scrollToApply();
-  }, [editHref, isOwner, openApplicationModal, router, scrollToApply, useApplicationModal]);
+    if (hideApplication) return;
+    openApplicationCheckout();
+  }, [editHref, hideApplication, isOwner, openApplicationCheckout, router]);
 
   useEffect(() => {
+    if (hideApplication || isOwner) return;
     if (typeof window === 'undefined' || window.location.hash !== `#${APPLY_JOB_SECTION_ID}`) {
       return;
     }
     window.requestAnimationFrame(() => {
-      if (useApplicationModal) {
-        openApplicationModal();
-        return;
-      }
-      scrollToApply();
+      openApplicationCheckout();
     });
-  }, [openApplicationModal, scrollToApply, useApplicationModal]);
+  }, [hideApplication, isOwner, openApplicationCheckout]);
 
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
@@ -139,10 +131,13 @@ export default function SingleJobPage({
         </div>
       </div>
 
-      {useApplicationModal && !hideApplication ? (
+      {showProfilePopup ? (
         <MakeOfferModal
-          isOpen={showApplicationModal}
-          onClose={() => setShowApplicationModal(false)}
+          presentation="modal"
+          profileGateOnly
+          isOpen={showProfilePopup}
+          onClose={cancelProfileGate}
+          onProfileGateComplete={completeProfileGate}
           job={job}
         />
       ) : null}

@@ -30,3 +30,12 @@ export function resolveOwnerInitials(name: string): string {
   }
   return (parts[0]?.[0] ?? 'E').toUpperCase();
 }
+
+/** Prefer company initials; ignore generic seeded placeholder text like "CO". */
+export function resolveEmployerLogoLabel(name: string, logoText?: string | null): string {
+  const text = logoText?.trim();
+  if (text && text.toUpperCase() !== 'CO') {
+    return text.slice(0, 2).toUpperCase();
+  }
+  return resolveOwnerInitials(name);
+}

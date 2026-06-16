@@ -19,6 +19,7 @@ import BillingAddressForm from './BillingAddressForm';
 import BidForm from './BidForm';
 import JobApplyForm from './JobApplyForm';
 import { Task } from '@/types';
+import type { Bid } from '@/types';
 import type { Project } from '@/components/projects/projectListData';
 import type { Job } from '@/components/jobs/jobListData';
 import { projectToOfferTask } from '@/components/projects/projectSlug';
@@ -33,8 +34,15 @@ interface MakeOfferModalProps {
   task?: Task;
   project?: Project;
   job?: Job;
-  /** Called after a bid is submitted successfully (before close) */
-  onBidSuccess?: () => void;
+  /** Called after a bid is submitted successfully (before close on modal) */
+  onBidSuccess?: (payload?: { bid?: Bid }) => void;
+  /** Page checkout renders inline instead of a centered dialog */
+  presentation?: 'modal' | 'page';
+  /** Profile checklist only — Continue calls onProfileGateComplete instead of opening bid form */
+  profileGateOnly?: boolean;
+  onProfileGateComplete?: () => void;
+  /** Header copy when no task/project/job is passed (e.g. service checkout gate) */
+  profileGateListingKind?: 'task' | 'project' | 'job' | 'service';
 }
 
 function resolveListingKind(task?: Task, project?: Project, job?: Job): ListingKind {
@@ -50,8 +58,12 @@ export default function MakeOfferModal({
   project,
   job,
   onBidSuccess,
+  presentation = 'modal',
+  profileGateOnly = false,
+  onProfileGateComplete,
+  profileGateListingKind,
 }: MakeOfferModalProps) {
-  const listingKind = resolveListingKind(task, project, job);
+  const listingKind = profileGateListingKind ?? resolveListingKind(task, project, job);
   const offerTask =
     task ?? (project ? projectToOfferTask(project) : job ? jobToOfferTask(job) : undefined);
   const { user, refreshUser, setUser } = useAuthStore();
@@ -333,37 +345,178 @@ export default function MakeOfferModal({
       return;
     }
     
+    if (profileGateOnly) {
+      onProfileGateComplete?.();
+      return;
+    }
+
     // Show the bid form instead of closing
     setShowBidForm(true);
   };
 
-  const handleBidSuccess = () => {
+  const handleBidSuccess = (bid?: Bid) => {
     setShowBidForm(false);
-    onBidSuccess?.();
-    onClose();
+    onBidSuccess?.({ bid });
+    if (presentation === 'modal') {
+      onClose();
+    }
   };
 
   const handleBidCancel = () => {
     setShowBidForm(false);
   };
 
+  const flowContent = (
+    <div
+      className={
+        presentation === 'page'
+          ? 'flex w-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm'
+          : 'pointer-events-auto mx-auto flex max-h-[min(90vh,calc(100dvh-2rem))] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl'
+      }
+    >
+      <div className={`flex-1 overflow-y-auto ${presentation === 'page' ? 'px-6 py-8 sm:px-8' : 'px-10 py-10'}`}>
+        {!profileGateOnly && showBidForm && listingKind === 'job' && job ? (
+          <JobApplyForm job={job} onSuccess={handleBidSuccess} onCancel={handleBidCancel} />
+        ) : !profileGateOnly && showBidForm && offerTask ? (
+          <BidForm
+            task={offerTask}
+            listingKind={listingKind === 'project' ? 'project' : 'task'}
+            onSuccess={handleBidSuccess}
+            onCancel={handleBidCancel}
+          />
+        ) : !profileGateOnly && showBidForm && !offerTask ? (
+          <div className="py-8 text-center">
+            <p className="mb-4 text-gray-600">Task details are not available.</p>
+            <button
+              type="button"
+              onClick={handleBidCancel}
+              className="font-semibold text-brand-emerald hover:underline"
+            >
+              Go back
+            </button>
+          </div>
+        ) : !expandedField ? (
+          <>
+            <ModalHeader listingKind={listingKind} />
+            <FieldsList
+              user={user}
+              hasProfilePicture={hasProfilePicture}
+              hasDateOfBirth={hasDateOfBirth}
+              hasVerifiedPhone={hasVerifiedPhone}
+              hasBankAccount={hasBankAccount}
+              hasBillingAddress={hasBillingAddress}
+              onFieldClick={setExpandedField}
+            />
+          </>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+          >
+            {expandedField === 'profile' && (
+              <ProfilePictureForm
+                user={user}
+                fileInputRef={fileInputRef}
+                isLoading={isLoading}
+                onBack={() => setExpandedField(null)}
+                onFileChange={handleProfilePictureUpload}
+              />
+            )}
+
+            {expandedField === 'dob' && (
+              <DateOfBirthForm
+                dateOfBirth={dateOfBirth}
+                isLoading={isLoading}
+                onBack={() => setExpandedField(null)}
+                onChange={setDateOfBirth}
+                onSubmit={handleUpdateDateOfBirth}
+              />
+            )}
+
+            {expandedField === 'mobile' && (
+              <VerifyMobileForm
+                phoneNumber={phoneNumber}
+                verificationCode={verificationCode}
+                showVerificationInput={showVerificationInput}
+                isLoading={isLoading}
+                onBack={() => setExpandedField(null)}
+                onPhoneChange={setPhoneNumber}
+                onCodeChange={setVerificationCode}
+                onSendCode={handleSendVerificationCode}
+                onVerify={handleVerifyPhone}
+              />
+            )}
+
+            {expandedField === 'bank' && (
+              <LinkBankAccountForm
+                fullName={esewaFullName}
+                mobileNumber={esewaMobileNumber}
+                isLoading={isLoading}
+                onBack={() => setExpandedField(null)}
+                onFullNameChange={setEsewaFullName}
+                onMobileNumberChange={setEsewaMobileNumber}
+                onSubmit={handleLinkBankAccount}
+              />
+            )}
+
+            {expandedField === 'address' && (
+              <BillingAddressForm
+                streetAddress={streetAddress}
+                city={city}
+                postcode={postcode}
+                state={state}
+                isLoading={isLoading}
+                onBack={() => setExpandedField(null)}
+                onStreetAddressChange={setStreetAddress}
+                onCityChange={setCity}
+                onPostcodeChange={setPostcode}
+                onStateChange={setState}
+                onSubmit={handleUpdateBillingAddress}
+              />
+            )}
+          </motion.div>
+        )}
+      </div>
+
+      {!showBidForm ? (
+        <div className={presentation === 'page' ? 'border-t border-neutral-100 px-6 py-5 sm:px-8' : 'bg-[#f8f9fb] px-10 py-6'}>
+          <button
+            onClick={handleContinueToOffer}
+            disabled={!allFieldsCompleted}
+            className={`w-full rounded-full py-4 text-lg font-bold transition-all ${
+              allFieldsCompleted
+                ? 'cursor-pointer bg-brand-emerald text-white hover:bg-brand-emerald/90'
+                : 'cursor-not-allowed bg-[#e8ecf4] text-brand-emerald opacity-60'
+            }`}
+          >
+            Continue
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  if (presentation === 'page') {
+    if (!isOpen) return null;
+    return flowContent;
+  }
+
   const modalTree = (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop — portaled to body so it sits above navbar/filter (TaskDetails is z-50) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-[10050]"
+            className="fixed inset-0 z-[10050] bg-black/50"
             aria-hidden
           />
 
-          {/* Centered dialog */}
           <div
-            className="fixed inset-0 z-[10051] flex items-center justify-center p-4 sm:p-6 pointer-events-none"
+            className="pointer-events-none fixed inset-0 z-[10051] flex items-center justify-center p-4 sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="make-offer-modal-title"
@@ -373,131 +526,8 @@ export default function MakeOfferModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="pointer-events-auto w-full max-w-lg bg-white rounded-3xl shadow-2xl max-h-[min(90vh,calc(100dvh-2rem))] overflow-hidden flex flex-col mx-auto"
             >
-            {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto px-10 py-10">
-              {showBidForm && listingKind === 'job' && job ? (
-                <JobApplyForm job={job} onSuccess={handleBidSuccess} onCancel={handleBidCancel} />
-              ) : showBidForm && offerTask ? (
-                <BidForm
-                  task={offerTask}
-                  listingKind={listingKind === 'project' ? 'project' : 'task'}
-                  onSuccess={handleBidSuccess}
-                  onCancel={handleBidCancel}
-                />
-              ) : showBidForm && !offerTask ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">Task details are not available.</p>
-                  <button
-                    type="button"
-                    onClick={handleBidCancel}
-                    className="text-brand-emerald font-semibold hover:underline"
-                  >
-                    Go back
-                  </button>
-                </div>
-              ) : !expandedField ? (
-                <>
-                  <ModalHeader listingKind={listingKind} />
-                  <FieldsList
-                    user={user}
-                    hasProfilePicture={hasProfilePicture}
-                    hasDateOfBirth={hasDateOfBirth}
-                    hasVerifiedPhone={hasVerifiedPhone}
-                    hasBankAccount={hasBankAccount}
-                    hasBillingAddress={hasBillingAddress}
-                    onFieldClick={setExpandedField}
-                  />
-                </>
-              ) : (
-                // Show individual field forms
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                >
-                  {expandedField === 'profile' && (
-                    <ProfilePictureForm
-                      user={user}
-                      fileInputRef={fileInputRef}
-                      isLoading={isLoading}
-                      onBack={() => setExpandedField(null)}
-                      onFileChange={handleProfilePictureUpload}
-                    />
-                  )}
-
-                  {expandedField === 'dob' && (
-                    <DateOfBirthForm
-                      dateOfBirth={dateOfBirth}
-                      isLoading={isLoading}
-                      onBack={() => setExpandedField(null)}
-                      onChange={setDateOfBirth}
-                      onSubmit={handleUpdateDateOfBirth}
-                    />
-                  )}
-
-                  {expandedField === 'mobile' && (
-                    <VerifyMobileForm
-                      phoneNumber={phoneNumber}
-                      verificationCode={verificationCode}
-                      showVerificationInput={showVerificationInput}
-                      isLoading={isLoading}
-                      onBack={() => setExpandedField(null)}
-                      onPhoneChange={setPhoneNumber}
-                      onCodeChange={setVerificationCode}
-                      onSendCode={handleSendVerificationCode}
-                      onVerify={handleVerifyPhone}
-                    />
-                  )}
-
-                  {expandedField === 'bank' && (
-                    <LinkBankAccountForm
-                      fullName={esewaFullName}
-                      mobileNumber={esewaMobileNumber}
-                      isLoading={isLoading}
-                      onBack={() => setExpandedField(null)}
-                      onFullNameChange={setEsewaFullName}
-                      onMobileNumberChange={setEsewaMobileNumber}
-                      onSubmit={handleLinkBankAccount}
-                    />
-                  )}
-
-                  {expandedField === 'address' && (
-                    <BillingAddressForm
-                      streetAddress={streetAddress}
-                      city={city}
-                      postcode={postcode}
-                      state={state}
-                      isLoading={isLoading}
-                      onBack={() => setExpandedField(null)}
-                      onStreetAddressChange={setStreetAddress}
-                      onCityChange={setCity}
-                      onPostcodeChange={setPostcode}
-                      onStateChange={setState}
-                      onSubmit={handleUpdateBillingAddress}
-                    />
-                  )}
-                </motion.div>
-              )}
-            </div>
-
-            {/* Modal Footer - Only show Continue button when not in bid form */}
-            {!showBidForm && (
-              <div className="px-10 py-6 bg-[#f8f9fb]">
-                <button 
-                  onClick={handleContinueToOffer}
-                  disabled={!allFieldsCompleted}
-                  className={`w-full py-4 font-bold text-lg rounded-full transition-all ${
-                    allFieldsCompleted 
-                      ? 'bg-brand-emerald text-white hover:bg-brand-emerald/90 cursor-pointer' 
-                      : 'bg-[#e8ecf4] text-brand-emerald cursor-not-allowed opacity-60'
-                  }`}
-                >
-                  Continue
-                </button>
-              </div>
-            )}
+              {flowContent}
             </motion.div>
           </div>
         </>

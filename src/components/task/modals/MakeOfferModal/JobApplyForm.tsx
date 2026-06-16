@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { bidService, extractBidList, getMyBidForTask } from '@/services/bid.service';
 import { tokenManager } from '@/lib/api/client';
 import { formatNPR } from '@/lib/nepalLocale';
+import type { Bid } from '@/types';
 import type { Job } from '@/components/jobs/jobListData';
 import { getJobEditHref, isJobOwner } from '@/components/jobs/jobSlug';
 import {
@@ -19,11 +20,13 @@ import {
   offerModalSubtitle,
   offerTextareaClass,
 } from './makeOfferModalStyles';
+import OfferTermsAcceptance from './OfferTermsAcceptance';
 
 interface JobApplyFormProps {
   job: Job;
-  onSuccess: () => void;
+  onSuccess: (bid?: Bid) => void;
   onCancel: () => void;
+  embedded?: boolean;
 }
 
 const MIN_PROPOSAL_LENGTH = 50;
@@ -40,7 +43,7 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormProps) {
+export default function JobApplyForm({ job, onSuccess, onCancel, embedded = false }: JobApplyFormProps) {
   const { user } = useAuthStore();
   const [offerAmount, setOfferAmount] = useState('');
   const [proposal, setProposal] = useState('');
@@ -49,6 +52,7 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvUrl, setCvUrl] = useState<string | null>(null);
   const [isUploadingCv, setIsUploadingCv] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const isOwner = isJobOwner(job, user?.id);
   const editHref = getJobEditHref(job);
@@ -177,6 +181,11 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
       return;
     }
 
+    if (!termsAccepted) {
+      toast.error('Please accept the terms and conditions to continue.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const response = await bidService.createBid({
@@ -195,7 +204,7 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
         description: "We'll notify you when the employer responds to your application.",
         duration: 6000,
       });
-      onSuccess();
+      onSuccess(response.data);
     } catch (error: unknown) {
       const message =
         error && typeof error === 'object' && 'message' in error
@@ -243,14 +252,16 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
       exit={{ opacity: 0, y: -12 }}
       className="space-y-5"
     >
-      <div className={`${offerCard} border-brand-emerald/10`}>
-        <p className="font-formula font-bold text-brand-dark text-base leading-snug line-clamp-2">
-          {job.title}
-        </p>
-        <p className={`${offerModalSubtitle} mt-2 text-xs`}>
-          {job.companyName} · {job.budgetLabel} {job.type}
-        </p>
-      </div>
+      {!embedded ? (
+        <div className={`${offerCard} border-brand-emerald/10`}>
+          <p className="font-formula font-bold text-brand-dark text-base leading-snug line-clamp-2">
+            {job.title}
+          </p>
+          <p className={`${offerModalSubtitle} mt-2 text-xs`}>
+            {job.companyName} · {job.budgetLabel} {job.type}
+          </p>
+        </div>
+      ) : null}
 
       <form onSubmit={(event) => void handleSubmit(event)} className="space-y-5">
         <div>
@@ -337,6 +348,12 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
           )}
         </div>
 
+        <OfferTermsAcceptance
+          id="job-apply-terms-accepted"
+          checked={termsAccepted}
+          onChange={setTermsAccepted}
+        />
+
         <div className="flex gap-3 pt-2 border-t border-[#e8ecf4]">
           <button
             type="button"
@@ -348,7 +365,7 @@ export default function JobApplyForm({ job, onSuccess, onCancel }: JobApplyFormP
           </button>
           <button
             type="submit"
-            disabled={submitting || isUploadingCv || !cvUrl}
+            disabled={submitting || isUploadingCv || !cvUrl || !termsAccepted}
             className={`${offerBtnPrimarySm} flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-50`}
           >
             {submitting ? (

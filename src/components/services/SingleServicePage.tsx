@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth.store';
+import { chatService } from '@/services/chat.service';
+import { dashboardMessageConversationHref } from '@/lib/dashboardChat';
 import ServiceDetailHero from './ServiceDetailHero';
 import ServiceInfoBar from './ServiceInfoBar';
 import ServiceGallery from './ServiceGallery';
@@ -14,7 +16,9 @@ import ServiceComparePackages from './ServiceComparePackages';
 import ServiceFaq from './ServiceFaq';
 import ServiceReviews from './ServiceReviews';
 import ServiceShareSaveActions from './ServiceShareSaveActions';
-import ServicePurchaseModal from './ServicePurchaseModal';
+import { getCheckoutHref } from '@/lib/checkout';
+import { useCheckoutProfileGate } from '@/hooks/useCheckoutProfileGate';
+import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { getServiceMeta, getServicePackages, type Service, type ServicePackage } from './serviceListData';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
@@ -31,8 +35,9 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
   const [selectedPackageId, setSelectedPackageId] = useState(
     packages[0]?.id ?? 'basic',
   );
-  const [purchasePackage, setPurchasePackage] = useState<ServicePackage | null>(null);
   const planCardRef = useRef<HTMLDivElement>(null);
+  const { showProfilePopup, goToCheckout, completeProfileGate, cancelProfileGate } =
+    useCheckoutProfileGate();
 
   useEffect(() => {
     const nextPackages = getServicePackages(service);
@@ -62,9 +67,58 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
         return;
       }
 
-      setPurchasePackage(pkg);
+      goToCheckout(getCheckoutHref('service', service.slug, { packageId: pkg.id }));
     },
-    [router, service.ownerId, service.slug, user],
+    [goToCheckout, service.ownerId, service.slug, user],
+  );
+
+  const handleContactSeller = useCallback(
+    async (name: string, message: string): Promise<boolean> => {
+      if (!message.trim()) {
+        return false;
+      }
+
+      if (!user) {
+        toast.message('Sign in to message this seller');
+        router.push(`/login?redirect=${encodeURIComponent(`/services/${service.slug ?? ''}`)}`);
+        return false;
+      }
+
+      if (service.ownerId && user.id === service.ownerId) {
+        toast.error('You cannot message your own service.');
+        return false;
+      }
+
+      if (!service.ownerId) {
+        toast.error('This seller is not available for messaging yet.');
+        return false;
+      }
+
+      const serviceContext = `Re: ${service.title}\n\n${message.trim()}`;
+
+      try {
+        const conversationRes = await chatService.findOrCreateDirectConversation(service.ownerId);
+        if (!conversationRes.success || !conversationRes.data) {
+          toast.error('Could not start a conversation. Please try again.');
+          return false;
+        }
+
+        const sendRes = await chatService.sendMessage(conversationRes.data.id, {
+          content: serviceContext,
+        });
+        if (!sendRes.success) {
+          toast.error('Message could not be sent. Please try again.');
+          return false;
+        }
+
+        router.push(dashboardMessageConversationHref(conversationRes.data.id));
+        return true;
+      } catch {
+        toast.error(`Could not send your message to ${name}. Please try again.`);
+        return false;
+      }
+    },
+    [router, service.ownerId, service.slug, service.title, user],
   );
 
   return (
@@ -104,7 +158,7 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
                   onPurchase={handlePurchasePackage}
                 />
               </div>
-              <ServiceSellerCard service={service} />
+              <ServiceSellerCard service={service} onContact={handleContactSeller} />
             </div>
           </aside>
         </div>
@@ -123,11 +177,14 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
         </div>
       </div>
 
-      {purchasePackage ? (
-        <ServicePurchaseModal
-          service={service}
-          package={purchasePackage}
-          onClose={() => setPurchasePackage(null)}
+      {showProfilePopup ? (
+        <MakeOfferModal
+          presentation="modal"
+          profileGateOnly
+          profileGateListingKind="service"
+          isOpen={showProfilePopup}
+          onClose={cancelProfileGate}
+          onProfileGateComplete={completeProfileGate}
         />
       ) : null}
     </div>

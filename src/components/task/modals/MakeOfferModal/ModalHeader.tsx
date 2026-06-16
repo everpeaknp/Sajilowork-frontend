@@ -1,14 +1,16 @@
 export default function ModalHeader({
   listingKind = 'task',
 }: {
-  listingKind?: 'task' | 'project' | 'job';
+  listingKind?: 'task' | 'project' | 'job' | 'service';
 }) {
   const title =
     listingKind === 'project'
       ? 'Before you submit a proposal'
       : listingKind === 'job'
         ? 'Before you apply for this job'
-        : 'Before you make an offer';
+        : listingKind === 'service'
+          ? 'Before you purchase'
+          : 'Before you make an offer';
 
   return (
     <div className="mb-8">

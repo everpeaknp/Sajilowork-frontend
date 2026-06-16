@@ -14,6 +14,7 @@ import { getVerifiedLicenceBadges } from '@/components/users/PublicLicenceBadges
 import { countConfiguredFromReviews } from '@/lib/freelancerProfileReadiness';
 import { formatShortLocation, reviewerDisplayName } from '@/lib/publicProfile';
 import { getMediaUrl } from '@/lib/utils';
+import { resolvePlaceholderAvatar } from '@/lib/placeholderAvatar';
 import type { PortfolioItem, UserBadge } from '@/types';
 import type { PublicProfileReview, PublicUserProfile } from '@/types/publicProfile';
 import type { UserDirectoryEntry } from '@/services/user.service';
@@ -344,7 +345,7 @@ export function mapDirectoryEntryToFreelancer(entry: UserDirectoryEntry): Freela
     rating: rating > 0 ? rating : reviewCount > 0 ? 5 : 0,
     reviews: reviewCount,
     rate: Number(entry.hourly_rate ?? 0) || 0,
-    avatar: getMediaUrl(entry.profile_image) || '',
+    avatar: getMediaUrl(entry.profile_image) || resolvePlaceholderAvatar(entry.id || displayName),
     tags: skillTags.slice(0, 6),
     location: location && location !== '—' ? location : '',
     availableNow: Boolean(entry.is_online),

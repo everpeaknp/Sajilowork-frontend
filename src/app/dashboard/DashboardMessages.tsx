@@ -34,12 +34,10 @@ import {
 import {
   dashboardMessagesViewForRole,
   emptyMessagesMessage,
-  messagesPageSubtitle,
   otherParticipantRoleLabel,
 } from '@/lib/dashboardMessages';
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
 import {
-  DASHBOARD_HEADING_MD,
   DASHBOARD_MESSAGES_HEIGHT,
   DASHBOARD_PAGE_ROOT,
 } from './dashboardResponsive';
@@ -264,7 +262,6 @@ function DashboardMessagesContent() {
   const sidebarRole = useDashboardSidebarRole();
   const dashboardRole = sidebarRole === 'customer' ? 'customer' : 'tasker';
   const messagesView = chatInboxViewParam(dashboardRole);
-  const pageSubtitle = messagesPageSubtitle(messagesView);
   const emptyInboxMessage = emptyMessagesMessage(messagesView);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -588,20 +585,53 @@ function DashboardMessagesContent() {
       (bidParam && taskerParam ? `bid:${bidParam}:${taskerParam}` : '') ||
       (taskParam && taskerParam ? `task:${taskParam}:${taskerParam}` : '');
 
-    if (!deepKey || resolvedDeepLinkRef.current === deepKey) return;
+    if (!deepKey) return;
 
     if (conversationParam) {
-      resolvedDeepLinkRef.current = deepKey;
+      if (resolvedDeepLinkRef.current === deepKey) return;
+
       setSelectedId(conversationParam);
       const group = conversationGroups.find((g) =>
         g.conversations.some((c) => conversationKey(c) === conversationParam),
       );
       if (group) {
+        resolvedDeepLinkRef.current = deepKey;
         setActivePersonKey(group.key);
         setMobilePane('thread');
+        return;
       }
+
+      if (loadingConversations || resolvingDeepLink) return;
+
+      setResolvingDeepLink(true);
+      void chatService
+        .getConversation(conversationParam)
+        .then((response) => {
+          if (!response.success || !response.data) {
+            toast.error('Could not open this conversation.');
+            return;
+          }
+          const conv = response.data;
+          const id = String(conv.id);
+          resolvedDeepLinkRef.current = deepKey;
+          setSelectedId(id);
+          setConversations((prev) => dedupeConversations([conv, ...prev]));
+          const personKey = otherParticipantKey(conv, user?.id);
+          if (personKey) {
+            setActivePersonKey(personKey);
+            setMobilePane('thread');
+          }
+        })
+        .catch(() => {
+          toast.error('Could not open this conversation.');
+        })
+        .finally(() => {
+          setResolvingDeepLink(false);
+        });
       return;
     }
+
+    if (resolvedDeepLinkRef.current === deepKey) return;
 
     const openConversation = async (
       finder: () => ReturnType<typeof chatService.findOrCreateConversationForBid>,
@@ -612,6 +642,7 @@ function DashboardMessagesContent() {
         if (response.success && response.data) {
           const conv = response.data;
           const id = String(conv.id);
+          resolvedDeepLinkRef.current = deepKey;
           setSelectedId(id);
           setConversations((prev) => dedupeConversations([conv, ...prev]));
           const personKey = otherParticipantKey(conv, user?.id);
@@ -656,7 +687,7 @@ function DashboardMessagesContent() {
         chatService.findOrCreateConversationForTask(taskParam, taskerParam),
       );
     }
-  }, [searchParams, conversationGroups, user?.id]);
+  }, [searchParams, conversationGroups, user?.id, loadingConversations, resolvingDeepLink]);
 
   useEffect(() => {
     if (!selectedGroup) {
@@ -878,11 +909,6 @@ function DashboardMessagesContent() {
 
   return (
     <div className={DASHBOARD_PAGE_ROOT}>
-      <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
-        <h1 className={DASHBOARD_HEADING_MD}>Message</h1>
-        <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">{pageSubtitle}</p>
-      </div>
-
       <div className="mx-auto grid min-w-0 max-w-7xl grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
         <div
           className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-5 lg:col-span-4`}

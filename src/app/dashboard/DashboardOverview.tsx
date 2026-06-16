@@ -14,6 +14,8 @@ import type { DashboardTab } from './DashboardSidebar';
 import { formatNPR } from '@/lib/nepalLocale';
 import { getMediaUrl } from '@/lib/utils';
 import UserAvatar from '@/components/common/UserAvatar';
+import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
+import { resolveOwnerAvatarBg } from '@/lib/employerAvatarUtils';
 import {
   dashboardService,
   type DashboardOverviewPayload,
@@ -21,6 +23,11 @@ import {
 } from '@/services/dashboard.service';
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
+import {
+  getDashboardEditHref,
+  getDashboardListHref,
+  type DashboardCreateTab,
+} from './dashboardTabs';
 
 const STAT_ICONS = [FileText, CheckCircle2, ThumbsUp, MessageSquareMore] as const;
 
@@ -58,6 +65,7 @@ const EMPTY_OVERVIEW: DashboardOverviewPayload = {
   },
   most_viewed_services: [],
   recent_purchases: [],
+  my_listings: [],
   recent_completed_projects: [],
   recent_activity: [],
 };
@@ -70,6 +78,35 @@ function formatOverviewDate(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function listingKindLabel(kind: string) {
+  switch (kind) {
+    case 'job':
+      return 'Job';
+    case 'project':
+      return 'Project';
+    case 'service':
+      return 'Service';
+    default:
+      return 'Task';
+  }
+}
+
+function listingKindToTab(kind: string): DashboardCreateTab {
+  if (kind === 'job') return 'jobs';
+  if (kind === 'project') return 'project';
+  if (kind === 'service') return 'services';
+  return 'task';
+}
+
+function formatListingStatus(status: string) {
+  const normalized = status.trim().toLowerCase();
+  if (!normalized) return 'Unknown';
+  return normalized
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 export default function DashboardOverview({ onTabChange }: DashboardOverviewProps) {
@@ -173,8 +210,14 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
   const referralDash = (traffic.referral_percent / 100) * circumference;
   const organicDash = (traffic.organic_percent / 100) * circumference;
   const middleCardTitle =
-    role === 'tasker' ? 'Recently Done Projects' : 'Recent Purchased Services';
-  const viewAllHref = role === 'tasker' ? '/dashboard/contracts' : '/dashboard/jobs';
+    role === 'tasker' ? 'Recently Done Projects' : 'Services, Projects & Tasks';
+  const middleCardViewAllHref =
+    role === 'tasker' ? '/dashboard/contracts' : getDashboardListHref('jobs');
+  const mostViewedCardTitle =
+    role === 'tasker' ? 'Most Viewed Services' : 'Most Viewed Jobs';
+  const mostViewedEmptyText =
+    role === 'tasker' ? 'No services yet.' : 'No jobs yet.';
+  const mostViewedViewAllHref = role === 'tasker' ? '/dashboard/contracts' : '/dashboard/jobs';
 
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
@@ -472,22 +515,43 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
           <div>
             <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5">
               <h4 className="text-[14px] font-semibold tracking-tight text-black">
-                Most Viewed Services
+                {mostViewedCardTitle}
               </h4>
-              <Link href={viewAllHref} className="text-[11.5px] font-medium text-[#4138C4] hover:underline">
+              <Link href={mostViewedViewAllHref} className="text-[11.5px] font-medium text-[#4138C4] hover:underline">
                 View All
               </Link>
             </div>
 
             <div className="space-y-4">
               {overview.most_viewed_services.length === 0 ? (
-                <p className="py-6 text-center text-xs text-neutral-400">No listings yet.</p>
+                <p className="py-6 text-center text-xs text-neutral-400">{mostViewedEmptyText}</p>
               ) : (
-                overview.most_viewed_services.map((service) => (
+                overview.most_viewed_services.map((service) => {
+                  const businessName = service.business_name?.trim() || service.title;
+                  const businessLogoUrl = service.business_logo_url?.trim()
+                    ? getMediaUrl(service.business_logo_url)
+                    : undefined;
+                  const avatarBg =
+                    service.logo_color?.startsWith('bg-')
+                      ? service.logo_color
+                      : resolveOwnerAvatarBg(businessName);
+
+                  return (
                   <div
                     key={service.id}
                     className="flex items-center gap-3.5 border-b border-neutral-100 pb-4 last:border-0 last:pb-0"
                   >
+                    {role === 'customer' ? (
+                      <div className="relative shrink-0">
+                        <EmployerAvatarCircle
+                          name={businessName}
+                          avatarUrl={businessLogoUrl}
+                          avatarBg={avatarBg}
+                          sizeClass="h-[50px] w-[50px]"
+                          textClass="text-sm font-bold uppercase"
+                        />
+                      </div>
+                    ) : (
                     <img
                       src={getMediaUrl(service.image) || FALLBACK_IMAGE}
                       alt={service.title}
@@ -498,6 +562,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                         e.currentTarget.src = FALLBACK_IMAGE;
                       }}
                     />
+                    )}
                     <div className="min-w-0 flex-1 space-y-1.5">
                       <h5
                         className="line-clamp-2 text-[11.5px] font-medium leading-snug text-black"
@@ -519,7 +584,8 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                       </div>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -532,7 +598,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                 {middleCardTitle}
               </h4>
               <Link
-                href={viewAllHref}
+                href={middleCardViewAllHref}
                 className="text-[11.5px] font-medium text-[#4138C4] hover:underline"
               >
                 View All
@@ -576,37 +642,61 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                     </div>
                   ))
                 )
-              ) : overview.recent_purchases.length === 0 ? (
-                <p className="py-6 text-center text-xs text-neutral-400">No recent orders yet.</p>
+              ) : (overview.my_listings ?? []).length === 0 ? (
+                <p className="py-6 text-center text-xs text-neutral-400">
+                  No services, projects, or tasks yet.
+                </p>
               ) : (
-                overview.recent_purchases.map((purchase, index) => (
-                  <div
-                    key={`${purchase.date}-${index}`}
-                    className="flex items-start gap-3 border-b border-neutral-100 pb-[18px] last:border-0 last:pb-0"
-                  >
-                    <UserAvatar
-                      src={purchase.avatar_url}
-                      name={purchase.buyer_name}
-                      size="md"
-                      className="shrink-0"
-                    />
-                    <div className="flex-1 space-y-1">
-                      <p className="text-[11.5px] leading-snug text-black">
-                        <span className="font-semibold text-black">{purchase.buyer_name}</span>{' '}
-                        <span className="font-medium text-[#3ca871]">has purchased</span>{' '}
-                        {purchase.task_title}
-                      </p>
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-medium text-neutral-400">
-                          {formatOverviewDate(purchase.date)}
-                        </span>
-                        <span className="font-semibold text-black">
-                          {formatNPR(purchase.amount)}
-                        </span>
+                (overview.my_listings ?? []).map((listing) => {
+                  const businessName = listing.business_name?.trim() || listing.title;
+                  const businessLogoUrl = listing.business_logo_url?.trim()
+                    ? getMediaUrl(listing.business_logo_url)
+                    : undefined;
+                  const avatarBg =
+                    listing.logo_color?.startsWith('bg-')
+                      ? listing.logo_color
+                      : resolveOwnerAvatarBg(businessName);
+                  const editHref = getDashboardEditHref(listingKindToTab(listing.listing_kind), listing.slug);
+
+                  return (
+                    <Link
+                      key={listing.id}
+                      href={editHref}
+                      className="flex items-start gap-3 border-b border-neutral-100 pb-[18px] last:border-0 last:pb-0 transition-colors hover:bg-neutral-50/60"
+                    >
+                      <div className="relative shrink-0">
+                        <EmployerAvatarCircle
+                          name={businessName}
+                          avatarUrl={businessLogoUrl}
+                          avatarBg={avatarBg}
+                          sizeClass="h-10 w-10"
+                          textClass="text-xs font-bold uppercase"
+                        />
                       </div>
-                    </div>
-                  </div>
-                ))
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <p className="line-clamp-2 text-[11.5px] font-medium leading-snug text-black">
+                          {listing.title}
+                        </p>
+                        <div className="flex items-center justify-between gap-2 text-[11px]">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <span className="shrink-0 rounded-full bg-[#F0F8FF] px-2 py-0.5 text-[10px] font-medium text-[#0080FF]">
+                              {listingKindLabel(listing.listing_kind)}
+                            </span>
+                            <span className="truncate font-medium text-neutral-400">
+                              {formatListingStatus(listing.status)}
+                            </span>
+                          </div>
+                          <span className="shrink-0 font-semibold text-black">
+                            {formatNPR(listing.budget_amount)}
+                          </span>
+                        </div>
+                        <p className="text-[10.5px] font-medium text-neutral-400">
+                          Updated {formatOverviewDate(listing.date)}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })
               )}
             </div>
           </div>

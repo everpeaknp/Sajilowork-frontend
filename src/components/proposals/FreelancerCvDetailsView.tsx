@@ -84,36 +84,48 @@ export default function FreelancerCvDetailsView({
         </ProposalSection>
       ) : null}
 
-      {data.experience.length > 0 ? (
-        <ProposalSection title="Experience" description="Work history and roles">
-          <ProposalTimelineList>
-            {data.experience.map((entry) => (
-              <ProposalTimelineItem
-                key={entry.id ?? `${entry.title}-${entry.company}`}
-                title={entry.title}
-                subtitle={entry.company}
-                period={entry.yearRange}
-                description={entry.description || undefined}
-              />
-            ))}
-          </ProposalTimelineList>
-        </ProposalSection>
-      ) : null}
+      {data.education.length > 0 || data.experience.length > 0 ? (
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
+          {data.education.length > 0 ? (
+            <ProposalSection
+              title="Education"
+              description="Qualifications and training"
+              className="mt-0"
+            >
+              <ProposalTimelineList>
+                {data.education.map((entry) => (
+                  <ProposalTimelineItem
+                    key={entry.id ?? `${entry.degree}-${entry.institution}`}
+                    title={entry.degree}
+                    subtitle={entry.institution}
+                    period={entry.yearRange}
+                    description={entry.description || undefined}
+                  />
+                ))}
+              </ProposalTimelineList>
+            </ProposalSection>
+          ) : null}
 
-      {data.education.length > 0 ? (
-        <ProposalSection title="Education" description="Qualifications and training">
-          <ProposalTimelineList>
-            {data.education.map((entry) => (
-              <ProposalTimelineItem
-                key={entry.id ?? `${entry.degree}-${entry.institution}`}
-                title={entry.degree}
-                subtitle={entry.institution}
-                period={entry.yearRange}
-                description={entry.description || undefined}
-              />
-            ))}
-          </ProposalTimelineList>
-        </ProposalSection>
+          {data.experience.length > 0 ? (
+            <ProposalSection
+              title="Experience"
+              description="Work history and roles"
+              className="mt-0"
+            >
+              <ProposalTimelineList>
+                {data.experience.map((entry) => (
+                  <ProposalTimelineItem
+                    key={entry.id ?? `${entry.title}-${entry.company}`}
+                    title={entry.title}
+                    subtitle={entry.company}
+                    period={entry.yearRange}
+                    description={entry.description || undefined}
+                  />
+                ))}
+              </ProposalTimelineList>
+            </ProposalSection>
+          ) : null}
+        </div>
       ) : null}
 
       {skills.length > 0 ? (
@@ -141,33 +153,60 @@ export default function FreelancerCvDetailsView({
         </ProposalSection>
       ) : null}
 
-      {licenceBadges.length > 0 ? (
-        <ProposalSection title="Licence badges" description="Verified trade credentials">
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {licenceBadges.map((badge) => (
-              <li
-                key={badge.id}
-                className="flex items-start gap-3 rounded-xl border border-emerald-100/80 bg-emerald-50/40 p-4"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-emerald-100">
-                  {licenceBadgeIcon(badge.badge_type)}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-neutral-900">{badge.name}</p>
-                  {badge.description?.trim() ? (
-                    <p className="mt-1 text-xs leading-relaxed text-neutral-600 [overflow-wrap:anywhere]">
-                      {badge.description.trim()}
-                    </p>
-                  ) : null}
-                  <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#52C47F]">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    Verified
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </ProposalSection>
+      {data.awards.length > 0 || licenceBadges.length > 0 ? (
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
+          {data.awards.length > 0 ? (
+            <ProposalSection
+              title="Awards & certifications"
+              className="mt-0"
+            >
+              <ProposalTimelineList>
+                {data.awards.map((entry) => (
+                  <ProposalTimelineItem
+                    key={entry.id ?? `${entry.title}-${entry.issuer}`}
+                    title={entry.title}
+                    subtitle={entry.issuer}
+                    period={entry.yearRange}
+                    description={entry.description || undefined}
+                  />
+                ))}
+              </ProposalTimelineList>
+            </ProposalSection>
+          ) : null}
+
+          {licenceBadges.length > 0 ? (
+            <ProposalSection
+              title="Licence badges"
+              description="Verified trade credentials"
+              className="mt-0"
+            >
+              <ul className="grid grid-cols-1 gap-3">
+                {licenceBadges.map((badge) => (
+                  <li
+                    key={badge.id}
+                    className="flex items-start gap-3 rounded-xl border border-emerald-100/80 bg-emerald-50/40 p-4"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-emerald-100">
+                      {licenceBadgeIcon(badge.badge_type)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-neutral-900">{badge.name}</p>
+                      {badge.description?.trim() ? (
+                        <p className="mt-1 text-xs leading-relaxed text-neutral-600 [overflow-wrap:anywhere]">
+                          {badge.description.trim()}
+                        </p>
+                      ) : null}
+                      <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#52C47F]">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Verified
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </ProposalSection>
+          ) : null}
+        </div>
       ) : null}
 
       {languages.length > 0 ? (
@@ -187,22 +226,6 @@ export default function FreelancerCvDetailsView({
               </li>
             ))}
           </ul>
-        </ProposalSection>
-      ) : null}
-
-      {data.awards.length > 0 ? (
-        <ProposalSection title="Awards & certifications">
-          <ProposalTimelineList>
-            {data.awards.map((entry) => (
-              <ProposalTimelineItem
-                key={entry.id ?? `${entry.title}-${entry.issuer}`}
-                title={entry.title}
-                subtitle={entry.issuer}
-                period={entry.yearRange}
-                description={entry.description || undefined}
-              />
-            ))}
-          </ProposalTimelineList>
         </ProposalSection>
       ) : null}
     </div>

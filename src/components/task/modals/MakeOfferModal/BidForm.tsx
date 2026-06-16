@@ -9,28 +9,30 @@ import { Calendar, FileText, Paperclip, Send, X, Loader2 } from 'lucide-react';
 import { bidSchema, type BidFormData } from '@/validations/bid.schema';
 import { bidService, extractBidList } from '@/services/bid.service';
 import { tokenManager } from '@/lib/api/client';
-import { Task } from '@/types';
+import { Bid, Task } from '@/types';
 import { formatNPR } from '@/lib/nepalLocale';
 import { canSubmitOfferOnTask, getListingClosedOfferMessage } from '@/lib/taskUtils';
 import { useAuthStore } from '@/store/auth.store';
 import {
   offerBtnPrimarySm,
   offerCard,
-  offerInfoBanner,
   offerInputClass,
   offerLabel,
   offerModalSubtitle,
   offerTextareaClass,
 } from './makeOfferModalStyles';
+import OfferTermsAcceptance from './OfferTermsAcceptance';
 
 interface BidFormProps {
   task: Task;
   listingKind?: 'task' | 'project';
-  onSuccess: () => void;
+  onSuccess: (bid?: Bid) => void;
   onCancel: () => void;
+  /** Hide listing preview card (checkout page already shows summary) */
+  embedded?: boolean;
 }
 
-export default function BidForm({ task, listingKind = 'task', onSuccess, onCancel }: BidFormProps) {
+export default function BidForm({ task, listingKind = 'task', onSuccess, onCancel, embedded = false }: BidFormProps) {
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -84,6 +86,7 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<BidFormData>({
     resolver: zodResolver(bidSchema),
@@ -190,7 +193,7 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
             : "We'll notify you when the task poster accepts your bid.",
         duration: 6000,
       });
-      onSuccess();
+      onSuccess(response.data);
     } catch (error: unknown) {
       let errorMessage = 'Failed to submit offer. Please try again.';
 
@@ -290,25 +293,27 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
           })}
           className="space-y-5"
         >
-          <div className={`${offerCard} border-brand-emerald/10`}>
-            <p className="font-formula font-bold text-brand-dark text-base leading-snug line-clamp-2">
-              {task.title}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-body text-[#6a719a]">
-              <span>
-                Budget{' '}
-                <span className="font-semibold text-brand-dark">
-                  {formatNPR(task.budget_amount)}
+          {!embedded ? (
+            <div className={`${offerCard} border-brand-emerald/10`}>
+              <p className="font-formula font-bold text-brand-dark text-base leading-snug line-clamp-2">
+                {task.title}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-body text-[#6a719a]">
+                <span>
+                  Budget{' '}
+                  <span className="font-semibold text-brand-dark">
+                    {formatNPR(task.budget_amount)}
+                  </span>
                 </span>
-              </span>
-              {task.due_date && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 shrink-0" />
-                  Due {new Date(task.due_date).toLocaleDateString('en-NP')}
-                </span>
-              )}
+                {task.due_date && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    Due {new Date(task.due_date).toLocaleDateString('en-NP')}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <div>
             <label className={`${offerLabel} mb-2 block`}>
@@ -426,31 +431,11 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
             </p>
           </div>
 
-          <div className={offerInfoBanner}>
-            <input
-              type="checkbox"
-              {...register('terms_accepted')}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#d8e0ef] text-brand-emerald focus:ring-brand-emerald/30"
-            />
-            <div className="font-body text-sm text-brand-dark/85 leading-relaxed">
-              <p className="font-formula font-bold tracking-tight mb-1">Terms & conditions</p>
-              <p>
-                By submitting this offer, I agree to complete the task if accepted and to the
-                platform&apos;s{' '}
-                <a href="/terms" className="font-semibold text-brand-emerald hover:underline">
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a href="/privacy" className="font-semibold text-brand-emerald hover:underline">
-                  Privacy Policy
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-          {errors.terms_accepted && (
-            <p className="font-body text-sm text-red-600">{errors.terms_accepted.message}</p>
-          )}
+          <OfferTermsAcceptance
+            checked={watch('terms_accepted')}
+            onChange={(checked) => setValue('terms_accepted', checked, { shouldValidate: true })}
+            error={errors.terms_accepted?.message}
+          />
 
           <div className="flex gap-3 pt-2 border-t border-[#e8ecf4]">
             <button

@@ -1,6 +1,6 @@
 'use client';
 
-import { resolveOwnerInitials } from '@/lib/employerAvatarUtils';
+import { resolveEmployerLogoLabel } from '@/lib/employerAvatarUtils';
 
 export function renderCompanyLogo(logoKey: string, name: string) {
   const baseClass = 'h-12 w-12 shrink-0 select-none overflow-hidden rounded-full shadow-sm';
@@ -255,7 +255,7 @@ export function renderEmployerBrandLogo(
   ]);
 
   if (logoColor === 'serif-m' || !demoLogoKeys.has(logoColor)) {
-    const label = logoText?.trim() || resolveOwnerInitials(name);
+    const label = resolveEmployerLogoLabel(name, logoText);
     return (
       <div
         className={`${baseClass} flex items-center justify-center bg-neutral-950 font-serif text-lg font-black text-white`}

@@ -49,21 +49,21 @@ export default function FreelancerEducation({ freelancer, items }: FreelancerEdu
             <div
               className={`flex flex-col items-start pt-0.5 ${idx < educationItems.length - 1 ? 'pb-10' : ''}`}
             >
-                <div className="mb-3 select-none rounded-full bg-[#FEF1EC] px-5 py-2 text-sm font-normal text-black">
-                  {item.years}
-                </div>
+              <div className="mb-3 select-none rounded-full bg-[#FEF1EC] px-5 py-2 text-sm font-normal text-black">
+                {item.years}
+              </div>
 
-                <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg">
-                  {item.degree}
-                </h4>
+              <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg">
+                {item.degree}
+              </h4>
 
-                <p className="mt-1.5 text-xs font-normal leading-none text-[#52C47F] sm:text-sm">
-                  {item.institution}
-                </p>
+              <p className="mt-1.5 text-xs font-normal leading-none text-[#52C47F] sm:text-sm">
+                {item.institution}
+              </p>
 
-                <p className="mt-4 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm">
-                  {item.description}
-                </p>
+              <p className="mt-4 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm">
+                {item.description}
+              </p>
             </div>
           </motion.div>
         ))}

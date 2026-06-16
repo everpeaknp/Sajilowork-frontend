@@ -312,7 +312,7 @@ export default function FreelancerAbout({
     >
       <div className={`mx-auto w-full ${embedded ? '' : 'max-w-7xl'}`}>
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
-          <div className="flex flex-col pt-2 lg:col-span-8">
+          <div className={`flex flex-col pt-2 ${embedded ? 'lg:col-span-12' : 'lg:col-span-8'}`}>
             {visibleMetrics.length > 0 ? (
               <div className="mb-8 grid grid-cols-2 gap-x-4 gap-y-8 border-b border-neutral-100 pb-10 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
                 {visibleMetrics.map((metric) => (
@@ -361,6 +361,7 @@ export default function FreelancerAbout({
             />
           </div>
 
+          {!embedded ? (
           <div className="lg:col-span-4">
             <div className="w-full max-w-[21rem] sm:max-w-[22rem]">
             <div
@@ -402,6 +403,7 @@ export default function FreelancerAbout({
             </div>
             </div>
           </div>
+          ) : null}
         </div>
       </div>
 

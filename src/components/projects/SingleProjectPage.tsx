@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowUpRight } from 'lucide-react';
 import { toast } from 'sonner';
-import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { useAuth } from '@/hooks/useAuth';
+import { getCheckoutHref } from '@/lib/checkout';
+import { useCheckoutProfileGate } from '@/hooks/useCheckoutProfileGate';
+import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { getListingClosedOfferMessage, isProjectOpenForBids } from '@/lib/taskUtils';
 import ProjectProfileHero from './ProjectProfileHero';
 import ProjectAbout from './ProjectAbout';
@@ -43,21 +45,11 @@ export default function SingleProjectPage({
   const { user } = useAuth();
   const useProposalModal = proposalPresentation === 'modal';
   const [proposalRefreshKey, setProposalRefreshKey] = useState(0);
-  const [showProposalModal, setShowProposalModal] = useState(false);
+  const { showProfilePopup, goToCheckout, completeProfileGate, cancelProfileGate } =
+    useCheckoutProfileGate();
   const sendProposalRef = useRef<HTMLDivElement>(null);
 
-  const scrollToSendProposal = useCallback(() => {
-    sendProposalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    onSubmitProposal?.();
-    window.setTimeout(() => {
-      const field = document.getElementById('offer-amount');
-      if (field instanceof HTMLElement) {
-        field.focus({ preventScroll: true });
-      }
-    }, 450);
-  }, [onSubmitProposal]);
-
-  const openProposalModal = useCallback(() => {
+  const openProposalCheckout = useCallback(() => {
     if (!user) {
       toast.error('Please sign in to submit a proposal.');
       const redirectPath =
@@ -71,29 +63,27 @@ export default function SingleProjectPage({
       toast.error(getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids));
       return;
     }
-    setShowProposalModal(true);
-  }, [project, router, user]);
-
-  const handleSubmitProposalClick = useCallback(() => {
-    if (useProposalModal) {
-      openProposalModal();
+    if (!project.slug) {
+      toast.error('This project is not available for proposals yet.');
       return;
     }
-    scrollToSendProposal();
-  }, [openProposalModal, scrollToSendProposal, useProposalModal]);
+    goToCheckout(getCheckoutHref('project', project.slug));
+  }, [goToCheckout, project, user]);
+
+  const handleSubmitProposalClick = useCallback(() => {
+    if (hideSendProposal) return;
+    openProposalCheckout();
+  }, [hideSendProposal, openProposalCheckout]);
 
   useEffect(() => {
+    if (hideSendProposal) return;
     if (typeof window === 'undefined' || window.location.hash !== `#${SEND_PROPOSAL_SECTION_ID}`) {
       return;
     }
     window.requestAnimationFrame(() => {
-      if (useProposalModal) {
-        openProposalModal();
-        return;
-      }
-      scrollToSendProposal();
+      openProposalCheckout();
     });
-  }, [openProposalModal, scrollToSendProposal, useProposalModal]);
+  }, [hideSendProposal, openProposalCheckout]);
 
   const handleProposalSubmitted = useCallback(() => {
     setProposalRefreshKey((key) => key + 1);
@@ -161,12 +151,14 @@ export default function SingleProjectPage({
         </div>
       </div>
 
-      {useProposalModal && !hideSendProposal ? (
+      {showProfilePopup ? (
         <MakeOfferModal
-          isOpen={showProposalModal}
-          onClose={() => setShowProposalModal(false)}
+          presentation="modal"
+          profileGateOnly
+          isOpen={showProfilePopup}
+          onClose={cancelProfileGate}
+          onProfileGateComplete={completeProfileGate}
           project={project}
-          onBidSuccess={handleProposalSubmitted}
         />
       ) : null}
     </div>

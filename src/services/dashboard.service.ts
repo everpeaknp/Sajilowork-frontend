@@ -83,6 +83,10 @@ export type DashboardOverviewService = {
   starting_price: number;
   currency: string;
   image: string;
+  business_logo_url?: string;
+  business_name?: string;
+  logo_color?: string;
+  logo_text?: string;
 };
 
 export type DashboardRecentPurchase = {
@@ -113,6 +117,22 @@ export type DashboardRecentActivity = {
   color: string;
 };
 
+export type DashboardOverviewListing = {
+  id: string;
+  slug: string;
+  title: string;
+  listing_kind: 'job' | 'project' | 'service' | 'task';
+  status: string;
+  budget_amount: number;
+  currency: string;
+  date: string;
+  image: string;
+  business_logo_url?: string;
+  business_name?: string;
+  logo_color?: string;
+  logo_text?: string;
+};
+
 export type DashboardOverviewPayload = {
   stat_cards: DashboardStatCard[];
   profile_views_chart: DashboardChartPoint[];
@@ -126,6 +146,7 @@ export type DashboardOverviewPayload = {
   };
   most_viewed_services: DashboardOverviewService[];
   recent_purchases: DashboardRecentPurchase[];
+  my_listings: DashboardOverviewListing[];
   recent_completed_projects: DashboardRecentCompletedProject[];
   recent_activity: DashboardRecentActivity[];
 };

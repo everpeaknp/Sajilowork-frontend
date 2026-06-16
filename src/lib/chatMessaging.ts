@@ -32,6 +32,10 @@ export function isMessagingEnabledForConversation(conv: Conversation | null | un
     return conv.messaging_enabled;
   }
 
+  if (!conv.task && !conv.bid) {
+    return true;
+  }
+
   const status = getTaskStatusFromConversation(conv);
   if (!status) return false;
   return MESSAGING_ALLOWED_TASK_STATUSES.includes(status);

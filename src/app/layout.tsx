@@ -56,7 +56,7 @@ export default function RootLayout({
           {children}
           {modal}
           <MobileBottomNav />
-          <Toaster position="top-right" richColors />
+          <Toaster position="bottom-right" richColors />
         </AuthProvider>
       </body>
     </html>

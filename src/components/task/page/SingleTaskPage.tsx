@@ -10,9 +10,11 @@ import ProjectAttachments from '@/components/projects/ProjectAttachments';
 import ProjectGallery from '@/components/projects/ProjectGallery';
 import ProjectSkillsRequired from '@/components/projects/ProjectSkillsRequired';
 import TaskReviewsSection from '@/components/reviews/TaskReviewsSection';
-import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { useAuth } from '@/hooks/useAuth';
 import { TASK_BROWSE_PATH } from '@/lib/taskBrowsePath';
+import { getCheckoutHref } from '@/lib/checkout';
+import { useCheckoutProfileGate } from '@/hooks/useCheckoutProfileGate';
+import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { mapTaskToTaskPageView, getTaskDetailPath } from '@/lib/taskPageApi';
 import { isListingOpenForBids, getListingClosedOfferMessage } from '@/lib/taskUtils';
 import type { Task } from '@/types';
@@ -80,21 +82,12 @@ export default function SingleTaskPage({
   const useMakeOfferModal = makeOfferPresentation === 'modal';
   const project = useMemo(() => mapTaskToTaskPageView(task), [task]);
   const [offerRefreshKey, setOfferRefreshKey] = useState(0);
-  const [showMakeOfferModal, setShowMakeOfferModal] = useState(false);
+  const { showProfilePopup, goToCheckout, completeProfileGate, cancelProfileGate } =
+    useCheckoutProfileGate();
   const makeOfferRef = useRef<HTMLDivElement>(null);
   const initialOfferCount = task.bid_count ?? task.bids_count ?? 0;
 
-  const scrollToMakeOffer = useCallback(() => {
-    makeOfferRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.setTimeout(() => {
-      const field = document.getElementById('task-offer-amount');
-      if (field instanceof HTMLElement) {
-        field.focus({ preventScroll: true });
-      }
-    }, 450);
-  }, []);
-
-  const openMakeOfferModal = useCallback(() => {
+  const openMakeOfferCheckout = useCallback(() => {
     if (!user) {
       toast.error('Please sign in to make an offer.');
       const redirectPath =
@@ -108,29 +101,27 @@ export default function SingleTaskPage({
       toast.error(getListingClosedOfferMessage(task.status, 'task', task.is_open));
       return;
     }
-    setShowMakeOfferModal(true);
-  }, [router, task, user]);
-
-  const handleMakeOfferClick = useCallback(() => {
-    if (useMakeOfferModal) {
-      openMakeOfferModal();
+    if (!task.slug) {
+      toast.error('This task is not available for offers yet.');
       return;
     }
-    scrollToMakeOffer();
-  }, [openMakeOfferModal, scrollToMakeOffer, useMakeOfferModal]);
+    goToCheckout(getCheckoutHref('task', task.slug));
+  }, [goToCheckout, task, user]);
+
+  const handleMakeOfferClick = useCallback(() => {
+    if (hideMakeOffer) return;
+    openMakeOfferCheckout();
+  }, [hideMakeOffer, openMakeOfferCheckout]);
 
   useEffect(() => {
+    if (hideMakeOffer) return;
     if (typeof window === 'undefined' || window.location.hash !== `#${MAKE_OFFER_SECTION_ID}`) {
       return;
     }
     window.requestAnimationFrame(() => {
-      if (useMakeOfferModal) {
-        openMakeOfferModal();
-        return;
-      }
-      scrollToMakeOffer();
+      openMakeOfferCheckout();
     });
-  }, [openMakeOfferModal, scrollToMakeOffer, useMakeOfferModal]);
+  }, [hideMakeOffer, openMakeOfferCheckout]);
 
   const handleOfferRefresh = useCallback(() => {
     setOfferRefreshKey((key) => key + 1);
@@ -264,12 +255,14 @@ export default function SingleTaskPage({
         </div>
       </div>
 
-      {useMakeOfferModal && !hideMakeOffer ? (
+      {showProfilePopup ? (
         <MakeOfferModal
-          isOpen={showMakeOfferModal}
-          onClose={() => setShowMakeOfferModal(false)}
+          presentation="modal"
+          profileGateOnly
+          isOpen={showProfilePopup}
+          onClose={cancelProfileGate}
+          onProfileGateComplete={completeProfileGate}
           task={task}
-          onBidSuccess={handleOfferRefresh}
         />
       ) : null}
     </div>

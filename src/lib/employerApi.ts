@@ -70,7 +70,7 @@ export function mapEmployerPublicDtoToEmployer(dto: EmployerPublicDto): Employer
     costRange: dto.cost_range || '—',
     openJobs: dto.open_jobs ?? 0,
     logoColor: dto.logo_color || 'serif-m',
-    logoText: dto.logo_text || 'CO',
+    logoText: dto.logo_text?.trim() || undefined,
     description: dto.description || '',
     website: dto.website || '',
     teamSize: dto.team_size || 'Not specified',
