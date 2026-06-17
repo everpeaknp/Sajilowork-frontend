@@ -167,12 +167,13 @@ export default function DashboardProposalsProject({
           ? 'Remote'
           : shortenCommaSeparatedLocation(rawLocation, 1),
       );
+      const kind = task.listing_kind as string | undefined;
       setListingKind(
-        task.listing_kind === 'project' ||
-          task.listing_kind === 'task' ||
-          task.listing_kind === 'job' ||
-          task.listing_kind === 'service'
-          ? task.listing_kind
+        kind === 'project' ||
+          kind === 'task' ||
+          kind === 'job' ||
+          kind === 'service'
+          ? (kind as 'task' | 'project' | 'job' | 'service')
           : '',
       );
       setOwnerId(resolvedOwnerId);
