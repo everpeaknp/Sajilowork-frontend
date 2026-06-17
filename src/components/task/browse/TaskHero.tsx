@@ -146,7 +146,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
   return (
     <section className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[280px] w-full items-stretch overflow-hidden rounded-2xl border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[350px] sm:rounded-[24px] lg:min-h-[420px]">
+        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
           <div className="pointer-events-none absolute -left-16 -top-10 z-0 hidden h-44 w-44 select-none rounded-full bg-[#fcd074] sm:block sm:-left-20 sm:-top-12 sm:h-56 sm:w-56 lg:-left-24 lg:-top-16 lg:h-64 lg:w-64" />
 
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.22] mix-blend-overlay">
@@ -170,10 +170,10 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
             </svg>
           </div>
 
-          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-6 px-4 pb-0 pt-8 sm:gap-8 sm:pl-24 sm:pr-12 sm:pt-10 md:pl-28 md:pr-16 lg:grid-cols-12 lg:pb-0 lg:pl-36 lg:pr-16 lg:pt-12">
-            <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-12">
+          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-7 sm:gap-6 sm:pl-20 sm:pr-10 sm:pt-9 md:pl-24 md:pr-14 lg:grid-cols-12 lg:pb-0 lg:pl-32 lg:pr-14 lg:pt-10">
+            <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-10">
               <motion.h1
-                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-black sm:text-3xl md:text-[42px]`}
+                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-black sm:text-3xl md:text-[38px]`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -182,7 +182,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
               </motion.h1>
 
               <motion.p
-                className={`${discoverBody} mb-6 max-w-xl text-xs font-normal leading-relaxed text-neutral-700 sm:mb-8 sm:text-sm md:text-base`}
+                className={`${discoverBody} mb-5 max-w-xl text-xs font-normal leading-relaxed text-neutral-700 sm:mb-6 sm:text-sm md:text-base`}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
@@ -199,7 +199,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
               </motion.div>
             </div>
 
-            <div className="relative mt-2 flex h-[180px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:mt-4 sm:h-[240px] sm:justify-end lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(400px,92%)] lg:max-w-[42%] lg:justify-center xl:right-10">
+            <div className="relative mt-2 flex h-[160px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:mt-0 sm:h-[200px] sm:justify-end lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(260px,95%)] lg:max-w-[38%] lg:justify-center xl:right-10">
               <motion.img
                 src={MAIN_PORTRAIT}
                 alt="Tasker illustration"
