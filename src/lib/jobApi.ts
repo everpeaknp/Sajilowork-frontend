@@ -197,7 +197,7 @@ function mapJobLocation(task: Task, form?: Partial<CreateJobFormData>): Job['loc
 
   if (normalized.includes('hybrid') || form?.location === 'Hybrid') return 'Hybrid';
 
-  if (form?.location === 'In-office' || task.location_type === 'physical') {
+  if (form?.location === 'In-office' || (task.location_type as any) === 'physical') {
 
     return 'In-office';
 
@@ -519,7 +519,7 @@ export function mapTaskStatusToDashboardJob(task: Task): DashboardJob['status'] 
   switch (task.status) {
     case 'open':
       // List endpoints may omit is_public; open published jobs should show Active.
-      if (task.is_public === false) return 'Pending';
+      if ((task as any).is_public === false) return 'Pending';
       return 'Active';
     case 'draft':
       return 'Draft';
@@ -639,7 +639,7 @@ export function resolveJobCityLabel(job: Job): string {
 
   return formatTaskLocationShort(
 
-    { city: job.city, location_type: job.location === 'Remote' ? 'remote' : 'physical' } as Task,
+    { city: job.city, location_type: (job.location as any) === 'Remote' ? 'remote' : ('physical' as any) } as Task,
 
     'Nepal',
 
