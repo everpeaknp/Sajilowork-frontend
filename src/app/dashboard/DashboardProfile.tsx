@@ -343,7 +343,7 @@ export default function DashboardProfile() {
 
   const applyUserToForm = useCallback((profileUser: NonNullable<typeof user>) => {
     setFullName([profileUser.first_name, profileUser.last_name].filter(Boolean).join(' ').trim());
-    setPhone(profileUser.phone_number?.trim() || profileUser.phone?.trim() || '');
+    setPhone(profileUser.phone_number?.trim() || '');
     setUsername(profileUser.username?.trim() || '');
     setBirthday(profileUser.date_of_birth || '');
     if (profileUser.id) {
