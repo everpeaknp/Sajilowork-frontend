@@ -472,6 +472,14 @@ export default function Navbar() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-5 lg:space-x-6">
+            <button
+              type="button"
+              onClick={handleBrowseTasksClick}
+              className={navLinkClass(isBrowseTasksActive)}
+              aria-current={isBrowseTasksActive ? 'page' : undefined}
+            >
+              Browse tasks
+            </button>
             <Link
               href="/jobs"
               className={navLinkClass(isJobsActive)}
@@ -496,14 +504,6 @@ export default function Navbar() {
 
             {isAuthenticated && (
               <>
-              <button
-                type="button"
-                onClick={handleBrowseTasksClick}
-                className={navLinkClass(isBrowseTasksActive)}
-                aria-current={isBrowseTasksActive ? 'page' : undefined}
-              >
-                Browse tasks
-              </button>
 
               <button
                 type="button"
@@ -851,7 +851,7 @@ export default function Navbar() {
                 isBrowseTasksActive ? 'text-brand-emerald' : 'text-neutral-600',
               )}
             >
-              Tasks
+              Browse tasks
             </Link>
             <Link
               href="/jobs"
