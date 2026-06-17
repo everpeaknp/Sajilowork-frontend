@@ -529,7 +529,7 @@ export default function Navbar() {
             <>
               <Link
                 href="/signin"
-                className={`${landingBody} hidden min-h-9 items-center rounded-full px-3 text-xs font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 hover:text-brand-emerald min-[380px]:flex sm:text-sm`}
+                className={`${landingBody} hidden sm:hidden min-h-9 items-center rounded-full px-3 text-xs font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 hover:text-brand-emerald min-[380px]:flex sm:text-sm`}
               >
                 Sign in
               </Link>
