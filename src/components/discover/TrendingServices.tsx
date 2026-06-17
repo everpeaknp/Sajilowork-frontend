@@ -100,29 +100,29 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
     <section
       className={`relative select-none overflow-hidden bg-[#1a3c34] px-4 py-16 sm:px-6 sm:py-24 lg:px-8 xl:px-10 ${className}`}
     >
-      <div className="relative mx-auto w-full max-w-[1240px]">
-        <div className="relative z-10 mb-8 flex flex-col gap-4 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+      <div className="relative mx-auto w-full max-w-7xl">
+        <div className="relative z-10 mb-12 flex flex-col gap-6 sm:mb-16 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <h2
-              className={`${discoverHeadline} mb-2 text-2xl leading-tight text-white sm:mb-3 sm:text-3xl md:text-4xl`}
+              className={`${discoverHeadline} mb-3 text-3xl leading-tight text-white sm:text-4xl lg:text-[44px]`}
             >
               Trending Services
             </h2>
-            <p className={`${discoverMedium} text-sm text-[#a5bdbc]/90 sm:text-base`}>
-              Most viewed services on tasknepal right now
+            <p className={`${discoverMedium} text-sm text-emerald-100/90 sm:text-base`}>
+              Most viewed services on Sajilowork right now
             </p>
           </div>
 
           <Link
             href="/services"
-            className={`${discoverMedium} group flex shrink-0 items-center gap-2 self-start text-sm text-white transition-colors duration-200 hover:text-[#4bbb80] sm:self-auto sm:text-base`}
+            className={`${discoverMedium} group flex shrink-0 items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 text-sm text-white backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-[#1a3c34] sm:self-auto sm:text-base`}
           >
-            <span>All Services</span>
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+            <span>Explore All Services</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <div className="relative z-10 w-full overflow-hidden">
+        <div className="relative z-10 w-full">
           {loading ? (
             <p className={`${discoverBody} py-12 text-center text-sm text-[#a5bdbc]/90`}>
               Loading trending services…
@@ -136,25 +136,25 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
               <button
                 type="button"
                 onClick={() => scrollByCard('left')}
-                className="absolute left-1 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-100/10 bg-white text-[#1a3c34] shadow-lg transition-all duration-150 hover:bg-[#4bbb80] hover:text-white active:scale-95 active:bg-[#3ca46d] sm:left-0 sm:h-12 sm:w-12 md:-left-8 lg:-left-12"
+                className="absolute left-1 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1a3c34] shadow-xl ring-1 ring-black/5 transition-all duration-300 hover:scale-105 hover:bg-brand-emerald hover:text-white active:scale-95 sm:left-0 md:-left-6 lg:-left-6"
                 aria-label="Scroll left"
               >
-                <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
+                <ChevronLeft className="h-6 w-6 stroke-[2]" />
               </button>
 
               <button
                 type="button"
                 onClick={() => scrollByCard('right')}
-                className="absolute right-1 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-100/10 bg-white text-[#1a3c34] shadow-lg transition-all duration-150 hover:bg-[#4bbb80] hover:text-white active:scale-95 active:bg-[#3ca46d] sm:right-0 sm:h-12 sm:w-12 md:-right-8 lg:-right-12"
+                className="absolute right-1 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#1a3c34] shadow-xl ring-1 ring-black/5 transition-all duration-300 hover:scale-105 hover:bg-brand-emerald hover:text-white active:scale-95 sm:right-0 md:-right-6 lg:-right-6"
                 aria-label="Scroll right"
               >
-                <ChevronRight className="h-6 w-6 stroke-[2.5]" />
+                <ChevronRight className="h-6 w-6 stroke-[2]" />
               </button>
 
               <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-8 pt-4 [-ms-overflow-style:none] [scrollbar-width:none] px-4 sm:px-0 [&::-webkit-scrollbar]:hidden"
               >
                 {carouselServices.map((service, idx) => {
                   const isFav = !!favorites[service.id];
@@ -162,13 +162,13 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
                     <Link
                       key={`${service.id}-${idx}`}
                       href={getServiceDetailPath(service)}
-                      className="group flex h-[360px] w-[min(82vw,250px)] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-none border-0 bg-white shadow-md transition-all duration-300 hover:no-underline hover:shadow-xl sm:h-[385px] sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)]"
+                      className="group flex h-[360px] w-[min(82vw,250px)] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:h-[385px] sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)]"
                     >
-                      <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden rounded-none bg-neutral-100 lg:h-[215px]">
+                      <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden bg-neutral-100 lg:h-[215px]">
                         <img
                           src={service.image}
                           alt={service.title}
-                          className="h-full w-full rounded-none object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
@@ -179,38 +179,40 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
                         <button
                           type="button"
                           onClick={(e) => toggleFavorite(service.id, e)}
-                          className="absolute right-4 top-4 z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-neutral-100/20 bg-white text-black shadow-md transition-all duration-200 hover:scale-105 hover:bg-neutral-50 active:scale-95"
+                          className={`absolute right-4 top-4 z-20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-all duration-300 ${
+                            isFav 
+                              ? 'bg-white text-rose-500 shadow-sm' 
+                              : 'bg-white/90 text-neutral-400 hover:bg-white hover:text-rose-400'
+                          }`}
                           aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                         >
                           <Heart
-                            className={`h-[17px] w-[17px] transition-transform ${
-                              isFav
-                                ? 'fill-red-500 text-red-500 stroke-red-500'
-                                : 'stroke-[2.2] text-neutral-700'
+                            className={`h-[16px] w-[16px] transition-transform ${
+                              isFav ? 'fill-rose-500 text-rose-500' : 'stroke-[2] text-neutral-600'
                             }`}
                           />
                         </button>
                       </div>
 
-                      <div className="flex flex-1 flex-col justify-between p-[18px]">
+                      <div className="flex flex-1 flex-col justify-between p-5">
                         <div>
                           <span
-                            className={`${discoverBody} mb-1.5 block text-[11px] uppercase tracking-wider text-neutral-400`}
+                            className={`${discoverMedium} mb-2 block text-[11px] uppercase tracking-wider text-brand-emerald`}
                           >
                             {service.category}
                           </span>
 
                           <h3
-                            className={`${discoverMedium} mb-2 line-clamp-2 h-10 text-[14px] leading-snug text-[#131118] transition-colors group-hover:text-[#4bbb80] sm:text-[15px]`}
+                            className={`${discoverHeadline} mb-3 line-clamp-2 h-11 text-[16px] leading-snug text-brand-dark transition-colors group-hover:text-brand-emerald`}
                           >
                             {service.title}
                           </h3>
 
                           <div
-                            className={`${discoverBody} mb-2 flex items-center gap-1 text-[12px] text-neutral-500`}
+                            className={`${discoverBody} mb-3 flex items-center gap-1.5 text-[13px] text-neutral-500`}
                           >
-                            <Star className="mr-0.5 h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
-                            <span className={`${discoverMedium} text-neutral-800`}>
+                            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                            <span className={`${discoverMedium} text-brand-dark font-semibold`}>
                               {service.rating > 0 ? service.rating.toFixed(2) : '—'}
                             </span>
                             <span className="text-neutral-400">
@@ -219,32 +221,32 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between border-t border-black pt-2.5">
+                        <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
                           <div className="flex min-w-0 items-center gap-2">
                             <div className="relative flex-shrink-0">
                               <img
                                 src={service.author.avatar}
                                 alt={service.author.name}
-                                className="h-6 w-6 rounded-full border border-neutral-200 object-cover"
+                                className="h-7 w-7 rounded-full border border-neutral-200 object-cover"
                                 referrerPolicy="no-referrer"
                               />
                               {service.author.online && (
-                                <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-white bg-[#10b981]" />
+                                <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-white bg-emerald-500" />
                               )}
                             </div>
-                            <span className={`${discoverMedium} truncate text-[12px] text-neutral-600`}>
+                            <span className={`${discoverMedium} truncate text-[13px] text-neutral-700`}>
                               {service.author.name}
                             </span>
                           </div>
 
-                          <div className="ml-3 flex flex-shrink-0 select-none items-center gap-1 text-right">
+                          <div className="ml-3 flex flex-shrink-0 select-none flex-col items-end gap-0.5 text-right">
                             <span
-                              className={`${discoverBody} text-[10px] leading-none text-neutral-400`}
+                              className={`${discoverBody} text-[11px] leading-none text-neutral-400`}
                             >
                               Starting at
                             </span>
                             <span
-                              className={`${discoverMedium} text-[14px] leading-none tracking-tight text-[#131118]`}
+                              className={`${discoverMedium} text-[15px] leading-none tracking-tight text-brand-dark`}
                             >
                               {formatNPR(service.startingPrice)}
                             </span>

@@ -69,121 +69,91 @@ interface TestimonialsProps {
 }
 
 export default function Testimonials({ className = '' }: TestimonialsProps) {
-  const [activeId, setActiveId] = useState<number>(1);
-
-  const currentTestimonial =
-    testimonials.find((item) => item.id === activeId) || testimonials[0];
+  // Duplicate the array to create a seamless infinite loop
+  const loopingTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
   return (
     <section
       id="testimonials-section"
-      className={`flex select-none flex-col items-center justify-center overflow-hidden bg-white px-4 py-12 text-center sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
+      className={`flex select-none flex-col items-center justify-center overflow-hidden bg-[#fdfdfc] px-4 py-20 sm:py-28 ${className}`}
     >
-      <div className="mx-auto w-full max-w-5xl">
-        <div className="mb-6 sm:mb-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mb-12 text-center sm:mb-16">
           <motion.h2
             id="testimonials-title"
-            className={`${discoverHeadline} mb-2.5 text-2xl text-[#131118] sm:text-3xl lg:text-[40px]`}
+            className={`${discoverHeadline} mb-4 text-3xl text-brand-dark sm:text-4xl lg:text-[44px]`}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            Testimonials
+            Loved by Businesses & Talent
           </motion.h2>
           <motion.p
             id="testimonials-subtitle"
-            className={`${discoverBody} mx-auto max-w-xl text-sm text-neutral-500 sm:text-base`}
+            className={`${discoverBody} mx-auto max-w-xl text-sm font-medium text-neutral-500 sm:text-base`}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Interdum et malesuada fames ac ante ipsum
+            Join thousands of satisfied users who trust Sajilowork for their daily tasks.
           </motion.p>
         </div>
 
-        <motion.div
-          id="testimonials-quote-icon"
-          className="mb-2 mt-4 flex h-10 select-none items-center justify-center font-serif text-7xl leading-[0] text-[#4bbb80] sm:mt-6 sm:h-12 sm:text-8xl"
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          aria-hidden
-        >
-          “
-        </motion.div>
+        <div className="relative w-full overflow-hidden">
+          {/* Gradient Masks for smooth fading edges */}
+          <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-[#fdfdfc] to-transparent sm:w-32"></div>
+          <div className="absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-[#fdfdfc] to-transparent sm:w-32"></div>
 
-        <div className="relative mx-auto mb-10 flex min-h-[140px] max-w-4xl items-center justify-center overflow-hidden px-4 sm:min-h-[120px] sm:px-6">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={activeId}
-              className={`${discoverMedium} text-center text-lg leading-[1.45] tracking-tight text-[#131118] sm:text-xl md:text-2xl lg:text-[28px]`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.35, ease: 'easeInOut' }}
-            >
-              {currentTestimonial.quote}
-            </motion.p>
-          </AnimatePresence>
-        </div>
-
-        <div className="mb-10 flex h-14 flex-col justify-center sm:mb-12">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeId}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
-              className="flex flex-col items-center"
-            >
-              <h4 className={`${discoverMedium} text-sm tracking-wide text-[#131118] sm:text-[15px]`}>
-                {currentTestimonial.author}
-              </h4>
-              <p className={`${discoverBody} mt-1 text-xs text-neutral-400 sm:text-[13px]`}>
-                {currentTestimonial.role}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div
-          id="testimonials-avatars-nav"
-          className="mt-4 flex items-center justify-center gap-3 overflow-x-auto px-2 pb-1 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0"
-        >
-          {testimonials.map((item) => (
-            <button
-              id={`testimonial-avatar-btn-${item.id}`}
-              key={item.id}
-              type="button"
-              onClick={() => setActiveId(item.id)}
-              className="group relative focus:outline-none focus:ring-0"
-              aria-label={`View testimonial from ${item.author}`}
-              aria-pressed={activeId === item.id}
-            >
+          <motion.div
+            className="flex w-max gap-6 sm:gap-8"
+            animate={{
+              x: ["0%", "-33.3333%"]
+            }}
+            transition={{
+              duration: 40,
+              ease: "linear",
+              repeat: Infinity,
+            }}
+          >
+            {loopingTestimonials.map((item, idx) => (
               <div
-                className={`flex items-center justify-center rounded-full p-1 transition-all duration-300 ${
-                  activeId === item.id
-                    ? 'scale-[1.15] border-2 border-[#4bbb80]'
-                    : 'scale-100 border-2 border-transparent hover:scale-[1.08]'
-                }`}
+                key={`${item.id}-${idx}`}
+                className="flex w-[300px] shrink-0 flex-col justify-between rounded-[2rem] bg-white p-8 shadow-xl shadow-brand-dark/10 ring-1 ring-black/5 sm:w-[380px]"
               >
-                <img
-                  src={item.avatar}
-                  alt={item.author}
-                  referrerPolicy="no-referrer"
-                  className={`h-9 w-9 rounded-full object-cover shadow-sm transition-all duration-300 sm:h-11 sm:w-11 ${
-                    activeId === item.id
-                      ? 'grayscale-0'
-                      : 'grayscale-[20%] hover:grayscale-0'
-                  }`}
-                />
+                <div>
+                  <div className="mb-6 flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="h-5 w-5 fill-amber-400 text-amber-400" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className={`${discoverBody} text-[15px] leading-relaxed text-brand-dark sm:text-base`}>
+                    "{item.quote}"
+                  </p>
+                </div>
+
+                <div className="mt-8 flex items-center gap-4 border-t border-neutral-100 pt-6">
+                  <img
+                    src={item.avatar}
+                    alt={item.author}
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-neutral-100"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div>
+                    <h4 className={`${discoverHeadline} text-base text-brand-dark`}>
+                      {item.author}
+                    </h4>
+                    <p className={`${discoverBody} text-sm text-neutral-500`}>
+                      {item.role}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </button>
-          ))}
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>

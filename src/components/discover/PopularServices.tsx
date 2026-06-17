@@ -79,23 +79,39 @@ export default function PopularServices({ className = '' }: PopularServicesProps
 
   return (
     <section
-      className={`overflow-hidden bg-white px-4 py-12 sm:px-8 sm:py-20 lg:px-12 xl:px-16 ${className}`}
+      className={`overflow-hidden bg-[#fdfdfc] px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-10 flex flex-col justify-between gap-4 sm:mb-12 sm:flex-row sm:items-end">
+        <div className="mb-14 flex flex-col justify-between gap-6 sm:mb-16 sm:flex-row sm:items-end">
           <div className="min-w-0">
-            <h2
-              className={`${discoverHeadline} mb-2 text-2xl leading-tight text-[#131118] sm:text-3xl md:text-4xl`}
+            <motion.h2
+              className={`${discoverHeadline} mb-3 text-3xl leading-tight text-brand-dark sm:text-4xl`}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
             >
               Popular Services
-            </h2>
-            <p className={`${discoverBody} text-sm text-[#5e586c] sm:text-base`}>
+            </motion.h2>
+            <motion.p 
+              className={`${discoverBody} text-base text-neutral-500`}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               Most viewed and all-time top-selling services
-            </p>
+            </motion.p>
           </div>
 
           {categories.length > 0 ? (
-            <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
+            <motion.div 
+              className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0"
+              initial={{ opacity: 0, x: 15 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               <div className="flex w-max max-w-full flex-nowrap gap-2 sm:w-auto sm:flex-wrap sm:gap-3">
               {categories.map((cat) => {
                 const isActive = activeCategory === cat;
@@ -104,10 +120,10 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                     key={cat}
                     type="button"
                     onClick={() => setActiveCategory(cat)}
-                    className={`${discoverBody} cursor-pointer rounded-lg border px-4 py-2.5 text-xs font-medium transition-all duration-200 sm:px-5 sm:text-sm ${
+                    className={`${discoverBody} cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
                       isActive
-                        ? 'border-black bg-white font-medium text-[#45a874]'
-                        : 'border-transparent text-neutral-600 hover:bg-neutral-50 hover:text-black'
+                        ? 'bg-brand-emerald text-white shadow-md shadow-brand-emerald/20'
+                        : 'bg-white text-neutral-600 ring-1 ring-neutral-200 hover:bg-neutral-50 hover:text-brand-dark'
                     }`}
                   >
                     {cat}
@@ -115,7 +131,7 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                 );
               })}
               </div>
-            </div>
+            </motion.div>
           ) : null}
         </div>
 
@@ -128,7 +144,7 @@ export default function PopularServices({ className = '' }: PopularServicesProps
             No services available yet.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-8 md:gap-10 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-2">
             <AnimatePresence mode="popLayout">
               {currentServices.map((service, idx) => {
                 const isFav = !!favorites[service.id];
@@ -139,7 +155,7 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, delay: idx * 0.05 }}
-                    whileHover={{ y: -2 }}
+                    whileHover={{ y: -4 }}
                   >
                     <Link
                       href={getServiceDetailPath(service)}
@@ -173,54 +189,54 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                           />
                         </button>
 
-                        <div className="pr-6">
+                        <div className="pr-10">
                           <span
-                            className={`${discoverMedium} mb-1.5 block text-[11px] uppercase tracking-wider text-neutral-400`}
+                            className={`${discoverMedium} mb-2 block text-xs uppercase tracking-wider text-brand-emerald`}
                           >
                             {service.category}
                           </span>
 
                           <h3
-                            className={`${discoverBody} mb-2 line-clamp-2 text-sm font-medium leading-snug text-[#131118] transition-colors group-hover:text-emerald-800 md:text-[15px]`}
+                            className={`${discoverHeadline} mb-3 line-clamp-2 text-lg leading-snug text-brand-dark transition-colors group-hover:text-brand-emerald`}
                           >
                             {service.title}
                           </h3>
 
-                          <div className="flex items-center gap-1 text-xs text-neutral-500">
-                            <Star className="h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
-                            <span className="font-medium text-neutral-800">
+                          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+                            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                            <span className="font-semibold text-brand-dark">
                               {service.rating > 0 ? service.rating.toFixed(2) : '—'}
                             </span>
                             <span className="text-neutral-400">({service.reviews} reviews)</span>
                           </div>
                         </div>
 
-                        <div className="mt-3 flex items-center justify-between border-t border-[#131118] pt-3">
-                          <div className="flex min-w-0 items-center gap-2">
+                        <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-4">
+                          <div className="flex min-w-0 items-center gap-3">
                             <div className="relative flex-shrink-0">
                               <img
                                 src={service.author.avatar}
                                 alt={service.author.name}
-                                className="h-[26px] w-[26px] rounded-full border border-neutral-200 object-cover"
+                                className="h-8 w-8 rounded-full border border-neutral-200 object-cover"
                                 referrerPolicy="no-referrer"
                               />
                               {service.author.online && (
-                                <span className="absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full border border-white bg-[#10b981]" />
+                                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
                               )}
                             </div>
                             <span
-                              className={`${discoverBody} truncate text-xs font-medium text-neutral-600`}
+                              className={`${discoverBody} truncate text-sm font-medium text-neutral-700`}
                             >
                               {service.author.name}
                             </span>
                           </div>
 
                           <div className="ml-4 flex-shrink-0 text-right">
-                            <span className="mb-0.5 block text-[10px] font-normal leading-none text-neutral-400">
+                            <span className="mb-1 block text-xs font-normal leading-none text-neutral-400">
                               Starting at
                             </span>
                             <span
-                              className={`${discoverMedium} text-[14px] text-neutral-800 sm:text-[15px]`}
+                              className={`${discoverMedium} text-lg text-brand-dark`}
                             >
                               {formatNPR(service.startingPrice)}
                             </span>

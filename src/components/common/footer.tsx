@@ -79,56 +79,67 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
   };
 
   return (
-    <footer className={cn('min-w-0 overflow-x-clip px-2 pt-3 sm:px-4 sm:pt-4', outerClassName)}>
-      <div className="overflow-hidden rounded-t-[1.25rem] bg-brand-dark text-white sm:rounded-t-[2.5rem] md:rounded-t-[3.5rem]">
-        <div className="mx-auto max-w-7xl px-4 py-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-14 md:py-16 lg:px-8 lg:py-20">
-          <div className="mb-8 grid gap-8 sm:mb-14 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
+    <footer className={cn('min-w-0 overflow-x-clip border-t border-neutral-200', outerClassName)}>
+      <div className="bg-white text-brand-dark">
+        <div className="mx-auto max-w-7xl px-4 py-12 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-16 md:py-20 lg:px-8">
+          <div className="mb-12 grid gap-10 sm:mb-16 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
             <div className="min-w-0 lg:col-span-2">
-              <Link href="/" className="mb-4 flex items-center gap-2 sm:mb-6 lg:mb-8">
+              <Link href="/" className="mb-6 flex items-center gap-2.5 lg:mb-8">
                 <div
                   aria-hidden="true"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 sm:h-10 sm:w-10"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-emerald/10 ring-1 ring-brand-emerald/20"
                 >
-                  <span className="font-['Outfit'] text-lg font-extrabold tracking-tighter text-white sm:text-xl">
-                    t
+                  <span className="font-['Outfit'] text-xl font-extrabold tracking-tighter text-brand-emerald">
+                    s
                   </span>
                 </div>
-                <span className="font-['Outfit'] text-xl font-extrabold tracking-tighter sm:text-2xl">
-                  tasknepal
+                <span className="font-['Outfit'] text-2xl font-extrabold tracking-tighter text-brand-emerald">
+                  Sajilo<span className="text-brand-dark">Work</span>
                 </span>
               </Link>
-              <p className="max-w-sm text-sm leading-relaxed text-white/90 sm:text-base">
+              <p className="max-w-sm text-sm leading-relaxed text-neutral-500 sm:text-base">
                 Connecting people who need tasks done with those who have the skills to do them.
                 Trusted by millions worldwide.
               </p>
             </div>
 
             {/* Mobile: collapsible sections */}
-            <div className="space-y-2 sm:hidden">
+            <div className="space-y-3 sm:hidden">
               {FOOTER_SECTIONS.map((section) => {
                 const isOpen = openSections[section.title] ?? false;
                 return (
                   <div
                     key={section.title}
-                    className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]"
+                    className="overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50"
                   >
                     <button
                       type="button"
                       onClick={() => toggleSection(section.title)}
-                      className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-left"
+                      className="flex min-h-12 w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-neutral-100/50"
                       aria-expanded={isOpen}
                     >
-                      <span className="text-sm font-semibold text-white">{section.title}</span>
+                      <span className="text-[15px] font-semibold text-brand-dark">{section.title}</span>
                       <ChevronDown
                         className={cn(
-                          'h-4 w-4 shrink-0 text-white/70 transition-transform duration-200',
-                          isOpen && 'rotate-180',
+                          'h-4 w-4 shrink-0 text-neutral-400 transition-transform duration-200',
+                          isOpen && 'rotate-180 text-brand-emerald',
                         )}
                       />
                     </button>
                     {isOpen ? (
-                      <div className="border-t border-white/10 px-4 pb-3 pt-1">
-                        <FooterLinkList sectionTitle={section.title} />
+                      <div className="border-t border-neutral-100 px-5 pb-4 pt-2">
+                        <ul className="space-y-2">
+                          {section.links.map((link) => (
+                            <li key={link.href}>
+                              <Link
+                                href={link.href}
+                                className="inline-flex min-h-10 w-full items-center text-[15px] text-neutral-500 transition-colors hover:text-brand-emerald"
+                              >
+                                {link.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     ) : null}
                   </div>
@@ -137,33 +148,56 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
             </div>
 
             {/* Tablet+ */}
-            <div className="hidden min-w-0 grid-cols-2 gap-x-6 gap-y-8 sm:grid sm:gap-x-8 sm:gap-y-10 lg:col-span-3 lg:grid-cols-3">
+            <div className="hidden min-w-0 grid-cols-2 gap-x-6 gap-y-10 sm:grid sm:gap-x-8 sm:gap-y-12 lg:col-span-3 lg:grid-cols-3">
               {FOOTER_SECTIONS.map((section) => (
                 <div key={section.title} className="min-w-0">
-                  <h4 className="mb-3 text-sm font-semibold text-white sm:mb-4 sm:text-base md:mb-6 md:text-lg">
+                  <h4 className="mb-5 text-sm font-bold text-brand-dark sm:text-base md:mb-6">
                     {section.title}
                   </h4>
-                  <FooterLinkList sectionTitle={section.title} />
+                  <ul className="space-y-3 md:space-y-4">
+                    {section.links.map((link) => (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          className="inline-flex items-center text-[15px] text-neutral-500 transition-colors hover:text-brand-emerald"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-5 border-t border-white/10 pt-6 sm:flex-row sm:justify-between sm:gap-8 sm:pt-10">
-            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
-              {SOCIAL_LINKS.map(({ label, Icon }) => (
-                <a
-                  key={label}
-                  href="#"
-                  aria-label={label}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 hover:text-white/80 active:bg-white/15 sm:h-10 sm:w-10"
-                >
-                  <Icon className="h-5 w-5" />
-                </a>
-              ))}
+          <div className="flex flex-col items-center gap-6 border-t border-neutral-200 pt-8 sm:flex-row sm:justify-between sm:gap-8 sm:pt-10">
+            <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-8">
+              <div className="flex items-center gap-3.5 rounded-full bg-neutral-50 px-5 py-2.5 ring-1 ring-neutral-200/60">
+                <span className="text-sm font-medium text-neutral-500">Powered by</span>
+                <img 
+                  src="/Everacy_logo_bg.jpeg" 
+                  alt="Everacy Tech Logo" 
+                  className="h-8 w-auto rounded-md object-cover transition-transform hover:scale-105" 
+                />
+              </div>
+              <div className="hidden h-6 w-px bg-neutral-200 sm:block"></div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {SOCIAL_LINKS.map(({ label, Icon }) => (
+                  <a
+                    key={label}
+                    href="#"
+                    aria-label={label}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-50 text-neutral-500 ring-1 ring-neutral-200/60 transition-all hover:bg-brand-emerald hover:text-white hover:ring-transparent active:scale-95"
+                  >
+                    <Icon className="h-[18px] w-[18px]" />
+                  </a>
+                ))}
+              </div>
             </div>
-            <p className="w-full text-center text-xs leading-relaxed text-white/80 sm:w-auto sm:text-right sm:text-sm">
-              © {new Date().getFullYear()} tasknepal Marketplace. All rights reserved.
+            
+            <p className="w-full text-center text-[13px] leading-relaxed text-neutral-400 sm:w-auto sm:text-right">
+              © {new Date().getFullYear()} SajiloWork Marketplace. All rights reserved.
             </p>
           </div>
         </div>

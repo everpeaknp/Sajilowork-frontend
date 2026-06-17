@@ -145,58 +145,60 @@ export default function Workflow({
 
   return (
     <section
-      className={`overflow-hidden bg-[#1a3f34] px-4 py-10 sm:px-6 sm:py-12 lg:px-12 lg:py-14 xl:px-16 ${className}`}
+      className={`px-4 py-10 sm:px-6 sm:py-16 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-8 md:mb-10">
-          <motion.h2
-            className={`${discoverHeadline} mb-3 text-2xl text-white sm:text-3xl lg:text-[40px]`}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            {title}
-          </motion.h2>
-          <motion.p
-            className={`${discoverBody} max-w-xl text-xs text-white/90 sm:text-sm`}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            {subtitle}
-          </motion.p>
-        </div>
+        <div className="overflow-hidden rounded-[2.5rem] bg-[#1a3f34] px-8 py-12 shadow-2xl shadow-brand-dark/10 sm:px-12 sm:py-16 lg:px-16 lg:py-20">
+          <div className="mb-10 md:mb-14 text-center">
+            <motion.h2
+              className={`${discoverHeadline} mb-4 text-3xl text-white sm:text-4xl lg:text-[44px]`}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              {title}
+            </motion.h2>
+            <motion.p
+              className={`${discoverBody} mx-auto max-w-2xl text-sm font-medium text-emerald-100/90 sm:text-base`}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              {subtitle}
+            </motion.p>
+          </div>
 
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-12 lg:grid-cols-4 lg:gap-8">
-          {steps.map((step, index) => {
-            const IconComponent = step.icon;
-            return (
-              <motion.div
-                key={step.title}
-                className="flex flex-col items-start text-left"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-              >
-                <div className="mb-6 text-emerald-300">
-                  <IconComponent />
-                </div>
-
-                <h3
-                  className={`${discoverHeadline} mb-3 text-lg tracking-normal text-white sm:text-xl`}
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
+            {steps.map((step, index) => {
+              const IconComponent = step.icon;
+              return (
+                <motion.div
+                  key={step.title}
+                  className="group flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-2"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.15 }}
                 >
-                  {step.title}
-                </h3>
+                  <div className="mb-6 rounded-2xl bg-white/5 p-4 text-emerald-300 ring-1 ring-white/10 transition-colors duration-300 group-hover:bg-brand-emerald group-hover:text-white group-hover:ring-brand-emerald">
+                    <IconComponent />
+                  </div>
 
-                <p className={`${discoverBody} max-w-sm text-xs leading-relaxed text-white/85 sm:text-sm`}>
-                  {step.description}
-                </p>
-              </motion.div>
-            );
-          })}
+                  <h3
+                    className={`${discoverHeadline} mb-3 text-lg tracking-normal text-white sm:text-xl`}
+                  >
+                    {step.title}
+                  </h3>
+
+                  <p className={`${discoverBody} max-w-sm text-sm leading-relaxed text-white/80 group-hover:text-white/95 transition-colors`}>
+                    {step.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

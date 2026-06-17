@@ -61,31 +61,31 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
   return (
     <section
       id="blog-section"
-      className={`border-t border-neutral-100 bg-white px-4 py-12 sm:px-8 sm:py-20 lg:px-12 xl:px-16 ${className}`}
+      className={`border-t border-neutral-100 bg-white px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-12">
+        <div className="mb-14">
           <motion.h2
-            className={`${discoverHeadline} text-2xl leading-tight text-[#131118] sm:text-3xl md:text-4xl`}
+            className={`${discoverHeadline} text-3xl leading-tight text-brand-dark sm:text-4xl lg:text-[40px]`}
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Our Blog
+            Insights & Guides
           </motion.h2>
           <motion.p
-            className={`${discoverBody} mt-2 text-sm text-neutral-500 sm:text-base`}
+            className={`${discoverBody} mt-3 text-base text-neutral-500`}
             initial={{ opacity: 0, y: -5 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Aliquam lacinia diam quis lacus euismod
+            Tips and stories to help you get more done on Sajilowork
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {BLOG_POSTS.map((post, idx) => (
             <motion.div
               key={post.id}
@@ -93,33 +93,35 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
+              className="h-full"
             >
               <Link
                 href={post.href ?? '/blog'}
-                className="group flex cursor-pointer flex-col hover:no-underline"
+                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md hover:no-underline"
               >
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-neutral-100">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
+                  <div className="absolute inset-0 bg-brand-dark/0 transition-colors duration-300 group-hover:bg-brand-dark/5 z-10"></div>
                   <img
                     src={post.image}
                     alt={post.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     referrerPolicy="no-referrer"
                   />
                 </div>
 
-                <div className="mt-4 flex flex-col">
-                  <span className={`${discoverBody} text-[12px] leading-none text-neutral-400 sm:text-[13px]`}>
+                <div className="flex flex-1 flex-col p-5">
+                  <span className={`${discoverMedium} text-[11px] uppercase tracking-wider text-brand-emerald`}>
                     {post.date}
                   </span>
 
                   <h3
-                    className={`${discoverMedium} mt-2.5 line-clamp-2 min-h-[44px] text-[15px] leading-snug tracking-tight text-[#131118] transition-colors duration-200 group-hover:text-[#4bbb80] sm:text-[16px]`}
+                    className={`${discoverHeadline} mt-3 line-clamp-2 text-[17px] leading-snug text-brand-dark transition-colors duration-200 group-hover:text-brand-emerald`}
                   >
                     {post.title}
                   </h3>
 
                   <p
-                    className={`${discoverBody} line-clamp-2 text-[13px] leading-relaxed text-neutral-500 sm:text-[14px]`}
+                    className={`${discoverBody} mt-3 line-clamp-2 text-sm leading-relaxed text-neutral-500`}
                   >
                     {post.description}
                   </p>

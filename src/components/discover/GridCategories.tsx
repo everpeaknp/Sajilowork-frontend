@@ -89,66 +89,83 @@ export default function GridCategories({
 
   return (
     <section
-      className={`overflow-hidden bg-white px-4 py-12 sm:px-6 sm:py-16 md:px-8 lg:px-12 xl:px-16 ${className}`}
-      style={{ backgroundColor: '#ffffff' }}
+      className={`overflow-hidden bg-[#fafaf9] px-4 py-16 sm:px-6 sm:py-24 md:px-8 lg:px-12 xl:px-16 ${className}`}
     >
-      <div className="mx-auto w-full max-w-7xl bg-white">
-        <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mb-14 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
-            <h2
-              className={`${discoverHeadline} mb-2 text-2xl leading-tight text-[#131118] sm:text-3xl`}
+            <motion.h2
+              className={`${discoverHeadline} mb-3 text-3xl leading-tight text-brand-dark sm:text-4xl`}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
             >
               Browse talent by category
-            </h2>
-            <p className={`${discoverBody} text-sm text-[#5e586c] sm:text-base`}>
+            </motion.h2>
+            <motion.p 
+              className={`${discoverBody} text-base text-neutral-500`}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
               Get inspiration from hundreds of local skills and services
-            </p>
+            </motion.p>
           </div>
 
           <motion.button
             type="button"
             onClick={() => handleCategoryClick('All')}
-            className={`${discoverMedium} group flex cursor-pointer items-center gap-1.5 self-start whitespace-nowrap text-left text-xs text-[#131118] transition-colors hover:text-emerald-700 sm:self-auto sm:text-sm`}
-            whileHover={{ x: 2 }}
+            className={`${discoverMedium} group flex cursor-pointer items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm text-brand-dark shadow-sm ring-1 ring-neutral-200 transition-all hover:bg-neutral-50 hover:shadow-md hover:ring-neutral-300`}
+            initial={{ opacity: 0, x: 15 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <span>All Categories</span>
+            <span>View All Categories</span>
             <ArrowRight className="h-4 w-4 stroke-[1.5] transition-transform group-hover:translate-x-1" />
           </motion.button>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-10 md:gap-y-12 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CATEGORIES_DATA.map((cat, idx) => (
             <motion.button
               key={cat.id}
               type="button"
               onClick={() => handleCategoryClick(cat.title)}
-              className="group flex cursor-pointer items-center gap-4 text-left"
-              initial={{ opacity: 0, y: 15 }}
+              className="group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-neutral-200"
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.05 }}
-              whileHover={{ y: -2 }}
+              transition={{ duration: 0.5, delay: idx * 0.1 }}
             >
-              <div className="relative h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-lg bg-white shadow-sm">
+              <div className="relative h-32 w-full overflow-hidden bg-neutral-100">
+                <div className="absolute inset-0 z-10 bg-brand-dark/5 transition-colors duration-300 group-hover:bg-transparent"></div>
                 <img
                   src={cat.image}
                   alt={cat.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
               </div>
 
-              <div className="flex min-w-0 flex-col justify-center">
+              <div className="flex w-full flex-col p-5">
                 <h3
-                  className={`${discoverBody} truncate text-sm text-[#131118] transition-colors group-hover:text-emerald-700 sm:text-base`}
+                  className={`${discoverHeadline} text-[17px] text-brand-dark transition-colors group-hover:text-brand-emerald`}
                 >
                   {cat.title}
                 </h3>
-                <span
-                  className={`${discoverBody} mt-0.5 text-xs tracking-wide text-[#a49faf]`}
-                >
-                  {cat.skillsCount}
-                </span>
+                <div className="mt-2 flex items-center justify-between">
+                  <span
+                    className={`${discoverBody} text-[13px] font-medium text-neutral-500`}
+                  >
+                    {cat.skillsCount}
+                  </span>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-50 text-neutral-400 transition-colors duration-300 group-hover:bg-brand-emerald group-hover:text-white">
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </div>
+                </div>
               </div>
             </motion.button>
           ))}

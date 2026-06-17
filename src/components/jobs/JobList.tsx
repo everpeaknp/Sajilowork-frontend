@@ -488,7 +488,7 @@ export default function JobList({
                           router.push(getJobDetailPath(job));
                         }
                       }}
-                      className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_12px_28px_rgba(0,0,0,0.02)] sm:min-h-[300px] sm:p-8"
+                      className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:min-h-[300px] sm:p-7"
                     >
                     <div>
                       <div className="flex items-center justify-between">
@@ -608,8 +608,8 @@ function FilterDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`${discoverMedium} flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border bg-white px-3 py-2 text-sm transition-all hover:bg-neutral-50 sm:gap-2 sm:px-4.5 sm:py-2.5 sm:text-[14.5px] ${
-          active ? 'border-black font-bold text-black' : 'border-black/30 text-black'
+        className={`${discoverMedium} flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-sm shadow-sm transition-all hover:bg-neutral-50 sm:gap-2 sm:px-4.5 sm:py-2.5 sm:text-[14px] ${
+          active ? 'border-brand-emerald font-semibold text-brand-emerald' : 'border-neutral-200 text-neutral-600'
         }`}
       >
         <span>{label}</span>

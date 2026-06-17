@@ -466,7 +466,7 @@ export default function Navbar() {
             className="flex shrink-0 items-center focus:outline-none cursor-pointer"
           >
             <span className={`${landingHeadline} text-base text-brand-emerald min-[380px]:text-lg sm:text-2xl`}>
-              task<span className="text-brand-dark">nepal</span>
+              Sajilo<span className="text-brand-dark">Work</span>
             </span>
           </Link>
 
