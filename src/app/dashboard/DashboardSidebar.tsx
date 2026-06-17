@@ -157,9 +157,8 @@ export default function DashboardSidebar({
   const renderItem = (item: NavigationItem) => {
     const isActive = activeTab === item.id;
     const Icon = item.icon;
-    const hasCreate = isCreateTab(item.id);
 
-    if (!hasCreate || collapsed) {
+    if (!isCreateTab(item.id) || collapsed) {
       return (
         <Link
           key={item.id}
