@@ -123,7 +123,7 @@ export default function ServicePurchaseModal({
       const result = {
         order_task_slug: response.data.order_task_slug,
         bid_id: response.data.bid_id,
-        conversation_id: response.data.conversation_id,
+        conversation_id: response.data.conversation_id ?? undefined,
       };
       onSuccess?.(result);
       if (!onSuccess) {

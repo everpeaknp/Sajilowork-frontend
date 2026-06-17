@@ -70,7 +70,7 @@ export interface AutocompleteResponse {
   categories?: unknown[];
 }
 
-export const searchService = {
+export const searchService: any = {
   async search(params: {
     query?: string;
     search_type?: SearchType;

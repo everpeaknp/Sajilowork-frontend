@@ -152,11 +152,12 @@ export default function CheckoutPageClient({ kind, slug }: CheckoutPageClientPro
   }, [detailHref, job, kind, project, selectedPackage, service, task]);
 
   const handleOfferSuccess = useCallback(
-    (payload?: { bid?: Bid }) => {
+    (payload?: { bid?: Bid } | Bid) => {
+      const resolvedBid = payload && 'id' in payload ? (payload as Bid) : (payload as { bid?: Bid })?.bid;
       const redirect = getCheckoutSuccessRedirect(kind, {
-        bid: payload?.bid,
-        bidId: payload?.bid?.id != null ? String(payload.bid.id) : undefined,
-        orderTaskSlug: payload?.bid?.task_slug ?? slug,
+        bid: resolvedBid,
+        bidId: resolvedBid?.id != null ? String(resolvedBid.id) : undefined,
+        orderTaskSlug: resolvedBid?.task_slug ?? slug,
       });
       router.push(redirect);
     },

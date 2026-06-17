@@ -87,7 +87,7 @@ export default function ProjectSidebar({
   const buyer = getProjectBuyerMeta(project);
   const offersOpen = isProjectOpenForBids(project);
   const isOwner =
-    Boolean(user?.id) && Boolean(project.ownerId) && String(user.id) === String(project.ownerId);
+    Boolean(user?.id) && Boolean(project.ownerId) && String(user?.id) === String(project.ownerId);
   const employerHref = resolveEmployerProfileHref({
     employerSlug: project.employerSlug,
     companyName: project.companyName,

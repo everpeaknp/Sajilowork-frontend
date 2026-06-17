@@ -25,10 +25,10 @@ function mapPublicProfileToSource(
   );
 
   return {
-    first_name: profile.first_name,
-    last_name: profile.last_name,
+    first_name: profile.first_name || '',
+    last_name: profile.last_name || '',
     full_name: profile.full_name,
-    email: tasker?.email,
+    email: tasker?.email || '',
     profile_image: profile.profile_image ?? undefined,
     bio: profile.bio,
     tagline: profile.tagline,
@@ -70,10 +70,10 @@ export async function fetchApplicantProfile(
     if (response.success && response.data) {
       const profile = response.data as User & { skills?: UserSkill[]; badges?: UserBadge[] };
       return {
-        first_name: profile.first_name,
-        last_name: profile.last_name,
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
         full_name: profile.full_name,
-        email: profile.email ?? tasker.email,
+        email: profile.email ?? tasker.email ?? '',
         profile_image: profile.profile_image,
         bio: profile.bio,
         tagline: profile.tagline,

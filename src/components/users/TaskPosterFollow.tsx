@@ -27,7 +27,7 @@ export default function TaskPosterFollow({
   const [followLoading, setFollowLoading] = useState(false);
 
   const isOwnProfile =
-    posterId && user?.id && String(user.id) === String(posterId);
+    posterId && user?.id && String(user?.id) === String(posterId);
 
   const profileSegment = profileSlug || posterId;
   const profileHref = profileSegment

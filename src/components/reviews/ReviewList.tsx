@@ -67,8 +67,8 @@ export function ReviewList({
         }
         list = [...list].sort((a, b) => {
           const field = sortBy === 'date' ? 'created_at' : 'rating';
-          const av = (a as Record<string, unknown>)[field] as string | number;
-          const bv = (b as Record<string, unknown>)[field] as string | number;
+          const av = (a as any)[field] as string | number;
+          const bv = (b as any)[field] as string | number;
           const cmp = av > bv ? 1 : av < bv ? -1 : 0;
           return sortOrder === 'desc' ? -cmp : cmp;
         });

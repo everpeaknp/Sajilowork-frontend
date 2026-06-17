@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { paymentService } from '@/services';
 import { serviceService } from '@/services/service.service';
 import type { CheckoutKind } from '@/lib/checkout';
-import type { CheckoutWalletPreview } from './CheckoutWalletSummary';
+import type { CheckoutWalletPreview } from '@/components/checkout/CheckoutWalletSummary';
 
 type UseCheckoutWalletPreviewOptions = {
   kind: CheckoutKind;

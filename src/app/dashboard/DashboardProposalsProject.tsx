@@ -179,7 +179,7 @@ export default function DashboardProposalsProject({
       setOwnerId(resolvedOwnerId);
 
       if (isCustomer) {
-        if (user?.id && resolvedOwnerId && String(user.id) !== String(resolvedOwnerId)) {
+        if (user?.id && resolvedOwnerId && String(user?.id) !== String(resolvedOwnerId)) {
           toast.error('You can only review proposals on your own listings.');
           setBids([]);
           return;

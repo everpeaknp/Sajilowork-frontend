@@ -32,7 +32,7 @@ export default function EarningsBanner() {
         const data = await searchService.searchTaskers('', { page_size: 6 });
         if (cancelled || !data?.results) return;
         const results = Array.isArray(data.results) ? data.results : [];
-        const list = results.map((t) =>
+        const list = results.map((t: any) =>
           mapUserToLandingTasker({
             id: t.id,
             first_name: t.first_name,

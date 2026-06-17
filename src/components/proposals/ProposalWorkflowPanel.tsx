@@ -190,7 +190,7 @@ function getJobContractStepDate(
       raw =
         normalizeTaskStatus(taskInfo.status) === 'cancelled'
           ? taskInfo.updated_at
-          : taskInfo.completion_date || taskInfo.completed_at;
+          : taskInfo.completion_date || (taskInfo as any).completed_at;
       break;
     default:
       raw = undefined;

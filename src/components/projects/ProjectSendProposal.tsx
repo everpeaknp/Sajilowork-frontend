@@ -43,7 +43,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
   const [checkingBid, setCheckingBid] = useState(false);
 
   const isOwner =
-    Boolean(user?.id) && Boolean(project.ownerId) && String(user.id) === String(project.ownerId);
+    Boolean(user?.id) && Boolean(project.ownerId) && String(user?.id) === String(project.ownerId);
 
   const offersOpen = isProjectOpenForBids(project);
 

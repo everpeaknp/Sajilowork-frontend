@@ -79,7 +79,7 @@ class WalletService {
     page?: number;
     page_size?: number;
   }): Promise<ApiResponse<WalletTransactionsPage>> {
-    return paymentService.getMyWithdrawals(filters);
+    return paymentService.getMyWithdrawals(filters) as any;
   }
 
   async createWithdrawal(data: Parameters<typeof paymentService.createWithdrawalRequest>[0]) {

@@ -182,7 +182,7 @@ export const employerService = {
         return {
           success: false,
           message: getErrorMessage(error, 'Not found'),
-          data: null as EmployerListingResponse<EmployerPublicDto>,
+          data: null as unknown as EmployerListingResponse<EmployerPublicDto>,
           errors: null,
         };
       }

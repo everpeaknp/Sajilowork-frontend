@@ -96,7 +96,7 @@ function mapProjectLocation(
   }
   const normalized = (form?.location || task.city || task.address || '').trim().toLowerCase();
   if (normalized.includes('hybrid')) return 'Hybrid';
-  if (form?.locationType === 'in-person' || task.location_type === 'physical') {
+  if (form?.locationType === 'in-person' || (task.location_type as any) === 'physical') {
     return 'In-office';
   }
   return 'Remote';

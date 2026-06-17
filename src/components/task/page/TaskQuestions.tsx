@@ -61,7 +61,7 @@ export default function TaskQuestions({
   const [loadingQuestions, setLoadingQuestions] = useState(Boolean(taskSlug));
 
   const isOwner = Boolean(
-    user?.id && project.ownerId && String(user.id) === String(project.ownerId),
+    user?.id && project.ownerId && String(user?.id) === String(project.ownerId),
   );
   const showAskBox = !isOwner;
   const canAnswer = isOwner;

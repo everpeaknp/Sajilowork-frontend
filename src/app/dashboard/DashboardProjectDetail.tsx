@@ -107,8 +107,8 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
 
   const ownerId = task ? resolveOwnerId(task) : undefined;
   const taskerId = task ? resolveTaskerId(task) : undefined;
-  const isOwner = Boolean(user?.id && ownerId && String(user.id) === String(ownerId));
-  const isAssignedTasker = Boolean(user?.id && taskerId && String(user.id) === String(taskerId));
+  const isOwner = Boolean(user?.id && ownerId && String(user?.id) === String(ownerId));
+  const isAssignedTasker = Boolean(user?.id && taskerId && String(user?.id) === String(taskerId));
   const dashboardStatus = task ? mapTaskStatusToDashboard(task.status) : 'Pending';
   const rawStatus = task?.status ?? 'draft';
 

@@ -336,7 +336,7 @@ function MapUserInteractionGuard({
 
   useEffect(() => {
     const markUserInteraction = (event: L.LeafletEvent) => {
-      if (event.originalEvent) {
+      if ((event as any).originalEvent) {
         userInteractedRef.current = true;
       }
     };

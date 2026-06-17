@@ -76,7 +76,7 @@ function searchResultToTask(result: SearchTaskResult, kind: BrowseListingKind): 
     created_at: result.created_at,
     tags: [listingTag(kind)],
     listing_kind: kind === 'task' ? undefined : kind,
-  } as Task);
+  } as unknown as Task);
 }
 
 function mapSortBy(sort?: BrowseSearchParams['sort_by']): string | undefined {
@@ -176,10 +176,10 @@ export function fetchSearchSuggestions(
 ): Promise<string[]> {
   const q = query.trim();
   if (q.length < 2) return Promise.resolve([]);
-  return searchService.getAutocomplete(q, 'tasks', limit).then((data) => {
+  return searchService.getAutocomplete(q, 'tasks', limit).then((data: any) => {
     if (!data?.suggestions?.length) return [];
     return data.suggestions
-      .map((s) => (typeof s === 'string' ? s : s.query || s.text || s.label || ''))
+      .map((s: any) => (typeof s === 'string' ? s : s.query || s.text || s.label || ''))
       .filter(Boolean)
       .slice(0, limit);
   });

@@ -254,7 +254,7 @@ export default function UserDirectory() {
         ) : (
           <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {users.map((user) => {
-              const href = getUserProfileHref(user) ?? '#';
+              const href = getUserProfileHref(user as any) ?? '#';
               return (
                 <PublicUserDirectoryCard key={user.id} user={user} href={href} />
               );

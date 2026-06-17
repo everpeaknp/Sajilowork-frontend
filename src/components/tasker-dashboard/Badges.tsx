@@ -771,7 +771,7 @@ export default function Badges() {
                 <BadgeItem
                   key={badge.id}
                   icon={getBadgeIcon('custom')}
-                  title={badge.name}
+                  title={badge.name || 'Custom Badge'}
                   description={
                     badge.description ||
                     'Custom licence or certification on your profile.'

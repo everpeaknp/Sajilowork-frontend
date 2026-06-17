@@ -70,7 +70,7 @@ export function mapEmployerPublicDtoToEmployer(dto: EmployerPublicDto): Employer
     costRange: dto.cost_range || '—',
     openJobs: dto.open_jobs ?? 0,
     logoColor: dto.logo_color || 'serif-m',
-    logoText: dto.logo_text?.trim() || undefined,
+    logoText: dto.logo_text?.trim() || '',
     description: dto.description || '',
     website: dto.website || '',
     teamSize: dto.team_size || 'Not specified',
@@ -152,7 +152,7 @@ function resolveListingLocation(task: Task): string {
 
   const city = task.city?.trim();
   const address = task.address?.trim();
-  const fullAddress = task.full_address?.trim();
+  const fullAddress = (task as any).full_address?.trim();
   if (fullAddress || city || address) {
     if (fullAddress) {
       return shortenCommaSeparatedLocation(ensureNepalInAddress(fullAddress), 1);
@@ -240,14 +240,14 @@ function mapListingResponses(
 }
 
 function emptyListingResponse<T>(): ApiResponse<{ count: number; results: T[] }> {
-  return { success: false, message: 'Unavailable', data: null as { count: number; results: T[] }, errors: null };
+  return { success: false, message: 'Unavailable', data: null as unknown as { count: number; results: T[] }, errors: null };
 }
 
 function emptyReviewsResponse(): ApiResponse<{
   count: number;
   results: EmployerReviewDto[];
 }> {
-  return { success: false, message: 'Unavailable', data: null as never, errors: null };
+  return { success: false, message: 'Unavailable', data: null as unknown as never, errors: null };
 }
 
 export function extractEmployerList(
@@ -306,7 +306,7 @@ export async function loadEmployerPageData(slug: string): Promise<{
     let employer: Employer | undefined;
 
     if (profileResponse.success && profileResponse.data) {
-      employer = mapEmployerPublicDtoToEmployer(profileResponse.data);
+      employer = mapEmployerPublicDtoToEmployer(profileResponse.data as any);
     } else {
       employer = findEmployerBySlug(normalizedSlug);
       if (!employer) {

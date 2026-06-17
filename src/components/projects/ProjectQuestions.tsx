@@ -43,7 +43,7 @@ export default function ProjectQuestions({ project }: ProjectQuestionsProps) {
   const [loadingQuestions, setLoadingQuestions] = useState(Boolean(projectSlug));
 
   const isOwner = Boolean(
-    user?.id && project.ownerId && String(user.id) === String(project.ownerId),
+    user?.id && project.ownerId && String(user?.id) === String(project.ownerId),
   );
   const showAskBox = !isOwner;
   const canAnswer = isOwner;

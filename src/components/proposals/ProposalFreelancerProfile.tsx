@@ -95,7 +95,7 @@ export default function ProposalFreelancerProfile({
   if (!bundle || loadFailed) {
     return (
       <div className="overflow-hidden rounded-[20px] border border-neutral-200/80 bg-white">
-        <FreelancerProfileEmptyState name={displayName} username={bid.tasker?.username} />
+        <FreelancerProfileEmptyState name={displayName} username={bid.tasker?.username ?? undefined} />
       </div>
     );
   }

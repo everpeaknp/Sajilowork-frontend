@@ -119,7 +119,7 @@ export const HighlightCard = React.forwardRef<HTMLDivElement, HighlightCardProps
             linear-gradient(to bottom right, var(--card-from-color), var(--card-to-color))
           `,
           backgroundSize: '0.5rem 0.5rem, 100% 100%',
-        }}
+        } as any}
         variants={cardVariants}
         initial="hidden"
         animate="visible"

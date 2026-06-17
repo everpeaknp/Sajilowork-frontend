@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import type { FreelancerProfileBundle } from '@/lib/freelancerProfileFromApi';
 import { loadFreelancerPageData, resolveEmployerRedirectForSlug } from '@/lib/freelancerApi';
 import { chatService } from '@/services/chat.service';
+import { dashboardMessageConversationHref } from '@/lib/dashboardChat';
 
 export default function FreelancerSlugPage() {
   const params = useParams();
