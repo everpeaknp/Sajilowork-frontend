@@ -197,39 +197,40 @@ function aggregateJobBidStats(bids: Bid[]): Map<string, JobBidStats> {
 }
 
 function buildJobApplicationGroups(jobs: Task[], bidStats: Map<string, JobBidStats>): JobApplicationGroup[] {
-  return jobs
-    .map((job) => {
-      const slug = job.slug?.trim();
-      if (!slug) return null;
+  const result: JobApplicationGroup[] = [];
 
-      const stats = bidStats.get(slug);
-      const createdTs = new Date(job.created_at || 0).getTime();
-      const ownerName =
-        job.owner_business_name?.trim() ||
-        (typeof job.owner === 'object' && job.owner && 'first_name' in job.owner
-          ? [job.owner.first_name, job.owner.last_name].filter(Boolean).join(' ').trim()
-          : '') ||
-        undefined;
+  for (const job of jobs) {
+    const slug = job.slug?.trim();
+    if (!slug) continue;
 
-      return {
-        slug,
-        title: job.title?.trim() || 'Job',
-        location: formatJobLocation(job),
-        imageUrl: job.primary_image?.trim() || undefined,
-        ownerLogoUrl: job.owner_logo_url?.trim() || undefined,
-        ownerLogoText: job.owner_logo_text?.trim() || undefined,
-        ownerLogoColor: job.owner_logo_color?.trim() || undefined,
-        ownerName,
-        totalApplications: stats?.total ?? 0,
-        pendingApplications: stats?.pending ?? 0,
-        acceptedApplications: stats?.accepted ?? 0,
-        cancelledApplications: stats?.cancelled ?? 0,
-        latestDate: stats?.latestDate || formatDisplayDate(job.created_at),
-        latestTs: stats?.latestTs || (Number.isNaN(createdTs) ? 0 : createdTs),
-      };
-    })
-    .filter((group): group is JobApplicationGroup => group !== null)
-    .sort((a, b) => b.latestTs - a.latestTs || a.title.localeCompare(b.title));
+    const stats = bidStats.get(slug);
+    const createdTs = new Date(job.created_at || 0).getTime();
+    const ownerName =
+      job.owner_business_name?.trim() ||
+      (typeof job.owner === 'object' && job.owner && 'first_name' in job.owner
+        ? [job.owner.first_name, job.owner.last_name].filter(Boolean).join(' ').trim()
+        : '') ||
+      undefined;
+
+    result.push({
+      slug,
+      title: job.title?.trim() || 'Job',
+      location: formatJobLocation(job),
+      imageUrl: job.primary_image?.trim() || undefined,
+      ownerLogoUrl: job.owner_logo_url?.trim() || undefined,
+      ownerLogoText: job.owner_logo_text?.trim() || undefined,
+      ownerLogoColor: job.owner_logo_color?.trim() || undefined,
+      ownerName,
+      totalApplications: stats?.total ?? 0,
+      pendingApplications: stats?.pending ?? 0,
+      acceptedApplications: stats?.accepted ?? 0,
+      cancelledApplications: stats?.cancelled ?? 0,
+      latestDate: stats?.latestDate || formatDisplayDate(job.created_at),
+      latestTs: stats?.latestTs || (Number.isNaN(createdTs) ? 0 : createdTs),
+    });
+  }
+
+  return result.sort((a, b) => b.latestTs - a.latestTs || a.title.localeCompare(b.title));
 }
 
 function matchesActivityFilter(group: JobApplicationGroup, filter: ApplicationActivityFilter): boolean {
