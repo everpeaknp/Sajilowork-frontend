@@ -201,7 +201,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
       className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[280px] w-full overflow-hidden rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[350px] sm:rounded-[24px] lg:min-h-[420px]">
+        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
           <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 hidden select-none sm:block">
             <svg
               viewBox="0 0 120 400"
@@ -235,10 +235,10 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
             </svg>
           </div>
 
-          <div className="relative z-10 grid w-full grid-cols-1 items-end gap-6 px-4 pb-0 pt-8 sm:gap-8 sm:px-12 sm:pt-12 md:px-16 lg:grid-cols-12 lg:pb-0 lg:pt-12">
-            <div className="flex flex-col justify-center pb-4 text-left sm:pb-12 lg:col-span-8 lg:pb-12">
+          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-7 sm:gap-6 sm:px-12 sm:pt-9 md:px-16 lg:grid-cols-12 lg:pb-0 lg:pt-10">
+            <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-10">
               <motion.h1
-                className={`${discoverHeadline} mb-2.5 text-2xl leading-tight text-white sm:text-3xl md:text-4xl lg:text-5xl`}
+                className={`${discoverHeadline} mb-2.5 text-2xl leading-tight text-white sm:text-3xl md:text-[38px] lg:text-[40px]`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -247,7 +247,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
               </motion.h1>
 
               <motion.p
-                className={`${discoverBody} mb-6 max-w-xl text-xs leading-relaxed text-white/90 sm:mb-8 sm:text-sm md:text-base`}
+                className={`${discoverBody} mb-5 max-w-xl text-xs leading-relaxed text-white/90 sm:mb-6 sm:text-sm md:text-base`}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
@@ -265,7 +265,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
               </motion.div>
             </div>
 
-            <div className="relative mt-0 flex h-[180px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:h-[220px] lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:h-[min(400px,92%)] lg:w-auto lg:max-w-[42%] xl:right-10">
+            <div className="relative mt-2 flex h-[160px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:mt-0 sm:h-[200px] lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(260px,95%)] lg:max-w-[38%] lg:justify-center xl:right-10">
               <motion.img
                 src={MAIN_PORTRAIT}
                 alt="Local tasker ready to help"
