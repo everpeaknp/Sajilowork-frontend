@@ -148,7 +148,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
               return (
                 <div
                   key={card.id}
-                  className="group flex w-full flex-shrink-0 flex-col justify-between overflow-hidden rounded-none border border-neutral-300 bg-white transition-all duration-300 sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)]"
+                  className="group flex w-full flex-shrink-0 flex-col justify-between overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)]"
                 >
                   <Link
                     href={getServiceDetailPath(card)}

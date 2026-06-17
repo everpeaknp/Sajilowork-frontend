@@ -643,7 +643,7 @@ export default function ProjectList({
                               router.push(getProjectDetailPath(project));
                             }
                           }}
-                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-[8px] border border-neutral-200/90 bg-white p-4 transition-all duration-300 hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
+                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
                         >
                         <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
                           {employerHref ? (
