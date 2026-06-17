@@ -155,6 +155,11 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
   );
 }
 
+interface JobHeroProps {
+  className?: string;
+  onSearchSubmit?: (query: string, location: string) => void;
+}
+
 export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps) {
   return (
     <section className={`select-none bg-white px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8 lg:px-8 ${className}`}>
