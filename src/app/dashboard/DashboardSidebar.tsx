@@ -118,7 +118,7 @@ function SidebarReveal({
   );
 }
 
-const NAV_ITEM_LOOKUP: Record<DashboardTab, NavigationItem> = {
+const NAV_ITEM_LOOKUP: Record<DashboardTab, Omit<NavigationItem, 'href'> & { href?: string }> = {
   dashboard: { id: 'dashboard', label: 'Dashboard', icon: Home },
   proposals: { id: 'proposals', label: 'My Proposals', icon: FileText },
   applications: { id: 'applications', label: 'Applications', icon: UserCheck },
