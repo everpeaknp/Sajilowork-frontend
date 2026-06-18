@@ -64,8 +64,8 @@ export default function Home() {
         <PopularServices className={sectionPad} />
         <BottomCTA className="!pt-10 sm:!pt-14 !pb-6" />
         <DiscoverStats className="!pt-4 !pb-10 sm:!pt-5 sm:!pb-12" />
-        <Testimonials className={sectionPadLoose} />
-        <TrendingServices className={sectionPadLoose} />
+        <Testimonials className={`${sectionPadLoose} !pb-8 sm:!pb-10`} />
+        <TrendingServices className={`${sectionPadLoose} !pt-12 sm:!pt-14`} />
         <OurBlog className={sectionPad} />
         <Partners className="!py-10 sm:!py-12" />
         <Newsletter className="!py-14 sm:!py-16" />

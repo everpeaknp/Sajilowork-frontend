@@ -75,7 +75,7 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
   return (
     <section
       id="testimonials-section"
-      className={`flex select-none flex-col items-center justify-center overflow-hidden bg-[#fdfdfc] px-4 py-20 sm:py-28 ${className}`}
+      className={`relative z-[1] flex select-none flex-col items-center justify-center bg-[#fdfdfc] px-4 py-20 sm:py-28 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-12 text-center sm:mb-16">
@@ -101,13 +101,19 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
           </motion.p>
         </div>
 
-        <div className="relative w-full overflow-hidden">
-          {/* Gradient Masks for smooth fading edges */}
-          <div className="absolute bottom-0 left-0 top-0 z-10 w-16 bg-gradient-to-r from-[#fdfdfc] to-transparent sm:w-32"></div>
-          <div className="absolute bottom-0 right-0 top-0 z-10 w-16 bg-gradient-to-l from-[#fdfdfc] to-transparent sm:w-32"></div>
+        <div className="relative isolate w-full overflow-x-hidden overflow-y-visible">
+          {/* Gradient masks to hide off-screen cards at the edges */}
+          <div
+            className="pointer-events-none absolute inset-y-0 left-0 z-20 w-24 bg-gradient-to-r from-[#fdfdfc] from-35% via-[#fdfdfc]/90 to-transparent sm:w-40"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 z-20 w-24 bg-gradient-to-l from-[#fdfdfc] from-35% via-[#fdfdfc]/90 to-transparent sm:w-40"
+            aria-hidden
+          />
 
           <motion.div
-            className="flex w-max gap-6 sm:gap-8"
+            className="relative z-0 flex w-max gap-6 sm:gap-8"
             animate={{
               x: ["0%", "-33.3333%"]
             }}
@@ -120,7 +126,7 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
             {loopingTestimonials.map((item, idx) => (
               <div
                 key={`${item.id}-${idx}`}
-                className="flex w-[300px] shrink-0 flex-col justify-between rounded-[2rem] bg-white p-8 shadow-xl shadow-brand-dark/10 ring-1 ring-black/5 sm:w-[380px]"
+                className="relative z-0 flex w-[300px] shrink-0 flex-col justify-between rounded-[2rem] bg-white p-8 ring-1 ring-black/5 sm:w-[380px]"
               >
                 <div>
                   <div className="mb-6 flex items-center gap-1">
