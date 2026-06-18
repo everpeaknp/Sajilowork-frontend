@@ -17,10 +17,11 @@ import {
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
-import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
+import { DEFAULT_SERVICE_IMAGE, languageNamesForSelect, loadAllSkills, loadLanguages, serviceListingFallbackImage, uniqueSkillNamesForSelect } from '@/lib/dashboardListingApi';
 import { searchBrowseServices } from '@/lib/listingSearchApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 import type { Service as ServiceItem } from './serviceListData';
+import { SERVICE_LANGUAGE_FALLBACK, SERVICE_LOCATIONS } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
 import { MarketplaceServiceGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
@@ -30,9 +31,7 @@ const BUDGET_MAX = 20000;
 const BUDGET_DEFAULT = BUDGET_MAX;
 const ITEMS_PER_PAGE = 6;
 
-const DESIGN_TOOLS = ['Figma', 'Sketch', 'Adobe XD', 'Illustrator', 'Photoshop'] as const;
-const LOCATIONS = ['United States', 'United Kingdom', 'Germany', 'Remote'] as const;
-const LANGUAGES = ['English', 'Spanish', 'French', 'German'] as const;
+const LOCATIONS = SERVICE_LOCATIONS;
 const LEVELS = ['New Seller', 'Level 1', 'Level 2', 'Top Rated'] as const;
 
 interface AvailableServicesProps {
@@ -56,16 +55,18 @@ export default function AvailableServices({
 
   const [deliveryTime, setDeliveryTime] = useState<string>('all');
   const [maxBudget, setMaxBudget] = useState(BUDGET_DEFAULT);
-  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('best-seller');
+  const [languageOptions, setLanguageOptions] = useState<string[]>([...SERVICE_LANGUAGE_FALLBACK]);
+  const [skillOptions, setSkillOptions] = useState<string[]>([]);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     delivery: false,
     budget: false,
-    tools: false,
+    skills: false,
     location: false,
     speaks: false,
     level: false,
@@ -78,12 +79,40 @@ export default function AvailableServices({
     searchCategory,
     deliveryTime,
     maxBudget,
-    selectedTools,
+    selectedSkills,
     selectedLocations,
     selectedLanguages,
     selectedLevels,
     sortBy,
   ]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void loadLanguages('service')
+      .then((items) => {
+        if (cancelled) return;
+        const names = languageNamesForSelect(items);
+        if (names.length > 0) setLanguageOptions(names);
+      })
+      .catch(() => {
+        /* keep Nepal fallback list */
+      });
+
+    void loadAllSkills()
+      .then((items) => {
+        if (cancelled) return;
+        const names = uniqueSkillNamesForSelect(items);
+        if (names.length > 0) setSkillOptions(names);
+      })
+      .catch(() => {
+        /* keep empty until API loads */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,7 +148,7 @@ export default function AvailableServices({
     searchCategory,
     deliveryTime,
     maxBudget,
-    selectedTools,
+    selectedSkills,
     selectedLocations,
     selectedLanguages,
     selectedLevels,
@@ -174,7 +203,7 @@ export default function AvailableServices({
   const hasActiveFilters =
     deliveryTime !== 'all' ||
     maxBudget !== BUDGET_DEFAULT ||
-    selectedTools.length > 0 ||
+    selectedSkills.length > 0 ||
     selectedLocations.length > 0 ||
     selectedLanguages.length > 0 ||
     selectedLevels.length > 0 ||
@@ -183,7 +212,7 @@ export default function AvailableServices({
   const handleResetFilters = () => {
     setDeliveryTime('all');
     setMaxBudget(BUDGET_DEFAULT);
-    setSelectedTools([]);
+    setSelectedSkills([]);
     setSelectedLocations([]);
     setSelectedLanguages([]);
     setSelectedLevels([]);
@@ -199,14 +228,25 @@ export default function AvailableServices({
 
     result = result.filter((item) => item.startingPrice <= maxBudget);
 
-    if (selectedTools.length > 0) {
-      result = result.filter((item) => selectedTools.includes(item.designTool));
+    if (selectedSkills.length > 0) {
+      result = result.filter((item) =>
+        selectedSkills.some((skill) =>
+          item.skills?.some((listed) => listed.toLowerCase() === skill.toLowerCase()) ||
+          item.designTool.toLowerCase() === skill.toLowerCase(),
+        ),
+      );
     }
     if (selectedLocations.length > 0) {
       result = result.filter((item) => selectedLocations.includes(item.location));
     }
     if (selectedLanguages.length > 0) {
-      result = result.filter((item) => selectedLanguages.includes(item.speaks));
+      result = result.filter((item) =>
+        selectedLanguages.some(
+          (lang) =>
+            item.speaks === lang ||
+            item.languages?.some((spoken) => spoken.toLowerCase() === lang.toLowerCase()),
+        ),
+      );
     }
     if (selectedLevels.length > 0) {
       result = result.filter((item) => selectedLevels.includes(item.level));
@@ -220,6 +260,7 @@ export default function AvailableServices({
           item.category.toLowerCase().includes(query) ||
           item.author.name.toLowerCase().includes(query) ||
           item.designTool.toLowerCase().includes(query) ||
+          (item.skills?.some((skill) => skill.toLowerCase().includes(query)) ?? false) ||
           (item.description?.toLowerCase().includes(query) ?? false) ||
           (item.author.role?.toLowerCase().includes(query) ?? false),
       );
@@ -249,7 +290,7 @@ export default function AvailableServices({
   }, [
     deliveryTime,
     maxBudget,
-    selectedTools,
+    selectedSkills,
     selectedLocations,
     selectedLanguages,
     selectedLevels,
@@ -376,14 +417,14 @@ export default function AvailableServices({
               </FilterAccordion>
 
               <FilterAccordion
-                title="Design Tool"
-                open={openSections.tools}
-                onToggle={() => toggleSection('tools')}
+                title="Skills"
+                open={openSections.skills}
+                onToggle={() => toggleSection('skills')}
               >
                 <CheckboxList
-                  items={DESIGN_TOOLS}
-                  selected={selectedTools}
-                  onToggle={(v) => toggleInList(v, setSelectedTools)}
+                  items={skillOptions}
+                  selected={selectedSkills}
+                  onToggle={(v) => toggleInList(v, setSelectedSkills)}
                 />
               </FilterAccordion>
 
@@ -405,7 +446,7 @@ export default function AvailableServices({
                 onToggle={() => toggleSection('speaks')}
               >
                 <CheckboxList
-                  items={LANGUAGES}
+                  items={languageOptions}
                   selected={selectedLanguages}
                   onToggle={(v) => toggleInList(v, setSelectedLanguages)}
                 />

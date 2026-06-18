@@ -11,6 +11,63 @@ export interface ServicePackage {
   features: string[];
 }
 
+export const SERVICE_LOCATIONS = [
+  'Kathmandu',
+  'Lalitpur',
+  'Bhaktapur',
+  'Pokhara',
+  'Chitwan',
+  'Remote',
+] as const;
+
+export type ServiceLocation = (typeof SERVICE_LOCATIONS)[number];
+
+export const SERVICE_LANGUAGE_FALLBACK = [
+  'English',
+  'Nepali',
+  'Hindi',
+  'Maithili',
+  'Bhojpuri',
+  'Tharu',
+  'Tamang',
+  'Newari',
+  'Magar',
+  'Gurung',
+  'Sherpa',
+  'Limbu',
+  'Rai',
+  'Awadhi',
+  'Doteli',
+  'Urdu',
+  'Bajjika',
+] as const;
+
+export type ServiceLanguage = (typeof SERVICE_LANGUAGE_FALLBACK)[number] | string;
+
+export interface ServiceReviewItem {
+  id: string;
+  reviewerName: string;
+  reviewerRole: string;
+  rating: number;
+  date: string;
+  comment: string;
+  likes: number;
+  dislikes: number;
+}
+
+export interface ServiceFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface ServiceAboutContent {
+  intro: string;
+  outro: string;
+  skills: string[];
+  appTypes: string[];
+  devices: string[];
+}
+
 export interface Service {
   id: string;
   /** Backend task slug for API-backed services */
@@ -49,8 +106,8 @@ export interface Service {
   locationLabel?: string;
   budget: number;
   designTool: 'Figma' | 'Sketch' | 'Adobe XD' | 'Illustrator' | 'Photoshop';
-  location: 'United States' | 'United Kingdom' | 'Germany' | 'Remote';
-  speaks: 'English' | 'Spanish' | 'French' | 'German';
+  location: ServiceLocation;
+  speaks: string;
   level: 'New Seller' | 'Level 1' | 'Level 2' | 'Top Rated';
   description?: string;
   aboutIntro?: string;
@@ -65,30 +122,6 @@ export interface Service {
   reviewsData?: ServiceReviewItem[];
   /** Packages from dashboard_meta when loaded from API */
   apiPackages?: ServicePackage[];
-}
-
-export interface ServiceReviewItem {
-  id: string;
-  reviewerName: string;
-  reviewerRole: string;
-  rating: number;
-  date: string;
-  comment: string;
-  likes: number;
-  dislikes: number;
-}
-
-export interface ServiceFaqItem {
-  question: string;
-  answer: string;
-}
-
-export interface ServiceAboutContent {
-  intro: string;
-  outro: string;
-  skills: string[];
-  appTypes: string[];
-  devices: string[];
 }
 
 const DEFAULT_SERVICES_PROVIDED = [
@@ -171,7 +204,7 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: '24h',
     budget: 8500,
     designTool: 'Figma',
-    location: 'United States',
+    location: 'Kathmandu',
     speaks: 'English',
     level: 'Level 2',
     description:
@@ -230,8 +263,8 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: '7days',
     budget: 4500,
     designTool: 'Figma',
-    location: 'United Kingdom',
-    speaks: 'Spanish',
+    location: 'Lalitpur',
+    speaks: 'Nepali',
     level: 'Level 1',
   },
   {
@@ -278,8 +311,8 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: '24h',
     budget: 9000,
     designTool: 'Figma',
-    location: 'Germany',
-    speaks: 'German',
+    location: 'Pokhara',
+    speaks: 'Hindi',
     level: 'Level 2',
   },
   {
@@ -302,7 +335,7 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: '3days',
     budget: 3500,
     designTool: 'Photoshop',
-    location: 'United States',
+    location: 'Kathmandu',
     speaks: 'English',
     level: 'Level 2',
   },
@@ -326,8 +359,8 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: 'anytime',
     budget: 5500,
     designTool: 'Illustrator',
-    location: 'Germany',
-    speaks: 'French',
+    location: 'Pokhara',
+    speaks: 'Maithili',
     level: 'New Seller',
   },
   {
@@ -350,7 +383,7 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: '3days',
     budget: 4800,
     designTool: 'Sketch',
-    location: 'United Kingdom',
+    location: 'Lalitpur',
     speaks: 'English',
     level: 'Level 1',
   },
@@ -374,16 +407,18 @@ export const ALL_SERVICES: Service[] = [
     deliveryTime: '24h',
     budget: 15000,
     designTool: 'Figma',
-    location: 'United States',
+    location: 'Kathmandu',
     speaks: 'English',
     level: 'Top Rated',
   },
 ];
 
-const LOCATION_LABELS: Record<Service['location'], string> = {
-  'United States': 'New York',
-  'United Kingdom': 'London',
-  Germany: 'Berlin',
+const LOCATION_LABELS: Record<ServiceLocation, string> = {
+  Kathmandu: 'Kathmandu',
+  Lalitpur: 'Lalitpur',
+  Bhaktapur: 'Bhaktapur',
+  Pokhara: 'Pokhara',
+  Chitwan: 'Chitwan',
   Remote: 'Remote',
 };
 

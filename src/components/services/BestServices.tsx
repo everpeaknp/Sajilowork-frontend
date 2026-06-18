@@ -76,7 +76,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
 
   return (
     <section
-      className={`w-full select-none bg-white px-4 pb-4 pt-6 sm:px-6 sm:pb-6 sm:pt-8 md:px-8 lg:px-12 ${className}`}
+      className={`relative z-0 w-full select-none bg-white px-4 pb-4 pt-6 sm:px-6 sm:pb-6 sm:pt-8 md:px-8 lg:px-12 ${className}`}
     >
       <div className="mx-auto w-full max-w-full">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
@@ -169,7 +169,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                     <button
                       type="button"
                       onClick={(e) => void toggleFavorite(card, e)}
-                      className="absolute right-3.5 top-3.5 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow-md transition-all hover:scale-105 active:scale-95"
+                      className="absolute right-3.5 top-3.5 z-[1] flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow-md transition-all hover:scale-105 active:scale-95"
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                     >
                       <Heart

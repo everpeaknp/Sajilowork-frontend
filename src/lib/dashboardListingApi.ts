@@ -24,7 +24,7 @@ import { projectService } from '@/services/project.service';
 import { jobService } from '@/services/job.service';
 import { serviceService } from '@/services/service.service';
 import { taskService } from '@/services/task.service';
-import type { Category, MarketplaceLanguage, MarketplaceSkill, Task } from '@/types';
+import type { Category, MarketplaceLanguage, MarketplaceSkill, PaginatedResponse, Task } from '@/types';
 
 export type ListingKind = 'service' | 'project' | 'job' | 'task';
 
@@ -602,9 +602,37 @@ export async function uploadTaskFiles(taskId: string, files: File[]) {
 export async function loadCategories(
   listingKind: 'task' | 'job' | 'project' | 'service' = 'task',
 ): Promise<Category[]> {
-  const response = await taskService.getCategories({ listing_kind: listingKind });
-  if (!response.success || !response.data) return [];
-  return extractCategoryList(response.data);
+  const all: Category[] = [];
+  let page = 1;
+
+  while (page <= 20) {
+    const response = await taskService.getCategories({
+      listing_kind: listingKind,
+      page,
+      page_size: 200,
+    });
+    if (!response.success || !response.data) break;
+
+    const batch = extractCategoryList(response.data);
+    all.push(...batch);
+
+    const next = (response.data as PaginatedResponse<Category>).next;
+    if (!next || batch.length === 0) break;
+    page += 1;
+  }
+
+  return all;
+}
+
+export async function loadAllCategories(): Promise<Category[]> {
+  const kinds: Array<'task' | 'job' | 'project' | 'service'> = [
+    'task',
+    'job',
+    'project',
+    'service',
+  ];
+  const batches = await Promise.all(kinds.map((kind) => loadCategories(kind)));
+  return batches.flat();
 }
 
 function extractSkillList(data: unknown): MarketplaceSkill[] {
@@ -629,6 +657,46 @@ export async function loadSkills(
   });
   if (!response.success || !response.data) return [];
   return extractSkillList(response.data);
+}
+
+export async function loadAllSkills(): Promise<MarketplaceSkill[]> {
+  const { skillService } = await import('@/services/skill.service');
+  const all: MarketplaceSkill[] = [];
+  let page = 1;
+
+  while (page <= 20) {
+    const response = await skillService.getSkills({
+      page,
+      page_size: 200,
+      ordering: 'order,name',
+    });
+    if (!response.success || !response.data) break;
+
+    const batch = extractSkillList(response.data);
+    all.push(...batch);
+
+    const next = (response.data as PaginatedResponse<MarketplaceSkill>).next;
+    if (!next || batch.length === 0) break;
+    page += 1;
+  }
+
+  return all;
+}
+
+export function uniqueSkillNamesForSelect(skills: MarketplaceSkill[]): string[] {
+  const seen = new Set<string>();
+  const names: string[] = [];
+
+  for (const skill of skills) {
+    const name = skill.name?.trim();
+    if (!name) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    names.push(name);
+  }
+
+  return names;
 }
 
 function extractLanguageList(data: unknown): MarketplaceLanguage[] {

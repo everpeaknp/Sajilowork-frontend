@@ -1,6 +1,7 @@
 import type { PackagesConfig } from '@/app/dashboard/DashboardCreateService';
 
-import type { Service, ServicePackage } from '@/components/services/serviceListData';
+import type { Service, ServicePackage, ServiceLocation } from '@/components/services/serviceListData';
+import { SERVICE_LANGUAGE_FALLBACK, SERVICE_LOCATIONS } from '@/components/services/serviceListData';
 
 import {
 
@@ -140,20 +141,18 @@ function mapSellerLevel(task: Task): Service['level'] {
 
 
 
-function mapLocationBucket(task: Task): Service['location'] {
-
+function mapLocationBucket(task: Task): ServiceLocation {
   if (task.location_type === 'remote' || task.work_type === 'remote') return 'Remote';
 
-  const country = (task.country || '').trim();
+  const haystack = `${task.city || ''} ${task.address || ''} ${task.country || ''}`.toLowerCase();
+  for (const location of SERVICE_LOCATIONS) {
+    if (location === 'Remote') continue;
+    if (haystack.includes(location.toLowerCase())) return location;
+  }
 
-  if (country === 'United Kingdom') return 'United Kingdom';
-
-  if (country === 'Germany') return 'Germany';
-
-  if (country === 'United States') return 'United States';
+  if (haystack.includes('nepal')) return 'Kathmandu';
 
   return 'Remote';
-
 }
 
 
@@ -174,20 +173,20 @@ function mapDesignTool(skills: string[]): Service['designTool'] {
 
 
 
-function mapSpeaks(languages: string[]): Service['speaks'] {
-
-  const allowed: Service['speaks'][] = ['English', 'Spanish', 'French', 'German'];
+function mapSpeaks(languages: string[]): string {
+  if (!languages.length) return 'English';
 
   const match = languages.find((lang) =>
-
-    allowed.some((item) => item.toLowerCase() === lang.toLowerCase()),
-
+    SERVICE_LANGUAGE_FALLBACK.some((item) => item.toLowerCase() === lang.toLowerCase()),
   );
 
-  if (!match) return 'English';
+  if (match) {
+    return (
+      SERVICE_LANGUAGE_FALLBACK.find((item) => item.toLowerCase() === match.toLowerCase()) ?? match
+    );
+  }
 
-  return allowed.find((item) => item.toLowerCase() === match.toLowerCase()) ?? 'English';
-
+  return languages[0]?.trim() || 'English';
 }
 
 

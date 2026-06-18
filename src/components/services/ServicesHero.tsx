@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search as SearchIcon } from 'lucide-react';
 import {
@@ -8,6 +8,39 @@ import {
   discoverHeadline,
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
+import { loadCategories } from '@/lib/dashboardListingApi';
+import { flattenCategoriesForSelect } from '@/lib/taskUtils';
+
+type CategoryOption = { id: string; name: string };
+
+const DEFAULT_CATEGORY_OPTION: CategoryOption = { id: 'choose-category', name: 'Choose Category' };
+
+const FALLBACK_CATEGORY_OPTIONS: CategoryOption[] = [
+  DEFAULT_CATEGORY_OPTION,
+  { id: 'fallback-cleaning', name: 'Cleaning' },
+  { id: 'fallback-moving', name: 'Moving & Delivery' },
+  { id: 'fallback-handyman', name: 'Handyman & Repairs' },
+  { id: 'fallback-garden', name: 'Garden & Outdoor' },
+  { id: 'fallback-electrical', name: 'Electrical & Plumbing' },
+  { id: 'fallback-design', name: 'Design & Creative' },
+  { id: 'fallback-web', name: 'Web & App Design' },
+];
+
+function uniqueCategoryOptions(items: ReturnType<typeof flattenCategoriesForSelect>): CategoryOption[] {
+  const seen = new Set<string>();
+  const options: CategoryOption[] = [];
+
+  for (const item of items) {
+    const name = item.name.trim();
+    if (!name) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    options.push({ id: item.id, name });
+  }
+
+  return options.sort((a, b) => a.name.localeCompare(b.name));
+}
 
 const SUGGESTIONS_DATABASE = [
   'Home deep cleaning',
@@ -27,17 +60,6 @@ const SUGGESTIONS_DATABASE = [
   'Website design',
 ];
 
-const CATEGORIES = [
-  'Choose Category',
-  'Cleaning',
-  'Moving & Delivery',
-  'Handyman & Repairs',
-  'Garden & Outdoor',
-  'Electrical & Plumbing',
-  'Design & Creative',
-  'Web & App Design',
-];
-
 const MAIN_PORTRAIT =
   'https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fhome6-hero-img-1.png&w=1200&q=75';
 
@@ -48,9 +70,44 @@ interface SearchBoxProps {
 function SearchBox({ onSearchSubmit }: SearchBoxProps) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('Choose Category');
+  const [categories, setCategories] = useState<CategoryOption[]>(FALLBACK_CATEGORY_OPTIONS);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void loadCategories('service')
+      .then((items) => {
+        if (cancelled) return;
+        const options = uniqueCategoryOptions(flattenCategoriesForSelect(items));
+        if (options.length > 0) {
+          setCategories([DEFAULT_CATEGORY_OPTION, ...options]);
+        }
+      })
+      .catch(() => {
+        /* keep fallback list */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!dropdownRef.current?.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDropdownOpen]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -104,7 +161,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
 
           <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 sm:block" />
 
-          <div className="relative flex items-center border-b border-neutral-100 py-2 sm:border-b-0 sm:border-none sm:py-0">
+          <div ref={dropdownRef} className="relative flex items-center border-b border-neutral-100 py-2 sm:border-b-0 sm:border-none sm:py-0">
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -123,22 +180,22 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute left-0 right-0 top-[110%] z-50 mt-1 overflow-hidden rounded-xl border border-neutral-100 bg-white py-1.5 shadow-xl sm:right-auto sm:w-[220px]">
-                {CATEGORIES.map((catOption) => (
+              <div className="absolute left-0 right-0 top-[110%] z-[200] mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-100 bg-white py-1.5 shadow-xl sm:right-auto sm:w-[260px]">
+                {categories.map((catOption) => (
                   <button
-                    key={catOption}
+                    key={catOption.id}
                     type="button"
                     onClick={() => {
-                      setCategory(catOption);
+                      setCategory(catOption.name);
                       setIsDropdownOpen(false);
                     }}
                     className={`${discoverBody} w-full cursor-pointer px-4 py-2.5 text-left text-sm transition-colors duration-150 ${
-                      category === catOption
+                      category === catOption.name
                         ? 'bg-brand-emerald/10 font-medium text-neutral-800'
                         : 'text-neutral-600 hover:bg-neutral-50'
                     }`}
                   >
-                    {catOption}
+                    {catOption.name}
                   </button>
                 ))}
               </div>
@@ -198,23 +255,24 @@ interface ServicesHeroProps {
 export default function ServicesHero({ className = '', onSearchSubmit }: ServicesHeroProps) {
   return (
     <section
-      className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}
+      className={`relative z-30 select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
-          <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 hidden select-none sm:block">
-            <svg
-              viewBox="0 0 120 400"
-              className="h-full w-[100px] text-[#ffc554] sm:w-[130px] md:w-[160px] lg:w-[200px]"
-              fill="currentColor"
-              preserveAspectRatio="none"
-              aria-hidden
-            >
-              <path d="M 0 0 Q 110 200 0 400 L 0 400 L 0 0 Z" />
-            </svg>
-          </div>
+        <div className="relative flex min-h-[200px] w-full items-stretch overflow-visible rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl sm:rounded-[24px]">
+            <div className="absolute bottom-0 left-0 top-0 hidden select-none sm:block">
+              <svg
+                viewBox="0 0 120 400"
+                className="h-full w-[100px] text-[#ffc554] sm:w-[130px] md:w-[160px] lg:w-[200px]"
+                fill="currentColor"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path d="M 0 0 Q 110 200 0 400 L 0 400 L 0 0 Z" />
+              </svg>
+            </div>
 
-          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.12] mix-blend-overlay">
+            <div className="absolute inset-0 overflow-hidden opacity-[0.12] mix-blend-overlay">
             <svg
               className="h-full w-full text-white"
               stroke="currentColor"
@@ -233,6 +291,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
                 strokeDasharray="3 3"
               />
             </svg>
+            </div>
           </div>
 
           <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-7 sm:gap-6 sm:px-12 sm:pt-9 md:px-16 lg:grid-cols-12 lg:pb-0 lg:pt-10">
