@@ -82,10 +82,10 @@ export default function PopularServices({ className = '' }: PopularServicesProps
       className={`overflow-hidden bg-[#fdfdfc] px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-14 flex flex-col justify-between gap-6 sm:mb-16 sm:flex-row sm:items-end">
+        <div className="mb-10 flex flex-col gap-6 sm:mb-12">
           <div className="min-w-0">
             <motion.h2
-              className={`${discoverHeadline} mb-3 text-3xl leading-tight text-brand-dark sm:text-4xl`}
+              className={`${discoverHeadline} mb-2 text-3xl leading-tight text-brand-dark sm:text-4xl lg:text-[44px]`}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -93,8 +93,8 @@ export default function PopularServices({ className = '' }: PopularServicesProps
             >
               Popular Services
             </motion.h2>
-            <motion.p 
-              className={`${discoverBody} text-base text-neutral-500`}
+            <motion.p
+              className={`${discoverBody} max-w-2xl text-sm text-neutral-500 sm:text-base`}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -105,10 +105,10 @@ export default function PopularServices({ className = '' }: PopularServicesProps
           </div>
 
           {categories.length > 0 ? (
-            <motion.div 
+            <motion.div
               className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0"
-              initial={{ opacity: 0, x: 15 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
@@ -151,6 +151,7 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                 return (
                   <motion.div
                     key={service.id}
+                    className="h-full"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -159,9 +160,9 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                   >
                     <Link
                       href={getServiceDetailPath(service)}
-                      className="group mx-auto flex w-full max-w-[691px] flex-col overflow-hidden rounded-xl border border-neutral-200/70 bg-white shadow-sm transition-all duration-300 hover:border-neutral-300 hover:shadow-md md:h-[192px] md:max-w-none md:flex-row"
+                      className="group flex h-full min-h-[192px] w-full flex-col overflow-hidden rounded-xl border border-neutral-200/70 bg-white transition-all duration-300 hover:border-neutral-300 md:flex-row"
                     >
-                      <div className="relative h-[192px] w-full flex-shrink-0 overflow-hidden bg-neutral-100 md:h-full md:w-[190px]">
+                      <div className="relative h-[192px] w-full shrink-0 overflow-hidden bg-neutral-100 md:w-[190px]">
                         <img
                           src={service.image}
                           alt={service.title}
@@ -174,7 +175,7 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                         />
                       </div>
 
-                      <div className="relative flex h-full min-w-0 flex-1 flex-col justify-between p-5 md:px-5 md:py-4">
+                      <div className="relative flex min-h-[192px] min-w-0 flex-1 flex-col p-5 md:py-4">
                         <button
                           type="button"
                           onClick={(e) => toggleFavorite(service.id, e)}
@@ -189,21 +190,21 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                           />
                         </button>
 
-                        <div className="pr-10">
+                        <div className="flex flex-1 flex-col pr-10">
                           <span
-                            className={`${discoverMedium} mb-2 block text-xs uppercase tracking-wider text-brand-emerald`}
+                            className={`${discoverMedium} mb-2 block truncate text-xs uppercase tracking-wider text-brand-emerald`}
                           >
                             {service.category}
                           </span>
 
                           <h3
-                            className={`${discoverHeadline} mb-3 line-clamp-2 text-lg leading-snug text-brand-dark transition-colors group-hover:text-brand-emerald`}
+                            className={`${discoverHeadline} mb-3 line-clamp-2 min-h-[3.25rem] text-lg leading-snug text-brand-dark transition-colors group-hover:text-brand-emerald`}
                           >
                             {service.title}
                           </h3>
 
-                          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
-                            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                          <div className="mt-auto flex items-center gap-1.5 text-sm text-neutral-500">
+                            <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400" />
                             <span className="font-semibold text-brand-dark">
                               {service.rating > 0 ? service.rating.toFixed(2) : '—'}
                             </span>
@@ -211,9 +212,9 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                           </div>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-4">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div className="relative flex-shrink-0">
+                        <div className="mt-4 flex shrink-0 items-center justify-between border-t border-neutral-100 pt-4">
+                          <div className="flex min-w-0 flex-1 items-center gap-3 pr-3">
+                            <div className="relative shrink-0">
                               <img
                                 src={service.author.avatar}
                                 alt={service.author.name}
@@ -231,12 +232,12 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                             </span>
                           </div>
 
-                          <div className="ml-4 flex-shrink-0 text-right">
+                          <div className="shrink-0 text-right">
                             <span className="mb-1 block text-xs font-normal leading-none text-neutral-400">
                               Starting at
                             </span>
                             <span
-                              className={`${discoverMedium} text-lg text-brand-dark`}
+                              className={`${discoverMedium} whitespace-nowrap text-lg tabular-nums text-brand-dark`}
                             >
                               {formatNPR(service.startingPrice)}
                             </span>
