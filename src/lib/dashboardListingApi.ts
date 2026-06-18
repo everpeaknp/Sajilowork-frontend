@@ -28,6 +28,11 @@ import type { Category, MarketplaceLanguage, MarketplaceSkill, PaginatedResponse
 
 export type ListingKind = 'service' | 'project' | 'job' | 'task';
 
+function hasPaginatedNextPage(data: unknown): boolean {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+  return Boolean((data as PaginatedResponse<unknown>).next);
+}
+
 const LISTING_TAG_PREFIX = 'listing:';
 
 /** Generic cover when a listing has no uploaded gallery images. */
@@ -616,8 +621,7 @@ export async function loadCategories(
     const batch = extractCategoryList(response.data);
     all.push(...batch);
 
-    const next = (response.data as PaginatedResponse<Category>).next;
-    if (!next || batch.length === 0) break;
+    if (!hasPaginatedNextPage(response.data) || batch.length === 0) break;
     page += 1;
   }
 
@@ -675,8 +679,7 @@ export async function loadAllSkills(): Promise<MarketplaceSkill[]> {
     const batch = extractSkillList(response.data);
     all.push(...batch);
 
-    const next = (response.data as PaginatedResponse<MarketplaceSkill>).next;
-    if (!next || batch.length === 0) break;
+    if (!hasPaginatedNextPage(response.data) || batch.length === 0) break;
     page += 1;
   }
 

@@ -50,8 +50,6 @@ export default function CheckoutWalletSummary({
   // block (see user request).
   if (kind === 'task' || kind === 'project') return null;
 
-  const balanceOnly = kind === 'task' || kind === 'project';
-
   if (loading) {
     return (
       <div className="mt-4 flex justify-center rounded-lg border border-neutral-200 bg-neutral-50/40 p-5">
@@ -63,17 +61,11 @@ export default function CheckoutWalletSummary({
   return (
     <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50/40 p-5">
       <div className="flex items-center justify-between gap-3 text-sm">
-        <span className="text-neutral-500">
-          {balanceOnly ? 'Available balance' : 'Wallet'}
-        </span>
+        <span className="text-neutral-500">Wallet</span>
         <span className="font-medium tabular-nums text-neutral-900">{formatNPR(walletAvailable)}</span>
       </div>
 
-      {balanceOnly ? (
-        <div className="mt-4 border-t border-neutral-200 pt-4">
-          <AddFundsLink />
-        </div>
-      ) : !walletSufficient ? (
+      {!walletSufficient ? (
         <div className="mt-4 border-t border-neutral-200 pt-4">
           <div className="flex items-start gap-2 text-sm text-amber-900">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -81,7 +73,7 @@ export default function CheckoutWalletSummary({
               <p className="font-medium">Insufficient wallet balance</p>
               <p className="mt-1 text-amber-800/90">
                 Load at least {formatNPR(totalHeld)} into your wallet{' '}
-                {COPY[kind as 'service' | 'job'].insufficientLead}.
+                {COPY[kind].insufficientLead}.
               </p>
               <AddFundsLink className="mt-3 text-amber-900 hover:text-amber-950" />
             </div>
@@ -90,7 +82,7 @@ export default function CheckoutWalletSummary({
       ) : (
         <>
           <div className="mt-3 flex items-center justify-between gap-3 border-t border-neutral-200 pt-3 text-sm">
-            <span className="text-neutral-500">{COPY[kind as 'service' | 'job'].heldLabel}</span>
+            <span className="text-neutral-500">{COPY[kind].heldLabel}</span>
             <span className="font-medium tabular-nums text-neutral-900">{formatNPR(totalHeld)}</span>
           </div>
           <div className="mt-4 border-t border-neutral-200 pt-4">
