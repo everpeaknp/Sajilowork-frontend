@@ -10,6 +10,7 @@ import { paymentService } from '@/services';
 import { serviceService } from '@/services/service.service';
 import type { FeePreview } from '@/services/payment.service';
 import type { Service, ServicePackage } from './serviceListData';
+import OfferTermsAcceptance from '@/components/task/modals/MakeOfferModal/OfferTermsAcceptance';
 
 interface ServicePurchaseModalProps {
   service: Service;
@@ -43,6 +44,8 @@ export default function ServicePurchaseModal({
   const [walletSufficient, setWalletSufficient] = useState(false);
   const [note, setNote] = useState('');
   const [noteExpanded, setNoteExpanded] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!service.slug) return;
@@ -52,6 +55,8 @@ export default function ServicePurchaseModal({
     const loadPreview = async () => {
       setLoading(true);
       setError(null);
+      setTermsAccepted(false);
+      setTermsError(null);
       try {
         const [previewRes, walletRes, feeRes] = await Promise.all([
           serviceService.getPurchasePreview(service.slug!, selectedPackage.id),
@@ -100,6 +105,12 @@ export default function ServicePurchaseModal({
 
   const handlePurchase = async () => {
     if (!service.slug) return;
+
+    if (!termsAccepted) {
+      setTermsError('Please accept the terms and conditions');
+      toast.error('Please accept the terms and conditions');
+      return;
+    }
 
     if (!walletSufficient) {
       setError('Insufficient wallet balance. Add funds before purchasing.');
@@ -273,6 +284,16 @@ export default function ServicePurchaseModal({
                   {error}
                 </p>
               ) : null}
+
+              <OfferTermsAcceptance
+                id="service-offer-terms-accepted"
+                checked={termsAccepted}
+                onChange={(checked) => {
+                  setTermsAccepted(checked);
+                  if (checked) setTermsError(null);
+                }}
+                error={termsError ?? undefined}
+              />
             </>
           )}
         </div>
@@ -293,7 +314,7 @@ export default function ServicePurchaseModal({
           <button
             type="button"
             onClick={() => void handlePurchase()}
-            disabled={loading || purchasing || !walletSufficient}
+            disabled={loading || purchasing || !walletSufficient || !termsAccepted}
             className={`flex items-center justify-center gap-2 rounded-xl bg-[#52C47F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#49b071] disabled:cursor-not-allowed disabled:opacity-50 ${
               embedded ? 'w-full' : 'flex-1'
             }`}
@@ -302,20 +323,6 @@ export default function ServicePurchaseModal({
             Pay {formatNPR(totalHeld)}
           </button>
         </div>
-        {embedded ? (
-          <p className="px-0 pb-5 text-xs leading-relaxed text-neutral-500 sm:px-0">
-            <span className="font-semibold">Terms &amp; conditions. </span>
-            By submitting this offer, I agree to complete the task if accepted and to the platform&apos;s{' '}
-            <a href="/terms" className="font-semibold text-brand-emerald hover:underline">
-              Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="/privacy" className="font-semibold text-brand-emerald hover:underline">
-              Privacy Policy
-            </a>
-            .
-          </p>
-        ) : null}
       </div>
   );
 

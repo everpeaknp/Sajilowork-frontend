@@ -46,6 +46,10 @@ export default function CheckoutWalletSummary({
   walletSufficient,
   loading,
 }: CheckoutWalletSummaryProps) {
+  // For task + project checkouts we intentionally hide the "Available balance" / "Add funds"
+  // block (see user request).
+  if (kind === 'task' || kind === 'project') return null;
+
   const balanceOnly = kind === 'task' || kind === 'project';
 
   if (loading) {

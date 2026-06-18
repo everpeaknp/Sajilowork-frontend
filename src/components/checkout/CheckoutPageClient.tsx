@@ -202,7 +202,9 @@ export default function CheckoutPageClient({ kind, slug }: CheckoutPageClientPro
     return 0;
   }, [kind, project, selectedPackage, task]);
 
-  const showWalletSummary = kind === 'task' || kind === 'project' || kind === 'service';
+  // Hide wallet "Available balance" / "Add funds to wallet" section on task + project checkouts.
+  // (The wallet summary is still shown for `service` purchases.)
+  const showWalletSummary = kind === 'service';
 
   const walletPreview = useCheckoutWalletPreview({
     kind,

@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Sparkles,
   CheckCircle2,
   Search as SearchIcon,
   ThumbsUp,
@@ -168,22 +167,15 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
 
 export default function Hero({ onSearchSubmit }: HeroProps) {
   return (
-    <section className="relative flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#f8fcf9] to-white px-4 py-20 sm:px-6 sm:py-32 lg:min-h-[calc(80dvh-4rem)] lg:px-12">
+    <section className="relative flex flex-col items-center justify-start overflow-hidden bg-gradient-to-b from-[#f8fcf9] to-white px-4 pt-10 pb-20 sm:px-6 sm:pt-12 sm:pb-28 lg:min-h-[calc(80dvh-4rem)] lg:px-12">
       {/* Decorative clean geometric background elements */}
       <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-emerald/5 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-[600px] w-[600px] translate-x-1/3 translate-y-1/3 rounded-full bg-amber-500/5 blur-3xl" aria-hidden />
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 h-[520px] w-[520px] translate-x-1/4 translate-y-1/4 rounded-full bg-amber-100/20 blur-[120px] mix-blend-soft-light opacity-50"
+        aria-hidden
+      />
       
       <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center text-center">
-        <motion.div
-          className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-emerald/20 bg-brand-emerald/5 px-4 py-1.5 text-sm font-medium text-brand-emerald"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Sparkles className="h-4 w-4" />
-          <span>The smarter way to outsource tasks</span>
-        </motion.div>
-
         <motion.h1
           className={`${discoverHeadline} mb-6 text-[2.25rem] leading-[1.1] text-brand-dark sm:text-5xl md:text-6xl lg:text-7xl`}
           initial={{ opacity: 0, y: 15 }}
