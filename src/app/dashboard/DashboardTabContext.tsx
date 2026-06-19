@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -80,6 +81,20 @@ function resolveActiveTab(
 }
 
 export function DashboardTabProvider({ children }: { children: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <p className="text-sm text-neutral-500">Loading…</p>
+        </div>
+      }
+    >
+      <DashboardTabProviderInner>{children}</DashboardTabProviderInner>
+    </Suspense>
+  );
+}
+
+function DashboardTabProviderInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();

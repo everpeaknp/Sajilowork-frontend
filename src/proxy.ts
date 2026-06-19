@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isJwtNotExpired } from '@/lib/jwt';
 
 const protectedRoutes = [
   '/my-tasks',
@@ -13,29 +14,20 @@ const protectedRoutes = [
   '/message',
   '/profile',
   '/settings',
-  '/dashboard',
 ];
 
 const authRoutes = ['/signin', '/signup'];
 
-function isAccessTokenValid(token: string | undefined): boolean {
-  if (!token) return false;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = typeof payload.exp === 'number' ? payload.exp * 1000 : 0;
-    return exp > Date.now();
-  } catch {
-    return false;
-  }
-}
-
 function hasValidSession(request: NextRequest): boolean {
   const accessToken = request.cookies.get('access_token')?.value;
-  if (isAccessTokenValid(accessToken)) return true;
-
-  // Allow through when access expired but refresh is still valid — client will refresh.
   const refreshToken = request.cookies.get('refresh_token')?.value;
-  return isAccessTokenValid(refreshToken);
+
+  if (!accessToken && !refreshToken) return false;
+  if (isJwtNotExpired(accessToken)) return true;
+  if (isJwtNotExpired(refreshToken)) return true;
+
+  // Both cookies present — allow through so the client can refresh the session.
+  return !!(accessToken && refreshToken);
 }
 
 export default function proxy(request: NextRequest) {
@@ -52,6 +44,10 @@ export default function proxy(request: NextRequest) {
   }
 
   if (isAuthRoute && isAuthenticated) {
+    const redirect = request.nextUrl.searchParams.get('redirect');
+    if (redirect && redirect.startsWith('/') && !redirect.startsWith('//')) {
+      return NextResponse.redirect(new URL(redirect, request.url));
+    }
     return NextResponse.redirect(new URL('/', request.url));
   }
 

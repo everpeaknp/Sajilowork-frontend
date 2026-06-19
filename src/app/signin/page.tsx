@@ -11,6 +11,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import { useAuth } from '@/hooks/useAuth';
+import { tokenManager } from '@/lib/api/client';
+import { persistSessionCookies, clearSessionCookies } from '@/lib/authSession';
+import { isJwtNotExpired } from '@/lib/jwt';
 import { loginSchema, type LoginFormData } from '@/validations';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { oauthErrorMessage } from '@/lib/socialAuth';
@@ -32,6 +35,23 @@ export default function SignInPage() {
     if (oauthError) {
       toast.error(oauthErrorMessage(oauthError));
     }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const redirect = searchParams.get('redirect');
+    const access = tokenManager.getAccessToken();
+    const refresh = tokenManager.getRefreshToken();
+    if (!redirect || !access || !refresh) return;
+
+    if (!isJwtNotExpired(access) && !isJwtNotExpired(refresh)) {
+      tokenManager.clearTokens();
+      void clearSessionCookies();
+      return;
+    }
+
+    void persistSessionCookies(access, refresh).then(() => {
+      window.location.assign(redirect);
+    });
   }, [searchParams]);
 
   const {
@@ -57,7 +77,13 @@ export default function SignInPage() {
       if (result.success) {
         toast.success('Welcome back!');
         const redirect = searchParams.get('redirect');
-        router.push(redirect && redirect.startsWith('/') ? redirect : '/discover');
+        const target =
+          redirect && redirect.startsWith('/') && !redirect.startsWith('//')
+            ? redirect
+            : '/discover';
+        // Brief delay so session cookies are committed before navigation.
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        window.location.assign(target);
       } else {
         const errorMsg =
           typeof result.error === 'string'

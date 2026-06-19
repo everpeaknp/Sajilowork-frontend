@@ -9,6 +9,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { User, AuthTokens, LoginCredentials, RegisterData } from '@/types';
 import { authService, tokenManager } from '@/services';
 import { normalizeUserFromApi } from '@/lib/userProfileSync';
+import { persistSessionCookies, clearSessionCookies } from '@/lib/authSession';
 
 interface AuthState {
   // State
@@ -42,86 +43,104 @@ export const useAuthStore = create<AuthState>()(
        * Initialize auth state from stored tokens
        */
       initialize: async () => {
-        const access = tokenManager.getAccessToken();
-        const refresh = tokenManager.getRefreshToken();
-        const tokens = (access && refresh) ? { access, refresh } : null;
-        
-        if (!tokens) {
-          set({ isAuthenticated: false, user: null, tokens: null });
-          return;
-        }
+        set({ isLoading: true });
 
-        // Check if token is expired
-        if (tokenManager.isTokenExpired(tokens.access)) {
-          try {
-            await authService.refreshToken();
-            const refreshedAccess = tokenManager.getAccessToken();
-            const refreshedRefresh = tokenManager.getRefreshToken();
-            const refreshedTokens = (refreshedAccess && refreshedRefresh) 
-              ? { access: refreshedAccess, refresh: refreshedRefresh } 
-              : null;
-            set({ tokens: refreshedTokens });
-          } catch (error) {
-            // Token refresh failed, clear auth state
-            tokenManager.clearTokens();
-            set({ isAuthenticated: false, user: null, tokens: null });
+        try {
+          const access = tokenManager.getAccessToken();
+          const refresh = tokenManager.getRefreshToken();
+          const tokens = access && refresh ? { access, refresh } : null;
+
+          if (!tokens) {
+            set({ isAuthenticated: false, user: null, tokens: null, error: null });
             return;
           }
-        }
 
-        const activeAccess = tokenManager.getAccessToken();
-        const activeRefresh = tokenManager.getRefreshToken();
-        const activeTokens =
-          activeAccess && activeRefresh
-            ? { access: activeAccess, refresh: activeRefresh }
-            : tokens;
+          await persistSessionCookies(tokens.access, tokens.refresh);
 
-        // Fetch current user
-        try {
-          set({ isLoading: true });
-          const response = await authService.getCurrentUser();
+          if (tokenManager.isTokenExpired(tokens.access)) {
+            try {
+              await authService.refreshToken();
+            } catch {
+              tokenManager.clearTokens();
+              void clearSessionCookies();
+              set({ isAuthenticated: false, user: null, tokens: null, error: null });
+              return;
+            }
+          }
 
-          if (response.success && response.data) {
+          const activeAccess = tokenManager.getAccessToken();
+          const activeRefresh = tokenManager.getRefreshToken();
+          const activeTokens =
+            activeAccess && activeRefresh
+              ? { access: activeAccess, refresh: activeRefresh }
+              : tokens;
+
+          try {
+            const response = await authService.getCurrentUser();
+
+            if (response.success && response.data) {
+              set({
+                user: normalizeUserFromApi(response.data as unknown as Record<string, unknown>),
+                tokens: activeTokens,
+                isAuthenticated: true,
+                error: null,
+              });
+              return;
+            }
+
             set({
-              user: normalizeUserFromApi(response.data as unknown as Record<string, unknown>),
               tokens: activeTokens,
               isAuthenticated: true,
-              isLoading: false,
-              error: null,
+              error: response.message || 'Failed to fetch user profile',
             });
-            return;
-          }
+          } catch (error: unknown) {
+            const status =
+              typeof error === 'object' && error !== null && 'status' in error
+                ? Number((error as { status?: number }).status)
+                : 0;
 
-          // Profile fetch failed but tokens may still be valid — keep session.
-          set({
-            tokens: activeTokens,
-            isAuthenticated: true,
-            isLoading: false,
-            error: response.message || 'Failed to fetch user profile',
-          });
-        } catch (error: any) {
-          const status = typeof error?.status === 'number' ? error.status : 0;
-          const shouldClearSession = status === 401 || status === 403;
+            if (status === 401 || status === 403) {
+              try {
+                await authService.refreshToken();
+                const retry = await authService.getCurrentUser();
+                if (retry.success && retry.data) {
+                  const refreshedAccess = tokenManager.getAccessToken();
+                  const refreshedRefresh = tokenManager.getRefreshToken();
+                  set({
+                    user: normalizeUserFromApi(retry.data as unknown as Record<string, unknown>),
+                    tokens:
+                      refreshedAccess && refreshedRefresh
+                        ? { access: refreshedAccess, refresh: refreshedRefresh }
+                        : activeTokens,
+                    isAuthenticated: true,
+                    error: null,
+                  });
+                  return;
+                }
+              } catch {
+                // fall through to logout
+              }
 
-          if (shouldClearSession) {
-            tokenManager.clearTokens();
+              tokenManager.clearTokens();
+              void clearSessionCookies();
+              set({
+                isAuthenticated: false,
+                user: null,
+                tokens: null,
+                error: 'Session expired',
+              });
+              return;
+            }
+
             set({
-              isAuthenticated: false,
-              user: null,
-              tokens: null,
-              isLoading: false,
-              error: error.message || 'Session expired',
+              tokens: activeTokens,
+              isAuthenticated: true,
+              error:
+                error instanceof Error ? error.message : 'Failed to fetch user profile',
             });
-            return;
           }
-
-          // Server/network errors: keep tokens so a refresh does not feel like logout.
-          set({
-            tokens: activeTokens,
-            isAuthenticated: true,
-            isLoading: false,
-            error: error.message || 'Failed to fetch user profile',
-          });
+        } finally {
+          set({ isLoading: false });
         }
       },
 

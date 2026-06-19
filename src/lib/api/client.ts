@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 import { ApiResponse, ApiError } from '@/types';
+import { isJwtNotExpired } from '@/lib/jwt';
+import { persistSessionCookies, clearSessionCookies } from '@/lib/authSession';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -71,6 +73,12 @@ const REFRESH_TOKEN_KEY = 'refresh_token';
 // Token Management
 // ============================================================================
 
+const COOKIE_OPTIONS = {
+  path: '/',
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+};
+
 export const tokenManager = {
   getAccessToken: (): string | null => {
     if (typeof window === 'undefined') return null;
@@ -84,42 +92,32 @@ export const tokenManager = {
 
   setTokens: (access: string, refresh: string): void => {
     if (typeof window === 'undefined') return;
-    
-    // Store in cookies (HttpOnly would be set by backend in production)
-    Cookies.set(ACCESS_TOKEN_KEY, access, { 
-      expires: 1, // 1 day
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    });
-    
-    Cookies.set(REFRESH_TOKEN_KEY, refresh, { 
-      expires: 7, // 7 days
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+
+    Cookies.set(ACCESS_TOKEN_KEY, access, {
+      ...COOKIE_OPTIONS,
+      expires: 1,
     });
 
-    // Fallback to localStorage
+    Cookies.set(REFRESH_TOKEN_KEY, refresh, {
+      ...COOKIE_OPTIONS,
+      expires: 7,
+    });
+
     localStorage.setItem(ACCESS_TOKEN_KEY, access);
     localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
   },
 
   clearTokens: (): void => {
     if (typeof window === 'undefined') return;
-    
-    Cookies.remove(ACCESS_TOKEN_KEY);
-    Cookies.remove(REFRESH_TOKEN_KEY);
+
+    Cookies.remove(ACCESS_TOKEN_KEY, { path: '/' });
+    Cookies.remove(REFRESH_TOKEN_KEY, { path: '/' });
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   },
 
   isTokenExpired: (token: string): boolean => {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() >= exp;
-    } catch {
-      return true;
-    }
+    return !isJwtNotExpired(token);
   }
 };
 
@@ -327,8 +325,10 @@ class ApiClient {
               { refresh: refreshToken }
             );
 
-            const { access } = response.data;
-            tokenManager.setTokens(access, refreshToken);
+            const { access, refresh } = response.data;
+            const newRefresh = typeof refresh === 'string' ? refresh : refreshToken;
+            tokenManager.setTokens(access, newRefresh);
+            void persistSessionCookies(access, newRefresh);
 
             // Retry all queued requests
             this.processQueue(null);
@@ -372,12 +372,14 @@ class ApiClient {
    */
   private handleAuthFailure(): void {
     tokenManager.clearTokens();
+    void clearSessionCookies();
 
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
       const onAuthPage = path.startsWith('/signin') || path.startsWith('/signup');
       if (!onAuthPage) {
-        window.location.href = '/signin';
+        const redirect = encodeURIComponent(path);
+        window.location.href = `/signin?redirect=${redirect}`;
       }
     }
   }

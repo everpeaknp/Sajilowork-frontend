@@ -1,8 +1,11 @@
 /**
  * Upload Service — /api/v1/uploads/uploads/
+ * Images prefer Cloudinary when backend CLOUDINARY_* env is configured.
  */
 
 import { apiClient } from '@/lib/api/client';
+import { getMediaUrl } from '@/lib/utils';
+import { isImageFile, tryUploadImageToCloudinary } from '@/services/cloudinary.service';
 import type { ApiResponse } from '@/types';
 
 export type UploadFileType = 'image' | 'document' | 'video' | 'audio' | 'other';
@@ -20,14 +23,45 @@ export interface UploadRecord {
   created_at: string;
 }
 
+function cloudinaryAsUploadRecord(file: File, url: string, publicId?: string): UploadRecord {
+  return {
+    id: publicId || url,
+    file: url,
+    file_name: file.name,
+    file_type: 'image',
+    file_size: file.size,
+    mime_type: file.type || 'image/jpeg',
+    status: 'completed',
+    is_public: true,
+    is_active: true,
+    created_at: new Date().toISOString(),
+  };
+}
+
 class UploadService {
   private readonly BASE = '/uploads/uploads';
 
   async upload(
     file: File,
-    options?: { file_type?: UploadFileType; is_public?: boolean },
+    options?: { file_type?: UploadFileType; is_public?: boolean; folder?: string },
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<UploadRecord>> {
+    if (isImageFile(file)) {
+      const cloudinaryResult = await tryUploadImageToCloudinary(file, {
+        folder: options?.folder,
+        onProgress,
+      });
+
+      if (cloudinaryResult?.url) {
+        return {
+          success: true,
+          message: 'Upload successful',
+          data: cloudinaryAsUploadRecord(file, cloudinaryResult.url, cloudinaryResult.public_id),
+          errors: null,
+        };
+      }
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     if (options?.file_type) formData.append('file_type', options.file_type);
@@ -45,7 +79,17 @@ class UploadService {
       formData.set('file_type', inferredType);
     }
 
-    return apiClient.upload<UploadRecord>(`${this.BASE}/`, formData, onProgress);
+    const response = await apiClient.upload<UploadRecord>(`${this.BASE}/`, formData, onProgress);
+    if (response.success && response.data?.file) {
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          file: getMediaUrl(response.data.file),
+        },
+      };
+    }
+    return response;
   }
 
   async list(): Promise<ApiResponse<UploadRecord[]>> {
@@ -53,7 +97,10 @@ class UploadService {
     if (!res.success || !res.data) return res as ApiResponse<UploadRecord[]>;
     const raw = res.data;
     const list = Array.isArray(raw) ? raw : raw.results ?? [];
-    return { ...res, data: list };
+    return {
+      ...res,
+      data: list.map((item) => ({ ...item, file: getMediaUrl(item.file) })),
+    };
   }
 
   async remove(id: string): Promise<ApiResponse<void>> {
@@ -62,7 +109,7 @@ class UploadService {
 
   /** Public URL from upload record */
   fileUrl(upload: UploadRecord): string {
-    return upload.file;
+    return getMediaUrl(upload.file);
   }
 }
 

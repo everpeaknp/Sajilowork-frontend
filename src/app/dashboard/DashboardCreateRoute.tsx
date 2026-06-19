@@ -23,6 +23,7 @@ import {
   taskToProjectFormData,
   taskToServiceFormData,
   uploadTaskFiles,
+  syncTaskGallery,
 } from '@/lib/dashboardListingApi';
 import {
   buildPostTaskApiPayload,
@@ -155,10 +156,14 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         if (!response.success || !response.data) {
           throw new Error(response.message || 'Failed to update service');
         }
-        const galleryFiles = uploads.galleryFiles;
-        if (galleryFiles.length) {
-          await uploadTaskFiles(response.data.id, galleryFiles);
-        }
+        await syncTaskGallery(
+          {
+            id: response.data.id,
+            attachments: response.data.attachments ?? editTask.attachments,
+          },
+          uploads.keptGalleryUrls,
+          uploads.galleryFiles,
+        );
         toast.success('Service updated');
         router.push(listHref('services'));
         return;

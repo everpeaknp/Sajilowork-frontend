@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from '@/lib/api/client';
+import { isImageFile, tryUploadImageToCloudinary } from '@/services/cloudinary.service';
 import { 
   Task, 
   Category,
@@ -185,9 +186,23 @@ export const taskService = {
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<TaskAttachment>> {
     const formData = new FormData();
-    formData.append('file', file);
     formData.append('task', taskId);
-    
+
+    if (isImageFile(file)) {
+      const cloudinaryResult = await tryUploadImageToCloudinary(file, {
+        folder: `sajilowork/task_attachments/${taskId}`,
+        onProgress,
+      });
+
+      if (cloudinaryResult?.url) {
+        formData.append('file_url', cloudinaryResult.url);
+        formData.append('file_name', file.name);
+        formData.append('file_size', String(file.size));
+        return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
+      }
+    }
+
+    formData.append('file', file);
     return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
   },
 

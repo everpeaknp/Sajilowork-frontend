@@ -125,6 +125,11 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+
+    const timeoutId = window.setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 12_000);
+
     void dashboardService
       .getMyOverview()
       .then((res) => {
@@ -139,8 +144,10 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
+      window.clearTimeout(timeoutId);
     };
   }, [role]);
 

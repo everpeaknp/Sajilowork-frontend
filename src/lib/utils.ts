@@ -21,6 +21,11 @@ export function getMediaUrl(path: string | null | undefined): string {
     return trimmed;
   }
 
+  // Cloudinary public IDs or folder paths returned by the API
+  if (trimmed.includes('res.cloudinary.com') || trimmed.startsWith('image/upload/')) {
+    return trimmed.startsWith('http') ? trimmed : `https://res.cloudinary.com/${trimmed.replace(/^\/+/, '')}`;
+  }
+
   // Frontend static assets — do not prefix with API host
   if (trimmed.startsWith('/images/') || trimmed.startsWith('/default-avatar')) {
     return trimmed;

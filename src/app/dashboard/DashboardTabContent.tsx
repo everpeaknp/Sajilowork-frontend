@@ -1,29 +1,75 @@
 'use client';
 
-import DashboardOverview from './DashboardOverview';
-import DashboardProposals from './DashboardProposals';
-import DashboardSaved from './DashboardSaved';
-import DashboardMessages from './DashboardMessages';
-import DashboardReviews from './DashboardReviews';
-import DashboardQuestions from './DashboardQuestions';
-import DashboardWallet from './DashboardWallet';
-import DashboardServices from './DashboardServices';
-import DashboardJobs from './DashboardJobs';
-import DashboardTasks from './DashboardTasks';
-import DashboardProjects from './DashboardProjects';
-import DashboardFreelancerProjects from './DashboardFreelancerProjects';
-import DashboardProfile from './DashboardProfile';
-import DashboardSettings from './DashboardSettings';
-import DashboardContracts from './DashboardContracts';
-import DashboardOrders from './DashboardOrders';
-import DashboardEmployerBids from './DashboardEmployerBids';
-import DashboardEmployerApplications from './DashboardEmployerApplications';
+import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDashboardTab } from './DashboardTabContext';
 import { useAuthStore } from '@/store';
 import { isTabAllowedForRole, type DashboardSidebarRole } from './dashboardTabs';
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
+
+function TabPanelLoading() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <p className="text-sm text-neutral-500">Loading…</p>
+    </div>
+  );
+}
+
+const DashboardOverview = dynamic(() => import('./DashboardOverview'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardProposals = dynamic(() => import('./DashboardProposals'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardSaved = dynamic(() => import('./DashboardSaved'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardMessages = dynamic(() => import('./DashboardMessages'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardReviews = dynamic(() => import('./DashboardReviews'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardQuestions = dynamic(() => import('./DashboardQuestions'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardWallet = dynamic(() => import('./DashboardWallet'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardServices = dynamic(() => import('./DashboardServices'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardJobs = dynamic(() => import('./DashboardJobs'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardTasks = dynamic(() => import('./DashboardTasks'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardProjects = dynamic(() => import('./DashboardProjects'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardFreelancerProjects = dynamic(() => import('./DashboardFreelancerProjects'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardProfile = dynamic(() => import('./DashboardProfile'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardSettings = dynamic(() => import('./DashboardSettings'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardContracts = dynamic(() => import('./DashboardContracts'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardOrders = dynamic(() => import('./DashboardOrders'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardEmployerBids = dynamic(() => import('./DashboardEmployerBids'), {
+  loading: () => <TabPanelLoading />,
+});
+const DashboardEmployerApplications = dynamic(() => import('./DashboardEmployerApplications'), {
+  loading: () => <TabPanelLoading />,
+});
 
 const TAB_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',

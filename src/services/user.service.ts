@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from '@/lib/api/client';
+import { tryUploadImageToCloudinary } from '@/services/cloudinary.service';
 import { 
   User, 
   UserSkill,
@@ -41,8 +42,18 @@ export const userService = {
    */
   async uploadProfileImage(file: File, onProgress?: (progress: number) => void): Promise<ApiResponse<User>> {
     const formData = new FormData();
-    formData.append('profile_image', file);
-    
+
+    const cloudinaryResult = await tryUploadImageToCloudinary(file, {
+      folder: 'sajilowork/profile_images',
+      onProgress,
+    });
+
+    if (cloudinaryResult?.url) {
+      formData.append('image_url', cloudinaryResult.url);
+    } else {
+      formData.append('profile_image', file);
+    }
+
     return apiClient.upload<User>('/users/me/upload-image/', formData, onProgress);
   },
 

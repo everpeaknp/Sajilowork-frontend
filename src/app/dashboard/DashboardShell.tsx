@@ -1,13 +1,29 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import Navbar from '@/components/common/navbar';
 import { useAuthStore } from '@/store/auth.store';
-import DashboardSidebar from './DashboardSidebar';
+import { tokenManager } from '@/lib/api/client';
+import dynamic from 'next/dynamic';
 import { DashboardTabProvider, useDashboardTab } from './DashboardTabContext';
 import { DashboardRoleSwitchProvider } from './DashboardRoleSwitchContext';
+
+const DashboardSidebar = dynamic(() => import('./DashboardSidebar'), {
+  loading: () => (
+    <div className="fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-[17.5rem] bg-white sm:top-16 sm:h-[calc(100dvh-4rem)]" />
+  ),
+  ssr: false,
+});
+
+function DashboardLoading() {
+  return (
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[#f0efec]">
+      <p className="text-sm text-neutral-500">Loading dashboard...</p>
+    </div>
+  );
+}
 
 function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const refreshUser = useAuthStore((s) => s.refreshUser);
@@ -16,25 +32,28 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   const isLoading = useAuthStore((s) => s.isLoading);
   const pathname = usePathname();
   const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
   const { activeTab, setActiveTab, mobileOpen, setMobileOpen, sidebarCollapsed, toggleSidebarCollapsed } =
     useDashboardTab();
 
   useEffect(() => {
-    void initialize();
+    void initialize().finally(() => setAuthChecked(true));
   }, [initialize]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      void refreshUser();
-    }
-  }, [isAuthenticated, refreshUser]);
-
-  useEffect(() => {
-    if (isLoading) return;
+    if (!authChecked || isLoading) return;
     if (!isAuthenticated) {
+      const hasTokens =
+        !!tokenManager.getAccessToken() && !!tokenManager.getRefreshToken();
+      if (hasTokens) return;
       router.replace(`/signin?redirect=${encodeURIComponent(pathname || '/dashboard')}`);
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [authChecked, isAuthenticated, isLoading, pathname, router]);
+
+  useEffect(() => {
+    if (!authChecked || !isAuthenticated) return;
+    void refreshUser();
+  }, [authChecked, isAuthenticated, refreshUser]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -48,6 +67,17 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       document.body.style.overflow = previousOverflow;
     };
   }, [mobileOpen]);
+
+  if (!authChecked || (isLoading && !isAuthenticated)) {
+    return <DashboardLoading />;
+  }
+
+  const hasTokens =
+    !!tokenManager.getAccessToken() && !!tokenManager.getRefreshToken();
+
+  if (!isAuthenticated && !hasTokens) {
+    return null;
+  }
 
   return (
     <div className="mobile-bottom-nav-offset min-h-[100dvh] overflow-x-clip bg-[#f0efec] font-body md:pb-0">
@@ -103,10 +133,12 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardTabProvider>
-      <DashboardRoleSwitchProvider>
-        <DashboardShellInner>{children}</DashboardShellInner>
-      </DashboardRoleSwitchProvider>
-    </DashboardTabProvider>
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardTabProvider>
+        <DashboardRoleSwitchProvider>
+          <DashboardShellInner>{children}</DashboardShellInner>
+        </DashboardRoleSwitchProvider>
+      </DashboardTabProvider>
+    </Suspense>
   );
 }

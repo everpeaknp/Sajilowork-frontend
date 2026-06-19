@@ -5,6 +5,7 @@
  */
 
 import { apiClient, tokenManager } from '@/lib/api/client';
+import { persistSessionCookies, clearSessionCookies } from '@/lib/authSession';
 import { 
   User, 
   AuthTokens, 
@@ -22,6 +23,7 @@ export const authService = {
     
     if (response.success && response.data.tokens) {
       tokenManager.setTokens(response.data.tokens.access, response.data.tokens.refresh);
+      await persistSessionCookies(response.data.tokens.access, response.data.tokens.refresh);
     }
     
     return response;
@@ -43,6 +45,7 @@ export const authService = {
         
         // Store tokens
         tokenManager.setTokens(access, refresh);
+        await persistSessionCookies(access, refresh);
 
         // Return in expected format
         return {
@@ -93,6 +96,7 @@ export const authService = {
       // Common case: refresh token already expired/invalid. We still clear local session.
     } finally {
       tokenManager.clearTokens();
+      await clearSessionCookies();
     }
     
     return {
@@ -118,7 +122,10 @@ export const authService = {
     });
     
     if (response.success && response.data) {
-      tokenManager.setTokens(response.data.access, refreshToken);
+      const newRefresh =
+        typeof response.data.refresh === 'string' ? response.data.refresh : refreshToken;
+      tokenManager.setTokens(response.data.access, newRefresh);
+      await persistSessionCookies(response.data.access, newRefresh);
     }
     
     return response;

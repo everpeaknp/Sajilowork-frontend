@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { tokenManager } from '@/lib/api/client';
 import { authService } from '@/services/auth.service';
+import { persistSessionCookies } from '@/lib/authSession';
 import { useAuthStore } from '@/store';
 import { normalizeUserFromApi } from '@/lib/userProfileSync';
 import { oauthErrorMessage } from '@/lib/socialAuth';
@@ -44,6 +45,7 @@ function AuthCallbackContent() {
     (async () => {
       try {
         tokenManager.setTokens(access, refresh);
+        await persistSessionCookies(access, refresh);
         const response = await authService.getCurrentUser();
 
         if (cancelled) return;
@@ -59,7 +61,7 @@ function AuthCallbackContent() {
             error: null,
           });
           toast.success('Signed in successfully');
-          router.replace(redirectTo);
+          window.location.assign(redirectTo);
           return;
         }
 

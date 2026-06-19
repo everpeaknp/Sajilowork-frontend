@@ -23,6 +23,8 @@ export { rulesService } from './rules.service';
 export { walletService } from './wallet.service';
 export { disputeService } from './dispute.service';
 export { uploadService } from './upload.service';
+export { cloudinaryService } from './cloudinary.service';
+export { mediaUploadService } from './mediaUpload.service';
 export { locationService } from './location.service';
 export { employerService } from './employer.service';
 export { freelancerService } from './freelancer.service';

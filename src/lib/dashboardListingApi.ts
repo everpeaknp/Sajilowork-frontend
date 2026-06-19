@@ -19,12 +19,12 @@ import {
   flattenCategoriesForSelect,
   formatTaskDisplayTitle,
 } from '@/lib/taskUtils';
-import { getMediaUrl } from '@/lib/utils';
+import { getMediaUrl, isTaskImageAttachment } from '@/lib/utils';
 import { projectService } from '@/services/project.service';
 import { jobService } from '@/services/job.service';
 import { serviceService } from '@/services/service.service';
 import { taskService } from '@/services/task.service';
-import type { Category, MarketplaceLanguage, MarketplaceSkill, PaginatedResponse, Task } from '@/types';
+import type { Category, MarketplaceLanguage, MarketplaceSkill, PaginatedResponse, Task, TaskAttachment } from '@/types';
 
 export type ListingKind = 'service' | 'project' | 'job' | 'task';
 
@@ -602,6 +602,36 @@ export async function uploadTaskFiles(taskId: string, files: File[]) {
   for (const file of files) {
     await taskService.uploadAttachment(taskId, file);
   }
+}
+
+function normalizeGalleryUrl(url: string): string {
+  const resolved = getMediaUrl(url.trim());
+  try {
+    const parsed = new URL(resolved);
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/$/, '').toLowerCase();
+  } catch {
+    return resolved.replace(/\/$/, '').toLowerCase();
+  }
+}
+
+/** Delete removed gallery images and upload new ones when editing a listing. */
+export async function syncTaskGallery(
+  task: { id: string; attachments?: TaskAttachment[] },
+  keptGalleryUrls: string[],
+  newGalleryFiles: File[],
+) {
+  const kept = new Set(keptGalleryUrls.map((url) => normalizeGalleryUrl(url)));
+  const imageAttachments =
+    task.attachments?.filter((item) => isTaskImageAttachment(item.file_type)) ?? [];
+
+  for (const attachment of imageAttachments) {
+    const attachmentUrl = normalizeGalleryUrl(attachment.file_url);
+    if (!kept.has(attachmentUrl)) {
+      await taskService.deleteAttachment(attachment.id);
+    }
+  }
+
+  await uploadTaskFiles(task.id, newGalleryFiles);
 }
 
 export async function loadCategories(
