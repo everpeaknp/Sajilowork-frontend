@@ -92,7 +92,7 @@ export default function FreelancerSlugPage() {
     }
 
     if (!currentUser) {
-      router.push(`/login?redirect=${encodeURIComponent(`/freelancers/${slug}`)}`);
+      router.push(`/signin?redirect=${encodeURIComponent(`/freelancers/${slug}`)}`);
       return;
     }
 
@@ -183,6 +183,7 @@ export default function FreelancerSlugPage() {
             isProfileConfigured={bundle.isProfileConfigured}
             isOwnProfile={currentUser?.id === bundle.extras.userId}
             onInquire={handleContact}
+            onNotification={triggerNotification}
           />
         )}
       </main>

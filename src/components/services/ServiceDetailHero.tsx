@@ -18,7 +18,6 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
   return (
     <div className="relative flex min-h-[150px] w-full items-stretch overflow-hidden rounded-[20px] border border-neutral-200/30 bg-[#f3f3f3] shadow-sm sm:min-h-[165px] md:min-h-[175px] lg:min-h-[190px]">
       <div className="pointer-events-none absolute -left-10 -top-10 z-0 h-28 w-28 select-none rounded-full bg-[#fcd074]/90 sm:-left-12 sm:-top-12 sm:h-36 sm:w-36" />
-      <div className="pointer-events-none absolute -bottom-16 -right-10 z-0 h-44 w-44 select-none rounded-full bg-[#f4b8a8]/70 sm:-bottom-20 sm:-right-12 sm:h-52 sm:w-52" />
 
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.18] mix-blend-overlay">
         <svg

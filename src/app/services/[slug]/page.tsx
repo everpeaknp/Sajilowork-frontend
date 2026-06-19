@@ -7,6 +7,7 @@ import { discoverDmSans } from '@/components/LangingHome/landingTypography';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleServicePage from '@/components/services/SingleServicePage';
+import ServiceDetailSkeleton from '@/components/services/ServiceDetailSkeleton';
 import type { Service } from '@/components/services/serviceListData';
 import { fetchPublicServiceBySlug } from '@/lib/serviceApi';
 
@@ -57,9 +58,13 @@ export default function ServiceSlugPage() {
   if (loading || !service) {
     return (
       <div
-        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset flex min-h-screen items-center justify-center bg-white text-sm text-neutral-500`}
+        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white font-normal text-black selection:bg-[#1161fe] selection:text-white tracking-tight`}
       >
-        Loading service…
+        <Navbar />
+        <main className="w-full max-w-none overflow-x-clip px-0 py-0 pb-2 md:pb-0">
+          <ServiceDetailSkeleton />
+        </main>
+        <Footer />
       </div>
     );
   }

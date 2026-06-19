@@ -24,6 +24,15 @@ type UseProfileReviewActionsOptions = {
   onReviewCreated?: (review: ProfileReviewRow) => void;
 };
 
+function mapEligibleTasks(
+  rows: Array<{ task_id: string; task_title?: string }>,
+): ReviewEligibleTask[] {
+  return rows.map((row) => ({
+    taskId: String(row.task_id),
+    taskTitle: row.task_title?.trim() || 'Completed work',
+  }));
+}
+
 export function useProfileReviewActions({
   revieweeUserId,
   fixedTaskId,
@@ -45,7 +54,13 @@ export function useProfileReviewActions({
       return;
     }
 
-    if (!revieweeUserId && !fixedTaskId) {
+    if (fixedTaskId) {
+      setEligibleTasks([{ taskId: fixedTaskId, taskTitle: 'Completed work' }]);
+      setSelectedTaskId(fixedTaskId);
+      return;
+    }
+
+    if (!revieweeUserId) {
       setEligibleTasks([]);
       setSelectedTaskId('');
       return;
@@ -55,19 +70,23 @@ export function useProfileReviewActions({
     setLoadingEligible(true);
 
     void reviewService
-      .getPendingInvitations()
-      .then((res) => {
+      .getEligibleReviewTasks(revieweeUserId)
+      .then(async (res) => {
         if (cancelled) return;
-        const invitations = res.success && Array.isArray(res.data) ? res.data : [];
+
+        if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+          const tasks = mapEligibleTasks(res.data);
+          setEligibleTasks(tasks);
+          setSelectedTaskId(tasks[0]?.taskId ?? '');
+          return;
+        }
+
+        const fallback = await reviewService.getPendingInvitations();
+        if (cancelled) return;
+
+        const invitations = fallback.success && Array.isArray(fallback.data) ? fallback.data : [];
         const tasks = invitations
           .filter((inv) => {
-            const taskId = String((inv as { task: string }).task);
-            if (fixedTaskId && taskId !== fixedTaskId) {
-              return false;
-            }
-            if (!revieweeUserId) {
-              return Boolean(fixedTaskId);
-            }
             const revieweeId = (inv as { reviewee_id?: string }).reviewee_id;
             return revieweeId && revieweeId === revieweeUserId;
           })
@@ -76,6 +95,7 @@ export function useProfileReviewActions({
             taskTitle:
               (inv as { task_title?: string }).task_title?.trim() || 'Completed work',
           }));
+
         setEligibleTasks(tasks);
         setSelectedTaskId(tasks[0]?.taskId ?? '');
       })
@@ -97,7 +117,7 @@ export function useProfileReviewActions({
   const requireAuth = useCallback(() => {
     if (isAuthenticated) return true;
     showToast('Sign in to interact with reviews.');
-    router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+    router.push(`/signin?redirect=${encodeURIComponent(window.location.pathname)}`);
     return false;
   }, [isAuthenticated, router, showToast]);
 
@@ -188,7 +208,9 @@ export function useProfileReviewActions({
           setEligibleTasks((prev) => prev.filter((task) => task.taskId !== taskId));
           if (!fixedTaskId) {
             setSelectedTaskId((current) =>
-              current === taskId ? (eligibleTasks.find((t) => t.taskId !== taskId)?.taskId ?? '') : current,
+              current === taskId
+                ? (eligibleTasks.find((t) => t.taskId !== taskId)?.taskId ?? '')
+                : current,
             );
           }
           return true;
@@ -197,10 +219,10 @@ export function useProfileReviewActions({
         return false;
       } catch (err) {
         showToast(err instanceof Error ? err.message : 'Could not submit your review.');
-        return false;
       } finally {
         setSubmitting(false);
       }
+      return false;
     },
     [
       defaultReviewerRole,

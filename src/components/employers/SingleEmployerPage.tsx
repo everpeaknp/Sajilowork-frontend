@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import {
   Star,
   MapPin,
@@ -21,6 +21,7 @@ import EmployerGallery from './EmployerGallery';
 import EmployerProjectsList from './EmployerProjectsList';
 import EmployerReviews, { type SingleReview } from './EmployerReviews';
 import EmployerJobsAt from './EmployerJobsAt';
+import { parseEmployerUserId } from '@/lib/profileReviewDisplay';
 
 interface SingleEmployerPageProps {
   employer: Employer;
@@ -278,6 +279,20 @@ export default function SingleEmployerPage({
   const [messageText, setMessageText] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [emailInput, setEmailInput] = useState('');
+  const [displayRating, setDisplayRating] = useState(employer.rating);
+  const [displayReviewCount, setDisplayReviewCount] = useState(employer.reviewCount);
+
+  useEffect(() => {
+    setDisplayRating(employer.rating);
+    setDisplayReviewCount(employer.reviewCount);
+  }, [employer.id, employer.rating, employer.reviewCount]);
+
+  const revieweeUserId = parseEmployerUserId(employer.id);
+
+  const handleReviewsUpdated = useCallback((count: number, average: number) => {
+    setDisplayReviewCount((prev) => (prev === count ? prev : count));
+    setDisplayRating((prev) => (prev === average ? prev : average));
+  }, []);
 
   const handleSendMessage = (e: FormEvent) => {
     e.preventDefault();
@@ -453,7 +468,7 @@ export default function SingleEmployerPage({
                         <div className="flex items-center gap-1.5">
                           <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-500" />
                           <span>
-                            {employer.rating.toFixed(2)} {employer.reviewCount} reviews
+                            {displayRating.toFixed(2)} {displayReviewCount} reviews
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -562,14 +577,11 @@ export default function SingleEmployerPage({
                   <EmployerReviews
                     employerId={employer.id}
                     employerName={employer.name}
-                    initialRating={employer.rating}
+                    initialRating={displayRating}
                     initialReviews={reviews}
                     preferApiReviews={reviews !== undefined}
-                    revieweeUserId={
-                      employer.id.startsWith('emp-user-')
-                        ? employer.id.slice('emp-user-'.length)
-                        : undefined
-                    }
+                    revieweeUserId={revieweeUserId}
+                    onReviewsUpdated={handleReviewsUpdated}
                     showToast={onNotification}
                   />
                 </div>

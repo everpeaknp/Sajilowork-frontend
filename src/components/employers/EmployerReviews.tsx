@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, type FormEvent } from 'react';
+import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react';
 import { Star, ArrowUpRight, ThumbsUp, ThumbsDown, Filter, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProfileReviewActions } from '@/hooks/useProfileReviewActions';
@@ -236,7 +236,14 @@ export default function EmployerReviews({
   const calculatedAverage =
     calculatedCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / calculatedCount : initialRating;
 
+  const lastNotifiedRef = useRef<{ count: number; average: number } | null>(null);
+
   useEffect(() => {
+    const prev = lastNotifiedRef.current;
+    if (prev?.count === calculatedCount && prev?.average === calculatedAverage) {
+      return;
+    }
+    lastNotifiedRef.current = { count: calculatedCount, average: calculatedAverage };
     onReviewsUpdated?.(calculatedCount, calculatedAverage);
   }, [calculatedCount, calculatedAverage, onReviewsUpdated]);
 
@@ -653,7 +660,10 @@ export default function EmployerReviews({
 
         <button
           type="submit"
-          disabled={preferApiReviews && (submitting || (isAuthenticated && eligibleTasks.length === 0))}
+          disabled={
+            preferApiReviews &&
+            (submitting || loadingEligible || (isAuthenticated && eligibleTasks.length === 0))
+          }
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#5BBB7B] px-6 py-3 text-sm font-normal text-white transition-colors hover:bg-[#4da86c] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span>{submitting ? 'Sending…' : 'Send'}</span>

@@ -35,6 +35,15 @@ function resolveOwnerId(task: Task): string | undefined {
   return undefined;
 }
 
+function resolveAssignedTaskerId(task: Task): string | undefined {
+  const assignee = task.assigned_tasker;
+  if (!assignee) return undefined;
+  if (typeof assignee === 'object' && assignee.id) {
+    return String(assignee.id);
+  }
+  return String(assignee);
+}
+
 export function mapTaskQuestionToProjectItem(
   question: TaskQuestion,
   buyerName: string,
@@ -286,6 +295,7 @@ export function mapTaskToPublicProject(task: Task): Project {
     slug: task.slug,
     isBookmarked: Boolean(task.is_bookmarked),
     ownerId: resolveOwnerId(task),
+    assignedTaskerId: resolveAssignedTaskerId(task),
     employerSlug,
     title: formatTaskDisplayTitle(task.title || ''),
     category: resolveCategoryName(task),
@@ -336,4 +346,22 @@ export async function fetchPublicProjectBySlug(slug: string): Promise<Project | 
     return null;
   }
   return mapTaskToPublicProject(response.data);
+}
+
+/** Minimal task shape for reviews on public project pages. */
+export function projectToReviewTask(project: Project): Task {
+  return {
+    id: project.id,
+    slug: project.slug,
+    title: project.title,
+    description: project.description,
+    status: (project.status || 'open') as Task['status'],
+    owner: project.ownerId,
+    assigned_tasker: project.assignedTaskerId,
+    owner_name: project.companyName,
+    owner_business_name: project.companyName,
+    budget_type: project.type === 'Hourly' ? 'hourly' : 'fixed',
+    budget_amount: project.budgetMin,
+    location_type: project.location === 'Remote' ? 'remote' : 'in_person',
+  };
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import FreelancerProfileHero from './FreelancerProfileHero';
@@ -14,15 +15,31 @@ interface SingleFreelancerPageProps {
   isProfileConfigured?: boolean;
   isOwnProfile?: boolean;
   onInquire?: (name: string, message?: string) => void | Promise<void>;
+  onNotification?: (message: string) => void;
 }
 
 export default function SingleFreelancerPage({
-  freelancer,
+  freelancer: initialFreelancer,
   profileExtras,
   isProfileConfigured = true,
   isOwnProfile = false,
   onInquire,
+  onNotification,
 }: SingleFreelancerPageProps) {
+  const [freelancer, setFreelancer] = useState(initialFreelancer);
+
+  useEffect(() => {
+    setFreelancer(initialFreelancer);
+  }, [initialFreelancer]);
+
+  const handleReviewsUpdated = useCallback((count: number, average: number) => {
+    setFreelancer((prev) => {
+      if (prev.reviews === count && prev.rating === average) {
+        return prev;
+      }
+      return { ...prev, reviews: count, rating: average };
+    });
+  }, []);
   if (!isProfileConfigured) {
     return (
       <div className="select-none bg-white pb-12 pt-8 font-normal text-black">
@@ -45,6 +62,8 @@ export default function SingleFreelancerPage({
         freelancer={freelancer}
         profileExtras={profileExtras}
         onContact={(name, message) => onInquire?.(name, message)}
+        showToast={onNotification}
+        onReviewsUpdated={handleReviewsUpdated}
       />
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">

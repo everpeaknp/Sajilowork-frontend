@@ -44,6 +44,8 @@ export interface Project {
   schedule?: ProjectScheduleInfo;
   /** Task owner id — used for Q&A permissions on API-backed projects */
   ownerId?: string;
+  /** Assigned freelancer/tasker when the project is in progress or completed */
+  assignedTaskerId?: string;
   /** Owner username for public employer profile links */
   employerSlug?: string;
   /** Poster profile image when loaded from API */

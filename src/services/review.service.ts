@@ -47,6 +47,11 @@ export type ReviewInvitation = {
   is_expired?: boolean;
 };
 
+export type ReviewEligibleTask = {
+  task_id: string;
+  task_title: string;
+};
+
 export type HelpfulVote = 'helpful' | 'not_helpful' | 'clear';
 
 class ReviewService {
@@ -100,6 +105,12 @@ class ReviewService {
 
   async getPendingInvitations(): Promise<ApiResponse<ReviewInvitation[]>> {
     return apiClient.get(`${this.BASE_PATH}/pending_invitations/`);
+  }
+
+  async getEligibleReviewTasks(revieweeUserId: string): Promise<ApiResponse<ReviewEligibleTask[]>> {
+    return apiClient.get(`${this.BASE_PATH}/eligible_tasks/`, {
+      params: { reviewee_id: revieweeUserId },
+    });
   }
 
   async voteHelpful(reviewId: string, vote: HelpfulVote): Promise<ApiResponse<Review>> {

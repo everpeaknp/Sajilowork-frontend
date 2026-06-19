@@ -31,6 +31,8 @@ interface FreelancerAboutProps {
   profileExtras?: FreelancerProfileExtras;
   onContact?: (name: string, message: string) => void | Promise<void>;
   embedded?: boolean;
+  showToast?: (message: string) => void;
+  onReviewsUpdated?: (count: number, average: number) => void;
 }
 
 interface MetricItem {
@@ -58,6 +60,8 @@ export default function FreelancerAbout({
   profileExtras,
   onContact,
   embedded = false,
+  showToast,
+  onReviewsUpdated,
 }: FreelancerAboutProps) {
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
@@ -358,6 +362,8 @@ export default function FreelancerAbout({
               initialReviews={reviewItems}
               preferApiReviews={Boolean(profileExtras)}
               revieweeUserId={profileExtras?.userId}
+              showToast={showToast}
+              onReviewsUpdated={onReviewsUpdated}
             />
           </div>
 

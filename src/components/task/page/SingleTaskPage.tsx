@@ -184,13 +184,11 @@ export default function SingleTaskPage({
               </div>
             ) : null}
 
-            {task.status === 'completed' ? (
-              <div className="mt-12 border-t border-neutral-200 pt-10">
-                <TaskReviewsSection task={task} />
-              </div>
-            ) : null}
-
             <TaskCancellationPolicy />
+
+            <div className="mt-12 border-t border-neutral-200 pt-10">
+              <TaskReviewsSection task={task} onReviewSubmitted={onTaskUpdated} />
+            </div>
 
             {managementActions ? (
               <MyTaskManagementSection actions={managementActions} />

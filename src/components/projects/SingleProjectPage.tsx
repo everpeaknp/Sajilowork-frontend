@@ -19,7 +19,10 @@ import ProjectGallery from './ProjectGallery';
 import ProjectSendProposal from './ProjectSendProposal';
 import ProjectShareSaveActions from './ProjectShareSaveActions';
 import TaskOffersQuestionsTabs from '@/components/task/page/TaskOffersQuestionsTabs';
+import TaskCancellationPolicy from '@/components/task/page/TaskCancellationPolicy';
+import TaskReviewsSection from '@/components/reviews/TaskReviewsSection';
 import TaskStatusTimeline from '@/components/common/TaskStatusTimeline';
+import { projectToReviewTask } from '@/lib/projectApi';
 import { getProjectDetailPath } from './projectSlug';
 import type { Project } from './projectListData';
 
@@ -128,6 +131,16 @@ export default function SingleProjectPage({
                 <ProjectSendProposal project={project} onSubmitted={handleProposalSubmitted} />
               </div>
             ) : null}
+
+            <TaskCancellationPolicy listingLabel="project" />
+
+            <div className="mt-12 border-t border-neutral-200 pt-10">
+              <TaskReviewsSection
+                task={projectToReviewTask(project)}
+                listingKind="project"
+                onReviewSubmitted={handleProposalSubmitted}
+              />
+            </div>
           </div>
 
           <ProjectSidebar

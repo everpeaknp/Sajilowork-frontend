@@ -7,6 +7,7 @@ import { discoverDmSans } from '@/components/LangingHome/landingTypography';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleTaskPage from '@/components/task/page/SingleTaskPage';
+import TaskDetailSkeleton from '@/components/task/page/TaskDetailSkeleton';
 import { taskService } from '@/services/task.service';
 import type { Task } from '@/types';
 
@@ -78,9 +79,13 @@ export default function TaskDetailPage() {
   if (loading || !task) {
     return (
       <div
-        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset flex min-h-screen items-center justify-center bg-white text-sm text-neutral-500`}
+        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white font-normal text-black selection:bg-[#1161fe] selection:text-white tracking-tight`}
       >
-        Loading task…
+        <Navbar />
+        <main className="w-full max-w-none overflow-x-clip px-0 py-0 pb-2 md:pb-0">
+          <TaskDetailSkeleton />
+        </main>
+        <Footer />
       </div>
     );
   }
