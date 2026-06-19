@@ -5,7 +5,8 @@
  */
 
 import { apiClient } from '@/lib/api/client';
-import { tryUploadImageToCloudinary } from '@/services/cloudinary.service';
+import { getCloudinaryFolder } from '@/lib/cloudinaryFolders';
+import { getCloudinaryConfig, uploadImageToCloudinary } from '@/services/cloudinary.service';
 import { 
   User, 
   UserSkill,
@@ -42,13 +43,13 @@ export const userService = {
    */
   async uploadProfileImage(file: File, onProgress?: (progress: number) => void): Promise<ApiResponse<User>> {
     const formData = new FormData();
+    const config = await getCloudinaryConfig();
 
-    const cloudinaryResult = await tryUploadImageToCloudinary(file, {
-      folder: 'sajilowork/profile_images',
-      onProgress,
-    });
-
-    if (cloudinaryResult?.url) {
+    if (config.enabled) {
+      const cloudinaryResult = await uploadImageToCloudinary(file, {
+        folder: await getCloudinaryFolder('usersProfiles'),
+        onProgress,
+      });
       formData.append('image_url', cloudinaryResult.url);
     } else {
       formData.append('profile_image', file);

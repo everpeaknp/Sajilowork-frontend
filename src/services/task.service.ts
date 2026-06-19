@@ -5,7 +5,8 @@
  */
 
 import { apiClient } from '@/lib/api/client';
-import { isImageFile, tryUploadImageToCloudinary } from '@/services/cloudinary.service';
+import { getCloudinaryFolder } from '@/lib/cloudinaryFolders';
+import { getCloudinaryConfig, isImageFile, uploadImageToCloudinary } from '@/services/cloudinary.service';
 import { 
   Task, 
   Category,
@@ -189,16 +190,23 @@ export const taskService = {
     formData.append('task', taskId);
 
     if (isImageFile(file)) {
-      const cloudinaryResult = await tryUploadImageToCloudinary(file, {
-        folder: `sajilowork/task_attachments/${taskId}`,
-        onProgress,
-      });
+      const config = await getCloudinaryConfig();
+      if (config.enabled) {
+        try {
+          const cloudinaryResult = await uploadImageToCloudinary(file, {
+            folder: await getCloudinaryFolder('tasks', taskId),
+            onProgress,
+          });
 
-      if (cloudinaryResult?.url) {
-        formData.append('file_url', cloudinaryResult.url);
-        formData.append('file_name', file.name);
-        formData.append('file_size', String(file.size));
-        return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
+          if (cloudinaryResult.url) {
+            formData.append('file_url', cloudinaryResult.url);
+            formData.append('file_name', file.name);
+            formData.append('file_size', String(file.size));
+            return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
+          }
+        } catch {
+          // Fall back to backend attachment upload (local media or server Cloudinary).
+        }
       }
     }
 

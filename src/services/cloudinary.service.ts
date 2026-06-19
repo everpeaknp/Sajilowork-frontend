@@ -4,10 +4,13 @@
  */
 
 import { apiClient } from '@/lib/api/client';
+import { DEFAULT_CLOUDINARY_ROOT } from '@/lib/cloudinaryConstants';
 import type { ApiResponse } from '@/types';
 
 export type CloudinaryConfig = {
   enabled: boolean;
+  browser_upload?: boolean;
+  server_upload?: boolean;
   cloud_name: string;
   upload_preset: string;
   folder: string;
@@ -25,9 +28,11 @@ let configPromise: Promise<CloudinaryConfig> | null = null;
 
 const DEFAULT_CONFIG: CloudinaryConfig = {
   enabled: false,
+  browser_upload: false,
+  server_upload: false,
   cloud_name: '',
   upload_preset: '',
-  folder: 'sajilowork',
+  folder: DEFAULT_CLOUDINARY_ROOT,
 };
 
 export function isImageFile(file: File): boolean {
@@ -146,15 +151,18 @@ export async function uploadImageToCloudinary(
     throw new Error('Cloudinary is not configured on the server');
   }
 
-  if (config.upload_preset) {
-    try {
-      return await uploadImageDirect(file, config, options?.folder);
-    } catch (directError) {
-      console.warn('Cloudinary unsigned upload failed, trying server upload', directError);
-    }
+  if (config.upload_preset && config.browser_upload !== false) {
+    return uploadImageDirect(file, config, options?.folder);
   }
 
-  return uploadImageViaBackend(file, options?.folder, options?.onProgress);
+  if (config.server_upload) {
+    return uploadImageViaBackend(file, options?.folder, options?.onProgress);
+  }
+
+  throw new Error(
+    'Cloudinary browser upload preset is missing or server credentials are invalid. ' +
+      'Create an unsigned upload preset in Cloudinary and set CLOUDINARY_UPLOAD_PRESET.',
+  );
 }
 
 export async function tryUploadImageToCloudinary(
