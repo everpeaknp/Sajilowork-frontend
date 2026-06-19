@@ -5,8 +5,8 @@
  */
 
 import { apiClient } from '@/lib/api/client';
-import { getCloudinaryFolder } from '@/lib/cloudinaryFolders';
-import { getCloudinaryConfig, isImageFile, uploadImageToCloudinary } from '@/services/cloudinary.service';
+import { getCloudinaryFolder, type CloudinaryFolderKey } from '@/lib/cloudinaryFolders';
+import { getCloudinaryConfig, isImageFile, uploadFileToCloudinary } from '@/services/cloudinary.service';
 import { 
   Task, 
   Category,
@@ -184,17 +184,28 @@ export const taskService = {
   async uploadAttachment(
     taskId: string, 
     file: File,
-    onProgress?: (progress: number) => void
+    options?: {
+      folder?: string;
+      listingKind?: 'task' | 'service' | 'project' | 'job';
+      onProgress?: (progress: number) => void;
+    },
   ): Promise<ApiResponse<TaskAttachment>> {
     const formData = new FormData();
     formData.append('task', taskId);
+    const onProgress = options?.onProgress;
 
     if (isImageFile(file)) {
       const config = await getCloudinaryConfig();
       if (config.enabled) {
         try {
-          const cloudinaryResult = await uploadImageToCloudinary(file, {
-            folder: await getCloudinaryFolder('tasks', taskId),
+          const folder =
+            options?.folder ??
+            (options?.listingKind && options.listingKind !== 'task'
+              ? await getCloudinaryFolder(options.listingKind as CloudinaryFolderKey)
+              : await getCloudinaryFolder('tasks', taskId));
+
+          const cloudinaryResult = await uploadFileToCloudinary(file, {
+            folder,
             onProgress,
           });
 

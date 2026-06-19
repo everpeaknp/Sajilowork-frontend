@@ -163,6 +163,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
           },
           uploads.keptGalleryUrls,
           uploads.galleryFiles,
+          'service',
         );
         toast.success('Service updated');
         router.push(listHref('services'));
@@ -176,7 +177,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
 
       const galleryFiles = uploads.galleryFiles;
       if (galleryFiles.length) {
-        await uploadTaskFiles(response.data.id, galleryFiles);
+        await uploadTaskFiles(response.data.id, galleryFiles, 'service');
       }
 
       toast.success('Service saved');
@@ -240,15 +241,26 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     try {
       const categoryId = await resolveCategoryId(data.category, categories);
       const payload = projectFormToTaskPayload(data, categoryId);
+      const galleryFiles = uploads.galleryFiles;
       const attachmentFiles = uploads.attachmentFiles;
+      const allNewFiles = [...galleryFiles, ...attachmentFiles];
 
       if (isEdit && editTask?.slug) {
         const response = await projectService.updateProject(editTask.slug, payload);
         if (!response.success || !response.data) {
           throw new Error(response.message || 'Failed to update project');
         }
+        await syncTaskGallery(
+          {
+            id: response.data.id,
+            attachments: response.data.attachments ?? editTask.attachments,
+          },
+          uploads.keptGalleryUrls,
+          galleryFiles,
+          'project',
+        );
         if (attachmentFiles.length) {
-          await uploadTaskFiles(response.data.id, attachmentFiles);
+          await uploadTaskFiles(response.data.id, attachmentFiles, 'project');
         }
         toast.success('Project updated');
         router.push(listHref('project'));
@@ -260,8 +272,8 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         throw new Error(response.message || 'Failed to create project');
       }
 
-      if (attachmentFiles.length) {
-        await uploadTaskFiles(response.data.id, attachmentFiles);
+      if (allNewFiles.length) {
+        await uploadTaskFiles(response.data.id, allNewFiles, 'project');
       }
 
       const publicSlug = response.data.slug;
@@ -299,7 +311,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
           throw new Error(response.message || 'Failed to update task');
         }
         if (data.images.length) {
-          await uploadTaskFiles(response.data.id, data.images);
+          await uploadTaskFiles(response.data.id, data.images, 'task');
         }
         toast.success('Task updated');
         router.push(listHref('task'));
@@ -312,7 +324,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
       }
 
       if (data.images.length) {
-        await uploadTaskFiles(response.data.id, data.images);
+        await uploadTaskFiles(response.data.id, data.images, 'task');
       }
 
       const publicSlug = response.data.slug;

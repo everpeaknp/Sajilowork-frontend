@@ -9,6 +9,7 @@ import { tokenManager } from '@/lib/api/client';
 import dynamic from 'next/dynamic';
 import { DashboardTabProvider, useDashboardTab } from './DashboardTabContext';
 import { DashboardRoleSwitchProvider } from './DashboardRoleSwitchContext';
+import DashboardLoadingFallback from './DashboardLoadingFallback';
 
 const DashboardSidebar = dynamic(() => import('./DashboardSidebar'), {
   loading: () => (
@@ -18,11 +19,7 @@ const DashboardSidebar = dynamic(() => import('./DashboardSidebar'), {
 });
 
 function DashboardLoading() {
-  return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-[#f0efec]">
-      <p className="text-sm text-neutral-500">Loading dashboard...</p>
-    </div>
-  );
+  return <DashboardLoadingFallback message="Loading dashboard..." />;
 }
 
 function DashboardShellInner({ children }: { children: React.ReactNode }) {

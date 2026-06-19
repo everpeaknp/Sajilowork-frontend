@@ -4,6 +4,7 @@ export type CloudinaryFolderKey =
   | 'users'
   | 'usersProfiles'
   | 'usersCovers'
+  | 'employers'
   | 'tasks'
   | 'services'
   | 'projects'
@@ -15,6 +16,7 @@ const SUBFOLDERS: Record<CloudinaryFolderKey, string> = {
   users: 'Users',
   usersProfiles: 'Users/Profiles',
   usersCovers: 'Users/Covers',
+  employers: 'Employers',
   tasks: 'Tasks',
   services: 'Services',
   projects: 'Projects',

@@ -1,4 +1,6 @@
 import { apiClient } from '@/lib/api/client';
+import { getCloudinaryFolder } from '@/lib/cloudinaryFolders';
+import { getCloudinaryConfig, uploadFileToCloudinary } from '@/services/cloudinary.service';
 import type { ApiResponse, Task } from '@/types';
 
 export type EmployerAccountType = 'individual' | 'company';
@@ -146,7 +148,19 @@ export const employerService = {
 
   async uploadLogo(file: File): Promise<ApiResponse<EmployerProfileDto>> {
     const formData = new FormData();
-    formData.append('file', file);
+    const config = await getCloudinaryConfig();
+
+    if (config.enabled) {
+      const profile = await this.getMyEmployerProfile();
+      const userId = profile.data?.user_id ?? '';
+      const cloudinaryResult = await uploadFileToCloudinary(file, {
+        folder: await getCloudinaryFolder('employers', userId, 'Logos'),
+      });
+      formData.append('image_url', cloudinaryResult.url);
+    } else {
+      formData.append('file', file);
+    }
+
     return apiClient.upload<EmployerProfileDto>('/users/me/employer-profile/logo/', formData);
   },
 
@@ -155,7 +169,19 @@ export const employerService = {
     altText?: string,
   ): Promise<ApiResponse<EmployerGalleryImageDto>> {
     const formData = new FormData();
-    formData.append('file', file);
+    const config = await getCloudinaryConfig();
+
+    if (config.enabled) {
+      const profile = await this.getMyEmployerProfile();
+      const userId = profile.data?.user_id ?? '';
+      const cloudinaryResult = await uploadFileToCloudinary(file, {
+        folder: await getCloudinaryFolder('employers', userId, 'Gallery'),
+      });
+      formData.append('image_url', cloudinaryResult.url);
+    } else {
+      formData.append('file', file);
+    }
+
     if (altText?.trim()) {
       formData.append('alt_text', altText.trim());
     }

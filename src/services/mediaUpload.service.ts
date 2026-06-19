@@ -35,19 +35,17 @@ export async function uploadMediaFile(
   file: File,
   options?: MediaUploadOptions,
 ): Promise<MediaUploadResult> {
-  if (isImageFile(file)) {
-    const cloudinaryResult = await cloudinaryService.tryUploadImage(file, {
-      folder: options?.folder,
-      onProgress: options?.onProgress,
-    });
+  const cloudinaryResult = await cloudinaryService.tryUploadFile(file, {
+    folder: options?.folder,
+    onProgress: options?.onProgress,
+  });
 
-    if (cloudinaryResult?.url) {
-      return {
-        url: cloudinaryResult.url,
-        storage: 'cloudinary',
-        public_id: cloudinaryResult.public_id,
-      };
-    }
+  if (cloudinaryResult?.url) {
+    return {
+      url: cloudinaryResult.url,
+      storage: 'cloudinary',
+      public_id: cloudinaryResult.public_id,
+    };
   }
 
   const response = await uploadService.upload(
@@ -55,6 +53,7 @@ export async function uploadMediaFile(
     {
       file_type: options?.file_type ?? inferFileType(file),
       is_public: options?.is_public,
+      folder: options?.folder,
     },
     options?.onProgress,
   );

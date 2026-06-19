@@ -64,11 +64,16 @@ export async function getCloudinaryConfig(force = false): Promise<CloudinaryConf
   return configPromise;
 }
 
-async function uploadImageDirect(
+function cloudinaryResourceType(file: File): 'image' | 'auto' {
+  return isImageFile(file) ? 'image' : 'auto';
+}
+
+async function uploadFileDirect(
   file: File,
   config: CloudinaryConfig,
   folder?: string,
 ): Promise<CloudinaryUploadResult> {
+  const resourceType = cloudinaryResourceType(file);
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', config.upload_preset);
@@ -76,7 +81,7 @@ async function uploadImageDirect(
   if (targetFolder) formData.append('folder', targetFolder);
 
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${config.cloud_name}/image/upload`,
+    `https://api.cloudinary.com/v1_1/${config.cloud_name}/${resourceType}/upload`,
     { method: 'POST', body: formData },
   );
 
@@ -115,7 +120,7 @@ async function uploadImageDirect(
   };
 }
 
-async function uploadImageViaBackend(
+async function uploadFileViaBackend(
   file: File,
   folder?: string,
   onProgress?: (progress: number) => void,
@@ -138,11 +143,10 @@ async function uploadImageViaBackend(
 }
 
 /**
- * Upload an image to Cloudinary using backend env credentials.
- * 1. Unsigned preset (browser → Cloudinary) when CLOUDINARY_UPLOAD_PRESET is set
- * 2. Server-side upload (browser → Django → Cloudinary) otherwise
+ * Upload a file to Cloudinary using backend env credentials.
+ * Images and documents (PDF, etc.) use image/auto resource types.
  */
-export async function uploadImageToCloudinary(
+export async function uploadFileToCloudinary(
   file: File,
   options?: { folder?: string; onProgress?: (progress: number) => void },
 ): Promise<CloudinaryUploadResult> {
@@ -152,11 +156,11 @@ export async function uploadImageToCloudinary(
   }
 
   if (config.upload_preset && config.browser_upload !== false) {
-    return uploadImageDirect(file, config, options?.folder);
+    return uploadFileDirect(file, config, options?.folder);
   }
 
   if (config.server_upload) {
-    return uploadImageViaBackend(file, options?.folder, options?.onProgress);
+    return uploadFileViaBackend(file, options?.folder, options?.onProgress);
   }
 
   throw new Error(
@@ -165,24 +169,41 @@ export async function uploadImageToCloudinary(
   );
 }
 
-export async function tryUploadImageToCloudinary(
+/** @deprecated Use uploadFileToCloudinary */
+export async function uploadImageToCloudinary(
+  file: File,
+  options?: { folder?: string; onProgress?: (progress: number) => void },
+): Promise<CloudinaryUploadResult> {
+  return uploadFileToCloudinary(file, options);
+}
+
+export async function tryUploadFileToCloudinary(
   file: File,
   options?: { folder?: string; onProgress?: (progress: number) => void },
 ): Promise<CloudinaryUploadResult | null> {
   try {
     const config = await getCloudinaryConfig();
     if (!config.enabled) return null;
-    return await uploadImageToCloudinary(file, options);
+    return await uploadFileToCloudinary(file, options);
   } catch {
     return null;
   }
 }
 
+export async function tryUploadImageToCloudinary(
+  file: File,
+  options?: { folder?: string; onProgress?: (progress: number) => void },
+): Promise<CloudinaryUploadResult | null> {
+  return tryUploadFileToCloudinary(file, options);
+}
+
 export const cloudinaryService = {
   getConfig: getCloudinaryConfig,
   isImageFile,
-  uploadImage: uploadImageToCloudinary,
-  tryUploadImage: tryUploadImageToCloudinary,
+  uploadFile: uploadFileToCloudinary,
+  uploadImage: uploadFileToCloudinary,
+  tryUploadFile: tryUploadFileToCloudinary,
+  tryUploadImage: tryUploadFileToCloudinary,
 };
 
 export default cloudinaryService;

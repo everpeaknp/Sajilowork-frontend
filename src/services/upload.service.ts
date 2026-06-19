@@ -5,7 +5,7 @@
 
 import { apiClient } from '@/lib/api/client';
 import { getMediaUrl } from '@/lib/utils';
-import { isImageFile, tryUploadImageToCloudinary } from '@/services/cloudinary.service';
+import { isImageFile, tryUploadFileToCloudinary } from '@/services/cloudinary.service';
 import type { ApiResponse } from '@/types';
 
 export type UploadFileType = 'image' | 'document' | 'video' | 'audio' | 'other';
@@ -47,7 +47,7 @@ class UploadService {
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<UploadRecord>> {
     if (isImageFile(file)) {
-      const cloudinaryResult = await tryUploadImageToCloudinary(file, {
+      const cloudinaryResult = await tryUploadFileToCloudinary(file, {
         folder: options?.folder,
         onProgress,
       });

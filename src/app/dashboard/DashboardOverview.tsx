@@ -23,6 +23,7 @@ import {
 } from '@/services/dashboard.service';
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
+import DashboardLoadingFallback from './DashboardLoadingFallback';
 import {
   getDashboardEditHref,
   getDashboardListHref,
@@ -228,9 +229,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
 
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
-      {loading ? (
-        <p className="text-sm text-neutral-500">Loading dashboard…</p>
-      ) : null}
+      {loading ? <DashboardLoadingFallback fullScreen={false} /> : null}
       <div className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card, idx) => {
           const IconComp = card.icon;

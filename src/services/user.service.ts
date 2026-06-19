@@ -6,7 +6,7 @@
 
 import { apiClient } from '@/lib/api/client';
 import { getCloudinaryFolder } from '@/lib/cloudinaryFolders';
-import { getCloudinaryConfig, uploadImageToCloudinary } from '@/services/cloudinary.service';
+import { getCloudinaryConfig, uploadFileToCloudinary } from '@/services/cloudinary.service';
 import { 
   User, 
   UserSkill,
@@ -46,7 +46,7 @@ export const userService = {
     const config = await getCloudinaryConfig();
 
     if (config.enabled) {
-      const cloudinaryResult = await uploadImageToCloudinary(file, {
+      const cloudinaryResult = await uploadFileToCloudinary(file, {
         folder: await getCloudinaryFolder('usersProfiles'),
         onProgress,
       });
@@ -248,7 +248,20 @@ export const userService = {
   ): Promise<ApiResponse<Badge>> {
     const formData = new FormData();
     formData.append('badge_type', data.badge_type);
-    formData.append('verification_document', file);
+    const config = await getCloudinaryConfig();
+
+    if (config.enabled) {
+      const profile = await this.getProfile();
+      const userId = profile.data?.id ?? '';
+      const cloudinaryResult = await uploadFileToCloudinary(file, {
+        folder: await getCloudinaryFolder('users', userId, 'Badges'),
+        onProgress,
+      });
+      formData.append('document_url', cloudinaryResult.url);
+    } else {
+      formData.append('verification_document', file);
+    }
+
     if (data.document_number?.trim()) {
       formData.append('document_number', data.document_number.trim());
     }
@@ -287,10 +300,24 @@ export const userService = {
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<PortfolioItem>> {
     const formData = new FormData();
-    formData.append('file', file);
     formData.append('title', data.title);
     if (data.description) {
       formData.append('description', data.description);
+    }
+
+    const config = await getCloudinaryConfig();
+    if (config.enabled) {
+      const profile = await this.getProfile();
+      const userId = profile.data?.id ?? '';
+      const cloudinaryResult = await uploadFileToCloudinary(file, {
+        folder: await getCloudinaryFolder('users', userId, 'Portfolio'),
+        onProgress,
+      });
+      formData.append('file_url', cloudinaryResult.url);
+      formData.append('file_type', file.type || 'application/octet-stream');
+      formData.append('file_size', String(file.size));
+    } else {
+      formData.append('file', file);
     }
     
     return apiClient.upload<PortfolioItem>('/users/me/portfolio/', formData, onProgress);
@@ -328,9 +355,21 @@ export const userService = {
     onProgress?: (progress: number) => void,
   ): Promise<ApiResponse<UserDocument>> {
     const formData = new FormData();
-    formData.append('file', file);
     formData.append('document_type', data.document_type);
     if (data.document_number) formData.append('document_number', data.document_number);
+
+    const config = await getCloudinaryConfig();
+    if (config.enabled) {
+      const profile = await this.getProfile();
+      const userId = profile.data?.id ?? '';
+      const cloudinaryResult = await uploadFileToCloudinary(file, {
+        folder: await getCloudinaryFolder('users', userId, 'Documents'),
+        onProgress,
+      });
+      formData.append('document_url', cloudinaryResult.url);
+    } else {
+      formData.append('file', file);
+    }
 
     return apiClient.upload<UserDocument>('/users/me/documents/', formData, onProgress);
   },

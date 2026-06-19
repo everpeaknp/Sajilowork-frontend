@@ -596,11 +596,15 @@ export async function fetchAssignedListingTasks(kind: ListingKind): Promise<Task
   return extractTaskList(response.data).filter((task) => getListingKind(task) === kind);
 }
 
-export async function uploadTaskFiles(taskId: string, files: File[]) {
+export async function uploadTaskFiles(
+  taskId: string,
+  files: File[],
+  listingKind: ListingKind = 'task',
+) {
   if (!files.length) return;
   // Upload in selection order so the first image stays the cover photo.
   for (const file of files) {
-    await taskService.uploadAttachment(taskId, file);
+    await taskService.uploadAttachment(taskId, file, { listingKind });
   }
 }
 
@@ -619,6 +623,7 @@ export async function syncTaskGallery(
   task: { id: string; attachments?: TaskAttachment[] },
   keptGalleryUrls: string[],
   newGalleryFiles: File[],
+  listingKind: ListingKind = 'task',
 ) {
   const kept = new Set(keptGalleryUrls.map((url) => normalizeGalleryUrl(url)));
   const imageAttachments =
@@ -631,7 +636,7 @@ export async function syncTaskGallery(
     }
   }
 
-  await uploadTaskFiles(task.id, newGalleryFiles);
+  await uploadTaskFiles(task.id, newGalleryFiles, listingKind);
 }
 
 export async function loadCategories(

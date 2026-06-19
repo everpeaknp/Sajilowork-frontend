@@ -10,7 +10,7 @@ import {
   type MouseEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUpRight, ChevronLeft, FolderKanban, MapPin, Paperclip, Trash2, X } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, FileText, FolderKanban, ImageIcon, MapPin, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { normalizeProjectFormData } from '@/lib/dashboardListingApi';
 import ScheduleFields, { type ScheduleTimeSlot } from '@/components/post-task/ScheduleFields';
@@ -23,14 +23,39 @@ import type { Project as PublicProject } from '@/components/projects/projectList
 import type { FormUploadsPayload, Project, UploadAttachment } from './types';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
 
-type AttachmentItem = { id: string; name: string; url: string; file?: File };
+type GalleryItem = {
+  id: string;
+  preview: string;
+  name: string;
+  savedUrl?: string;
+  file?: File;
+  kind: 'image' | 'document';
+};
 
-function toAttachmentItems(items: UploadAttachment[]): AttachmentItem[] {
-  return items.map((item, index) => ({
-    id: `saved-attachment-${index}-${item.url}`,
-    name: item.name,
-    url: item.url,
-  }));
+function isImageAttachment(item: { name: string; url: string }): boolean {
+  const combined = `${item.name} ${item.url}`.toLowerCase();
+  return (
+    /\.(jpe?g|png|webp|gif)(\?|$)/i.test(combined) ||
+    (item.url.includes('res.cloudinary.com') && item.url.includes('/image/'))
+  );
+}
+
+function isImageUploadFile(file: File): boolean {
+  if (file.type.startsWith('image/')) return true;
+  return /\.(jpe?g|png|webp|gif)$/i.test(file.name);
+}
+
+function toGalleryItems(items: UploadAttachment[]): GalleryItem[] {
+  return items.map((item, index) => {
+    const image = isImageAttachment(item);
+    return {
+      id: `saved-gallery-${index}-${item.url}`,
+      preview: image ? item.url : '',
+      name: item.name,
+      savedUrl: item.url,
+      kind: image ? 'image' : 'document',
+    };
+  });
 }
 
 export type CreateProjectFormData = {
@@ -404,10 +429,8 @@ export default function DashboardCreateProject({
       : baseCategoryOptions;
   const skillChoices = skillOptions.length > 0 ? skillOptions : SKILLS;
   const languageChoices = languageOptions.length > 0 ? languageOptions : LANGUAGES;
-  const [attachmentItems, setAttachmentItems] = useState<AttachmentItem[]>(() =>
-    toAttachmentItems(initialAttachments),
-  );
-  const attachmentInputRef = useRef<HTMLInputElement>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(() => toGalleryItems(initialAttachments));
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   const toggleSection = (id: string) => {
@@ -423,16 +446,18 @@ export default function DashboardCreateProject({
     if (!form.title.trim()) return;
 
     onSubmit(form, {
-      galleryFiles: [],
-      attachmentFiles: attachmentItems.filter((item) => item.file).map((item) => item.file as File),
-      keptGalleryUrls: [],
-      keptAttachments: attachmentItems
-        .filter((item) => !item.file)
-        .map((item) => ({ name: item.name, url: item.url })),
+      galleryFiles: galleryItems.filter((item) => item.file && item.kind === 'image').map((item) => item.file as File),
+      attachmentFiles: galleryItems.filter((item) => item.file && item.kind === 'document').map((item) => item.file as File),
+      keptGalleryUrls: galleryItems
+        .filter((item) => !item.file && item.kind === 'image')
+        .map((item) => item.preview),
+      keptAttachments: galleryItems
+        .filter((item) => !item.file && item.kind === 'document')
+        .map((item) => ({ name: item.name, url: item.savedUrl ?? item.preview })),
     });
   };
 
-  const onAttachmentsSelected = (list: FileList | null) => {
+  const onGallerySelected = (list: FileList | null) => {
     if (!list?.length) return;
 
     const allowedTypes = new Set([
@@ -457,25 +482,31 @@ export default function DashboardCreateProject({
       return;
     }
 
-    const nextItems = validFiles.map((file) => ({
-      id: `new-attachment-${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-      name: file.name,
-      url: URL.createObjectURL(file),
-      file,
-    }));
+    const nextItems: GalleryItem[] = validFiles.map((file) => {
+      const image = isImageUploadFile(file);
+      return {
+        id: `new-gallery-${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+        preview: image ? URL.createObjectURL(file) : '',
+        name: file.name,
+        file,
+        kind: image ? 'image' : 'document',
+      };
+    });
 
-    setAttachmentItems((prev) => [...prev, ...nextItems]);
+    setGalleryItems((prev) => [...prev, ...nextItems]);
   };
 
-  const removeAttachmentItem = (id: string) => {
-    setAttachmentItems((prev) => {
+  const removeGalleryItem = (id: string) => {
+    setGalleryItems((prev) => {
       const target = prev.find((item) => item.id === id);
-      if (target?.file && target.url.startsWith('blob:')) {
-        URL.revokeObjectURL(target.url);
+      if (target?.file && target.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(target.preview);
       }
       return prev.filter((item) => item.id !== id);
     });
   };
+
+  const firstImageIndex = galleryItems.findIndex((item) => item.kind === 'image');
 
   return (
     <div className={DASHBOARD_PAGE_ROOT}>
@@ -632,53 +663,70 @@ export default function DashboardCreateProject({
         </FormAccordionSection>
 
         <FormAccordionSection
-          title="Upload Attachments"
-          icon={Paperclip}
-          description="Files for freelancers (max 10 MB each)"
+          title="Attachment"
+          icon={ImageIcon}
+          description="Upload project attachments"
           isOpen={openSection === 'attachments'}
           onToggle={() => toggleSection('attachments')}
         >
           <input
-            ref={attachmentInputRef}
+            ref={galleryInputRef}
             type="file"
             multiple
             accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,image/jpeg,image/png,image/webp,image/gif,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             className="hidden"
             onChange={(e) => {
-              onAttachmentsSelected(e.target.files);
+              onGallerySelected(e.target.files);
               e.target.value = '';
             }}
           />
-          <button
-            type="button"
-            onClick={() => attachmentInputRef.current?.click()}
-            className="flex w-full cursor-pointer flex-col items-center justify-center rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] px-6 py-10 text-sm font-normal text-neutral-700 transition-colors hover:bg-[#ffede8]"
-          >
-            Upload Files
-          </button>
-          <p className="text-xs font-normal text-neutral-400">
-            JPG, PNG, WEBP, GIF, PDF, DOC, or DOCX — max 10 MB per file
-          </p>
-          {attachmentItems.length > 0 ? (
-            <ul className="space-y-2">
-              {attachmentItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-center justify-between gap-3 rounded-none border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-normal text-neutral-700"
+          <div className="flex flex-wrap gap-3">
+            {galleryItems.map((item, index) => (
+              <div
+                key={item.id}
+                className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 bg-neutral-50"
+              >
+                {item.kind === 'image' && item.preview ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={item.preview} alt="" className="h-full w-full object-cover" />
+                    {index === firstImageIndex ? (
+                      <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        Main
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-1 text-center">
+                    <FileText className="h-5 w-5 shrink-0 text-neutral-400" />
+                    <span className="line-clamp-2 text-[9px] font-normal leading-tight text-neutral-600">
+                      {item.name}
+                    </span>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeGalleryItem(item.id)}
+                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black"
+                  aria-label={`Remove ${item.name}`}
                 >
-                  <span className="truncate">{item.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeAttachmentItem(item.id)}
-                    className="shrink-0 rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-800"
-                    aria-label={`Remove ${item.name}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8]"
+            >
+              <ImageIcon className="h-5 w-5 text-neutral-400" />
+              Upload
+            </button>
+          </div>
+          <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500">
+            Upload multiple images and files — the first image is used as the main cover. JPG, PNG, WEBP,
+            GIF, PDF, DOC, or DOCX — max 10 MB per file.
+          </p>
         </FormAccordionSection>
         </div>
       </form>
