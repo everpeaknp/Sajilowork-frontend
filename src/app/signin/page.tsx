@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
@@ -18,7 +18,7 @@ import { loginSchema, type LoginFormData } from '@/validations';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { oauthErrorMessage } from '@/lib/socialAuth';
 
-export default function SignInPage() {
+function SignInPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isLoading } = useAuth();
@@ -246,5 +246,19 @@ export default function SignInPage() {
         <Footer />
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-emerald" />
+        </div>
+      }
+    >
+      <SignInPageContent />
+    </Suspense>
   );
 }

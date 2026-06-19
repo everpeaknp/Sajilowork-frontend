@@ -9,12 +9,12 @@
  * - v2: data (Base64 JSON payload) OR transaction_uuid/total_amount fields
  */
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { paymentService } from '@/services/payment.service';
 import { CheckCircle, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 
-export default function ESewaSuccessPage() {
+function ESewaSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
@@ -210,5 +210,23 @@ export default function ESewaSuccessPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ESewaSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <Loader2 className="h-16 w-16 text-primary animate-spin mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Verifying Payment</h1>
+            <p className="text-gray-600">Please wait while we confirm your payment with eSewa...</p>
+          </div>
+        </div>
+      }
+    >
+      <ESewaSuccessContent />
+    </Suspense>
   );
 }

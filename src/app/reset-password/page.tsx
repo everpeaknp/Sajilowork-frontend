@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "motion/react";
@@ -11,7 +11,7 @@ import Navbar from "@/components/common/navbar";
 import Footer from "@/components/common/footer";
 import authService from "@/services/auth.service";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [show, setShow] = useState(false);
@@ -144,3 +144,16 @@ export default function ResetPasswordPage() {
   );
 }
 
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-emerald" />
+        </div>
+      }
+    >
+      <ResetPasswordPageContent />
+    </Suspense>
+  );
+}

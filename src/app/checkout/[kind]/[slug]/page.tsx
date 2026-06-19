@@ -1,6 +1,8 @@
 'use client';
 
+import { Suspense } from 'react';
 import { notFound, useParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import CheckoutPageClient from '@/components/checkout/CheckoutPageClient';
 import { isCheckoutKind } from '@/lib/checkout';
 
@@ -13,5 +15,15 @@ export default function CheckoutPage() {
     notFound();
   }
 
-  return <CheckoutPageClient kind={kind} slug={slug} />;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-white">
+          <Loader2 className="h-8 w-8 animate-spin text-[#005fff]" />
+        </div>
+      }
+    >
+      <CheckoutPageClient kind={kind} slug={slug} />
+    </Suspense>
+  );
 }

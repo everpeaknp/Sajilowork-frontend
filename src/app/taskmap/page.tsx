@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { SlidersHorizontal, MapPin } from 'lucide-react';
@@ -42,7 +42,7 @@ const MapView = dynamic(() => import('@/components/task/MapView'), {
   loading: () => <TaskMapSkeleton />,
 });
 
-export default function App() {
+function TaskmapPageContent() {
   const searchParams = useSearchParams();
 
   /** Map marker click — centered preview */
@@ -651,5 +651,22 @@ export default function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function TaskmapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
+          <Navbar />
+          <main className="flex flex-1 overflow-hidden">
+            <TaskMapSkeleton />
+          </main>
+        </div>
+      }
+    >
+      <TaskmapPageContent />
+    </Suspense>
   );
 }
