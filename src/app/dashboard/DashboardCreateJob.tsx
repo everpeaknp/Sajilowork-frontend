@@ -3,10 +3,12 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
   type FormEvent,
+  type KeyboardEvent,
   type MouseEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
@@ -19,6 +21,7 @@ import {
   GraduationCap,
   ListChecks,
   Plus,
+  Search,
   Trash2,
   X,
 } from 'lucide-react';
@@ -149,15 +152,6 @@ const DURATIONS = [
   'Short term',
   'Long term',
 ];
-const ICON_TYPES: PublicJob['companyIconType'][] = ['wave', 'face', 'in', 'clover'];
-const LOGO_BACKGROUNDS = [
-  'bg-[#192338]',
-  'bg-[#3f3ebd]',
-  'bg-[#ff1a53]',
-  'bg-[#ab004b]',
-  'bg-[#0f766e]',
-  'bg-[#1d4ed8]',
-];
 const SKILLS = [
   'Figma',
   'React',
@@ -211,24 +205,69 @@ function SelectField({
   );
 }
 
+function normalizeSkillLabel(skill: string): string {
+  return skill.trim().replace(/\s+/g, ' ');
+}
+
+function skillKeysEqual(a: string, b: string): boolean {
+  return normalizeSkillLabel(a).toLowerCase() === normalizeSkillLabel(b).toLowerCase();
+}
+
+function findMatchingOption(input: string, options: string[]): string | undefined {
+  const normalized = normalizeSkillLabel(input).toLowerCase();
+  if (!normalized) return undefined;
+  return options.find((opt) => opt.toLowerCase() === normalized);
+}
+
+function findMatchingSelected(input: string, selected: string[]): string | undefined {
+  const normalized = normalizeSkillLabel(input).toLowerCase();
+  if (!normalized) return undefined;
+  return selected.find((item) => item.toLowerCase() === normalized);
+}
+
+function dedupeSkills(skills: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const skill of skills) {
+    const trimmed = normalizeSkillLabel(skill);
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+  return result;
+}
+
 function MultiSelectField({
   label,
   value,
   onChange,
   placeholder = 'Nothing selected',
   options,
+  searchable = false,
+  allowCustom = false,
+  onPersistCustom,
 }: {
   label: string;
   value: string[];
   onChange: (value: string[]) => void;
   placeholder?: string;
   options: string[];
+  searchable?: boolean;
+  allowCustom?: boolean;
+  onPersistCustom?: (skillName: string) => Promise<string | null>;
 }) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [customSkill, setCustomSkill] = useState('');
+  const [customError, setCustomError] = useState('');
+  const [savingCustom, setSavingCustom] = useState(false);
   const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const customInputRef = useRef<HTMLInputElement>(null);
 
   const updatePanelPosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -267,17 +306,96 @@ function MultiSelectField({
     return () => document.removeEventListener('mousedown', onPointerDown);
   }, [open]);
 
+  useEffect(() => {
+    if (open) return;
+    setSearchQuery('');
+    setCustomSkill('');
+    setCustomError('');
+  }, [open]);
+
+  const filteredOptions = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return options;
+    return options.filter((option) => option.toLowerCase().includes(query));
+  }, [options, searchQuery]);
+
+  const addSkill = (raw: string) => {
+    const trimmed = normalizeSkillLabel(raw);
+    if (!trimmed) return false;
+
+    if (findMatchingSelected(trimmed, value)) {
+      return false;
+    }
+
+    const optionMatch = findMatchingOption(trimmed, options);
+    if (optionMatch) {
+      onChange([...value, optionMatch]);
+      return true;
+    }
+
+    if (!allowCustom) return false;
+
+    onChange([...value, trimmed]);
+    return true;
+  };
+
   const toggle = (option: string) => {
-    if (value.includes(option)) {
-      onChange(value.filter((item) => item !== option));
+    const selected = findMatchingSelected(option, value);
+    if (selected) {
+      onChange(value.filter((item) => !skillKeysEqual(item, option)));
       return;
     }
-    onChange([...value, option]);
+    addSkill(option);
+  };
+
+  const handleAddCustomSkill = async () => {
+    const trimmed = normalizeSkillLabel(customSkill);
+    if (!trimmed) {
+      setCustomError('Enter a skill name.');
+      return;
+    }
+
+    if (findMatchingSelected(trimmed, value)) {
+      setCustomError('This skill is already selected.');
+      return;
+    }
+
+    const optionMatch = findMatchingOption(trimmed, options);
+    if (optionMatch) {
+      setCustomError(`"${optionMatch}" is in the list — select it above instead.`);
+      return;
+    }
+
+    setSavingCustom(true);
+    try {
+      let skillToAdd = trimmed;
+      if (onPersistCustom) {
+        const savedName = await onPersistCustom(trimmed);
+        if (!savedName) {
+          setCustomError('Could not save skill. Please try again.');
+          return;
+        }
+        skillToAdd = savedName;
+      }
+
+      onChange(dedupeSkills([...value, skillToAdd]));
+      setCustomSkill('');
+      setCustomError('');
+    } finally {
+      setSavingCustom(false);
+    }
+  };
+
+  const handleCustomKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      void handleAddCustomSkill();
+    }
   };
 
   const remove = (option: string, event: MouseEvent) => {
     event.stopPropagation();
-    onChange(value.filter((item) => item !== option));
+    onChange(value.filter((item) => !skillKeysEqual(item, option)));
   };
 
   return (
@@ -331,25 +449,87 @@ function MultiSelectField({
               role="listbox"
               aria-multiselectable
               style={panelStyle}
-              className="max-h-56 overflow-y-auto border border-neutral-200 bg-white shadow-lg"
+              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg"
             >
-              {options.map((option) => {
-                const checked = value.includes(option);
-                return (
-                  <label
-                    key={option}
-                    className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
-                  >
+              {searchable ? (
+                <div className="border-b border-neutral-100 p-2">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                     <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggle(option)}
-                      className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35]"
+                      type="search"
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="Search skills..."
+                      className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      onClick={(event) => event.stopPropagation()}
                     />
-                    {option}
-                  </label>
-                );
-              })}
+                  </div>
+                </div>
+              ) : null}
+              <div className="max-h-44 overflow-y-auto">
+                {filteredOptions.length === 0 ? (
+                  <p className="px-4 py-3 text-sm font-normal text-neutral-500">
+                    {searchQuery.trim() ? 'No skills match your search.' : 'No skills available.'}
+                  </p>
+                ) : (
+                  filteredOptions.map((option) => {
+                    const checked = Boolean(findMatchingSelected(option, value));
+                    return (
+                      <label
+                        key={option}
+                        className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggle(option)}
+                          className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35]"
+                        />
+                        {option}
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+              {allowCustom ? (
+                <div className="border-t border-neutral-100 bg-neutral-50 p-3">
+                  <p className="mb-2 text-xs font-normal text-neutral-500">
+                    Skill not listed? Add it manually (only if it is not in the list above).
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      ref={customInputRef}
+                      type="text"
+                      value={customSkill}
+                      onChange={(event) => {
+                        setCustomSkill(event.target.value);
+                        if (customError) setCustomError('');
+                      }}
+                      onKeyDown={handleCustomKeyDown}
+                      placeholder="Type a custom skill"
+                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      onClick={(event) => event.stopPropagation()}
+                    />
+                    <button
+                      type="button"
+                      disabled={savingCustom}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleAddCustomSkill();
+                      }}
+                      className="inline-flex shrink-0 items-center gap-1 bg-[#193e32] px-3 py-2 text-xs font-semibold text-white hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {savingCustom ? 'Saving…' : 'Add'}
+                    </button>
+                  </div>
+                  {customError ? (
+                    <p className="mt-2 text-xs font-normal text-red-600" role="alert">
+                      {customError}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>,
             document.body,
           )
@@ -423,6 +603,7 @@ interface DashboardCreateJobProps {
   postingContext?: EmployerPostingContext | null;
   categoryOptions?: string[];
   skillOptions?: string[];
+  onPersistCustomSkill?: (skillName: string) => Promise<string | null>;
 }
 
 function parseDescriptionParagraphs(text: string): string[] {
@@ -487,9 +668,9 @@ export default function DashboardCreateJob({
   postingContext,
   categoryOptions = [],
   skillOptions = [],
+  onPersistCustomSkill,
 }: DashboardCreateJobProps) {
   const isEdit = mode === 'edit';
-  const isIndividualPoster = postingContext?.accountType === 'individual';
   const [form, setForm] = useState<CreateJobFormData>(() => ({
     ...EMPTY_CREATE_FORM,
     ...normalizeJobFormData(initialData ?? {}),
@@ -603,24 +784,6 @@ export default function DashboardCreateJob({
                 />
               </div>
             ) : null}
-            {!isIndividualPoster ? (
-              <>
-                <SelectField
-                  label="Company Logo Style"
-                  value={form.companyIconType}
-                  onChange={(companyIconType) =>
-                    update({ companyIconType: companyIconType as PublicJob['companyIconType'] })
-                  }
-                  options={ICON_TYPES}
-                />
-                <SelectField
-                  label="Logo Background"
-                  value={form.companyLogoBg}
-                  onChange={(companyLogoBg) => update({ companyLogoBg })}
-                  options={LOGO_BACKGROUNDS}
-                />
-              </>
-            ) : null}
             <SelectField
               label="Experience Level"
               value={form.experienceLevel}
@@ -630,18 +793,6 @@ export default function DashboardCreateJob({
               options={EXPERIENCE_LEVELS}
             />
           </div>
-
-          {!isIndividualPoster ? (
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-normal text-neutral-800">
-              <input
-                type="checkbox"
-                checked={form.verified}
-                onChange={(e) => update({ verified: e.target.checked })}
-                className="h-4 w-4 rounded-none border-neutral-300"
-              />
-              Verified company
-            </label>
-          ) : null}
         </FormAccordionSection>
 
         <FormAccordionSection
@@ -760,10 +911,16 @@ export default function DashboardCreateJob({
               <MultiSelectField
                 label="Skills"
                 value={form.skills}
-                onChange={(skills) => update({ skills })}
+                onChange={(skills) => update({ skills: dedupeSkills(skills) })}
                 placeholder="Nothing selected"
                 options={skillChoices}
+                searchable
+                allowCustom
+                onPersistCustom={onPersistCustomSkill}
               />
+              <p className="mt-1.5 text-xs font-normal text-neutral-500">
+                Search the list or add a custom skill only when it is not already available.
+              </p>
             </div>
           </div>
         </FormAccordionSection>

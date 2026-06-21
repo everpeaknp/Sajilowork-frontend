@@ -7,6 +7,13 @@ export const skillService = {
   ): Promise<ApiResponse<PaginatedResponse<MarketplaceSkill>>> {
     return apiClient.get<PaginatedResponse<MarketplaceSkill>>('/skills/', { params });
   },
+
+  async createSkill(data: {
+    name: string;
+    listing_kind: 'job' | 'project' | 'service';
+  }): Promise<ApiResponse<MarketplaceSkill>> {
+    return apiClient.post<MarketplaceSkill>('/skills/', data);
+  },
 };
 
 export default skillService;

@@ -729,6 +729,29 @@ export async function loadSkills(
   return extractSkillList(response.data);
 }
 
+export async function ensureMarketplaceSkill(
+  name: string,
+  listingKind: 'job' | 'project' | 'service',
+): Promise<MarketplaceSkill | null> {
+  const trimmed = normalizeSkillLabel(name);
+  if (!trimmed) return null;
+
+  const { skillService } = await import('@/services/skill.service');
+  const response = await skillService.createSkill({
+    name: trimmed,
+    listing_kind: listingKind,
+  });
+
+  if (!response.success || !response.data) return null;
+
+  const skill = response.data as MarketplaceSkill;
+  return skill?.name?.trim() ? skill : null;
+}
+
+function normalizeSkillLabel(skill: string): string {
+  return skill.trim().replace(/\s+/g, ' ');
+}
+
 export async function loadAllSkills(): Promise<MarketplaceSkill[]> {
   const { skillService } = await import('@/services/skill.service');
   const all: MarketplaceSkill[] = [];

@@ -15,6 +15,7 @@ import {
   categoryNamesForSelect,
   getListingKind,
   jobFormToTaskPayload,
+  ensureMarketplaceSkill,
   loadCategories,
   loadAllCategories,
   loadLanguages,
@@ -92,6 +93,14 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
   const goBack = useCallback(() => {
     router.push(listHref(tab));
   }, [router, tab]);
+
+  const persistJobSkill = useCallback(async (skillName: string) => {
+    const created = await ensureMarketplaceSkill(skillName, 'job');
+    if (!created?.name) return null;
+    const refreshed = await loadSkills('job');
+    setJobSkills(refreshed);
+    return created.name;
+  }, []);
 
   useEffect(() => {
     if (!user?.id) {
@@ -445,6 +454,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         postingContext={postingContext}
         categoryOptions={jobCategoryOptions}
         skillOptions={jobSkillOptions}
+        onPersistCustomSkill={persistJobSkill}
       />
     );
   }
