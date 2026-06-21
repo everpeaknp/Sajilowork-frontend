@@ -74,6 +74,7 @@ function searchResultToTask(result: SearchTaskResult, kind: BrowseListingKind): 
     category_name: result.category_name,
     bid_count: result.bid_count,
     created_at: result.created_at,
+    requirements: result.requirements,
     tags: [listingTag(kind)],
     listing_kind: kind === 'task' ? undefined : kind,
   } as unknown as Task);

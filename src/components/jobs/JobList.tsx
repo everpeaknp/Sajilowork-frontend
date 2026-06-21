@@ -576,7 +576,7 @@ export default function JobList({
               </button>
             </div>
             <div className={`${discoverBody} mt-4 text-center text-[13px] font-normal tracking-wide text-zinc-500 sm:mt-4.5 sm:text-[14.5px]`}>
-              {startIdx} – {endIdx} of {totalJobs === 320 ? '300+' : totalJobs} jobs available
+              {startIdx} – {endIdx} of {totalJobs.toLocaleString()} jobs available
             </div>
           </div>
         )}

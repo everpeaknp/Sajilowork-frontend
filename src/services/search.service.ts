@@ -37,6 +37,7 @@ export interface SearchTaskResult {
   urgency?: string;
   bid_count?: number;
   created_at?: string;
+  requirements?: Array<{ type?: string; value?: string }>;
 }
 
 export interface SearchTaskerResult {
