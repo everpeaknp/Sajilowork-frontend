@@ -24,6 +24,7 @@ const HIDDEN_PATH_PREFIXES = [
   '/signup',
   '/forgot-password',
   '/reset-password',
+  '/verify-email',
   '/dashboard/task/postnewtask',
 ];
 

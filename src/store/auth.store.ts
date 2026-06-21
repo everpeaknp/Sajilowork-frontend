@@ -183,10 +183,13 @@ export const useAuthStore = create<AuthState>()(
           const response = await authService.register(data);
           
           if (response.success) {
+            const tokens = response.data?.tokens ?? null;
             set({
-              user: normalizeUserFromApi(response.data.user as unknown as Record<string, unknown>),
-              tokens: response.data.tokens,
-              isAuthenticated: true,
+              user: response.data?.user
+                ? normalizeUserFromApi(response.data.user as unknown as Record<string, unknown>)
+                : null,
+              tokens,
+              isAuthenticated: Boolean(tokens?.access && tokens?.refresh),
               isLoading: false,
               error: null
             });

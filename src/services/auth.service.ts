@@ -19,13 +19,30 @@ export const authService = {
    * Register a new user
    */
   async register(data: RegisterData): Promise<ApiResponse<{ user: User; tokens: AuthTokens }>> {
-    const response = await apiClient.post<{ user: User; tokens: AuthTokens }>('/users/register/', data);
-    
-    if (response.success && response.data.tokens) {
+    const response = await apiClient.post<any>('/users/register/', data);
+    const responseData = response.data ?? response;
+
+    if (responseData?.access && responseData?.refresh && responseData?.user) {
+      const { access, refresh, user } = responseData;
+      tokenManager.setTokens(access, refresh);
+      await persistSessionCookies(access, refresh);
+
+      return {
+        success: true,
+        message: responseData.message || 'Registration successful',
+        data: {
+          user: user as User,
+          tokens: { access, refresh },
+        },
+        errors: null,
+      };
+    }
+
+    if (response.success && response.data?.tokens) {
       tokenManager.setTokens(response.data.tokens.access, response.data.tokens.refresh);
       await persistSessionCookies(response.data.tokens.access, response.data.tokens.refresh);
     }
-    
+
     return response;
   },
 
@@ -170,17 +187,17 @@ export const authService = {
   },
 
   /**
-   * Verify email with token
+   * Verify email with token from verification link
    */
-  async verifyEmail(token: string): Promise<ApiResponse<void>> {
-    return apiClient.post('/auth/verify-email/', { token });
+  async verifyEmail(token: string): Promise<ApiResponse<{ message?: string }>> {
+    return apiClient.post('/auth/email/verify/', { token }, { skipAuth: true });
   },
 
   /**
    * Resend verification email
    */
-  async resendVerificationEmail(): Promise<ApiResponse<void>> {
-    return apiClient.post('/auth/resend-verification/');
+  async resendVerificationEmail(email: string): Promise<ApiResponse<{ message?: string }>> {
+    return apiClient.post('/auth/email/resend/', { email }, { skipAuth: true });
   },
 
   /**

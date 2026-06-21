@@ -202,6 +202,7 @@ export default function Settings({
   const [birthday, setBirthday] = useState('');
   const [panNumber, setPanNumber] = useState('');
   const [verifySaving, setVerifySaving] = useState(false);
+  const [resendVerificationLoading, setResendVerificationLoading] = useState(false);
   const [profileImageUploading, setProfileImageUploading] = useState(false);
   const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -250,6 +251,7 @@ export default function Settings({
 
   const displayEmail = user?.email || email || defaultEmail || 'Not set';
   const displayPhone = user?.phone_number || phoneNumber || defaultPhone || 'Not set';
+  const emailVerified = Boolean(user?.is_email_verified);
 
   useEffect(() => {
     const onProfileUpdated = () => {
@@ -635,6 +637,13 @@ export default function Settings({
       return;
     }
 
+    const emailChanged = trimmedEmail !== (user?.email || '').trim();
+    if (emailChanged && !emailVerified) {
+      toast.error('Verify your current email before changing it.');
+      setEmail(user?.email || defaultEmail || '');
+      return;
+    }
+
     try {
       setVerifySaving(true);
       const { first_name, last_name } = parseFullName(trimmedName);
@@ -661,7 +670,7 @@ export default function Settings({
 
       let nextUser = profileResponse.data;
 
-      if (trimmedEmail !== (user?.email || '').trim()) {
+      if (emailChanged && emailVerified) {
         const emailResponse = await userService.updateEmail(trimmedEmail);
         if (emailResponse.success && emailResponse.data) {
           nextUser = emailResponse.data;
@@ -689,6 +698,29 @@ export default function Settings({
       toast.error(message);
     } finally {
       setVerifySaving(false);
+    }
+  };
+
+  const handleResendVerificationEmail = async () => {
+    const targetEmail = (user?.email || email || '').trim();
+    if (!targetEmail) {
+      toast.error('No email address on file');
+      return;
+    }
+
+    try {
+      setResendVerificationLoading(true);
+      const response = await authService.resendVerificationEmail(targetEmail);
+      if (response.success) {
+        toast.success('Verification email sent. Check your inbox.');
+      } else {
+        toast.error(response.message || 'Could not send verification email');
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Could not send verification email';
+      toast.error(message);
+    } finally {
+      setResendVerificationLoading(false);
     }
   };
 
@@ -799,6 +831,10 @@ export default function Settings({
   const inputClass = isDashboard
     ? 'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F]'
     : 'w-full rounded-2xl border border-outline-variant bg-gray-50 p-4 font-semibold outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-emerald';
+
+  const inputDisabledClass = isDashboard
+    ? 'cursor-not-allowed bg-neutral-100 text-neutral-500 focus:ring-0'
+    : 'cursor-not-allowed bg-gray-100 text-gray-500 focus:ring-0';
 
   const primaryButtonClass = isDashboard
     ? 'flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0'
@@ -1044,20 +1080,46 @@ export default function Settings({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <label className={labelClass}>Email</label>
-                    {user?.is_email_verified ? (
+                    {emailVerified ? (
                       <span className="inline-flex items-center gap-1 rounded-lg border border-green-100 bg-green-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green-700">
                         <CheckCircle2 className="h-3 w-3" />
                         Verified
                       </span>
-                    ) : null}
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-lg border border-amber-100 bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                        <AlertCircle className="h-3 w-3" />
+                        Unverified
+                      </span>
+                    )}
                   </div>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className={inputClass}
+                    readOnly={!emailVerified}
+                    disabled={!emailVerified}
+                    aria-readonly={!emailVerified}
+                    className={`${inputClass}${!emailVerified ? ` ${inputDisabledClass}` : ''}`}
                   />
+                  {!emailVerified ? (
+                    <div className="space-y-2 pt-1">
+                      <p className={`text-xs ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+                        Verify your current email before you can change it.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => void handleResendVerificationEmail()}
+                        disabled={resendVerificationLoading}
+                        className={`inline-flex items-center gap-1.5 text-sm font-semibold transition disabled:opacity-50 ${
+                          isDashboard ? 'text-[#52C47F] hover:text-[#45a86d]' : 'text-brand-emerald hover:text-brand-emerald/80'
+                        }`}
+                      >
+                        <Mail className="h-4 w-4" />
+                        {resendVerificationLoading ? 'Sending…' : 'Resend verification email'}
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="space-y-2">

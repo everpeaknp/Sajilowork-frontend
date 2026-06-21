@@ -62,7 +62,7 @@ function ResetPasswordPageContent() {
           className="w-full max-w-md"
         >
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#000d45] mb-2">Reset password</h1>
+            <h1 className="text-3xl font-bold text-brand-dark mb-2">Reset password</h1>
             <p className="text-on-surface-variant">Choose a new password for your account.</p>
           </div>
 
@@ -72,14 +72,14 @@ function ResetPasswordPageContent() {
                 <p className="text-sm text-on-surface-variant">
                   This reset link is missing required parameters. Please request a new one.
                 </p>
-                <Link href="/forgot-password" className="font-bold text-primary hover:underline">
+                <Link href="/forgot-password" className="font-bold text-brand-emerald hover:underline">
                   Go to forgot password
                 </Link>
               </div>
             ) : (
               <form onSubmit={onSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-[#000d45] mb-2">
+                  <label className="block text-sm font-semibold text-brand-dark mb-2">
                     New password
                   </label>
                   <div className="relative">
@@ -89,12 +89,12 @@ function ResetPasswordPageContent() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter a new password"
-                      className="w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all border-outline-variant focus:border-primary"
+                      className="w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all border-outline-variant focus:border-brand-emerald"
                     />
                     <button
                       type="button"
                       onClick={() => setShow((s) => !s)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-brand-emerald transition-colors"
                     >
                       {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -102,7 +102,7 @@ function ResetPasswordPageContent() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-[#000d45] mb-2">
+                  <label className="block text-sm font-semibold text-brand-dark mb-2">
                     Confirm password
                   </label>
                   <input
@@ -110,14 +110,14 @@ function ResetPasswordPageContent() {
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Re-enter your new password"
-                    className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all border-outline-variant focus:border-primary"
+                    className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all border-outline-variant focus:border-brand-emerald"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 bg-primary text-white font-bold text-lg rounded-full hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-brand-emerald text-white font-bold text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>

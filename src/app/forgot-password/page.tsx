@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
           className="w-full max-w-md"
         >
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-[#000d45] mb-2">Forgot password?</h1>
+            <h1 className="text-3xl font-bold text-brand-dark mb-2">Forgot password?</h1>
             <p className="text-on-surface-variant">
               Enter your email and we’ll send you a reset link.
             </p>
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
           <div className="bg-white rounded-3xl shadow-2xl p-8 border border-outline-variant">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-[#000d45] mb-2">
+                <label className="block text-sm font-semibold text-brand-dark mb-2">
                   Email address
                 </label>
                 <div className="relative">
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
                     className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
                       errors.email
                         ? "border-red-500 focus:border-red-500"
-                        : "border-outline-variant focus:border-primary"
+                        : "border-outline-variant focus:border-brand-emerald"
                     }`}
                   />
                 </div>
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 bg-primary text-white font-bold text-lg rounded-full hover:bg-primary/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-brand-emerald text-white font-bold text-lg rounded-full hover:bg-brand-emerald/90 transition-all shadow-lg flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
@@ -104,7 +104,7 @@ export default function ForgotPasswordPage() {
 
               <p className="text-center text-sm text-on-surface-variant">
                 Remembered?{" "}
-                <Link href="/signin" className="font-bold text-primary hover:underline">
+                <Link href="/signin" className="font-bold text-brand-emerald hover:underline">
                   Back to sign in
                 </Link>
               </p>

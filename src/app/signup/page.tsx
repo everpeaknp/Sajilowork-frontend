@@ -76,9 +76,10 @@ function SignUpForm() {
       });
 
       if (result.success) {
-        toast.success('Account created successfully! Welcome to tasknepal.');
+        toast.success('Account created! Check your email to verify your address.');
+        const verifyUrl = `/verify-email?pending=1&email=${encodeURIComponent(data.email)}`;
         const redirect = searchParams.get('redirect');
-        router.push(redirect && redirect.startsWith('/') ? redirect : '/discover');
+        router.push(redirect && redirect.startsWith('/') ? `${verifyUrl}&redirect=${encodeURIComponent(redirect)}` : verifyUrl);
       } else {
         const errorMsg =
           typeof result.error === 'string'

@@ -59,6 +59,8 @@ const REQUEST_TIMEOUT = 30000; // 30 seconds
 const PUBLIC_AUTH_PATHS = [
   '/auth/login/',
   '/auth/register/',
+  '/auth/email/verify/',
+  '/auth/email/resend/',
   '/users/register/',
   '/auth/password-reset/',
   '/users/password-reset/',
