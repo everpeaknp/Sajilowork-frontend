@@ -70,7 +70,7 @@ function SignInPageContent() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const result = await login({ 
-        email: data.email, 
+        email: data.email.trim(), 
         password: data.password 
       });
 
