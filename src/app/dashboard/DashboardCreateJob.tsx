@@ -23,9 +23,14 @@ import {
   X,
 } from 'lucide-react';
 import { normalizeJobFormData } from '@/lib/dashboardListingApi';
+import { getFallbackCategoryNames } from '@/lib/taskUtils';
 import FormAccordionSection from './FormAccordionSection';
 import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
-import { formatJobBudgetLabel, type Job as PublicJob } from '@/components/jobs/jobListData';
+import {
+  resolveJobBudgetFromForm,
+  type Job as PublicJob,
+  type JobBudgetPricing,
+} from '@/components/jobs/jobListData';
 import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
 import type { Job as DashboardJob } from './types';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
@@ -42,9 +47,10 @@ export type CreateJobFormData = {
   duration: string;
   type: PublicJob['type'] | '';
   experienceLevel: PublicJob['experienceLevel'] | '';
+  budgetPricing: JobBudgetPricing | '';
+  budgetFixed: string;
   budgetMin: string;
   budgetMax: string;
-  expenseLevel: PublicJob['expenseLevel'] | '';
   hoursLabel: string;
   postedLabel: string;
   skills: string[];
@@ -66,9 +72,10 @@ const EMPTY_CREATE_FORM: CreateJobFormData = {
   duration: '',
   type: '',
   experienceLevel: '',
+  budgetPricing: 'negotiable',
+  budgetFixed: '',
   budgetMin: '',
   budgetMax: '',
-  expenseLevel: '',
   hoursLabel: '',
   postedLabel: '',
   skills: [],
@@ -85,13 +92,63 @@ const CATEGORIES = [
   'Digital Marketing',
   'Video & Animation',
   'Finance & Accounting',
+  'Web Development',
+  'Mobile Development',
+  'Backend Development',
+  'DevOps & Cloud',
+  'Data & Analytics',
+  'Cleaning',
+  'House Cleaning',
+  'End of Lease',
+  'Carpet Cleaning',
+  'Window Cleaning',
+  'Delivery',
+  'Furniture Removal',
+  'Groceries',
+  'Handyman',
+  'Furniture Assembly',
+  'Plumbing Repairs',
+  'Electrician',
+  'Gardening',
+  'Lawn Mowing',
+  'Landscaping',
+  'Business',
+  'Admin Support',
+  'Graphic Design',
+  'Marketing',
+  'Data Entry',
+  'Art & Illustration',
+  'Music & Audio',
+  'Programming & Tech',
+  'Sales & Marketing',
+  'Customer Support',
+  'Human Resources',
+  'Legal',
+  'Engineering & Architecture',
+  ...getFallbackCategoryNames(),
 ];
 
 const LOCATIONS: PublicJob['location'][] = ['Remote', 'Hybrid', 'In-office'];
 const JOB_TYPES: PublicJob['type'][] = ['Hourly', 'Fixed Price', 'Contract', 'Full Time'];
-const EXPERIENCE_LEVELS: PublicJob['experienceLevel'][] = ['Entry Level', 'Intermediate', 'Expert'];
-const EXPENSE_LEVELS: PublicJob['expenseLevel'][] = ['Expensive', 'Intermediate', 'Inexpensive'];
-const DURATIONS = ['1-5 Days', '6-10 Days', '10-15 Days', '20-30 Days'];
+const EXPERIENCE_LEVELS: PublicJob['experienceLevel'][] = [
+  'Intern',
+  'Entry Level',
+  'Intermediate',
+  'Expert',
+];
+const BUDGET_PRICING_OPTIONS: { value: JobBudgetPricing; label: string }[] = [
+  { value: 'negotiable', label: 'Negotiable (Optional)' },
+  { value: 'fixed', label: 'Fixed amount' },
+  { value: 'range', label: 'Min–Max range' },
+];
+const DURATIONS = [
+  '1-5 Days',
+  '6-10 Days',
+  '10-15 Days',
+  '20-30 Days',
+  'Short term',
+  'Long term',
+];
 const ICON_TYPES: PublicJob['companyIconType'][] = ['wave', 'face', 'in', 'clover'];
 const LOGO_BACKGROUNDS = [
   'bg-[#192338]',
@@ -376,8 +433,7 @@ function parseDescriptionParagraphs(text: string): string[] {
 }
 
 export function createPublicJobFromForm(data: CreateJobFormData, id?: string): PublicJob {
-  const budgetMin = Number(data.budgetMin) || 0;
-  const budgetMax = Number(data.budgetMax) || budgetMin;
+  const budget = resolveJobBudgetFromForm(data);
   const descriptionParagraphs = parseDescriptionParagraphs(data.description);
   const skills = data.skills.map((skill) => skill.trim()).filter(Boolean);
   const summary = descriptionParagraphs[0] ?? data.description.trim();
@@ -391,13 +447,12 @@ export function createPublicJobFromForm(data: CreateJobFormData, id?: string): P
     companyIconType: data.companyIconType || 'wave',
     verified: data.verified,
     location: data.location || 'Remote',
-    duration: data.duration || '1-5 Days',
+    duration: data.duration || 'Short term',
     type: data.type || 'Hourly',
     experienceLevel: data.experienceLevel || 'Entry Level',
-    budgetMin,
-    budgetMax,
-    budgetLabel: formatJobBudgetLabel(budgetMin, budgetMax),
-    expenseLevel: data.expenseLevel || 'Intermediate',
+    budgetMin: budget.min,
+    budgetMax: budget.max,
+    budgetLabel: budget.label,
     description: summary,
     skills: skills.length ? skills : ['General'],
     city: data.city.trim() || undefined,
@@ -439,8 +494,12 @@ export default function DashboardCreateJob({
     ...EMPTY_CREATE_FORM,
     ...normalizeJobFormData(initialData ?? {}),
   }));
-  const baseCategoryOptions =
-    categoryOptions.length > 0 ? categoryOptions : CATEGORIES;
+  const baseCategoryOptions = [
+    ...new Set([
+      ...(categoryOptions.length > 0 ? categoryOptions : CATEGORIES),
+      ...CATEGORIES,
+    ]),
+  ].sort((a, b) => a.localeCompare(b));
   const categories =
     form.category && !baseCategoryOptions.includes(form.category)
       ? [form.category, ...baseCategoryOptions]
@@ -620,14 +679,6 @@ export default function DashboardCreateJob({
               onChange={(duration) => update({ duration })}
               options={DURATIONS}
             />
-            <SelectField
-              label="Expense Level"
-              value={form.expenseLevel}
-              onChange={(expenseLevel) =>
-                update({ expenseLevel: expenseLevel as PublicJob['expenseLevel'] })
-              }
-              options={EXPENSE_LEVELS}
-            />
             <div>
               <label className={labelClass}>Hours</label>
               <input
@@ -638,25 +689,73 @@ export default function DashboardCreateJob({
               />
             </div>
             <div>
-              <label className={labelClass}>Budget Min (Rs.)</label>
-              <input
-                type="number"
-                min={0}
-                value={form.budgetMin}
-                onChange={(e) => update({ budgetMin: e.target.value })}
-                className={fieldClass}
-              />
+              <label className={labelClass}>Budget (Optional)</label>
+              <select
+                value={form.budgetPricing || 'negotiable'}
+                onChange={(e) =>
+                  update({ budgetPricing: e.target.value as JobBudgetPricing })
+                }
+                className={selectClass}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                }}
+              >
+                {BUDGET_PRICING_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1.5 text-xs font-normal text-neutral-500">
+                Leave amounts empty to show{' '}
+                <span className="font-medium text-neutral-700">Negotiable</span> on the job page.
+              </p>
             </div>
-            <div>
-              <label className={labelClass}>Budget Max (Rs.)</label>
-              <input
-                type="number"
-                min={0}
-                value={form.budgetMax}
-                onChange={(e) => update({ budgetMax: e.target.value })}
-                className={fieldClass}
-              />
-            </div>
+
+            {form.budgetPricing === 'fixed' ? (
+              <div>
+                <label className={labelClass}>Fixed Amount (Rs.)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={form.budgetFixed}
+                  onChange={(e) => update({ budgetFixed: e.target.value })}
+                  placeholder="Optional"
+                  className={fieldClass}
+                />
+              </div>
+            ) : form.budgetPricing === 'range' ? (
+              <>
+                <div>
+                  <label className={labelClass}>Budget Min (Rs.)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.budgetMin}
+                    onChange={(e) => update({ budgetMin: e.target.value })}
+                    placeholder="Optional"
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Budget Max (Rs.)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.budgetMax}
+                    onChange={(e) => update({ budgetMax: e.target.value })}
+                    placeholder="Optional"
+                    className={fieldClass}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="sm:col-span-2 rounded-none border border-dashed border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-normal text-neutral-600">
+                Budget will display as <span className="font-medium text-neutral-900">Negotiable</span>{' '}
+                unless you choose fixed amount or a min–max range.
+              </div>
+            )}
+
             <div className="sm:col-span-2">
               <MultiSelectField
                 label="Skills"

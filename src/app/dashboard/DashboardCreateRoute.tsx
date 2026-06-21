@@ -12,6 +12,7 @@ import {
   getListingKind,
   jobFormToTaskPayload,
   loadCategories,
+  loadAllCategories,
   loadLanguages,
   loadSkills,
   languageNamesForSelect,
@@ -91,7 +92,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
       setCategories(rows);
       setTaskCategoriesLoaded(true);
     });
-    void loadCategories('job').then(setJobCategories);
+    void loadAllCategories().then(setJobCategories);
     void loadSkills('job').then(setJobSkills);
     void loadSkills('project').then(setProjectSkills);
     void loadSkills('service').then(setServiceSkills);

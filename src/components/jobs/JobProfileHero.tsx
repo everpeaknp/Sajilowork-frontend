@@ -7,7 +7,6 @@ import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import JobCompanyLogo from './JobCompanyLogo';
 import {
-  getExperienceShortLabel,
   getJobLocationLabel,
   type Job,
 } from './jobListData';
@@ -24,7 +23,6 @@ function MetaDivider() {
 }
 
 export default function JobProfileHero({ job, onApply, isOwner = false, editHref }: JobProfileHeroProps) {
-  const experienceLabel = getExperienceShortLabel(job.experienceLevel);
   const locationLabel = getJobLocationLabel(job.location);
   const employerHref = resolveEmployerProfileHref({
     employerSlug: job.employerSlug,
@@ -105,8 +103,6 @@ export default function JobProfileHero({ job, onApply, isOwner = false, editHref
                 <p className="mt-1 text-sm font-normal text-[#45a874]">{job.companyName}</p>
               )}
 
-              <p className="mt-1 text-sm font-normal text-[#52C47F]">{experienceLabel}</p>
-
               <div className="mt-3 flex flex-col gap-1 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:text-sm">
                 <span>
                   {job.budgetLabel} {job.type}
@@ -114,7 +110,7 @@ export default function JobProfileHero({ job, onApply, isOwner = false, editHref
                 <MetaDivider />
                 <span>{job.duration}</span>
                 <MetaDivider />
-                <span>{job.expenseLevel}</span>
+                <span>{job.experienceLevel}</span>
                 <MetaDivider />
                 <span>{locationLabel}</span>
               </div>

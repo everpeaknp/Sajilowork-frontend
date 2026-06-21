@@ -48,6 +48,7 @@ const FILTER_TYPES = [
 
 const FILTER_LEVELS = [
   { value: 'All', label: 'All Levels' },
+  { value: 'Intern', label: 'Intern' },
   { value: 'Entry Level', label: 'Entry Level' },
   { value: 'Intermediate', label: 'Intermediate' },
   { value: 'Expert', label: 'Expert' },
@@ -539,7 +540,7 @@ export default function JobList({
                     </div>
                     <div className={`${discoverBody} mt-auto flex flex-wrap select-none items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:flex-nowrap sm:gap-x-0 sm:text-[13px]`}>
                       <div className="mr-2 hidden h-3.5 w-px bg-black sm:block" />
-                      <span>{job.expenseLevel}</span>
+                      <span>{job.experienceLevel}</span>
                       <span className="text-neutral-300">|</span>
                       <span>{locationLabel(job.location)}</span>
                     </div>

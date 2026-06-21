@@ -120,7 +120,7 @@ export default function JobRelatedJobs({ job, relatedJobs = [] }: JobRelatedJobs
                       <MetaDivider />
                       <span>{relatedJob.duration}</span>
                       <MetaDivider />
-                      <span>{relatedJob.expenseLevel}</span>
+                      <span>{relatedJob.experienceLevel}</span>
                       <MetaDivider />
                       <span>{locationLabel}</span>
                     </div>

@@ -21,11 +21,10 @@ export interface Job {
   location: 'Remote' | 'Hybrid' | 'In-office';
   duration: string;
   type: 'Hourly' | 'Fixed Price' | 'Contract' | 'Full Time';
-  experienceLevel: 'Entry Level' | 'Intermediate' | 'Expert';
+  experienceLevel: 'Entry Level' | 'Intermediate' | 'Expert' | 'Intern';
   budgetLabel: string;
   budgetMin: number;
   budgetMax: number;
-  expenseLevel: 'Expensive' | 'Intermediate' | 'Inexpensive';
   description: string;
   skills: string[];
   city?: string;
@@ -36,9 +35,69 @@ export interface Job {
   workExperience?: string[];
 }
 
+export type JobBudgetPricing = 'negotiable' | 'fixed' | 'range';
+
 export function formatJobBudgetLabel(min: number, max: number): string {
   const fmt = (n: number) => (n >= 1000 ? `Rs. ${Math.round(n / 1000)}k` : `Rs. ${n}`);
-  return `${fmt(min)}–${fmt(max)}`;
+  if (min <= 0 && max <= 0) return 'Negotiable';
+  if (min > 0 && max > 0 && min !== max) return `${fmt(min)}–${fmt(max)}`;
+  const amount = min > 0 ? min : max;
+  return fmt(amount);
+}
+
+export function resolveJobBudgetFromForm(input: {
+  budgetPricing?: JobBudgetPricing | '';
+  budgetMin?: number | string;
+  budgetMax?: number | string;
+  budgetFixed?: number | string;
+}): { min: number; max: number; amount: number; label: string; negotiable: boolean } {
+  const pricing = input.budgetPricing || '';
+  const fixed = Number(input.budgetFixed);
+  const min = Number(input.budgetMin);
+  const max = Number(input.budgetMax);
+  const hasMin = Number.isFinite(min) && min > 0;
+  const hasMax = Number.isFinite(max) && max > 0;
+  const hasFixed = Number.isFinite(fixed) && fixed > 0;
+
+  if (pricing === 'negotiable') {
+    return { min: 0, max: 0, amount: 1, label: 'Negotiable', negotiable: true };
+  }
+
+  if (pricing === 'fixed') {
+    if (!hasFixed) {
+      return { min: 0, max: 0, amount: 1, label: 'Negotiable', negotiable: true };
+    }
+    return {
+      min: fixed,
+      max: fixed,
+      amount: fixed,
+      label: formatJobBudgetLabel(fixed, fixed),
+      negotiable: false,
+    };
+  }
+
+  if (!hasMin && !hasMax) {
+    return { min: 0, max: 0, amount: 1, label: 'Negotiable', negotiable: true };
+  }
+
+  const resolvedMin = hasMin ? min : max;
+  const resolvedMax = hasMax ? max : min;
+  const amount = Math.max(resolvedMin, resolvedMax);
+
+  let label = formatJobBudgetLabel(resolvedMin, resolvedMax);
+  if (hasMin && !hasMax) {
+    label = `From ${formatJobBudgetLabel(min, min)}`;
+  } else if (!hasMin && hasMax) {
+    label = `Up to ${formatJobBudgetLabel(max, max)}`;
+  }
+
+  return {
+    min: resolvedMin,
+    max: resolvedMax,
+    amount,
+    label,
+    negotiable: false,
+  };
 }
 
 function budgetLabel(min: number, max: number): string {
@@ -60,7 +119,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 85000,
     budgetMax: 95000,
     budgetLabel: budgetLabel(85000, 95000),
-    expenseLevel: 'Expensive',
     skills: ['Figma', 'UI/UX Design', 'Directory Theme', 'Component Library'],
     description:
       'Looking for an elite visual website designer to structure a modern Directory and Listings Theme in Figma. Needs high focus on layout grid aesthetics, typography, and clear visual hierarchy.',
@@ -79,7 +137,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 90000,
     budgetMax: 110000,
     budgetLabel: budgetLabel(90000, 110000),
-    expenseLevel: 'Expensive',
     skills: ['React', 'Tailwind CSS', 'Vite', 'Headless CMS'],
     description:
       'Experienced developer needed to handle high-fidelity reactive components, modular styling, and clean API hydration pipelines.',
@@ -98,7 +155,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 75000,
     budgetMax: 90000,
     budgetLabel: budgetLabel(75000, 90000),
-    expenseLevel: 'Expensive',
     skills: ['Content Writing', 'Copywriting', 'Newsletter Design', 'Brand Voice'],
     description:
       'Seeking a senior editorial specialist to author weekly SaaS trends, product updates, and high-conversion subscriber flows.',
@@ -117,7 +173,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 80000,
     budgetMax: 100000,
     budgetLabel: budgetLabel(80000, 100000),
-    expenseLevel: 'Expensive',
     skills: ['Logo Design', 'Illustration', 'Brand Guidelines', 'Aesthetics'],
     description:
       'Craft unique geometric logos, brand design matrices, and responsive icons that project modern simplicity and professional confidence.',
@@ -136,7 +191,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 55000,
     budgetMax: 75000,
     budgetLabel: budgetLabel(55000, 75000),
-    expenseLevel: 'Intermediate',
     skills: ['Google Ads', 'SEM', 'Auditing', 'Landing Pages'],
     description:
       'Help optimize active search networks, perform click rate evaluation audits, and restructure conversion tag mechanisms.',
@@ -155,7 +209,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 60000,
     budgetMax: 85000,
     budgetLabel: budgetLabel(60000, 85000),
-    expenseLevel: 'Intermediate',
     skills: ['After Effects', 'Animation', 'Lottie Files', 'UX Flow'],
     description:
       'Illustrate and animate simple UX workflows into interactive website visualizers with scalable asset packages.',
@@ -174,7 +227,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 35000,
     budgetMax: 55000,
     budgetLabel: budgetLabel(35000, 55000),
-    expenseLevel: 'Inexpensive',
     skills: ['Laravel', 'PHP', 'API Customization', 'Webhooks'],
     description:
       'Write clean custom controllers, build secure webhook endpoints, and manage SQL database triggers.',
@@ -193,7 +245,6 @@ const baseJobs: Omit<Job, 'id'>[] = [
     budgetMin: 100000,
     budgetMax: 130000,
     budgetLabel: budgetLabel(100000, 130000),
-    expenseLevel: 'Expensive',
     skills: ['Financial Analysis', 'SaaS Outlook', 'Excel Modeling', 'Slide Deck'],
     description:
       'Build authoritative financial projections, 5-year balance models, metrics dashboards, and high-fidelity summary slides.',
@@ -258,9 +309,9 @@ export function generateMockJobs(): Job[] {
   ];
   const icons: Job['companyIconType'][] = ['wave', 'face', 'in', 'clover'];
   const locations: Job['location'][] = ['Remote', 'Hybrid', 'In-office'];
-  const levels: Job['experienceLevel'][] = ['Entry Level', 'Intermediate', 'Expert'];
+  const levels: Job['experienceLevel'][] = ['Entry Level', 'Intermediate', 'Expert', 'Intern'];
   const types: Job['type'][] = ['Hourly', 'Fixed Price', 'Contract', 'Full Time'];
-  const durations = ['1-5 Days', '6-10 Days', '10-15 Days', '20-30 Days'];
+  const durations = ['1-5 Days', '6-10 Days', '10-15 Days', '20-30 Days', 'Short term', 'Long term'];
 
   for (let i = 0; i < totalItemsNeeded; i++) {
     const base = baseJobs[i % baseJobs.length];
@@ -276,20 +327,16 @@ export function generateMockJobs(): Job[] {
     const experienceLevel = levels[(i + itemNumOnPage) % levels.length];
     let budgetMin = 35000;
     let budgetMax = 55000;
-    let expenseLevel: Job['expenseLevel'] = 'Inexpensive';
 
     if (experienceLevel === 'Expert') {
       budgetMin = 80000 + ((i * 11) % 5) * 5000;
       budgetMax = budgetMin + 15000;
-      expenseLevel = 'Expensive';
     } else if (experienceLevel === 'Intermediate') {
       budgetMin = 50000 + ((i * 7) % 5) * 5000;
       budgetMax = budgetMin + 10000;
-      expenseLevel = 'Intermediate';
     } else {
       budgetMin = 25000 + ((i * 5) % 4) * 5000;
       budgetMax = budgetMin + 10000;
-      expenseLevel = 'Inexpensive';
     }
 
     jobsList.push({
@@ -307,7 +354,6 @@ export function generateMockJobs(): Job[] {
       budgetMin,
       budgetMax,
       budgetLabel: budgetLabel(budgetMin, budgetMax),
-      expenseLevel,
       skills: base.skills,
       description: base.description,
     });
@@ -321,6 +367,7 @@ export const ALL_JOBS = generateMockJobs();
 export function getExperienceShortLabel(level: Job['experienceLevel']): string {
   if (level === 'Intermediate') return 'Medium';
   if (level === 'Entry Level') return 'Entry';
+  if (level === 'Intern') return 'Intern';
   return level;
 }
 

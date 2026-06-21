@@ -1,6 +1,6 @@
 'use client';
 
-import { CURRENCY_INPUT_PREFIX, formatDashboardTypeCost, formatNPR } from '@/lib/nepalLocale';
+import { formatDashboardTypeCost, formatNPR } from '@/lib/nepalLocale';
 import {
   useCallback,
   useEffect,
@@ -24,7 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import LocationFields, { type LocationType } from '@/components/post-task/LocationFields';
-import { parseServiceSkills } from '@/lib/dashboardListingApi';
+import { parseServiceSkills, getServiceListingPrice, parsePriceFromPackageText } from '@/lib/dashboardListingApi';
 import FormAccordionSection from './FormAccordionSection';
 import type { FormUploadsPayload, Service } from './types';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
@@ -60,7 +60,6 @@ export type PackagesConfig = {
 
 export type CreateServiceFormData = {
   title: string;
-  price: string;
   category: string;
   languages: string[];
   responseTime: string;
@@ -76,6 +75,20 @@ export type CreateServiceFormData = {
 
 function newId(prefix: string) {
   return `${prefix}-${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now()}`;
+}
+
+const DEFAULT_PACKAGE_TIER_TOTALS = [2900, 4900, 8900] as const;
+
+function defaultTotalPriceForTierIndex(index: number): string {
+  const amount =
+    DEFAULT_PACKAGE_TIER_TOTALS[index] ??
+    DEFAULT_PACKAGE_TIER_TOTALS[DEFAULT_PACKAGE_TIER_TOTALS.length - 1] +
+      (index - DEFAULT_PACKAGE_TIER_TOTALS.length + 1) * 2000;
+  return formatNPR(amount);
+}
+
+function isTotalPackageRow(row: PackageRow): boolean {
+  return /total/i.test(row.label) || row.id === 'total';
 }
 
 function createDefaultPackagesConfig(): PackagesConfig {
@@ -136,9 +149,9 @@ function createDefaultPackagesConfig(): PackagesConfig {
         label: 'Total',
         type: 'text',
         values: {
-          [basic]: formatNPR(2900),
-          [standard]: formatNPR(4900),
-          [premium]: formatNPR(8900),
+          [basic]: defaultTotalPriceForTierIndex(0),
+          [standard]: defaultTotalPriceForTierIndex(1),
+          [premium]: defaultTotalPriceForTierIndex(2),
         },
       },
     ],
@@ -147,15 +160,45 @@ function createDefaultPackagesConfig(): PackagesConfig {
 
 const DEFAULT_PACKAGES_CONFIG = createDefaultPackagesConfig();
 
-export function normalizePackagesConfig(config?: PackagesConfig | null): PackagesConfig {
-  if (config?.tiers?.length && config?.rows?.length) {
-    return structuredClone(config);
+function ensurePackageTotalDefaults(config: PackagesConfig): PackagesConfig {
+  if (!config.tiers.length) return structuredClone(DEFAULT_PACKAGES_CONFIG);
+
+  const rows = [...config.rows];
+  let totalRow = rows.find(isTotalPackageRow);
+
+  if (!totalRow) {
+    totalRow = { id: 'total', label: 'Total', type: 'text', values: {} };
+    rows.push(totalRow);
+  } else {
+    const totalIndex = rows.findIndex(isTotalPackageRow);
+    rows.splice(totalIndex, 1);
+    rows.push({ ...totalRow });
+    totalRow = rows[rows.length - 1];
   }
-  return structuredClone(DEFAULT_PACKAGES_CONFIG);
+
+  const values = { ...totalRow.values };
+  config.tiers.forEach((tier, index) => {
+    const current = String(values[tier.id] ?? '').trim();
+    if (!current || parsePriceFromPackageText(current) == null) {
+      values[tier.id] = defaultTotalPriceForTierIndex(index);
+    }
+  });
+
+  rows[rows.length - 1] = { ...totalRow, values };
+
+  return { ...config, rows };
+}
+
+export function normalizePackagesConfig(config?: PackagesConfig | null): PackagesConfig {
+  if (!config?.tiers?.length || !config?.rows?.length) {
+    return structuredClone(DEFAULT_PACKAGES_CONFIG);
+  }
+  return ensurePackageTotalDefaults(structuredClone(config));
 }
 
 function addPackageTier(config: PackagesConfig): PackagesConfig {
   const id = newId('tier');
+  const tierIndex = config.tiers.length;
   const lastTier = config.tiers[config.tiers.length - 1];
 
   return {
@@ -167,9 +210,11 @@ function addPackageTier(config: PackagesConfig): PackagesConfig {
         [id]:
           row.type === 'checkbox'
             ? false
-            : lastTier
-              ? String(row.values[lastTier.id] ?? '')
-              : '',
+            : isTotalPackageRow(row)
+              ? defaultTotalPriceForTierIndex(tierIndex)
+              : lastTier
+                ? String(row.values[lastTier.id] ?? '')
+                : '',
       },
     })),
   };
@@ -196,10 +241,16 @@ function addPackageRow(config: PackagesConfig): PackagesConfig {
     values[tier.id] = false;
   }
 
-  return {
-    ...config,
-    rows: [...config.rows, { id, label: 'New feature', type: 'checkbox', values }],
-  };
+  const newRow: PackageRow = { id, label: 'New feature', type: 'checkbox', values };
+  const totalIndex = config.rows.findIndex(isTotalPackageRow);
+
+  if (totalIndex === -1) {
+    return { ...config, rows: [...config.rows, newRow] };
+  }
+
+  const rows = [...config.rows];
+  rows.splice(totalIndex, 0, newRow);
+  return { ...config, rows };
 }
 
 function removePackageRow(config: PackagesConfig, rowId: string): PackagesConfig {
@@ -209,7 +260,6 @@ function removePackageRow(config: PackagesConfig, rowId: string): PackagesConfig
 
 const EMPTY_CREATE_FORM: CreateServiceFormData = {
   title: '',
-  price: '10',
   category: '',
   languages: [],
   responseTime: '',
@@ -566,7 +616,7 @@ function PackagesEditor({
                     ) : null}
                   </div>
                 </td>
-                {safeConfig.tiers.map((tier) => (
+                {safeConfig.tiers.map((tier, tierIndex) => (
                   <td key={tier.id} className="py-3 text-center align-middle">
                     {row.type === 'checkbox' ? (
                       <PackageCheckbox
@@ -577,7 +627,9 @@ function PackagesEditor({
                       <input
                         value={String(row.values[tier.id] ?? '')}
                         onChange={(e) => updateRowValue(row.id, tier.id, e.target.value)}
-                        placeholder="Value"
+                        placeholder={
+                          isTotalPackageRow(row) ? defaultTotalPriceForTierIndex(tierIndex) : 'Value'
+                        }
                         className={packageCellInputClass}
                       />
                     )}
@@ -623,7 +675,7 @@ interface DashboardCreateServiceProps {
 }
 
 export function createServiceFromForm(data: CreateServiceFormData, imageUrl?: string): Omit<Service, 'id'> {
-  const costVal = Number(data.price) || 0;
+  const costVal = getServiceListingPrice(data.packages);
   const detail = data.serviceDetail.trim();
 
   return {
@@ -747,12 +799,12 @@ export default function DashboardCreateService({
         <FormAccordionSection
           title="Basic Information"
           icon={Sparkles}
-          description="Title, pricing, category, and delivery"
+          description="Title, category, and delivery"
           isOpen={openSection === 'basic'}
           onToggle={() => toggleSection('basic')}
         >
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
+            <div className="sm:col-span-2">
               <label className={labelClass}>Service Title</label>
               <input
                 required
@@ -761,22 +813,6 @@ export default function DashboardCreateService({
                 placeholder="i will"
                 className={fieldClass}
               />
-            </div>
-            <div>
-              <label className={labelClass}>Price</label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-neutral-400">
-                  {CURRENCY_INPUT_PREFIX}
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.price}
-                  onChange={(e) => update({ price: e.target.value })}
-                  placeholder="10"
-                  className={`${fieldClass} pl-8`}
-                />
-              </div>
             </div>
             <SelectField
               label="Category"
@@ -848,7 +884,7 @@ export default function DashboardCreateService({
         <FormAccordionSection
           title="Packages"
           icon={Package}
-          description="Pricing tiers and feature matrix"
+          description="Set tier prices in the Total row — Basic tier is the listing starting price"
           isOpen={openSection === 'packages'}
           onToggle={() => toggleSection('packages')}
         >

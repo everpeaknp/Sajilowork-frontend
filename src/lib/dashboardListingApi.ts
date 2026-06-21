@@ -1,5 +1,6 @@
 import type { CreateProjectFormData } from '@/app/dashboard/DashboardCreateProject';
 import type { CreateJobFormData } from '@/app/dashboard/DashboardCreateJob';
+import { resolveJobBudgetFromForm } from '@/components/jobs/jobListData';
 import type {
   CreateServiceFormData,
   PackagesConfig,
@@ -57,6 +58,27 @@ export function parseServiceSkills(value?: string | string[]): string[] {
     .filter(Boolean);
 }
 
+export function parsePriceFromPackageText(text: string): number | null {
+  const digits = String(text).replace(/[^\d.]/g, '');
+  const parsed = Number(digits);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/** Listing "starting price" from the first package tier Total row (falls back to lowest tier). */
+export function getServiceListingPrice(packages?: PackagesConfig | null): number {
+  if (!packages?.tiers?.length || !packages?.rows?.length) return 1;
+
+  const totalRow = packages.rows.find((row) => /total/i.test(row.label) || row.id === 'total');
+  if (!totalRow) return 1;
+
+  const tierPrices = packages.tiers
+    .map((tier) => parsePriceFromPackageText(String(totalRow.values[tier.id] ?? '')))
+    .filter((price): price is number => price != null);
+
+  if (!tierPrices.length) return 1;
+  return tierPrices[0] ?? Math.min(...tierPrices);
+}
+
 /** Coerce legacy single-string project fields into multi-select arrays. */
 /** Coerce legacy comma-separated job skills into multi-select arrays. */
 export function normalizeJobFormData(
@@ -65,6 +87,8 @@ export function normalizeJobFormData(
   return {
     ...data,
     skills: parseServiceSkills(data.skills),
+    budgetPricing: data.budgetPricing ?? 'negotiable',
+    budgetFixed: data.budgetFixed ?? '',
   };
 }
 
@@ -325,7 +349,7 @@ export function serviceFormToTaskPayload(
   data: CreateServiceFormData,
   categoryId?: string,
 ): DashboardListingPayload {
-  const costVal = Number(data.price) || 1;
+  const costVal = getServiceListingPrice(data.packages);
   const detail = data.serviceDetail.trim();
 
   const skills = parseServiceSkills(data.skills);
@@ -437,9 +461,7 @@ export function jobFormToTaskPayload(
   data: CreateJobFormData,
   categoryId?: string,
 ): DashboardListingPayload {
-  const budgetMin = Number(data.budgetMin) || 1;
-  const budgetMax = Number(data.budgetMax) || budgetMin;
-  const budgetAmount = Math.max(budgetMin, budgetMax);
+  const budget = resolveJobBudgetFromForm(data);
   const skills = parseServiceSkills(data.skills);
   const descriptionParts = [
     data.description.trim() || data.title.trim(),
@@ -473,7 +495,7 @@ export function jobFormToTaskPayload(
     description: descriptionParts.join('\n\n'),
     category: categoryId,
     budget_type: data.type === 'Hourly' ? 'hourly' : 'fixed',
-    budget_amount: budgetAmount.toFixed(2),
+    budget_amount: budget.amount.toFixed(2),
     budget_currency: DEFAULT_CURRENCY,
     ...location,
     due_date: due.toISOString(),
@@ -513,8 +535,10 @@ export function taskToJobFormData(task: Task): Partial<CreateJobFormData> {
     companyName: task.owner_name || '',
     location: isRemote ? 'Remote' : 'In-office',
     city: task.city || '',
-    budgetMin: String(Number(task.budget_amount) || ''),
-    budgetMax: String(Number(task.budget_amount) || ''),
+    budgetPricing:
+      Number(task.budget_amount) > 1 ? ('range' as const) : ('negotiable' as const),
+    budgetMin: Number(task.budget_amount) > 1 ? String(Number(task.budget_amount) || '') : '',
+    budgetMax: Number(task.budget_amount) > 1 ? String(Number(task.budget_amount) || '') : '',
     type: task.budget_type === 'hourly' ? 'Hourly' : 'Fixed Price',
     description: task.description || '',
     skills,
@@ -527,7 +551,6 @@ export function taskToServiceFormData(task: Task): Partial<CreateServiceFormData
 
   return {
     title: task.title,
-    price: String(Number(task.budget_amount) || ''),
     category: resolveCategoryName(task),
     languages: parseServiceSkills(meta?.languages ?? meta?.language ?? meta?.englishLevel),
     responseTime: meta?.responseTime ?? '',

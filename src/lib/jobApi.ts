@@ -4,7 +4,7 @@ import type { Job as DashboardJob } from '@/app/dashboard/types';
 
 import type { Job } from '@/components/jobs/jobListData';
 
-import { formatJobBudgetLabel } from '@/components/jobs/jobListData';
+import { resolveJobBudgetFromForm } from '@/components/jobs/jobListData';
 
 import { parseServiceSkills, parseTaskDashboardMeta } from '@/lib/dashboardListingApi';
 
@@ -29,6 +29,8 @@ const LEVEL_TO_EXPERIENCE: Record<string, Job['experienceLevel']> = {
   Medium: 'Intermediate',
 
   Expert: 'Expert',
+
+  Intern: 'Intern',
 
   'Entry Level': 'Entry Level',
 
@@ -235,20 +237,6 @@ function parseSkills(form?: Partial<CreateJobFormData>, description?: string): s
 
 
 
-function mapExpenseLevel(budgetMax: number, form?: Partial<CreateJobFormData>): Job['expenseLevel'] {
-
-  if (form?.expenseLevel) return form.expenseLevel;
-
-  if (budgetMax >= 80000) return 'Expensive';
-
-  if (budgetMax >= 50000) return 'Intermediate';
-
-  return 'Inexpensive';
-
-}
-
-
-
 function resolveDescription(task: Task, form?: Partial<CreateJobFormData>): string {
 
   if (form?.description?.trim()) {
@@ -363,9 +351,22 @@ export function mapTaskToPublicJob(task: Task): Job {
 
   const form = meta?.jobForm;
 
-  const budgetMin = Number(form?.budgetMin ?? task.budget_amount) || 0;
+  const storedAmount = Number(task.budget_amount) || 0;
 
-  const budgetMax = Number(form?.budgetMax ?? task.budget_amount) || budgetMin;
+  const budget = form?.budgetPricing
+    ? resolveJobBudgetFromForm(form)
+    : storedAmount > 1
+      ? resolveJobBudgetFromForm({
+          budgetPricing: 'range',
+          budgetMin: form?.budgetMin ?? storedAmount,
+          budgetMax: form?.budgetMax ?? storedAmount,
+          budgetFixed: form?.budgetFixed,
+        })
+      : resolveJobBudgetFromForm({ budgetPricing: 'negotiable' });
+
+  const budgetMin = budget.min;
+
+  const budgetMax = budget.max;
 
   const companyName = form?.companyName?.trim() || resolveOwnerName(task);
 
@@ -423,9 +424,7 @@ export function mapTaskToPublicJob(task: Task): Job {
 
     budgetMax,
 
-    budgetLabel: formatJobBudgetLabel(budgetMin, budgetMax),
-
-    expenseLevel: mapExpenseLevel(budgetMax, form),
+    budgetLabel: budget.label,
 
     description: resolveDescription(task, form),
 
