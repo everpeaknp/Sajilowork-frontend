@@ -4,7 +4,7 @@ import type { Job as DashboardJob } from '@/app/dashboard/types';
 
 import type { Job } from '@/components/jobs/jobListData';
 
-import { resolveJobBudgetFromForm } from '@/components/jobs/jobListData';
+import { JOB_MIN_BUDGET_NPR, resolveJobBudgetFromForm } from '@/components/jobs/jobListData';
 
 import { parseServiceSkills, parseTaskDashboardMeta } from '@/lib/dashboardListingApi';
 
@@ -355,7 +355,7 @@ export function mapTaskToPublicJob(task: Task): Job {
 
   const budget = form?.budgetPricing
     ? resolveJobBudgetFromForm(form)
-    : storedAmount > 1
+    : storedAmount > JOB_MIN_BUDGET_NPR
       ? resolveJobBudgetFromForm({
           budgetPricing: 'range',
           budgetMin: form?.budgetMin ?? storedAmount,

@@ -1,6 +1,6 @@
 import type { CreateProjectFormData } from '@/app/dashboard/DashboardCreateProject';
 import type { CreateJobFormData } from '@/app/dashboard/DashboardCreateJob';
-import { resolveJobBudgetFromForm } from '@/components/jobs/jobListData';
+import { JOB_MIN_BUDGET_NPR, resolveJobBudgetFromForm } from '@/components/jobs/jobListData';
 import type {
   CreateServiceFormData,
   PackagesConfig,
@@ -536,9 +536,17 @@ export function taskToJobFormData(task: Task): Partial<CreateJobFormData> {
     location: isRemote ? 'Remote' : 'In-office',
     city: task.city || '',
     budgetPricing:
-      Number(task.budget_amount) > 1 ? ('range' as const) : ('negotiable' as const),
-    budgetMin: Number(task.budget_amount) > 1 ? String(Number(task.budget_amount) || '') : '',
-    budgetMax: Number(task.budget_amount) > 1 ? String(Number(task.budget_amount) || '') : '',
+      Number(task.budget_amount) > JOB_MIN_BUDGET_NPR
+        ? ('range' as const)
+        : ('negotiable' as const),
+    budgetMin:
+      Number(task.budget_amount) > JOB_MIN_BUDGET_NPR
+        ? String(Number(task.budget_amount) || '')
+        : '',
+    budgetMax:
+      Number(task.budget_amount) > JOB_MIN_BUDGET_NPR
+        ? String(Number(task.budget_amount) || '')
+        : '',
     type: task.budget_type === 'hourly' ? 'Hourly' : 'Fixed Price',
     description: task.description || '',
     skills,

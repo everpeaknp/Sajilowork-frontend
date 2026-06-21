@@ -37,6 +37,9 @@ export interface Job {
 
 export type JobBudgetPricing = 'negotiable' | 'fixed' | 'range';
 
+/** Backend minimum budget; used as stored placeholder when pricing is negotiable. */
+export const JOB_MIN_BUDGET_NPR = 100;
+
 export function formatJobBudgetLabel(min: number, max: number): string {
   const fmt = (n: number) => (n >= 1000 ? `Rs. ${Math.round(n / 1000)}k` : `Rs. ${n}`);
   if (min <= 0 && max <= 0) return 'Negotiable';
@@ -60,12 +63,24 @@ export function resolveJobBudgetFromForm(input: {
   const hasFixed = Number.isFinite(fixed) && fixed > 0;
 
   if (pricing === 'negotiable') {
-    return { min: 0, max: 0, amount: 1, label: 'Negotiable', negotiable: true };
+    return {
+      min: 0,
+      max: 0,
+      amount: JOB_MIN_BUDGET_NPR,
+      label: 'Negotiable',
+      negotiable: true,
+    };
   }
 
   if (pricing === 'fixed') {
     if (!hasFixed) {
-      return { min: 0, max: 0, amount: 1, label: 'Negotiable', negotiable: true };
+      return {
+        min: 0,
+        max: 0,
+        amount: JOB_MIN_BUDGET_NPR,
+        label: 'Negotiable',
+        negotiable: true,
+      };
     }
     return {
       min: fixed,
@@ -77,7 +92,13 @@ export function resolveJobBudgetFromForm(input: {
   }
 
   if (!hasMin && !hasMax) {
-    return { min: 0, max: 0, amount: 1, label: 'Negotiable', negotiable: true };
+    return {
+      min: 0,
+      max: 0,
+      amount: JOB_MIN_BUDGET_NPR,
+      label: 'Negotiable',
+      negotiable: true,
+    };
   }
 
   const resolvedMin = hasMin ? min : max;
