@@ -23,6 +23,9 @@ function buildStartUrl(provider: SocialProvider, options?: SocialAuthStartOption
   if (options?.role) {
     params.set('role', options.role);
   }
+  if (typeof window !== 'undefined') {
+    params.set('frontend_origin', window.location.origin);
+  }
   const qs = params.toString();
   const base = `${API_BASE}/auth/${provider}/login/`;
   return qs ? `${base}?${qs}` : base;
