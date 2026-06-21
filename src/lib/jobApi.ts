@@ -60,6 +60,8 @@ const ICON_TYPES: Job['companyIconType'][] = ['wave', 'face', 'in', 'clover'];
 
 function resolveOwnerName(task: Task): string {
 
+  if (task.owner_business_name?.trim()) return task.owner_business_name.trim();
+
   if (task.owner_name) return task.owner_name;
 
   const owner = task.owner;
@@ -368,7 +370,10 @@ export function mapTaskToPublicJob(task: Task): Job {
 
   const budgetMax = budget.max;
 
-  const companyName = form?.companyName?.trim() || resolveOwnerName(task);
+  const companyName =
+    task.owner_business_name?.trim() ||
+    form?.companyName?.trim() ||
+    resolveOwnerName(task);
 
   const employerSlug = resolveOwnerUsername(task);
 

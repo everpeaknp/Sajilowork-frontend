@@ -162,10 +162,9 @@ export function resolveEmployerBusinessProfile(user: User | null): EmployerBusin
   return buildDefaultEmployerBusinessProfile(user);
 }
 
-export function getEmployerPostingContext(user: User | null): EmployerPostingContext | null {
-  const profile = resolveEmployerBusinessProfile(user);
-  if (!profile) return null;
-
+export function employerPostingContextFromProfile(
+  profile: EmployerBusinessProfile,
+): EmployerPostingContext {
   return {
     accountType: profile.accountType,
     displayName: profile.companyName.trim() || profile.slug,
@@ -174,6 +173,13 @@ export function getEmployerPostingContext(user: User | null): EmployerPostingCon
     location: profile.location,
     industry: profile.industry,
   };
+}
+
+export function getEmployerPostingContext(user: User | null): EmployerPostingContext | null {
+  const profile = resolveEmployerBusinessProfile(user);
+  if (!profile) return null;
+
+  return employerPostingContextFromProfile(profile);
 }
 
 export function buildJobFormDefaultsFromProfile(

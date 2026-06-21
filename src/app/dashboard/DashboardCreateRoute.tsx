@@ -5,8 +5,12 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   buildJobFormDefaultsFromProfile,
+  employerPostingContextFromProfile,
   getEmployerPostingContext,
+  type EmployerPostingContext,
 } from '@/lib/employerBusinessProfile';
+import { mapEmployerProfileDtoToBusinessProfile } from '@/lib/employerApi';
+import { employerService } from '@/services';
 import {
   categoryNamesForSelect,
   getListingKind,
@@ -59,7 +63,9 @@ type DashboardCreateRouteProps = {
 export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateRouteProps) {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const postingContext = useMemo(() => getEmployerPostingContext(user), [user]);
+  const [postingContext, setPostingContext] = useState<EmployerPostingContext | null>(() =>
+    getEmployerPostingContext(user),
+  );
   const createJobDefaults = useMemo(() => buildJobFormDefaultsFromProfile(user), [user]);
   const isEdit = Boolean(editSlug);
 
@@ -86,6 +92,37 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
   const goBack = useCallback(() => {
     router.push(listHref(tab));
   }, [router, tab]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setPostingContext(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    void employerService
+      .getMyEmployerProfile()
+      .then((response) => {
+        if (cancelled) return;
+        if (response.success && response.data) {
+          setPostingContext(
+            employerPostingContextFromProfile(
+              mapEmployerProfileDtoToBusinessProfile(response.data),
+            ),
+          );
+          return;
+        }
+        setPostingContext(getEmployerPostingContext(user));
+      })
+      .catch(() => {
+        if (!cancelled) setPostingContext(getEmployerPostingContext(user));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   useEffect(() => {
     void loadCategories('task').then((rows) => {
