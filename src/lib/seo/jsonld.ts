@@ -2,6 +2,80 @@ import type { SiteSettings } from '@/lib/siteSettings';
 
 import { absoluteUrl, getAppBaseUrl, resolveSiteOrigin } from './constants';
 
+export function buildSchemaGraph(schemas: Array<Record<string, unknown>>) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': schemas.map((schema) => {
+      const { '@context': _removed, ...rest } = schema;
+      return rest;
+    }),
+  };
+}
+
+export function buildWebPageSchema(input: {
+  title: string;
+  description?: string;
+  path: string;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: input.title,
+    description: input.description,
+    url: absoluteUrl(input.path, input.settings),
+    isPartOf: {
+      '@type': 'WebSite',
+      name: input.settings?.site_name || 'Sajilowork',
+      url: resolveSiteOrigin(input.settings),
+    },
+  };
+}
+
+export function buildPersonSchema(input: {
+  name: string;
+  description?: string;
+  path: string;
+  image?: string | null;
+  jobTitle?: string;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: input.name,
+    description: input.description,
+    url: absoluteUrl(input.path, input.settings),
+    image: input.image || undefined,
+    jobTitle: input.jobTitle || 'Freelancer',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'NP',
+    },
+  };
+}
+
+export function buildEmployerOrganizationSchema(input: {
+  name: string;
+  description?: string;
+  path: string;
+  image?: string | null;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: input.name,
+    description: input.description,
+    url: absoluteUrl(input.path, input.settings),
+    logo: input.image || undefined,
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'NP',
+    },
+  };
+}
+
 export function buildOrganizationSchema(settings: SiteSettings) {
   const siteName = settings.site_name || 'Sajilowork';
   const url = resolveSiteOrigin(settings);

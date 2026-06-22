@@ -99,3 +99,33 @@ export async function fetchBlogPostSeo(slug: string): Promise<ListingSeoRecord |
     { revalidate: 300 },
   );
 }
+
+export type ProfileSeoRecord = {
+  slug?: string;
+  username?: string;
+  full_name?: string;
+  name?: string;
+  bio?: string;
+  tagline?: string;
+  description?: string;
+  profile_image?: string | null;
+  logo_url?: string | null;
+  specialization?: string | null;
+  industry?: string | null;
+  location?: string | null;
+  updated_at?: string | null;
+  date_joined?: string | null;
+  member_since?: string | null;
+};
+
+export async function fetchFreelancerSeo(slug: string): Promise<ProfileSeoRecord | null> {
+  return fetchPublicJson<ProfileSeoRecord>(`/freelancers/${encodeURIComponent(slug)}/`, {
+    revalidate: 300,
+  });
+}
+
+export async function fetchEmployerSeo(slug: string): Promise<ProfileSeoRecord | null> {
+  return fetchPublicJson<ProfileSeoRecord>(`/employers/${encodeURIComponent(slug)}/`, {
+    revalidate: 300,
+  });
+}

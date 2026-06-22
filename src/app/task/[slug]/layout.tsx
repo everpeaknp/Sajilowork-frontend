@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
 
-import { buildListingMetadata, fetchListingSeo } from '@/lib/seo';
+import JsonLd from '@/components/seo/JsonLd';
+import {
+  buildListingDetailSchemaGraph,
+  buildListingMetadata,
+  fetchListingSeo,
+} from '@/lib/seo';
+import { fetchSiteSettings } from '@/lib/siteSettings';
 
 type Props = {
   children: React.ReactNode;
@@ -18,6 +24,26 @@ export async function generateMetadata({ params }: Pick<Props, 'params'>): Promi
   });
 }
 
-export default function TaskSlugLayout({ children }: { children: React.ReactNode }) {
-  return children;
+export default async function TaskSlugLayout({ children, params }: Props) {
+  const { slug } = await params;
+  const [task, settings] = await Promise.all([
+    fetchListingSeo('/tasks', slug),
+    fetchSiteSettings(),
+  ]);
+
+  const schema =
+    task &&
+    buildListingDetailSchemaGraph({
+      type: 'task',
+      slug,
+      record: task,
+      settings,
+    });
+
+  return (
+    <>
+      {schema ? <JsonLd data={schema} /> : null}
+      {children}
+    </>
+  );
 }

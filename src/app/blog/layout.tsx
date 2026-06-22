@@ -4,10 +4,10 @@ import { buildPageMetadata } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Jobs in Nepal',
+    title: 'Blog & Tips',
     description:
-      'Browse open jobs and freelance opportunities across Nepal. Find remote, contract, and full-time roles on Sajilowork.',
-    path: '/jobs',
+      'Read guides, tips, and marketplace insights for hiring freelancers and growing your business in Nepal on Sajilowork.',
+    path: '/blog',
   });
 }
 
