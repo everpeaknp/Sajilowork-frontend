@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { fetchAllPaginated } from '@/lib/seo/api';
-import { getAppBaseUrl } from '@/lib/seo/constants';
+import { getCanonicalSiteUrl } from '@/lib/seo/constants';
 
 type SlugRecord = {
   slug: string;
@@ -51,15 +51,25 @@ function listingEntries(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = getAppBaseUrl();
+  const base = await getCanonicalSiteUrl();
 
-  const [jobs, tasks, services, projects, blogPosts] = await Promise.all([
-    fetchAllPaginated<SlugRecord>('/jobs/?page_size=100', { revalidate: 3600 }),
-    fetchAllPaginated<SlugRecord>('/tasks/?listing_kind=task&page_size=100', { revalidate: 3600 }),
-    fetchAllPaginated<SlugRecord>('/services/?page_size=100', { revalidate: 3600 }),
-    fetchAllPaginated<SlugRecord>('/projects/?page_size=100', { revalidate: 3600 }),
-    fetchAllPaginated<SlugRecord>('/blog/posts/?page_size=100', { revalidate: 3600 }),
-  ]);
+  let jobs: SlugRecord[] = [];
+  let tasks: SlugRecord[] = [];
+  let services: SlugRecord[] = [];
+  let projects: SlugRecord[] = [];
+  let blogPosts: SlugRecord[] = [];
+
+  try {
+    [jobs, tasks, services, projects, blogPosts] = await Promise.all([
+      fetchAllPaginated<SlugRecord>('/jobs/?page_size=100', { revalidate: 3600 }),
+      fetchAllPaginated<SlugRecord>('/tasks/?listing_kind=task&page_size=100', { revalidate: 3600 }),
+      fetchAllPaginated<SlugRecord>('/services/?page_size=100', { revalidate: 3600 }),
+      fetchAllPaginated<SlugRecord>('/projects/?page_size=100', { revalidate: 3600 }),
+      fetchAllPaginated<SlugRecord>('/blog/posts/?page_size=100', { revalidate: 3600 }),
+    ]);
+  } catch {
+    // Static routes are still published when listing APIs are unavailable.
+  }
 
   return [
     ...STATIC_ROUTES.map((route) => ({

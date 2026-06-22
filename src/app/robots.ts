@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
 
-import { getAppBaseUrl } from '@/lib/seo/constants';
+import { getCanonicalSiteUrl } from '@/lib/seo/constants';
 
-export default function robots(): MetadataRoute.Robots {
-  const base = getAppBaseUrl();
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const base = await getCanonicalSiteUrl();
   return {
     rules: [
       {

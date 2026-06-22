@@ -8,9 +8,36 @@ export const DEFAULT_FAVICON = '/favicon-48x48.png';
 
 export function getAppBaseUrl(): string {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (configured) return configured.replace(/\/$/, '');
-  if (process.env.NODE_ENV === 'production') return 'https://www.sajilowork.com';
+  const productionCanonical = 'https://www.sajilowork.com';
+
+  if (configured) {
+    const normalized = configured.replace(/\/$/, '');
+    // Ignore staging/preview host in production SEO output.
+    if (
+      process.env.NODE_ENV === 'production' &&
+      /everacy\.com/i.test(normalized) &&
+      !/sajilowork\.com/i.test(normalized)
+    ) {
+      return productionCanonical;
+    }
+    return normalized;
+  }
+  if (process.env.NODE_ENV === 'production') return productionCanonical;
   return 'http://localhost:3000';
+}
+
+/** Canonical public site origin for sitemap, robots, and metadata. */
+export async function getCanonicalSiteUrl(): Promise<string> {
+  try {
+    const { fetchSiteSettings } = await import('@/lib/siteSettings');
+    const settings = await fetchSiteSettings();
+    if (settings.site_domain?.trim()) {
+      return resolveSiteOrigin(settings);
+    }
+  } catch {
+    // Fall back to env-based URL.
+  }
+  return getAppBaseUrl();
 }
 
 export function getApiBaseUrl(): string {

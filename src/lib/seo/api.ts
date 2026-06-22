@@ -4,6 +4,25 @@ type FetchOptions = {
   revalidate?: number;
 };
 
+function resolvePaginatedNextUrl(next: string | null | undefined, apiBase: string): string | null {
+  if (!next) return null;
+  if (next.startsWith('http://') || next.startsWith('https://')) {
+    try {
+      const parsed = new URL(next);
+      const api = new URL(apiBase);
+      if (parsed.origin !== api.origin) {
+        return `${apiBase}${parsed.pathname}${parsed.search}`;
+      }
+    } catch {
+      return null;
+    }
+  }
+  if (next.startsWith('/')) {
+    return `${apiBase}${next}`;
+  }
+  return `${apiBase}/${next}`;
+}
+
 export async function fetchPublicJson<T>(
   path: string,
   options: FetchOptions = {},
@@ -30,8 +49,9 @@ export async function fetchAllPaginated<T>(
   path: string,
   options: FetchOptions = {},
 ): Promise<T[]> {
+  const apiBase = getApiBaseUrl();
   const items: T[] = [];
-  let nextUrl: string | null = `${getApiBaseUrl()}${path}`;
+  let nextUrl: string | null = `${apiBase}${path}`;
   let guard = 0;
 
   while (nextUrl && guard < 50) {
@@ -41,7 +61,7 @@ export async function fetchAllPaginated<T>(
       if (!response.ok) break;
       const data = (await response.json()) as Paginated<T>;
       if (Array.isArray(data.results)) items.push(...data.results);
-      nextUrl = data.next || null;
+      nextUrl = resolvePaginatedNextUrl(data.next, apiBase);
     } catch {
       break;
     }
