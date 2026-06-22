@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 
 import { getCanonicalSiteUrl } from '@/lib/seo/constants';
-import { SITEMAP_IDS } from '@/lib/seo/sitemap-data';
 
 const DISALLOW_PATHS = [
   '/admin/',
@@ -37,10 +36,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         disallow: DISALLOW_PATHS,
       },
     ],
-    sitemap: [
-      `${base}/sitemap.xml`,
-      ...SITEMAP_IDS.map((id) => `${base}/sitemap/${id}.xml`),
-    ],
+    sitemap: `${base}/sitemap.xml`,
     host: base,
   };
 }
