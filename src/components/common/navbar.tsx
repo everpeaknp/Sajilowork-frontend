@@ -8,7 +8,6 @@ import {
   X,
   Settings,
   LogOut,
-  LayoutDashboard,
   ClipboardList,
   Briefcase,
 } from 'lucide-react';
@@ -23,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
 import AccountRoleMode from '@/components/common/AccountRoleMode';
+import { isConfirmModalTarget } from '@/app/dashboard/DeleteConfirmModal';
 import type { Conversation, Notification as NotificationType, PaginatedResponse } from '@/types';
 import { normalizeNotificationCurrency } from '@/lib/nepalLocale';
 import {
@@ -278,6 +278,8 @@ export default function Navbar() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (isConfirmModalTarget(event.target)) return;
+
       if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setNotificationsOpen(false);
       }
@@ -389,22 +391,14 @@ export default function Navbar() {
         <p className={`${landingHeadlineSm} text-sm text-gray-900`}>
           {user?.first_name} {user?.last_name}
         </p>
-        <AccountRoleMode variant="navbar" />
+        <AccountRoleMode
+          variant="navbar"
+          navigateToDashboard
+          onSwitched={() => setProfileMenuOpen(false)}
+        />
       </div>
 
       <div className="py-1">
-        <button
-          type="button"
-          onClick={() => {
-            setProfileMenuOpen(false);
-            router.push('/dashboard');
-          }}
-          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
-        >
-          <LayoutDashboard className="h-4 w-4 text-gray-400" />
-          <span>Dashboard</span>
-        </button>
-
         <button
           type="button"
           onClick={() => {

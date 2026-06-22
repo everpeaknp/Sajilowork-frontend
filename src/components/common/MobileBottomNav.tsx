@@ -108,7 +108,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-[9990] border-t border-gray-200/80 bg-white/95 backdrop-blur-md md:hidden"
+      className="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-[9990] border-t border-gray-200/80 bg-white/95 backdrop-blur-md md:hidden"
       aria-label="Main navigation"
     >
       <div className="mx-auto flex h-[3.75rem] max-w-lg items-stretch justify-between px-1 pb-[env(safe-area-inset-bottom,0px)]">
@@ -134,7 +134,7 @@ export default function MobileBottomNav() {
               <span
                 className={cn(
                   'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition',
-                  active ? 'bg-[#005fff]/10 text-[#005fff]' : 'text-[#3c4a6b]',
+                  active ? 'bg-brand-emerald/10 text-brand-emerald' : 'text-neutral-600',
                 )}
               >
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.25 : 2} />
@@ -142,7 +142,7 @@ export default function MobileBottomNav() {
               <span
                 className={cn(
                   'max-w-full truncate text-center text-[9px] font-semibold leading-tight sm:text-[10px]',
-                  active ? 'text-[#005fff]' : 'text-[#3c4a6b]',
+                  active ? 'text-brand-emerald' : 'text-neutral-600',
                 )}
               >
                 {item.label}

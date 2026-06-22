@@ -83,12 +83,8 @@ interface DashboardSidebarProps {
   onToggleCollapse?: () => void;
 }
 
-function DashboardRoleDropdown({
-  isProfileActive,
-}: {
-  isProfileActive: boolean;
-}) {
-  return <AccountRoleMode variant="sidebar" isProfileActive={isProfileActive} />;
+function DashboardRoleSwitch() {
+  return <AccountRoleMode variant="sidebar" />;
 }
 
 const SIDEBAR_MOTION = 'duration-300 ease-in-out';
@@ -150,45 +146,73 @@ export default function DashboardSidebar({
   const sidebarRole = useDashboardSidebarRole();
 
   const navItems = useMemo(
-    () => getNavTabsForRole(sidebarRole).map((tabId) => resolveNavItem(tabId, sidebarRole)),
+    () =>
+      getNavTabsForRole(sidebarRole)
+        .filter((tabId) => tabId !== 'settings')
+        .map((tabId) => resolveNavItem(tabId, sidebarRole)),
     [sidebarRole],
   );
 
-  const renderItem = (item: NavigationItem) => {
+  const settingsItem = useMemo(
+    () => resolveNavItem('settings', sidebarRole),
+    [sidebarRole],
+  );
+
+  const profileItem = useMemo(
+    () => resolveNavItem('profile', sidebarRole),
+    [sidebarRole],
+  );
+
+  const itemLinkClass = (isActive: boolean, collapsed: boolean) =>
+    `group flex w-full min-w-0 cursor-pointer items-center rounded-lg py-3.5 text-[15px] font-medium transition-[padding,background-color,color,box-shadow,gap] ${SIDEBAR_MOTION} ${
+      collapsed ? 'justify-center px-2' : 'gap-[18px] px-4'
+    } ${
+      isActive
+        ? 'bg-[#222222] font-semibold text-white shadow-sm'
+        : 'text-black hover:bg-neutral-50'
+    }`;
+
+  const renderSimpleNavItem = (
+    item: NavigationItem,
+    icon?: ReactNode,
+  ) => {
     const isActive = activeTab === item.id;
     const Icon = item.icon;
 
-    if (!isCreateTab(item.id) || collapsed) {
-      return (
-        <Link
-          key={item.id}
-          href={item.href}
-          title={collapsed ? item.label : undefined}
-          onClick={() => {
-            onTabChange(item.id);
-            onClose?.();
-          }}
-          className={`group flex w-full min-w-0 cursor-pointer items-center rounded-lg py-3.5 text-[15px] font-medium transition-[padding,background-color,color,box-shadow,gap] ${SIDEBAR_MOTION} ${
-            collapsed ? 'justify-center px-2' : 'gap-[18px] px-4'
-          } ${
-            isActive
-              ? 'bg-[#222222] font-semibold text-white shadow-sm'
-              : 'text-black hover:bg-neutral-50'
-          }`}
-        >
+    return (
+      <Link
+        key={item.id}
+        href={item.href}
+        title={collapsed ? item.label : undefined}
+        onClick={() => {
+          onTabChange(item.id);
+          onClose?.();
+        }}
+        className={itemLinkClass(isActive, collapsed)}
+      >
+        {icon ?? (
           <Icon
             className={`h-[22px] w-[22px] shrink-0 transition-transform ${SIDEBAR_MOTION} ${
               isActive ? 'text-[#52C47F]' : 'text-black'
             }`}
             strokeWidth={1.8}
           />
-          {!collapsed ? (
-            <SidebarReveal collapsed={false} className="truncate tracking-wide">
-              {item.label}
-            </SidebarReveal>
-          ) : null}
-        </Link>
-      );
+        )}
+        {!collapsed ? (
+          <SidebarReveal collapsed={false} className="truncate tracking-wide">
+            {item.label}
+          </SidebarReveal>
+        ) : null}
+      </Link>
+    );
+  };
+
+  const renderItem = (item: NavigationItem) => {
+    const isActive = activeTab === item.id;
+    const Icon = item.icon;
+
+    if (!isCreateTab(item.id) || collapsed) {
+      return renderSimpleNavItem(item);
     }
 
     return (
@@ -269,7 +293,7 @@ export default function DashboardSidebar({
       </div>
 
       <div
-        className={`scrollbar-none flex-1 select-none overflow-y-auto overflow-x-hidden pb-6 transition-[padding] ${SIDEBAR_MOTION} ${
+        className={`scrollbar-none min-h-0 flex-1 select-none overflow-y-auto overflow-x-hidden pb-4 transition-[padding] ${SIDEBAR_MOTION} ${
           collapsed ? 'px-1.5 pt-2' : 'px-4 pt-3'
         }`}
       >
@@ -277,45 +301,73 @@ export default function DashboardSidebar({
       </div>
 
       <div
-        className={`pt-0 transition-[padding] ${SIDEBAR_MOTION} ${collapsed ? 'p-1.5' : 'p-4'}`}
+        className={`shrink-0 space-y-1 border-t border-neutral-100 transition-[padding] ${SIDEBAR_MOTION} ${
+          collapsed ? 'px-1.5 py-2' : 'px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]'
+        }`}
       >
         <div className="space-y-1">
           <div
             className={`group flex w-full min-w-0 items-center rounded-lg transition-[background-color,box-shadow] ${SIDEBAR_MOTION} ${
-              activeTab === 'profile' ? 'bg-[#222222] shadow-sm' : 'hover:bg-neutral-50'
-            } ${collapsed ? 'justify-center' : ''}`}
+              activeTab === 'profile' || activeTab === 'settings'
+                ? 'bg-[#222222] shadow-sm'
+                : 'hover:bg-neutral-50'
+            }`}
           >
             <Link
-              href={getDashboardHref('profile')}
-              title={collapsed ? 'My Profile' : undefined}
+              href={profileItem.href}
+              title={collapsed ? profileItem.label : undefined}
               onClick={() => {
                 onTabChange('profile');
                 onClose?.();
               }}
-              className={`flex cursor-pointer items-center rounded-lg py-3.5 text-[15px] font-medium transition-[padding,background-color,color,gap] ${SIDEBAR_MOTION} ${
-                collapsed
-                  ? 'w-full justify-center px-2'
-                  : 'min-w-0 flex-1 gap-[18px] px-4'
-              } ${activeTab === 'profile' ? 'font-semibold text-white' : 'text-black'}`}
+              className={`flex min-w-0 flex-1 cursor-pointer items-center rounded-lg py-3.5 text-[15px] font-medium transition-[padding,background-color,color,gap] ${SIDEBAR_MOTION} ${
+                collapsed ? 'justify-center px-2' : 'gap-[18px] px-4'
+              } ${
+                activeTab === 'profile'
+                  ? 'font-semibold text-white'
+                  : activeTab === 'settings'
+                    ? 'text-white/80'
+                    : 'text-black'
+              }`}
             >
               <UserAvatar
                 src={user?.profile_image}
-                name={user ? `${user.first_name} ${user.last_name}` : 'My Profile'}
+                name={user ? `${user.first_name} ${user.last_name}` : profileItem.label}
                 size="xs"
+                verified={user?.is_verified_tasker}
                 className="!h-[22px] !w-[22px] shrink-0"
               />
               {!collapsed ? (
                 <SidebarReveal collapsed={false} className="truncate tracking-wide">
-                  My Profile
+                  {profileItem.label}
                 </SidebarReveal>
               ) : null}
             </Link>
 
-            {!collapsed ? (
-              <DashboardRoleDropdown isProfileActive={activeTab === 'profile'} />
-            ) : null}
+            <Link
+              href={settingsItem.href}
+              title={settingsItem.label}
+              onClick={() => {
+                onTabChange('settings');
+                onClose?.();
+              }}
+              aria-label={settingsItem.label}
+              className={`mr-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${SIDEBAR_MOTION} ${
+                activeTab === 'profile' || activeTab === 'settings'
+                  ? activeTab === 'settings'
+                    ? 'text-[#52C47F] hover:bg-white/10'
+                    : 'text-white/80 hover:bg-white/10 hover:text-[#52C47F]'
+                  : 'text-neutral-500 hover:bg-neutral-100 hover:text-black'
+              }`}
+            >
+              <Settings className="h-[22px] w-[22px]" strokeWidth={1.8} />
+            </Link>
           </div>
         </div>
+
+        {!collapsed ? (
+          <DashboardRoleSwitch />
+        ) : null}
       </div>
     </aside>
   );

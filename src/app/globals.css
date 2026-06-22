@@ -275,4 +275,12 @@ body {
   body.has-mobile-bottom-nav .mobile-bottom-nav-offset {
     padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px));
   }
+
+  body.dashboard-mobile-sidebar-open.has-mobile-bottom-nav {
+    padding-bottom: 0;
+  }
+
+  body.dashboard-mobile-sidebar-open .mobile-bottom-nav {
+    display: none;
+  }
 }

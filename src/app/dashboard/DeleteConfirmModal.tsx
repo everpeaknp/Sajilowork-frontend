@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowUpRight, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface DeleteConfirmModalProps {
   open: boolean;
@@ -13,6 +13,12 @@ interface DeleteConfirmModalProps {
   confirmLabel?: string;
   cancelLabel?: string;
   confirmTone?: 'danger' | 'primary' | 'brand';
+}
+
+export const CONFIRM_MODAL_ROOT_ATTR = 'data-confirm-modal-root';
+
+export function isConfirmModalTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest(`[${CONFIRM_MODAL_ROOT_ATTR}]`));
 }
 
 const CONFIRM_TONE_CLASS: Record<NonNullable<DeleteConfirmModalProps['confirmTone']>, string> = {
@@ -37,48 +43,69 @@ export default function DeleteConfirmModal({
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!open || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[10052] flex items-center justify-center p-4">
+    <div
+      {...{ [CONFIRM_MODAL_ROOT_ATTR]: '' }}
+      className="fixed inset-0 z-[10100] flex items-end justify-center p-4 sm:items-center sm:p-6"
+    >
       <button
         type="button"
-        aria-label="Close delete confirmation"
+        aria-label="Close confirmation"
         onClick={onClose}
-        className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-neutral-900/50"
       />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-neutral-100 bg-white px-8 py-10 text-center shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-modal-title"
+        className="relative z-10 w-full max-w-sm rounded-2xl border border-neutral-100 bg-white px-5 py-6 text-center shadow-2xl sm:max-w-md sm:px-8 sm:py-8"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
+          className="absolute right-3 top-3 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black sm:right-4 sm:top-4"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
         </button>
 
-        <h3 className="text-xl font-semibold tracking-tight text-black sm:text-2xl">{title}</h3>
-        <p className="mx-auto mt-4 max-w-sm text-sm font-normal leading-relaxed text-neutral-500">
+        <h3
+          id="confirm-modal-title"
+          className="pr-8 text-lg font-semibold tracking-tight text-black sm:text-xl"
+        >
+          {title}
+        </h3>
+        <p className="mx-auto mt-3 text-sm leading-relaxed text-neutral-500 sm:mt-4">
           {description}
         </p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`inline-flex min-w-[140px] items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-normal text-white transition-colors ${CONFIRM_TONE_CLASS[confirmTone]}`}
-          >
-            {confirmLabel}
-            <ArrowUpRight className="h-4 w-4" />
-          </button>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-lg bg-[#222222] px-6 py-3 text-sm font-normal text-white transition-colors hover:bg-neutral-800"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50"
           >
             {cancelLabel}
-            <ArrowUpRight className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={`inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors ${CONFIRM_TONE_CLASS[confirmTone]}`}
+          >
+            {confirmLabel}
           </button>
         </div>
       </div>

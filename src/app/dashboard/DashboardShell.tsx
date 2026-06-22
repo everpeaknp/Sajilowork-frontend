@@ -13,7 +13,7 @@ import DashboardLoadingFallback from './DashboardLoadingFallback';
 
 const DashboardSidebar = dynamic(() => import('./DashboardSidebar'), {
   loading: () => (
-    <div className="fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-[17.5rem] bg-white sm:top-16 sm:h-[calc(100dvh-4rem)]" />
+    <div className="fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] w-[17.5rem] bg-white sm:top-16 sm:h-[calc(100dvh-4rem-env(safe-area-inset-bottom,0px))] lg:h-[calc(100dvh-4rem)]" />
   ),
   ssr: false,
 });
@@ -65,6 +65,22 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
     };
   }, [mobileOpen]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+    if (!isMobile) return undefined;
+
+    if (mobileOpen) {
+      document.body.classList.add('dashboard-mobile-sidebar-open');
+    } else {
+      document.body.classList.remove('dashboard-mobile-sidebar-open');
+    }
+
+    return () => {
+      document.body.classList.remove('dashboard-mobile-sidebar-open');
+    };
+  }, [mobileOpen]);
+
   if (!authChecked || (isLoading && !isAuthenticated)) {
     return <DashboardLoading />;
   }
@@ -81,9 +97,13 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       <Navbar />
 
       <nav
-        className={`fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem)] w-[17.5rem] overflow-hidden bg-white shadow-xl transition-[width,transform] duration-300 ease-in-out sm:top-16 sm:h-[calc(100dvh-4rem)] lg:z-40 lg:translate-x-0 lg:shadow-none ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        } ${sidebarCollapsed ? 'lg:w-[4.75rem]' : 'lg:w-[17.5rem]'}`}
+        className={`fixed top-14 left-0 w-[17.5rem] overflow-hidden bg-white shadow-xl transition-[width,transform,height,z-index] duration-300 ease-in-out sm:top-16 lg:z-40 lg:h-[calc(100dvh-4rem)] lg:translate-x-0 lg:shadow-none ${
+          mobileOpen
+            ? 'z-[10010] h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-4rem-env(safe-area-inset-bottom,0px))]'
+            : 'z-50 h-[calc(100dvh-3.5rem-3.75rem-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-4rem-3.75rem-env(safe-area-inset-bottom,0px))] md:h-[calc(100dvh-4rem)] -translate-x-full lg:translate-x-0'
+        } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${
+          sidebarCollapsed ? 'lg:w-[4.75rem]' : 'lg:w-[17.5rem]'
+        }`}
       >
         <DashboardSidebar
           activeTab={activeTab}
@@ -98,7 +118,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       {mobileOpen ? (
         <button
           type="button"
-          className="fixed inset-0 top-14 z-40 bg-black/50 transition-opacity duration-300 ease-in-out sm:top-16 lg:hidden"
+          className="fixed inset-0 top-14 z-[10005] bg-black/50 transition-opacity duration-300 ease-in-out sm:top-16 lg:hidden"
           aria-label="Close navigation"
           onClick={() => setMobileOpen(false)}
         />
