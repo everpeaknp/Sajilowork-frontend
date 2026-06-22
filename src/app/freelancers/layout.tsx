@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Freelancers',
-  description:
-    'Browse verified freelancers on TaskNepal — designers, developers, writers, and specialists across Nepal.',
-};
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildPageMetadata({
+    title: 'Freelancers in Nepal',
+    description:
+      'Browse verified freelancers — designers, developers, writers, and specialists available for hire on Sajilowork.',
+    path: '/freelancers',
+  });
+}
 
 export default function FreelancersLayout({ children }: { children: React.ReactNode }) {
   return children;

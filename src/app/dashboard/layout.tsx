@@ -1,12 +1,14 @@
-'use client';
+import type { Metadata } from 'next';
 
-import dynamic from 'next/dynamic';
-import DashboardLoadingFallback from './DashboardLoadingFallback';
+import { NOINDEX_METADATA } from '@/lib/seo';
 
-const DashboardShell = dynamic(() => import('./DashboardShell'), {
-  loading: () => <DashboardLoadingFallback />,
-});
+import DashboardClientShell from './DashboardClientShell';
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  ...NOINDEX_METADATA,
+};
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <DashboardShell>{children}</DashboardShell>;
+  return <DashboardClientShell>{children}</DashboardClientShell>;
 }

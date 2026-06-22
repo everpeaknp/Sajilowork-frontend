@@ -11,6 +11,6 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function JobsLayout({ children }: { children: React.ReactNode }) {
+export default function BlogLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

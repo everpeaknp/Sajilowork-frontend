@@ -1,0 +1,151 @@
+import type { SiteSettings } from '@/lib/siteSettings';
+
+import { absoluteUrl, getAppBaseUrl, resolveSiteOrigin } from './constants';
+
+export function buildOrganizationSchema(settings: SiteSettings) {
+  const siteName = settings.site_name || 'Sajilowork';
+  const url = resolveSiteOrigin(settings);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: siteName,
+    url,
+    logo: settings.favicon_url || absoluteUrl('/favicon-48x48.png', settings),
+    ...(settings.contact_email ? { email: settings.contact_email } : {}),
+    sameAs: [],
+  };
+}
+
+export function buildWebsiteSchema(settings: SiteSettings) {
+  const siteName = settings.site_name || 'Sajilowork';
+  const url = resolveSiteOrigin(settings);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteName,
+    url,
+    description: settings.meta_description || undefined,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${url}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+export function buildBreadcrumbSchema(
+  items: Array<{ name: string; path: string }>,
+  settings?: SiteSettings,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path, settings),
+    })),
+  };
+}
+
+export function buildFaqPageSchema(
+  items: Array<{ question: string; answer: string }>,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+export function buildArticleSchema(input: {
+  title: string;
+  description?: string;
+  path: string;
+  image?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  settings?: SiteSettings;
+}) {
+  const publisherName = input.settings?.site_name || 'Sajilowork';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: input.title,
+    description: input.description,
+    image: input.image ? [input.image] : undefined,
+    datePublished: input.publishedAt || undefined,
+    dateModified: input.updatedAt || input.publishedAt || undefined,
+    mainEntityOfPage: absoluteUrl(input.path, input.settings),
+    publisher: {
+      '@type': 'Organization',
+      name: publisherName,
+      logo: {
+        '@type': 'ImageObject',
+        url: input.settings?.favicon_url || absoluteUrl('/favicon-48x48.png', input.settings),
+      },
+    },
+  };
+}
+
+export function buildJobPostingSchema(input: {
+  title: string;
+  description: string;
+  path: string;
+  datePosted?: string | null;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: input.title,
+    description: input.description,
+    datePosted: input.datePosted || undefined,
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: input.settings?.site_name || 'Sajilowork',
+      sameAs: getAppBaseUrl(),
+    },
+    jobLocation: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'NP',
+      },
+    },
+    url: absoluteUrl(input.path, input.settings),
+  };
+}
+
+export function buildServiceSchema(input: {
+  title: string;
+  description: string;
+  path: string;
+  image?: string | null;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: input.title,
+    description: input.description,
+    provider: {
+      '@type': 'Organization',
+      name: input.settings?.site_name || 'Sajilowork',
+    },
+    areaServed: {
+      '@type': 'Country',
+      name: 'Nepal',
+    },
+    url: absoluteUrl(input.path, input.settings),
+    image: input.image || undefined,
+  };
+}

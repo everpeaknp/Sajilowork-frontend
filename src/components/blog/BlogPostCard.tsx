@@ -21,7 +21,7 @@ export default function BlogPostCard({ post, className = '' }: BlogPostCardProps
     >
       {post.image ? (
         <div className="h-48 overflow-hidden">
-          <img src={post.image} alt="" className="w-full h-full object-cover" />
+          <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
         </div>
       ) : null}
       <div className="p-6">

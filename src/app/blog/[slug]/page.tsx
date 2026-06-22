@@ -85,7 +85,8 @@ export default function BlogPostPage() {
               <div className="aspect-[21/9] max-h-[420px] overflow-hidden bg-gray-100">
                 <img
                   src={post.image}
-                  alt=""
+                  alt={post.title}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>

@@ -3,7 +3,8 @@ import FaqContent from '@/components/marketing/FaqContent';
 
 export const metadata = {
   title: 'FAQ',
-  description: 'Frequently asked questions about posting tasks, payments, and using tasknepal.',
+  description:
+    'Frequently asked questions about posting tasks, secure payments, and using Sajilowork in Nepal.',
 };
 
 export default function FaqPage() {

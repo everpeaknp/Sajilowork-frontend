@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
 import { buildSiteMetadata, fetchSiteSettings } from "@/lib/siteSettings";
+import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,6 +54,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${outfit.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <GlobalJsonLd />
         <AuthProvider>
           {children}
           {modal}

@@ -6,7 +6,7 @@ import { ABOUT_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
   title: 'About Us',
-  description: 'Learn about tasknepal — Nepal’s marketplace to get anything done.',
+  description: 'Learn about Sajilowork — Nepal’s marketplace to hire taskers and get work done.',
 };
 
 export default function AboutPage() {

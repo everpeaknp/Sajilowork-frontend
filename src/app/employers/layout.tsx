@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Employers',
-  description:
-    'Browse verified employer companies and talent partners on TaskNepal — agencies, studios, and hiring organizations.',
-};
+import { buildPageMetadata } from '@/lib/seo';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return buildPageMetadata({
+    title: 'Employers and companies',
+    description:
+      'Explore employer profiles, agencies, and hiring organizations posting jobs and projects on Sajilowork.',
+    path: '/employers',
+  });
+}
 
 export default function EmployersLayout({ children }: { children: React.ReactNode }) {
   return children;
