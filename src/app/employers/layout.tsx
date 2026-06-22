@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Employers | tasknepal',
+  title: 'Employers',
   description:
     'Browse verified employer companies and talent partners on TaskNepal — agencies, studios, and hiring organizations.',
 };

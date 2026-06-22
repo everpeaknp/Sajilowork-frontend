@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Services | tasknepal',
+  title: 'Services',
   description:
     'Browse home services on TaskNepal — cleaning, moving, repairs, and more from verified local taskers.',
 };

@@ -3,7 +3,7 @@ import ContactContent from '@/components/marketing/ContactContent';
 import FaqContent from '@/components/marketing/FaqContent';
 
 export const metadata = {
-  title: 'Contact Us | tasknepal',
+  title: 'Contact Us',
   description: 'Contact tasknepal support for help with tasks, payments, and your account.',
 };
 

@@ -2,7 +2,7 @@ import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import FaqContent from '@/components/marketing/FaqContent';
 
 export const metadata = {
-  title: 'FAQ | tasknepal',
+  title: 'FAQ',
   description: 'Frequently asked questions about posting tasks, payments, and using tasknepal.',
 };
 

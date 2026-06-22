@@ -3,7 +3,7 @@ import { MarketingProse, MarketingLead } from '@/components/marketing/MarketingP
 import { PRIVACY_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
-  title: 'Privacy Policy | tasknepal',
+  title: 'Privacy Policy',
   description: 'How tasknepal collects, uses, and protects your personal information.',
 };
 

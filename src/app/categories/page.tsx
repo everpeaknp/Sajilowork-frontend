@@ -2,7 +2,7 @@ import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import CategoriesPageContent from '@/components/marketing/CategoriesPageContent';
 
 export const metadata = {
-  title: 'Categories | tasknepal',
+  title: 'Categories',
   description: 'Browse task categories and post work in cleaning, delivery, handyman, and more.',
 };
 

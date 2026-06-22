@@ -5,7 +5,7 @@ import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import { ABOUT_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
-  title: 'About Us | tasknepal',
+  title: 'About Us',
   description: 'Learn about tasknepal — Nepal’s marketplace to get anything done.',
 };
 

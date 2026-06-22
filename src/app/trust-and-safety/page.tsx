@@ -6,7 +6,7 @@ import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import { TRUST_SAFETY_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
-  title: 'Trust & Safety | tasknepal',
+  title: 'Trust & Safety',
   description: 'Secure payments, verified profiles, and safety features for posters and Taskers.',
 };
 

@@ -3,7 +3,7 @@ import { MarketingProse, MarketingLead } from '@/components/marketing/MarketingP
 import { TERMS_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
-  title: 'Terms of Service | tasknepal',
+  title: 'Terms of Service',
   description: 'Terms and conditions for using the tasknepal marketplace.',
 };
 

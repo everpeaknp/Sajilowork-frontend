@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Freelancers | tasknepal',
+  title: 'Freelancers',
   description:
     'Browse verified freelancers on TaskNepal — designers, developers, writers, and specialists across Nepal.',
 };

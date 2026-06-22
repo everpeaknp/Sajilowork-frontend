@@ -35,8 +35,19 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "tasknepal - Get Things Done",
+  applicationName: "Sajilowork",
+  title: {
+    default: "Sajilowork - Get Things Done",
+    template: "%s | Sajilowork",
+  },
   description: "Connect with skilled taskers to get your tasks done quickly and efficiently",
+  icons: {
+    icon: [
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+    ],
+    shortcut: "/favicon-48x48.png",
+    apple: "/favicon-48x48.png",
+  },
 };
 
 export default function RootLayout({
