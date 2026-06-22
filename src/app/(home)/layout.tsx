@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
-import HomeClient from '@/app/HomeClient';
-import { buildPageMetadata } from '@/lib/seo';
+import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
@@ -12,6 +11,6 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default function HomePage() {
-  return <HomeClient />;
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

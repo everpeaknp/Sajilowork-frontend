@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import '@/components/LangingHome/landing-home.css';
 import { discoverPageRoot, discoverPageTypo } from '@/components/LangingHome/landingTypography';
