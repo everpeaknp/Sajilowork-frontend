@@ -6,23 +6,39 @@ export const DEFAULT_DESCRIPTION =
   'Hire skilled taskers and freelancers in Nepal. Post tasks, find jobs, book local services, and get work done securely on Sajilowork.';
 export const DEFAULT_FAVICON = '/favicon-48x48.png';
 
+const PRODUCTION_CANONICAL_URL = 'https://www.sajilowork.com';
+
+const PLACEHOLDER_SITE_DOMAINS = new Set([
+  'example.com',
+  'www.example.com',
+  'localhost',
+  '127.0.0.1',
+]);
+
+export function isPlaceholderSiteDomain(domain?: string | null): boolean {
+  if (!domain?.trim()) return true;
+  const normalized = domain.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase();
+  if (PLACEHOLDER_SITE_DOMAINS.has(normalized)) return true;
+  return normalized.startsWith('localhost:') || normalized.startsWith('127.0.0.1:');
+}
+
 export function getAppBaseUrl(): string {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  const productionCanonical = 'https://www.sajilowork.com';
 
   if (configured) {
     const normalized = configured.replace(/\/$/, '');
-    // Ignore staging/preview host in production SEO output.
-    if (
-      process.env.NODE_ENV === 'production' &&
-      /everacy\.com/i.test(normalized) &&
-      !/sajilowork\.com/i.test(normalized)
-    ) {
-      return productionCanonical;
+    // Ignore placeholder/staging hosts in production SEO output.
+    if (process.env.NODE_ENV === 'production') {
+      if (isPlaceholderSiteDomain(normalized)) {
+        return PRODUCTION_CANONICAL_URL;
+      }
+      if (/everacy\.com/i.test(normalized) && !/sajilowork\.com/i.test(normalized)) {
+        return PRODUCTION_CANONICAL_URL;
+      }
     }
     return normalized;
   }
-  if (process.env.NODE_ENV === 'production') return productionCanonical;
+  if (process.env.NODE_ENV === 'production') return PRODUCTION_CANONICAL_URL;
   return 'http://localhost:3000';
 }
 
@@ -31,13 +47,10 @@ export async function getCanonicalSiteUrl(): Promise<string> {
   try {
     const { fetchSiteSettings } = await import('@/lib/siteSettings');
     const settings = await fetchSiteSettings();
-    if (settings.site_domain?.trim()) {
-      return resolveSiteOrigin(settings);
-    }
+    return resolveSiteOrigin(settings);
   } catch {
-    // Fall back to env-based URL.
+    return getAppBaseUrl();
   }
-  return getAppBaseUrl();
 }
 
 export function getApiBaseUrl(): string {
@@ -49,7 +62,7 @@ export function getApiBaseUrl(): string {
 
 export function resolveSiteOrigin(settings?: Pick<SiteSettings, 'site_domain'>): string {
   const domain = settings?.site_domain?.trim();
-  if (domain) {
+  if (domain && !isPlaceholderSiteDomain(domain)) {
     const normalized = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
     return `https://${normalized}`;
   }
