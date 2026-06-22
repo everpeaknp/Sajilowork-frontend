@@ -6,6 +6,7 @@ import {
   DEFAULT_DESCRIPTION,
   DEFAULT_FAVICON,
   DEFAULT_SITE_NAME,
+  GOOGLE_SITE_VERIFICATION,
   absoluteUrl,
   resolveSiteOrigin,
   truncateDescription,
@@ -91,6 +92,9 @@ export function buildSiteMetadata(settings: SiteSettings): Metadata {
       icon: [{ url: favicon, sizes: '48x48', type: 'image/png' }],
       shortcut: favicon,
       apple: favicon,
+    },
+    verification: {
+      google: GOOGLE_SITE_VERIFICATION,
     },
   };
 }

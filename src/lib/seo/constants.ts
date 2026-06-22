@@ -1,6 +1,7 @@
 import type { SiteSettings } from '@/lib/siteSettings';
 
 export const DEFAULT_SITE_NAME = 'Sajilowork';
+export const GOOGLE_SITE_VERIFICATION = 'hjH7kkL6ZxyL241q-d9X5wcu6dTCnw_vDZC5eWGEbhA';
 export const DEFAULT_DESCRIPTION =
   'Hire skilled taskers and freelancers in Nepal. Post tasks, find jobs, book local services, and get work done securely on Sajilowork.';
 export const DEFAULT_FAVICON = '/favicon-48x48.png';
