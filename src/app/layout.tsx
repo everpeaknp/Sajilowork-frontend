@@ -3,6 +3,7 @@ import { DM_Sans, Geist, Geist_Mono, Manrope, Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
+import { buildSiteMetadata, fetchSiteSettings } from "@/lib/siteSettings";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,21 +35,10 @@ const dmSans = DM_Sans({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  applicationName: "Sajilowork",
-  title: {
-    default: "Sajilowork - Get Things Done",
-    template: "%s | Sajilowork",
-  },
-  description: "Connect with skilled taskers to get your tasks done quickly and efficiently",
-  icons: {
-    icon: [
-      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
-    ],
-    shortcut: "/favicon-48x48.png",
-    apple: "/favicon-48x48.png",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchSiteSettings();
+  return buildSiteMetadata(settings);
+}
 
 export default function RootLayout({
   children,
