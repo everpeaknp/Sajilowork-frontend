@@ -15,6 +15,15 @@ const PLACEHOLDER_SITE_DOMAINS = new Set([
   '127.0.0.1',
 ]);
 
+const PLACEHOLDER_SITE_NAMES = new Set(['example.com', 'example', 'localhost']);
+
+export function isPlaceholderSiteName(name?: string | null): boolean {
+  if (!name?.trim()) return true;
+  const normalized = name.trim().toLowerCase();
+  if (PLACEHOLDER_SITE_NAMES.has(normalized)) return true;
+  return normalized.startsWith('localhost');
+}
+
 export function isPlaceholderSiteDomain(domain?: string | null): boolean {
   if (!domain?.trim()) return true;
   const normalized = domain.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase();

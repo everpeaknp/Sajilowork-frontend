@@ -6,14 +6,14 @@ export async function generateSitemaps() {
   return SITEMAP_IDS.map((id) => ({ id }));
 }
 
-export default async function sitemap({
-  id,
-}: {
-  id: SitemapId;
+export default async function sitemap(props: {
+  id: Promise<SitemapId>;
 }): Promise<MetadataRoute.Sitemap> {
+  const id = await props.id;
   try {
     return await buildSitemapForId(id);
-  } catch {
+  } catch (error) {
+    console.error(`[sitemap] failed to build sitemap for id=${id}:`, error);
     return [];
   }
 }

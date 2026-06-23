@@ -8,6 +8,7 @@ import {
   DEFAULT_SITE_NAME,
   GOOGLE_SITE_VERIFICATION,
   absoluteUrl,
+  isPlaceholderSiteName,
   resolveSiteOrigin,
   truncateDescription,
 } from './constants';
@@ -27,7 +28,10 @@ export async function getSiteSettingsForSeo(): Promise<SiteSettings> {
 }
 
 export function buildSiteMetadata(settings: SiteSettings): Metadata {
-  const siteName = settings.site_name?.trim() || DEFAULT_SITE_NAME;
+  const siteName =
+    settings.site_name?.trim() && !isPlaceholderSiteName(settings.site_name)
+      ? settings.site_name.trim()
+      : DEFAULT_SITE_NAME;
   const description = truncateDescription(
     settings.meta_description || DEFAULT_DESCRIPTION,
     320,
@@ -101,7 +105,10 @@ export function buildSiteMetadata(settings: SiteSettings): Metadata {
 
 export async function buildPageMetadata(input: PageSeoInput): Promise<Metadata> {
   const settings = input.settings ?? (await getSiteSettingsForSeo());
-  const siteName = settings.site_name?.trim() || DEFAULT_SITE_NAME;
+  const siteName =
+    settings.site_name?.trim() && !isPlaceholderSiteName(settings.site_name)
+      ? settings.site_name.trim()
+      : DEFAULT_SITE_NAME;
   const title = input.title.trim();
   const description = truncateDescription(input.description || settings.meta_description);
   const canonical = absoluteUrl(input.path, settings);

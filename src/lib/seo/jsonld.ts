@@ -1,6 +1,12 @@
 import type { SiteSettings } from '@/lib/siteSettings';
 
-import { absoluteUrl, getAppBaseUrl, resolveSiteOrigin } from './constants';
+import { absoluteUrl, getAppBaseUrl, isPlaceholderSiteName, resolveSiteOrigin } from './constants';
+
+function resolveSiteName(settings?: SiteSettings): string {
+  const name = settings?.site_name?.trim();
+  if (name && !isPlaceholderSiteName(name)) return name;
+  return 'Sajilowork';
+}
 
 export function buildSchemaGraph(schemas: Array<Record<string, unknown>>) {
   return {
@@ -26,7 +32,7 @@ export function buildWebPageSchema(input: {
     url: absoluteUrl(input.path, input.settings),
     isPartOf: {
       '@type': 'WebSite',
-      name: input.settings?.site_name || 'Sajilowork',
+      name: resolveSiteName(input.settings),
       url: resolveSiteOrigin(input.settings),
     },
   };
@@ -77,7 +83,7 @@ export function buildEmployerOrganizationSchema(input: {
 }
 
 export function buildOrganizationSchema(settings: SiteSettings) {
-  const siteName = settings.site_name || 'Sajilowork';
+  const siteName = resolveSiteName(settings);
   const url = resolveSiteOrigin(settings);
   return {
     '@context': 'https://schema.org',
@@ -91,7 +97,7 @@ export function buildOrganizationSchema(settings: SiteSettings) {
 }
 
 export function buildWebsiteSchema(settings: SiteSettings) {
-  const siteName = settings.site_name || 'Sajilowork';
+  const siteName = resolveSiteName(settings);
   const url = resolveSiteOrigin(settings);
   return {
     '@context': 'https://schema.org',
@@ -99,11 +105,6 @@ export function buildWebsiteSchema(settings: SiteSettings) {
     name: siteName,
     url,
     description: settings.meta_description || undefined,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${url}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
   };
 }
 
@@ -149,7 +150,7 @@ export function buildArticleSchema(input: {
   updatedAt?: string | null;
   settings?: SiteSettings;
 }) {
-  const publisherName = input.settings?.site_name || 'Sajilowork';
+  const publisherName = resolveSiteName(input.settings);
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -185,7 +186,7 @@ export function buildJobPostingSchema(input: {
     datePosted: input.datePosted || undefined,
     hiringOrganization: {
       '@type': 'Organization',
-      name: input.settings?.site_name || 'Sajilowork',
+      name: resolveSiteName(input.settings),
       sameAs: getAppBaseUrl(),
     },
     jobLocation: {
@@ -213,7 +214,7 @@ export function buildServiceSchema(input: {
     description: input.description,
     provider: {
       '@type': 'Organization',
-      name: input.settings?.site_name || 'Sajilowork',
+      name: resolveSiteName(input.settings),
     },
     areaServed: {
       '@type': 'Country',
