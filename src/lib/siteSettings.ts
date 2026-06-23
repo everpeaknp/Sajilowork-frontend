@@ -6,6 +6,7 @@ export type SiteSettings = {
   og_image_url: string | null;
   twitter_handle: string | null;
   contact_email: string | null;
+  same_as?: string[];
 };
 
 export {
@@ -33,6 +34,7 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
       og_image_url: null,
       twitter_handle: null,
       contact_email: null,
+      same_as: [],
     };
   }
 }

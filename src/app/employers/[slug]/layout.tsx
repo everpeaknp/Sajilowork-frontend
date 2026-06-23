@@ -8,6 +8,7 @@ import {
   buildSchemaGraph,
   buildWebPageSchema,
   fetchEmployerSeo,
+  withAggregateRating,
 } from '@/lib/seo';
 import { truncateDescription } from '@/lib/seo/constants';
 import { fetchSiteSettings } from '@/lib/siteSettings';
@@ -62,13 +63,17 @@ export default async function EmployerSlugLayout({ children, params }: Props) {
       settings,
     ),
     buildWebPageSchema({ title: name, description, path, settings }),
-    buildEmployerOrganizationSchema({
-      name,
-      description,
-      path,
-      image: profile.logo_url,
-      settings,
-    }),
+    withAggregateRating(
+      buildEmployerOrganizationSchema({
+        name,
+        description,
+        path,
+        image: profile.logo_url,
+        settings,
+      }),
+      profile.rating ?? profile.average_rating,
+      profile.review_count ?? profile.total_reviews,
+    ),
   ]);
 
   return (

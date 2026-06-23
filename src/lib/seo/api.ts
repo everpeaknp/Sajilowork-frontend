@@ -81,7 +81,33 @@ export type ListingSeoRecord = {
   updated_at?: string | null;
   published_at?: string | null;
   created_at?: string | null;
+  owner_business_name?: string | null;
+  owner_name?: string | null;
+  owner_logo_url?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  work_type?: string | null;
 };
+
+export type CategorySeoRecord = {
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  listing_kind?: string | null;
+};
+
+export async function fetchCategorySeo(slug: string): Promise<CategorySeoRecord | null> {
+  return fetchPublicJson<CategorySeoRecord>(`/tasks/categories/${encodeURIComponent(slug)}/`, {
+    revalidate: 3600,
+  });
+}
+
+export async function fetchAllCategories(): Promise<CategorySeoRecord[]> {
+  return fetchAllPaginated<CategorySeoRecord>('/tasks/categories/?page_size=100', {
+    revalidate: 3600,
+  });
+}
 
 export async function fetchListingSeo(
   endpoint: string,
@@ -116,6 +142,10 @@ export type ProfileSeoRecord = {
   updated_at?: string | null;
   date_joined?: string | null;
   member_since?: string | null;
+  average_rating?: number | null;
+  total_reviews?: number | null;
+  rating?: number | null;
+  review_count?: number | null;
 };
 
 export async function fetchFreelancerSeo(slug: string): Promise<ProfileSeoRecord | null> {

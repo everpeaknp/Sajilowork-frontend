@@ -5,6 +5,17 @@ export const GOOGLE_SITE_VERIFICATION = 'hjH7kkL6ZxyL241q-d9X5wcu6dTCnw_vDZC5eWG
 export const DEFAULT_DESCRIPTION =
   'Hire skilled taskers and freelancers in Nepal. Post tasks, find jobs, book local services, and get work done securely on Sajilowork.';
 export const DEFAULT_FAVICON = '/favicon-48x48.png';
+export const DEFAULT_OG_IMAGE_PATH = '/opengraph-image';
+
+export function resolveOgImageUrl(
+  settings?: { og_image_url?: string | null; favicon_url?: string | null },
+  siteOrigin?: string,
+): string {
+  const configured = settings?.og_image_url?.trim();
+  if (configured) return configured;
+  const base = siteOrigin || getAppBaseUrl();
+  return `${base.replace(/\/$/, '')}${DEFAULT_OG_IMAGE_PATH}`;
+}
 
 const PRODUCTION_CANONICAL_URL = 'https://www.sajilowork.com';
 

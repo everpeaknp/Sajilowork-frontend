@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 
 import { fetchAllPaginated } from './api';
 import { getCanonicalSiteUrl } from './constants';
+import { SEO_LOCATION_PAGES } from './locations';
 
 export const SITEMAP_IDS = [
   'static',
@@ -179,10 +180,24 @@ export async function buildSitemapForId(id: SitemapId): Promise<MetadataRoute.Si
       ];
     }
 
-    case 'categories':
-      return staticEntries(base, [
-        { path: '/categories', priority: 0.7, changeFrequency: 'weekly' },
-      ]);
+    case 'categories': {
+      const categories = await fetchAllPaginated<SlugRecord>(
+        '/tasks/categories/?page_size=100',
+        { revalidate },
+      );
+      const locationEntries: MetadataRoute.Sitemap = SEO_LOCATION_PAGES.map((location) => ({
+        url: `${base}/locations/${location.slug}`,
+        changeFrequency: 'weekly',
+        priority: 0.65,
+      }));
+      return [
+        ...staticEntries(base, [
+          { path: '/categories', priority: 0.7, changeFrequency: 'weekly' },
+        ]),
+        ...slugEntries(base, '/categories', categories, 0.65),
+        ...locationEntries,
+      ];
+    }
 
     default:
       return [];

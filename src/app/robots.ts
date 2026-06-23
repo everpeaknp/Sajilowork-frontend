@@ -21,6 +21,7 @@ const DISALLOW_PATHS = [
   '/bookmarks/',
   '/message/',
   '/search/',
+  '/users/',
   '/taskmap/',
   '/api/',
 ];

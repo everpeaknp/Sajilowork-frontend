@@ -8,6 +8,26 @@ function resolveSiteName(settings?: SiteSettings): string {
   return 'Sajilowork';
 }
 
+export function withAggregateRating<T extends Record<string, unknown>>(
+  schema: T,
+  rating?: number | null,
+  reviewCount?: number | null,
+): T {
+  const value = typeof rating === 'number' ? rating : null;
+  const count = typeof reviewCount === 'number' ? reviewCount : null;
+  if (!value || !count || count < 1) return schema;
+  return {
+    ...schema,
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: Number(value.toFixed(1)),
+      reviewCount: count,
+      bestRating: 5,
+      worstRating: 1,
+    },
+  };
+}
+
 export function buildSchemaGraph(schemas: Array<Record<string, unknown>>) {
   return {
     '@context': 'https://schema.org',
@@ -92,7 +112,7 @@ export function buildOrganizationSchema(settings: SiteSettings) {
     url,
     logo: settings.favicon_url || absoluteUrl('/favicon-48x48.png', settings),
     ...(settings.contact_email ? { email: settings.contact_email } : {}),
-    sameAs: [],
+    sameAs: settings.same_as?.length ? settings.same_as : [],
   };
 }
 
@@ -176,24 +196,37 @@ export function buildJobPostingSchema(input: {
   description: string;
   path: string;
   datePosted?: string | null;
+  employerName?: string | null;
+  employerLogo?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  employmentType?: string | null;
   settings?: SiteSettings;
 }) {
+  const employerName =
+    input.employerName?.trim() || resolveSiteName(input.settings);
+  const locality = [input.city, input.state].filter(Boolean).join(', ');
+
   return {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
     title: input.title,
     description: input.description,
     datePosted: input.datePosted || undefined,
+    employmentType: input.employmentType || undefined,
     hiringOrganization: {
       '@type': 'Organization',
-      name: resolveSiteName(input.settings),
-      sameAs: getAppBaseUrl(),
+      name: employerName,
+      ...(input.employerLogo ? { logo: input.employerLogo } : {}),
+      ...(!input.employerName?.trim() ? { sameAs: getAppBaseUrl() } : {}),
     },
     jobLocation: {
       '@type': 'Place',
       address: {
         '@type': 'PostalAddress',
-        addressCountry: 'NP',
+        ...(locality ? { addressLocality: locality } : {}),
+        addressCountry: input.country || 'NP',
       },
     },
     url: absoluteUrl(input.path, input.settings),

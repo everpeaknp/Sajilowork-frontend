@@ -60,6 +60,12 @@ export function buildListingDetailSchemaGraph(input: {
         description,
         path,
         datePosted: input.record.published_at || input.record.created_at,
+        employerName: input.record.owner_business_name || input.record.owner_name,
+        employerLogo: input.record.owner_logo_url,
+        city: input.record.city,
+        state: input.record.state,
+        country: input.record.country,
+        employmentType: input.record.work_type,
         settings: input.settings,
       }),
     );

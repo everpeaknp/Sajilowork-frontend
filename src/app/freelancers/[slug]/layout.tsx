@@ -3,13 +3,12 @@ import type { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import {
   buildBreadcrumbSchema,
-  buildEmployerOrganizationSchema,
   buildListingMetadata,
   buildPersonSchema,
   buildSchemaGraph,
   buildWebPageSchema,
-  fetchEmployerSeo,
   fetchFreelancerSeo,
+  withAggregateRating,
 } from '@/lib/seo';
 import { truncateDescription } from '@/lib/seo/constants';
 import { fetchSiteSettings } from '@/lib/siteSettings';
@@ -64,14 +63,18 @@ export default async function FreelancerSlugLayout({ children, params }: Props) 
       settings,
     ),
     buildWebPageSchema({ title: name, description, path, settings }),
-    buildPersonSchema({
-      name,
-      description,
-      path,
-      image: profile.profile_image,
-      jobTitle: profile.specialization || 'Freelancer',
-      settings,
-    }),
+    withAggregateRating(
+      buildPersonSchema({
+        name,
+        description,
+        path,
+        image: profile.profile_image,
+        jobTitle: profile.specialization || 'Freelancer',
+        settings,
+      }),
+      profile.average_rating,
+      profile.total_reviews,
+    ),
   ]);
 
   return (

@@ -9,6 +9,7 @@ import {
   GOOGLE_SITE_VERIFICATION,
   absoluteUrl,
   isPlaceholderSiteName,
+  resolveOgImageUrl,
   resolveSiteOrigin,
   truncateDescription,
 } from './constants';
@@ -37,8 +38,9 @@ export function buildSiteMetadata(settings: SiteSettings): Metadata {
     320,
   );
   const favicon = settings.favicon_url || DEFAULT_FAVICON;
-  const ogImage = settings.og_image_url || favicon;
-  const metadataBase = new URL(resolveSiteOrigin(settings));
+  const siteOrigin = resolveSiteOrigin(settings);
+  const ogImage = resolveOgImageUrl(settings, siteOrigin);
+  const metadataBase = new URL(siteOrigin);
 
   return {
     metadataBase,
@@ -112,7 +114,9 @@ export async function buildPageMetadata(input: PageSeoInput): Promise<Metadata> 
   const title = input.title.trim();
   const description = truncateDescription(input.description || settings.meta_description);
   const canonical = absoluteUrl(input.path, settings);
-  const image = input.image || settings.og_image_url || settings.favicon_url || DEFAULT_FAVICON;
+  const siteOrigin = resolveSiteOrigin(settings);
+  const image =
+    input.image || resolveOgImageUrl(settings, siteOrigin);
   const type = input.type || 'website';
 
   return {
@@ -132,7 +136,7 @@ export async function buildPageMetadata(input: PageSeoInput): Promise<Metadata> 
       siteName,
       title: `${title} | ${siteName}`,
       description,
-      images: image ? [{ url: image, alt: title }] : [],
+      images: image ? [{ url: image, width: 1200, height: 630, alt: title }] : [],
     },
     twitter: {
       card: 'summary_large_image',
