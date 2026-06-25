@@ -46,7 +46,7 @@ const SECTION_NAV: {
 }[] = [
   { id: 'identity', label: 'Identity', icon: UserIcon, description: 'Name, location & contact' },
   { id: 'about', label: 'About', icon: Info, description: 'Bio & introduction' },
-  { id: 'goal', label: 'Your goal', icon: Target, description: 'How you use TaskNepal' },
+  { id: 'goal', label: 'Your goal', icon: Target, description: 'How you use SajiloWork' },
 ];
 
 const inputClass =
@@ -895,7 +895,7 @@ export default function Profile() {
               <div>
                 <h2 className={cn(landingHeadline, 'text-xl text-brand-dark')}>Your goal</h2>
                 <p className={cn(landingBodyMuted, 'mt-1 text-sm')}>
-                  What brings you to TaskNepal?
+                  What brings you to SajiloWork?
                 </p>
               </div>
             </div>

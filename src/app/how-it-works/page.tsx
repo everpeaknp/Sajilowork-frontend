@@ -3,7 +3,7 @@ import HowItWorksContent from '@/components/marketing/HowItWorksContent';
 
 export const metadata = {
   title: 'How it works',
-  description: 'Learn how to post a task, receive offers, and get work done on tasknepal.',
+  description: 'Learn how to post a task, receive offers, and get work done on sajilowork.',
 };
 
 export default function HowItWorksPage() {

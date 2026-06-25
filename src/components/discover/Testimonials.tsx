@@ -29,7 +29,7 @@ const testimonials: TestimonialItem[] = [
   {
     id: 2,
     quote:
-      'The interface of TaskNepal is incredibly intuitive and clean. We hired three talented developers in less than a week, and all of them delivered exceptional quality.',
+      'The interface of SajiloWork is incredibly intuitive and clean. We hired three talented developers in less than a week, and all of them delivered exceptional quality.',
     author: 'David Lee',
     role: 'Chief Technology Officer, Stripe',
     avatar:
@@ -38,7 +38,7 @@ const testimonials: TestimonialItem[] = [
   {
     id: 3,
     quote:
-      'Fantastic support, secure escrow payment flow, and access to top-tier global talent. TaskNepal has completely reformed our remote team workflow.',
+      'Fantastic support, secure escrow payment flow, and access to top-tier global talent. SajiloWork has completely reformed our remote team workflow.',
     author: 'Marcus Aurelius',
     role: 'Operations Lead, Nike',
     avatar:
@@ -47,7 +47,7 @@ const testimonials: TestimonialItem[] = [
   {
     id: 4,
     quote:
-      "I've been working as a freelance UI/UX designer on TaskNepal for two years, and the steady stream of high-quality clients has allowed me to double my income.",
+      "I've been working as a freelance UI/UX designer on SajiloWork for two years, and the steady stream of high-quality clients has allowed me to double my income.",
     author: 'Samantha R.',
     role: 'Senior Product Designer',
     avatar:

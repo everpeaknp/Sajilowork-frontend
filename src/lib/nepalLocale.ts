@@ -214,7 +214,7 @@ export function mapToNepalProvince(stateName?: string): string {
 
 const NOMINATIM_HEADERS: HeadersInit = {
   'Accept-Language': 'en',
-  'User-Agent': 'tasknepal/1.0 (location search)',
+  'User-Agent': 'sajilowork/1.0 (location search)',
 };
 
 /** Reverse geocode coordinates in Nepal (Nominatim). */

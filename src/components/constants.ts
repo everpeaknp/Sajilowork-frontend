@@ -128,7 +128,7 @@ export const TOP_TASKERS = [
     totalRatings: 73,
     completionRate: 97,
     specialities: ["24/7 emergency plumbing", "gas fitting", "renovations"],
-    description: "Hassan has been in the plumbing industry for 11 years, and joined tasknepal for better work life balance. He enjoys the opportunity to connect with customers from many different areas and backgrounds.",
+    description: "Hassan has been in the plumbing industry for 11 years, and joined sajilowork for better work life balance. He enjoys the opportunity to connect with customers from many different areas and backgrounds.",
     badges: ["Digital ID", "Payment Method", "Mobile"],
     topReview: {
       text: "A+++ for Hassan! I was left in quite a dilemma with a shower leak and he was there within the hour. Highly professional, punctual and he did it all with a friendly smile.",

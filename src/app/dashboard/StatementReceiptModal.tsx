@@ -248,11 +248,11 @@ export default function StatementReceiptModal({
                   <div className="tn-receipt-inner">
                     <header className="tn-receipt-header">
                       <div>
-                        <h1 className="tn-receipt-brand-name">TaskNepal</h1>
+                        <h1 className="tn-receipt-brand-name">SajiloWork</h1>
                         <p className="tn-receipt-brand-meta">
                           Kathmandu, Nepal
                           <br />
-                          support@tasknepal.com
+                          support@sajilowork.com
                         </p>
                       </div>
                       <div className="tn-receipt-meta-block">
@@ -345,9 +345,9 @@ export default function StatementReceiptModal({
                         Transaction ID: <span>{shortTransactionId}</span>
                       </p>
                       <p className="tn-receipt-footer-note">
-                        Thank you for using TaskNepal. This is a system-generated receipt — keep it
+                        Thank you for using SajiloWork. This is a system-generated receipt — keep it
                         for your records. Generated on {generatedAt}. For support, email
-                        support@tasknepal.com and include receipt {receiptId}.
+                        support@sajilowork.com and include receipt {receiptId}.
                       </p>
                     </footer>
                   </div>

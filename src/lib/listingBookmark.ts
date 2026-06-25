@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/auth.store';
 
 export type ListingKind = 'task' | 'job' | 'project' | 'service';
 
-export const BOOKMARKS_CHANGED_EVENT = 'tasknepal-bookmarks-changed';
+export const BOOKMARKS_CHANGED_EVENT = 'sajilowork-bookmarks-changed';
 
 export function notifyBookmarksChanged(): void {
   if (typeof window === 'undefined') return;

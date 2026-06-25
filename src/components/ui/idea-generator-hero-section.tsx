@@ -4,7 +4,7 @@ import React from 'react';
 
 /**
  * Decorative layers for idea-generator-style hero sections.
- * Uses tasknepal blue palette (not the template purple theme).
+ * Uses sajilowork blue palette (not the template purple theme).
  */
 export function IdeaGeneratorHeroDecor() {
   return (

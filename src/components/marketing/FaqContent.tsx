@@ -6,7 +6,7 @@ import { faqService } from '@/services/faq.service';
 const FALLBACK_FAQ_ITEMS = [
   {
     q: 'How much does it cost to post a task?',
-    a: 'Posting a task on tasknepal is free. You only pay when you accept an offer and funds are held securely until the work is completed to your satisfaction.',
+    a: 'Posting a task on sajilowork is free. You only pay when you accept an offer and funds are held securely until the work is completed to your satisfaction.',
   },
   {
     q: 'How do I choose the right Tasker?',
@@ -30,7 +30,7 @@ const FALLBACK_FAQ_ITEMS = [
   },
   {
     q: 'Can I communicate off the platform?',
-    a: 'We recommend keeping all task communication on tasknepal so support can help if there is a dispute or payment issue.',
+    a: 'We recommend keeping all task communication on sajilowork so support can help if there is a dispute or payment issue.',
   },
   {
     q: 'How do I contact support?',

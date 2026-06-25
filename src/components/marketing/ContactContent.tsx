@@ -30,7 +30,7 @@ const OFFICE_LOCATIONS: OfficeLocation[] = [
     name: 'Kathmandu Headquarters',
     address: 'Lazimpat Road, Kathmandu 44600, Nepal.',
     phone: '+977 1-4001234',
-    email: 'support@tasknepal.com',
+    email: 'support@sajilowork.com',
     region: 'Bagmati Province',
   },
 ];

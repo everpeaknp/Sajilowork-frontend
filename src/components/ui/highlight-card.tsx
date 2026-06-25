@@ -5,7 +5,7 @@ import { motion, type Variants } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 const colorThemes = {
-  tasknepal: {
+  sajilowork: {
     from: '217 100% 50%',
     to: '224 91% 18%',
     foreground: '0 0% 100%',
@@ -77,14 +77,14 @@ export const HighlightCard = React.forwardRef<HTMLDivElement, HighlightCardProps
       onButtonClick,
       icon,
       bookmark,
-      color = 'tasknepal',
+      color = 'sajilowork',
       className,
       isActive = false,
       onClick,
     },
     ref
   ) => {
-    const theme = colorThemes[color] ?? colorThemes.tasknepal;
+    const theme = colorThemes[color] ?? colorThemes.sajilowork;
     const handleAction = onButtonClick ?? onClick;
 
     return (

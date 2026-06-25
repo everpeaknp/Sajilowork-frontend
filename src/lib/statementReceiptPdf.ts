@@ -36,7 +36,7 @@ function isPaidStatus(status: string) {
 
 function receiptFilename(receiptId: string) {
   const safe = receiptId.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 24);
-  return `tasknepal-receipt-${safe || 'statement'}.pdf`;
+  return `sajilowork-receipt-${safe || 'statement'}.pdf`;
 }
 
 function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
@@ -63,7 +63,7 @@ function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(dark);
-  doc.text('TaskNepal', margin, y);
+  doc.text('SajiloWork', margin, y);
   y += 18;
 
   doc.setFont('helvetica', 'normal');
@@ -71,7 +71,7 @@ function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
   doc.setTextColor(muted);
   doc.text('Kathmandu, Nepal', margin, y);
   y += 12;
-  doc.text('support@tasknepal.com', margin, y);
+  doc.text('support@sajilowork.com', margin, y);
 
   // Receipt meta (right)
   doc.setFont('helvetica', 'bold');
@@ -275,15 +275,15 @@ function buildStatementReceiptDoc(data: StatementReceiptData): jsPDF {
     timeStyle: 'short',
   });
   const footer =
-    `Thank you for using TaskNepal. This is a system-generated receipt. Generated on ${generatedAt}. ` +
-    `For support, email support@tasknepal.com and include receipt ${data.receiptId}.`;
+    `Thank you for using SajiloWork. This is a system-generated receipt. Generated on ${generatedAt}. ` +
+    `For support, email support@sajilowork.com and include receipt ${data.receiptId}.`;
   const footerLines = doc.splitTextToSize(footer, contentWidth);
   doc.setTextColor(lightMuted);
   doc.text(footerLines, margin, y);
 
   // Page footer
   doc.setFontSize(7);
-  doc.text('TaskNepal · tasknepal.com', pageWidth / 2, pageHeight - 28, { align: 'center' });
+  doc.text('SajiloWork · sajilowork.com', pageWidth / 2, pageHeight - 28, { align: 'center' });
 
   return doc;
 }

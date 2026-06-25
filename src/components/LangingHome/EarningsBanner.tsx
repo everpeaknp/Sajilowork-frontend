@@ -209,7 +209,7 @@ export default function EarningsBanner() {
                       <div className={`${landingBodyMuted} text-[10px] leading-tight text-gray-400`}>
                         COMPLETION RATE
                         <br />
-                        on TaskNepal
+                        on SajiloWork
                       </div>
                     </div>
                   </div>

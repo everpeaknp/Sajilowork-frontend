@@ -6,9 +6,9 @@ export interface BillingParty {
   location: string;
 }
 
-export const TASKNEPAL_PLATFORM: BillingParty = {
-  name: 'TaskNepal Pvt. Ltd.',
-  email: 'support@tasknepal.com',
+export const SAJILOWORK_PLATFORM: BillingParty = {
+  name: 'SajiloWork Pvt. Ltd.',
+  email: 'support@sajilowork.com',
   location: 'Kathmandu, Nepal',
 };
 
@@ -29,7 +29,7 @@ export function resolveBillingParties(options: {
     statementType === 'Wallet Recharge' || statementType === 'Wallet Payout';
 
   if (isWalletInvoice) {
-    return { billedFrom: TASKNEPAL_PLATFORM, billedTo: account };
+    return { billedFrom: SAJILOWORK_PLATFORM, billedTo: account };
   }
 
   const other: BillingParty = counterparty?.name
@@ -38,7 +38,7 @@ export function resolveBillingParties(options: {
         email: counterparty.email || '—',
         location: counterparty.location || 'Nepal',
       }
-    : TASKNEPAL_PLATFORM;
+    : SAJILOWORK_PLATFORM;
 
   if (direction === 'earned') {
     return { billedFrom: account, billedTo: other };

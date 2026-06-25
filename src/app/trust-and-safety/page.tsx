@@ -17,7 +17,7 @@ export default function TrustAndSafetyPage() {
       description="Features designed to protect posters and Taskers on every job."
     >
       <MarketingLead>
-        Your safety matters. tasknepal uses secure payments, community reviews, and platform
+        Your safety matters. sajilowork uses secure payments, community reviews, and platform
         policies so you can hire and work with more confidence.
       </MarketingLead>
       <MarketingProse sections={[...TRUST_SAFETY_SECTIONS]} />

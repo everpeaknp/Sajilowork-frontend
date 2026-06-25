@@ -4,7 +4,7 @@ import { PRIVACY_SECTIONS } from '@/components/marketing/legalContent';
 
 export const metadata = {
   title: 'Privacy Policy',
-  description: 'How tasknepal collects, uses, and protects your personal information.',
+  description: 'How sajilowork collects, uses, and protects your personal information.',
 };
 
 export default function PrivacyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       backLabel="Back to help"
     >
       <MarketingLead>
-        This policy describes what information we collect when you use tasknepal, why we collect
+        This policy describes what information we collect when you use sajilowork, why we collect
         it, and the choices you have.
       </MarketingLead>
       <MarketingProse sections={[...PRIVACY_SECTIONS]} />

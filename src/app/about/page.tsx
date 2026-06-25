@@ -17,7 +17,7 @@ export default function AboutPage() {
     >
       <MarketingLead>
         sajilowork is a local services marketplace built for Nepal — inspired by the simple,
-        trusted model used by global platforms like Airtasker.
+        trusted model used by global platforms.
       </MarketingLead>
       <MarketingProse sections={[...ABOUT_SECTIONS]} />
       <MarketingCta

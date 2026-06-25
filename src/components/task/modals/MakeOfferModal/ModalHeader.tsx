@@ -18,7 +18,7 @@ export default function ModalHeader({
         {title}
       </h2>
       <p className="text-on-surface-variant text-base">
-        Help us keep tasknepal safe and fun, and fill in a few details.
+        Help us keep sajilowork safe and fun, and fill in a few details.
       </p>
     </div>
   );

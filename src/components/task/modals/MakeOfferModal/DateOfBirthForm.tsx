@@ -29,7 +29,7 @@ export default function DateOfBirthForm({
 
       <h3 className="text-2xl font-bold text-brand-dark mb-2">Date of birth</h3>
       <p className="text-sm text-on-surface-variant mb-6">
-        You must be 18 or older to use tasknepal
+        You must be 18 or older to use sajilowork
       </p>
 
       <div className="space-y-4">

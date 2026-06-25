@@ -38,7 +38,7 @@ const SECTIONS = [
     title: 'Disputes',
     body: [
       'If you disagree with a cancellation outcome or fee, open a dispute from the task or contact support before completing work off-platform.',
-      'Keep all communication on tasknepal so we can review messages and payment history.',
+      'Keep all communication on sajilowork so we can review messages and payment history.',
     ],
   },
   {
@@ -55,7 +55,7 @@ export default function CancellationPolicyContent() {
   return (
     <article className="min-w-0">
       <p className="mb-8 text-sm leading-relaxed text-[#6a719a] sm:mb-10 sm:text-base">
-        This policy explains what happens when a task is cancelled on tasknepal, including fees,
+        This policy explains what happens when a task is cancelled on sajilowork, including fees,
         escrow refunds, and account moderation. Specific amounts may vary by task and are shown
         when you cancel.
       </p>
@@ -81,7 +81,7 @@ export default function CancellationPolicyContent() {
       </div>
 
       <p className="mt-10 border-t border-gray-100 pt-6 text-xs text-[#6a719a] sm:mt-12 sm:text-sm">
-        Last updated: May 2026. tasknepal may update this policy; continued use of the platform
+        Last updated: May 2026. sajilowork may update this policy; continued use of the platform
         constitutes acceptance of the current version.
       </p>
     </article>

@@ -113,12 +113,12 @@ export function mapUserToLandingTasker(user: User): LandingTaskerCard {
       : ['General services'],
     description:
       user.bio?.trim() ||
-      `${display} is an active tasker on TaskNepal, ready to help with local jobs in your area.`,
+      `${display} is an active tasker on SajiloWork, ready to help with local jobs in your area.`,
     profileHref: publicUserHref(user),
     topReview: reviews
       ? {
           text: `Highly rated by ${reviews} community review${reviews === 1 ? '' : 's'}.`,
-          author: 'TaskNepal member',
+          author: 'SajiloWork member',
         }
       : undefined,
   };
