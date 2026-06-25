@@ -1,9 +1,9 @@
 import type { Job, Project, Service } from '@/app/dashboard/types';
 
 const STORAGE_KEYS = {
-  services: 'airtasker-dashboard-listing-services',
-  jobs: 'airtasker-dashboard-listing-jobs',
-  projects: 'airtasker-dashboard-listing-projects',
+  services: 'sajilowork-dashboard-listing-services',
+  jobs: 'sajilowork-dashboard-listing-jobs',
+  projects: 'sajilowork-dashboard-listing-projects',
 } as const;
 
 function readList<T>(key: string): T[] {

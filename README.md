@@ -1,6 +1,6 @@
 # Job Portal - Frontend
 
-Web client for a task marketplace (Airtasker-style). Customers post jobs; taskers browse, bid, chat, and get paid. Built with Next.js 16, React 19, and TypeScript.
+Web client for a task marketplace (SajiloWork-style). Customers post jobs; taskers browse, bid, chat, and get paid. Built with Next.js 16, React 19, and TypeScript.
 
 ## Tech stack
 

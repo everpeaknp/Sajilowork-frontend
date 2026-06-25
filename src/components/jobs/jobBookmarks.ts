@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
-const STORAGE_KEY = 'airtasker-saved-job-ids';
-const CHANGE_EVENT = 'airtasker-job-bookmarks-change';
+const STORAGE_KEY = 'sajilowork-saved-job-ids';
+const CHANGE_EVENT = 'sajilowork-job-bookmarks-change';
 
 const EMPTY_SNAPSHOT: readonly string[] = [];
 const SERVER_SNAPSHOT: readonly string[] = EMPTY_SNAPSHOT;

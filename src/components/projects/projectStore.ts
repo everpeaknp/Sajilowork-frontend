@@ -1,6 +1,6 @@
 import { ALL_PROJECTS, type Project } from './projectListData';
 
-const STORAGE_KEY = 'airtasker-posted-projects';
+const STORAGE_KEY = 'sajilowork-posted-projects';
 
 let postedProjects: Project[] = [];
 

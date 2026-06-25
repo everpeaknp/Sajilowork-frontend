@@ -16,7 +16,7 @@ export default function AboutPage() {
       description="Connecting people who need tasks done with those who have the skills to do them."
     >
       <MarketingLead>
-        tasknepal is a local services marketplace built for Nepal — inspired by the simple,
+        sajilowork is a local services marketplace built for Nepal — inspired by the simple,
         trusted model used by global platforms like Airtasker.
       </MarketingLead>
       <MarketingProse sections={[...ABOUT_SECTIONS]} />

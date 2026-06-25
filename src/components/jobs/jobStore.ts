@@ -1,6 +1,6 @@
 import { ALL_JOBS, type Job } from './jobListData';
 
-const STORAGE_KEY = 'airtasker-posted-jobs';
+const STORAGE_KEY = 'sajilowork-posted-jobs';
 
 let postedJobs: Job[] = [];
 
