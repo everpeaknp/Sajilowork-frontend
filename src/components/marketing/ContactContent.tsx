@@ -41,6 +41,8 @@ export default function ContactContent() {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; message?: string }>({});
 
   const [selectedLocationId] = useState<string>('kathmandu');
   const [showPopup, setShowPopup] = useState(true);
@@ -76,6 +78,9 @@ export default function ContactContent() {
     e.preventDefault();
     if (!name || !email || !message) return;
 
+    // Clear previous errors
+    setError('');
+    setFieldErrors({});
     setIsSubmitting(true);
     
     try {
@@ -90,13 +95,20 @@ export default function ContactContent() {
       setName('');
       setEmail('');
       setMessage('');
-    } catch (error) {
-      console.error('Failed to submit contact form:', error);
-      // Still show success message to user (form was submitted, email delivery might have failed)
-      setSubmitted(true);
-      setName('');
-      setEmail('');
-      setMessage('');
+    } catch (err: any) {
+      console.error('Failed to submit contact form:', err);
+      
+      // Handle validation errors from backend
+      if (err?.errors && typeof err.errors === 'object') {
+        // Field-specific errors
+        setFieldErrors(err.errors);
+        setError('Please fix the errors below.');
+      } else if (err?.message) {
+        // General error message
+        setError(err.message);
+      } else {
+        setError('Failed to send message. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -177,6 +189,34 @@ export default function ContactContent() {
                       </button>
                     </motion.div>
                   ) : null}
+                  
+                  {error && !submitted ? (
+                    <motion.div
+                      className="mb-5 flex items-start gap-3.5 rounded-xl border border-red-200 bg-red-50 p-4"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                    >
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100">
+                        <span className="text-xs font-semibold text-red-600">!</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-normal text-red-900">
+                          {error}
+                        </h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setError('');
+                          setFieldErrors({});
+                        }}
+                        className="ml-auto cursor-pointer text-xs font-normal text-red-800 underline transition-colors hover:text-red-900"
+                      >
+                        Dismiss
+                      </button>
+                    </motion.div>
+                  ) : null}
                 </AnimatePresence>
 
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
@@ -193,10 +233,22 @@ export default function ContactContent() {
                         type="text"
                         required
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          if (fieldErrors.name) {
+                            setFieldErrors({ ...fieldErrors, name: undefined });
+                          }
+                        }}
                         placeholder="Name"
-                        className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20"
+                        className={`w-full rounded-lg border ${
+                          fieldErrors.name
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20'
+                        } bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2`}
                       />
+                      {fieldErrors.name && (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>
+                      )}
                     </div>
                     <div>
                       <label
@@ -210,10 +262,22 @@ export default function ContactContent() {
                         type="email"
                         required
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (fieldErrors.email) {
+                            setFieldErrors({ ...fieldErrors, email: undefined });
+                          }
+                        }}
                         placeholder="Enter Email"
-                        className="w-full rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20"
+                        className={`w-full rounded-lg border ${
+                          fieldErrors.email
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20'
+                        } bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2`}
                       />
+                      {fieldErrors.email && (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+                      )}
                     </div>
                   </div>
 
@@ -229,10 +293,22 @@ export default function ContactContent() {
                       required
                       rows={5}
                       value={message}
-                      onChange={(e) => setMessage(e.target.value)}
+                      onChange={(e) => {
+                        setMessage(e.target.value);
+                        if (fieldErrors.message) {
+                          setFieldErrors({ ...fieldErrors, message: undefined });
+                        }
+                      }}
                       placeholder="How can we help?"
-                      className="min-h-[120px] w-full resize-y rounded-lg border border-neutral-200 bg-white px-3.5 py-3 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:border-brand-emerald focus:outline-none focus:ring-2 focus:ring-brand-emerald/20 sm:min-h-[140px]"
+                      className={`min-h-[120px] w-full resize-y rounded-lg border ${
+                        fieldErrors.message
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                          : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20'
+                      } bg-white px-3.5 py-3 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2 sm:min-h-[140px]`}
                     />
+                    {fieldErrors.message && (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.message}</p>
+                    )}
                   </div>
 
                   <button
