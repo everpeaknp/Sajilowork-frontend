@@ -340,7 +340,7 @@ export default function SingleEmployerPage({
         <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
           <div className="flex items-center gap-2.5 font-normal text-neutral-500">
             <Calendar className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
-            <span>Founded in</span>
+            <span>Joined in</span>
           </div>
           <span className="font-normal tracking-tight text-black">
             {formatMemberSince(employer.memberSince).replace(/^—$/, 'Not specified')}
