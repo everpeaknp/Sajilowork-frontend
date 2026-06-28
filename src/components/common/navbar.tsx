@@ -119,7 +119,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const taskerDashboardNav = useTaskerDashboardNavOptional();
   const isTaskerDashboard = pathname.startsWith('/tasker-dashboard');
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const authResolved = !isLoading;
+  const showSignedOutCtas = authResolved && !isAuthenticated;
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -519,7 +521,7 @@ export default function Navbar() {
 
         {/* Right section: Utilities Dashboard & Profile */}
         <div className="flex shrink-0 items-center gap-0 sm:gap-1 md:gap-5">
-          {!isAuthenticated ? (
+          {showSignedOutCtas ? (
             <>
               <Link
                 href="/signin"
@@ -542,7 +544,7 @@ export default function Navbar() {
               </Link>
               </div>
             </>
-          ) : (
+          ) : isAuthenticated ? (
             <>
               {/* Help button */}
               <div className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald`}>
@@ -774,10 +776,12 @@ export default function Navbar() {
                 )}
               </div>
             </>
+          ) : (
+            <div className="hidden h-10 w-36 sm:block" aria-hidden="true" />
           )}
 
           {/* Hamburger: tasker dashboard sidebar, or guest sign-in menu */}
-          {(!isAuthenticated || isTaskerDashboard) && (
+          {(showSignedOutCtas || isTaskerDashboard) && (
             <button
               type="button"
               onClick={() => {
@@ -830,7 +834,7 @@ export default function Navbar() {
       </div>
 
       {/* Guest mobile menu only (signed-in users use icon shortcuts in the bar) */}
-      {mobileMenuOpen && !isAuthenticated && (
+      {mobileMenuOpen && showSignedOutCtas && (
         <nav
           className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden sm:px-4"
           aria-label="Mobile navigation"
