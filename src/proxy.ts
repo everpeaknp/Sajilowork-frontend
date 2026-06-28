@@ -9,6 +9,11 @@ import type { NextRequest } from 'next/server';
 import { isJwtNotExpired } from '@/lib/jwt';
 
 const protectedRoutes = [
+  '/dashboard',
+  '/checkout',
+  '/bookmarks',
+  '/disputes',
+  '/edit-task',
   '/my-tasks',
   '/tasker-dashboard',
   '/message',

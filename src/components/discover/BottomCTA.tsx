@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
+import { MARKETPLACE_CTA_IMAGE } from '@/lib/placeholderImages';
 
 function QualityBadgeIcon() {
   return (
@@ -155,7 +156,7 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
         <div className="relative z-20 flex w-full items-center justify-end lg:mb-0">
           <div className="relative h-[400px] w-full max-w-full overflow-hidden rounded-2xl border border-neutral-100 shadow-sm sm:h-[500px] lg:h-[600px]">
             <img
-              src="https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fabout-10.jpg&w=1920&q=75"
+              src={MARKETPLACE_CTA_IMAGE}
               alt="Tasker working on a laptop"
               className="h-full w-full object-cover object-center transition-transform duration-700 hover:scale-105"
               referrerPolicy="no-referrer"

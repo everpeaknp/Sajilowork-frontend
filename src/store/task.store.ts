@@ -13,6 +13,7 @@ import {
   getFallbackCategories,
   normalizeTaskForDisplay,
 } from '@/lib/taskUtils';
+import { devLog, devWarn, devError } from '@/lib/devLog';
 
 interface TaskState {
   // State
@@ -91,7 +92,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       const isRateLimited = err.status === 429;
 
       if (!isRateLimited) {
-        console.warn('Failed to fetch tasks:', err.message ?? error);
+        devWarn('Failed to fetch tasks:', err.message ?? error);
       }
 
       set({
@@ -110,17 +111,17 @@ export const useTaskStore = create<TaskState>((set, get) => ({
    */
   fetchMyTasks: async (status?: string) => {
     try {
-      console.log('🔍 Task Store: Fetching my tasks with status:', status);
+      devLog('🔍 Task Store: Fetching my tasks with status:', status);
       set({ isLoading: true, error: null });
       
       const response = await taskService.getMyTasks(status);
-      console.log('📦 Task Store: My Tasks API Response:', response);
-      console.log('📦 Raw response.data type:', typeof response.data);
-      console.log('📦 Raw response.data:', JSON.stringify(response.data, null, 2));
+      devLog('📦 Task Store: My Tasks API Response:', response);
+      devLog('📦 Raw response.data type:', typeof response.data);
+      devLog('📦 Raw response.data:', JSON.stringify(response.data, null, 2));
       
       if (response.success) {
         const data = response.data as PaginatedResponse<Task>;
-        console.log('✅ Task Store: My tasks received:', {
+        devLog('✅ Task Store: My tasks received:', {
           count: data.count,
           resultsLength: data.results?.length,
           results: data.results
@@ -129,7 +130,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         // DEBUG: Log first task in detail to see what fields are present
         if (data.results && data.results.length > 0) {
           const firstTask = data.results[0];
-          console.log('🔍 FIRST TASK DETAILED DEBUG:', {
+          devLog('🔍 FIRST TASK DETAILED DEBUG:', {
             id: firstTask.id,
             slug: firstTask.slug,
             title: firstTask.title,
@@ -148,7 +149,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           isLoading: false
         });
       } else {
-        console.warn('⚠️ Task Store: Response not successful:', response);
+        devWarn('⚠️ Task Store: Response not successful:', response);
         set({
           tasks: [],
           isLoading: false,
@@ -156,17 +157,17 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         });
       }
     } catch (error: any) {
-      console.error('❌ Task Store: Error fetching my tasks:', error);
-      console.error('Error type:', typeof error);
-      console.error('Error constructor:', error?.constructor?.name);
-      console.error('Error keys:', Object.keys(error || {}));
-      console.error('Error message:', error?.message);
-      console.error('Error status:', error?.status);
-      console.error('Error stringified:', JSON.stringify(error, null, 2));
+      devError('❌ Task Store: Error fetching my tasks:', error);
+      devError('Error type:', typeof error);
+      devError('Error constructor:', error?.constructor?.name);
+      devError('Error keys:', Object.keys(error || {}));
+      devError('Error message:', error?.message);
+      devError('Error status:', error?.status);
+      devError('Error stringified:', JSON.stringify(error, null, 2));
       
       // Handle empty error object
       if (!error || (typeof error === 'object' && Object.keys(error).length === 0)) {
-        console.error('⚠️ Empty error object received - likely authentication issue');
+        devError('⚠️ Empty error object received - likely authentication issue');
         set({
           tasks: [],
           isLoading: false,
@@ -206,7 +207,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         });
       }
     } catch (error: any) {
-      console.error('❌ Task Store: Error fetching task by ID:', error);
+      devError('❌ Task Store: Error fetching task by ID:', error);
       
       const errorMessage = 
         error?.message || 
@@ -238,7 +239,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       
       throw new Error(response.message || 'Failed to create task');
     } catch (error: any) {
-      console.error('❌ Task Store: Error creating task:', error);
+      devError('❌ Task Store: Error creating task:', error);
       
       const errorMessage = 
         error?.message || 
@@ -276,7 +277,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         }));
       }
     } catch (error: any) {
-      console.error('❌ Task Store: Error updating task:', error);
+      devError('❌ Task Store: Error updating task:', error);
       
       const errorMessage = 
         error?.message || 
@@ -309,7 +310,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         isLoading: false
       }));
     } catch (error: any) {
-      console.error('❌ Task Store: Error deleting task:', error);
+      devError('❌ Task Store: Error deleting task:', error);
       
       const errorMessage = 
         error?.message || 
@@ -342,7 +343,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
       set({ categories, categoriesLoaded: true });
     } catch (error: unknown) {
-      console.error('Failed to fetch categories:', error);
+      devError('Failed to fetch categories:', error);
       set({ categories: getFallbackCategories(), categoriesLoaded: true });
     }
   },

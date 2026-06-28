@@ -97,16 +97,21 @@ function SignInPageContent() {
         toast.error(errorMsg);
       }
     } catch (error: any) {
-      // Extract the most specific error message
-      const errorMessage = 
+      const errorMessage =
         typeof error === 'string'
           ? error
           : error?.message ||
             error?.error ||
             error?.detail ||
             'An error occurred. Please try again.';
-      
+
       toast.error(errorMessage);
+
+      if (error?.status === 403 && /verify your email/i.test(errorMessage)) {
+        router.push(
+          `/verify-email?pending=1&email=${encodeURIComponent(data.email.trim())}`,
+        );
+      }
     }
   };
 

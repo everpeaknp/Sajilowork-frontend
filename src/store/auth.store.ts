@@ -46,18 +46,40 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const access = tokenManager.getAccessToken();
-          const refresh = tokenManager.getRefreshToken();
-          const tokens = access && refresh ? { access, refresh } : null;
+          let access = tokenManager.getAccessToken();
+          let refresh = tokenManager.getRefreshToken();
 
-          if (!tokens) {
+          if (!access) {
+            const restored = await tokenManager.refreshViaBff();
+            if (restored) {
+              tokenManager.setTokens(restored.access, restored.refresh);
+              access = restored.access;
+              refresh = restored.refresh;
+            }
+          }
+
+          const tokens = access && refresh ? { access, refresh } : access ? { access, refresh: '' } : null;
+
+          if (!tokens?.access) {
             set({ isAuthenticated: false, user: null, tokens: null, error: null });
             return;
           }
 
-          await persistSessionCookies(tokens.access, tokens.refresh);
+          if (!refresh) {
+            const restored = await tokenManager.refreshViaBff();
+            if (restored) {
+              tokenManager.setTokens(restored.access, restored.refresh);
+            }
+          }
 
-          if (tokenManager.isTokenExpired(tokens.access)) {
+          await persistSessionCookies(
+            tokenManager.getAccessToken() || tokens.access,
+            tokenManager.getRefreshToken() || tokens.refresh || '',
+          );
+
+          const currentAccess = tokenManager.getAccessToken() || tokens.access;
+
+          if (tokenManager.isTokenExpired(currentAccess)) {
             try {
               await authService.refreshToken();
             } catch {
@@ -73,7 +95,7 @@ export const useAuthStore = create<AuthState>()(
           const activeTokens =
             activeAccess && activeRefresh
               ? { access: activeAccess, refresh: activeRefresh }
-              : tokens;
+              : { access: currentAccess, refresh: tokens.refresh || activeRefresh || '' };
 
           try {
             const response = await authService.getCurrentUser();
@@ -191,7 +213,7 @@ export const useAuthStore = create<AuthState>()(
               tokens,
               isAuthenticated: Boolean(tokens?.access && tokens?.refresh),
               isLoading: false,
-              error: null
+              error: null,
             });
           } else {
             throw new Error(response.message || 'Registration failed');

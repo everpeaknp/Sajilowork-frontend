@@ -7,9 +7,9 @@ import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import JobCompanyLogo from '@/components/jobs/JobCompanyLogo';
 import { getProjectMeta, type Project } from './projectListData';
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
-const HERO_ILLUSTRATION =
-  'https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fhome6-hero-img-1.png&w=1200&q=75';
+const HERO_ILLUSTRATION = MARKETPLACE_HERO_IMAGE;
 
 interface ProjectProfileHeroProps {
   project: Project;

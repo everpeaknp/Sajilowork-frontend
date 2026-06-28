@@ -53,8 +53,14 @@ export default function DashboardJobs() {
       setJobs(tasks.map(mapTaskToDashboardJob));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not load jobs';
-      toast.error(message);
-      setJobs([]);
+      const isRateLimited =
+        (error as { status?: number })?.status === 429 ||
+        message.toLowerCase().includes('throttled');
+      toast.error(
+        isRateLimited
+          ? 'Too many requests — your jobs are still saved. Please wait a moment and refresh.'
+          : message,
+      );
     } finally {
       setLoading(false);
     }

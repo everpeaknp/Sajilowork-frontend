@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '../ui/sidebar-with-submenu';
 import Navbar from '../common/navbar';
 import { useAuthStore } from '@/store/auth.store';
@@ -12,10 +12,17 @@ import {
 } from '@/context/TaskerDashboardNavContext';
 
 function DashboardLayoutShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const refreshUser = useAuthStore((s) => s.refreshUser);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const pathname = usePathname();
   const { mobileOpen, setMobileOpen } = useTaskerDashboardNav();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace(`/signin?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [isAuthenticated, pathname, router]);
 
   useEffect(() => {
     if (isAuthenticated) {

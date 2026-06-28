@@ -64,6 +64,7 @@ function getProfileLocationFromUser(user: User): string {
   return user.address?.trim() || '';
 }
 import { USER_PROFILE_UPDATED, notifyUserProfileUpdated } from '@/lib/userProfileSync';
+import { devLog, devError } from '@/lib/devLog';
 import type { User } from '@/types';
 
 interface UserProfile {
@@ -253,7 +254,7 @@ export default function Profile() {
 
         // Upload to backend
         const response = await userService.uploadProfileImage(file, (progress) => {
-          console.log('Upload progress:', progress);
+          devLog('Upload progress:', progress);
         });
 
         if (response.success && response.data) {
@@ -272,7 +273,7 @@ export default function Profile() {
           toast.error('Failed to upload image');
         }
       } catch (error: any) {
-        console.error('Error uploading image:', error);
+        devError('Error uploading image:', error);
         
         // Extract error message from normalized ApiError
         let errorMessage = 'Failed to upload image';
@@ -389,7 +390,7 @@ export default function Profile() {
         toast.error('Failed to update profile');
       }
     } catch (error: any) {
-      console.error('Error updating profile:', error);
+      devError('Error updating profile:', error);
       const fieldErrors = error?.errors
         ? Object.values(error.errors).flat().filter(Boolean)
         : [];
@@ -426,7 +427,7 @@ export default function Profile() {
         toast.error('Failed to delete account');
       }
     } catch (error: any) {
-      console.error('Error deleting account:', error);
+      devError('Error deleting account:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to delete account. Please check your password.';
       toast.error(errorMessage);
     } finally {

@@ -51,8 +51,8 @@ function VerifyEmailPageContent() {
       .then((res) => {
         if (cancelled) return;
         setState("success");
-        setMessage(res.message || res.data?.message || "Email verified successfully.");
-        toast.success("Email verified!");
+        setMessage(res.message || res.data?.message || "Email verified successfully. You can now sign in.");
+        toast.success("Email verified! Sign in to continue.");
       })
       .catch((err: { message?: string }) => {
         if (cancelled) return;

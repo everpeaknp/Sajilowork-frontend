@@ -18,29 +18,20 @@ export const authService = {
   /**
    * Register a new user
    */
-  async register(data: RegisterData): Promise<ApiResponse<{ user: User; tokens: AuthTokens }>> {
+  async register(data: RegisterData): Promise<ApiResponse<{ user: User; tokens: AuthTokens | null }>> {
     const response = await apiClient.post<any>('/users/register/', data);
     const responseData = response.data ?? response;
 
-    if (responseData?.access && responseData?.refresh && responseData?.user) {
-      const { access, refresh, user } = responseData;
-      tokenManager.setTokens(access, refresh);
-      await persistSessionCookies(access, refresh);
-
+    if (responseData?.user) {
       return {
         success: true,
-        message: responseData.message || 'Registration successful',
+        message: responseData.message || 'Registration successful. Please verify your email.',
         data: {
-          user: user as User,
-          tokens: { access, refresh },
+          user: responseData.user as User,
+          tokens: null,
         },
         errors: null,
       };
-    }
-
-    if (response.success && response.data?.tokens) {
-      tokenManager.setTokens(response.data.tokens.access, response.data.tokens.refresh);
-      await persistSessionCookies(response.data.tokens.access, response.data.tokens.refresh);
     }
 
     return response;
@@ -104,23 +95,23 @@ export const authService = {
    * Logout user
    */
   async logout(): Promise<ApiResponse<void>> {
-    const refreshToken = tokenManager.getRefreshToken();
-    
     try {
-      await apiClient.post('/auth/logout/', { refresh: refreshToken });
-    } catch (error) {
-      // Continue with logout even if API call fails
-      // Common case: refresh token already expired/invalid. We still clear local session.
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+    } catch {
+      // Continue with local cleanup even if API call fails.
     } finally {
       tokenManager.clearTokens();
       await clearSessionCookies();
     }
-    
+
     return {
       success: true,
       message: 'Logged out successfully',
       data: undefined,
-      errors: null
+      errors: null,
     };
   },
 
@@ -128,24 +119,20 @@ export const authService = {
    * Refresh access token
    */
   async refreshToken(): Promise<ApiResponse<AuthTokens>> {
-    const refreshToken = tokenManager.getRefreshToken();
-    
-    if (!refreshToken) {
+    const refreshed = await tokenManager.refreshViaBff();
+
+    if (!refreshed) {
       throw new Error('No refresh token available');
     }
-    
-    const response = await apiClient.post<AuthTokens>('/auth/token/refresh/', {
-      refresh: refreshToken
-    });
-    
-    if (response.success && response.data) {
-      const newRefresh =
-        typeof response.data.refresh === 'string' ? response.data.refresh : refreshToken;
-      tokenManager.setTokens(response.data.access, newRefresh);
-      await persistSessionCookies(response.data.access, newRefresh);
-    }
-    
-    return response;
+
+    tokenManager.setTokens(refreshed.access, refreshed.refresh);
+
+    return {
+      success: true,
+      message: 'Token refreshed',
+      data: { access: refreshed.access, refresh: refreshed.refresh },
+      errors: null,
+    };
   },
 
   /**

@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     });
     response.cookies.set('refresh_token', refresh, {
       ...COOKIE_OPTIONS,
+      httpOnly: true,
       maxAge: 60 * 60 * 24 * 7,
     });
     return response;
@@ -34,6 +35,6 @@ export async function POST(request: Request) {
 export async function DELETE() {
   const response = NextResponse.json({ success: true });
   response.cookies.set('access_token', '', { ...COOKIE_OPTIONS, maxAge: 0 });
-  response.cookies.set('refresh_token', '', { ...COOKIE_OPTIONS, maxAge: 0 });
+    response.cookies.set('refresh_token', '', { ...COOKIE_OPTIONS, httpOnly: true, maxAge: 0 });
   return response;
 }

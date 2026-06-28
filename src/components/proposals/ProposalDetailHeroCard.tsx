@@ -11,9 +11,9 @@ import { formatNPR } from '@/lib/nepalLocale';
 import { getMediaUrl } from '@/lib/utils';
 import { formatBidDisplayId } from '@/services/bid.service';
 import type { Bid, Task } from '@/types';
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
-const HERO_ILLUSTRATION =
-  'https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fhome6-hero-img-1.png&w=1200&q=75';
+const HERO_ILLUSTRATION = MARKETPLACE_HERO_IMAGE;
 
 type ProposalDetailHeroCardProps = {
   bid: Bid;

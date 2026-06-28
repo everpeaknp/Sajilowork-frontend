@@ -1,3 +1,5 @@
+import { devError } from '@/lib/devLog';
+
 export async function persistSessionCookies(access: string, refresh: string): Promise<void> {
   if (typeof window === 'undefined') return;
 
@@ -9,7 +11,7 @@ export async function persistSessionCookies(access: string, refresh: string): Pr
       credentials: 'same-origin',
     });
   } catch (error) {
-    console.error('Failed to persist session cookies', error);
+    devError('Failed to persist session cookies', error);
   }
 }
 
@@ -22,6 +24,6 @@ export async function clearSessionCookies(): Promise<void> {
       credentials: 'same-origin',
     });
   } catch (error) {
-    console.error('Failed to clear session cookies', error);
+    devError('Failed to clear session cookies', error);
   }
 }

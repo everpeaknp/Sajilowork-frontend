@@ -55,6 +55,26 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 const TOKEN_REFRESH_ENDPOINT = '/auth/token/refresh/';
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 
+const IS_API_DEBUG = process.env.NODE_ENV === 'development';
+
+const apiDebug = {
+  log: (...args: unknown[]) => {
+    if (IS_API_DEBUG) console.log(...args);
+  },
+  warn: (...args: unknown[]) => {
+    if (IS_API_DEBUG) console.warn(...args);
+  },
+  error: (...args: unknown[]) => {
+    if (IS_API_DEBUG) console.error(...args);
+  },
+  group: (label?: string) => {
+    if (IS_API_DEBUG) console.group(label);
+  },
+  groupEnd: () => {
+    if (IS_API_DEBUG) console.groupEnd();
+  },
+};
+
 /** Endpoints where 401 means invalid credentials, not an expired access token. */
 const PUBLIC_AUTH_PATHS = [
   '/auth/login/',
@@ -81,46 +101,73 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
 };
 
+/** In-memory refresh token — httpOnly cookie is not readable from JS. */
+let memoryRefreshToken: string | null = null;
+
+async function refreshTokensViaBff(): Promise<{ access: string; refresh: string } | null> {
+  try {
+    const response = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (typeof data?.access === 'string' && typeof data?.refresh === 'string') {
+      return { access: data.access, refresh: data.refresh };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export const tokenManager = {
   getAccessToken: (): string | null => {
     if (typeof window === 'undefined') return null;
-    return Cookies.get(ACCESS_TOKEN_KEY) || localStorage.getItem(ACCESS_TOKEN_KEY);
+    const cookieToken = Cookies.get(ACCESS_TOKEN_KEY);
+    if (cookieToken) return cookieToken;
+    const legacy = localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (legacy) {
+      const legacyRefresh = localStorage.getItem(REFRESH_TOKEN_KEY) || '';
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      memoryRefreshToken = legacyRefresh || memoryRefreshToken;
+      Cookies.set(ACCESS_TOKEN_KEY, legacy, { ...COOKIE_OPTIONS, expires: 1 });
+      void persistSessionCookies(legacy, legacyRefresh);
+    }
+    return legacy;
   },
 
-  getRefreshToken: (): string | null => {
-    if (typeof window === 'undefined') return null;
-    return Cookies.get(REFRESH_TOKEN_KEY) || localStorage.getItem(REFRESH_TOKEN_KEY);
-  },
+  getRefreshToken: (): string | null => memoryRefreshToken,
 
   setTokens: (access: string, refresh: string): void => {
     if (typeof window === 'undefined') return;
 
+    memoryRefreshToken = refresh;
     Cookies.set(ACCESS_TOKEN_KEY, access, {
       ...COOKIE_OPTIONS,
       expires: 1,
     });
 
-    Cookies.set(REFRESH_TOKEN_KEY, refresh, {
-      ...COOKIE_OPTIONS,
-      expires: 7,
-    });
-
-    localStorage.setItem(ACCESS_TOKEN_KEY, access);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    void persistSessionCookies(access, refresh);
   },
 
   clearTokens: (): void => {
     if (typeof window === 'undefined') return;
 
+    memoryRefreshToken = null;
     Cookies.remove(ACCESS_TOKEN_KEY, { path: '/' });
-    Cookies.remove(REFRESH_TOKEN_KEY, { path: '/' });
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   },
 
+  refreshViaBff: refreshTokensViaBff,
+
   isTokenExpired: (token: string): boolean => {
     return !isJwtNotExpired(token);
-  }
+  },
 };
 
 // ============================================================================
@@ -210,7 +257,7 @@ class ApiClient {
     // Check if same request is already in flight
     const existingRequest = this.pendingRequests.get(cacheKey);
     if (existingRequest) {
-      console.log(`🔄 Deduplicating request: ${cacheKey}`);
+      apiDebug.log(`🔄 Deduplicating request: ${cacheKey}`);
       return existingRequest;
     }
 
@@ -234,7 +281,7 @@ class ApiClient {
       (config: InternalAxiosRequestConfig) => {
         // Check rate limiting
         if (config.url && this.shouldRateLimit(config.url)) {
-          console.warn(`⚠️ Rate limit: Too many requests to ${config.url}`);
+          apiDebug.warn(`⚠️ Rate limit: Too many requests to ${config.url}`);
           const rateLimitError = new Error('Too many requests. Please wait a moment.');
           (rateLimitError as any).status = 429;
           (rateLimitError as any).isRateLimitError = true;
@@ -285,7 +332,7 @@ class ApiClient {
           // Exponential backoff: 1s, 2s, 4s
           const delay = Math.pow(2, originalRequest._retryCount - 1) * 1000;
           
-          console.warn(`⚠️ Rate limited. Retrying in ${delay}ms (attempt ${originalRequest._retryCount}/3)`);
+          apiDebug.warn(`⚠️ Rate limited. Retrying in ${delay}ms (attempt ${originalRequest._retryCount}/3)`);
           
           await new Promise(resolve => setTimeout(resolve, delay));
           
@@ -313,31 +360,20 @@ class ApiClient {
           originalRequest._retry = true;
           this.isRefreshing = true;
 
-          const refreshToken = tokenManager.getRefreshToken();
-
-          if (!refreshToken) {
-            this.handleAuthFailure();
-            return Promise.reject(this.ensureApiError(error));
-          }
-
           try {
-            // Attempt to refresh token
-            const response = await axios.post(
-              `${API_BASE_URL}${TOKEN_REFRESH_ENDPOINT}`,
-              { refresh: refreshToken }
-            );
+            const refreshed = await tokenManager.refreshViaBff();
 
-            const { access, refresh } = response.data;
-            const newRefresh = typeof refresh === 'string' ? refresh : refreshToken;
-            tokenManager.setTokens(access, newRefresh);
-            void persistSessionCookies(access, newRefresh);
+            if (!refreshed) {
+              this.handleAuthFailure();
+              return Promise.reject(this.ensureApiError(error));
+            }
 
-            // Retry all queued requests
+            tokenManager.setTokens(refreshed.access, refreshed.refresh);
+
             this.processQueue(null);
 
-            // Retry original request
             if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${access}`;
+              originalRequest.headers.Authorization = `Bearer ${refreshed.access}`;
             }
             return this.instance(originalRequest);
           } catch (refreshError) {
@@ -374,7 +410,7 @@ class ApiClient {
    */
   private handleAuthFailure(): void {
     tokenManager.clearTokens();
-    void clearSessionCookies();
+    void fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
 
     if (typeof window !== 'undefined') {
       const path = window.location.pathname;
@@ -492,24 +528,24 @@ class ApiClient {
   }
 
   private normalizeError(error: any): ApiError {
-    console.group('🔍 Normalizing Error');
-    console.log('Error object:', error);
-    console.log('Error type:', typeof error);
-    console.log('Error keys:', error ? Object.keys(error) : 'null');
-    console.log('Error.response:', error?.response);
-    console.log('Error.response.data:', error?.response?.data);
-    console.log('Error.response.status:', error?.response?.status);
-    console.log('Error.message:', error?.message);
-    console.log('Error.status:', error?.status);
-    console.log('Error.data:', error?.data);
-    console.log('Error.isAxiosError:', error?.isAxiosError);
+    apiDebug.group('🔍 Normalizing Error');
+    apiDebug.log('Error object:', error);
+    apiDebug.log('Error type:', typeof error);
+    apiDebug.log('Error keys:', error ? Object.keys(error) : 'null');
+    apiDebug.log('Error.response:', error?.response);
+    apiDebug.log('Error.response.data:', error?.response?.data);
+    apiDebug.log('Error.response.status:', error?.response?.status);
+    apiDebug.log('Error.message:', error?.message);
+    apiDebug.log('Error.status:', error?.status);
+    apiDebug.log('Error.data:', error?.data);
+    apiDebug.log('Error.isAxiosError:', error?.isAxiosError);
 
     // Axios throws "Network Error" when the server is unreachable (not running, wrong port, CORS blocked)
     if (
       (error?.code === 'ERR_NETWORK' || error?.message === 'Network Error') &&
       !error?.response
     ) {
-      console.groupEnd();
+      apiDebug.groupEnd();
       const isLocalApi =
         /localhost|127\.0\.0\.1/.test(API_BASE_URL);
       return {
@@ -528,20 +564,20 @@ class ApiClient {
     if (error?.response) {
       responseData = error.response.data;
       status = error.response.status;
-      console.log('✅ Found response via error.response');
-      console.log('Response data:', responseData);
-      console.log('Response status:', status);
+      apiDebug.log('✅ Found response via error.response');
+      apiDebug.log('Response data:', responseData);
+      apiDebug.log('Response status:', status);
     }
     // Method 2: Error object itself might be the response
     else if (error?.data !== undefined || error?.status !== undefined) {
       responseData = error.data;
       status = error.status || 0;
-      console.log('✅ Found response via error itself');
+      apiDebug.log('✅ Found response via error itself');
     }
     // Method 3: Check if error is already normalized
     else if (error?.message && typeof error.message === 'string') {
-      console.log('✅ Error already has message');
-      console.groupEnd();
+      apiDebug.log('✅ Error already has message');
+      apiDebug.groupEnd();
       return {
         message: error.message,
         errors: error.errors,
@@ -549,8 +585,8 @@ class ApiClient {
       };
     }
     
-    console.log('Final extracted data:', responseData);
-    console.log('Final extracted status:', status);
+    apiDebug.log('Final extracted data:', responseData);
+    apiDebug.log('Final extracted status:', status);
     
     const hasResponseData = responseData !== null || status > 0;
     
@@ -561,14 +597,14 @@ class ApiClient {
       const rawData = responseData as any;
       const data = this.unwrapEnvelope(rawData);
 
-      console.log('📋 Processing response data:', data);
-      console.log('Data type:', typeof data);
-      console.log('Data is array?', Array.isArray(data));
-      console.log('Data keys:', data && typeof data === 'object' ? Object.keys(data) : 'N/A');
+      apiDebug.log('📋 Processing response data:', data);
+      apiDebug.log('Data type:', typeof data);
+      apiDebug.log('Data is array?', Array.isArray(data));
+      apiDebug.log('Data keys:', data && typeof data === 'object' ? Object.keys(data) : 'N/A');
 
       // Extract error message
       const errorMessage = this.extractErrorMessage(rawData);
-      console.log('📝 Extracted error message:', errorMessage);
+      apiDebug.log('📝 Extracted error message:', errorMessage);
 
       // Build errors object for field-specific errors.
       // We only consider keys that look like field errors (skip envelope
@@ -595,7 +631,7 @@ class ApiClient {
           }
         }
 
-        console.log('📦 Built errors object:', errors);
+        apiDebug.log('📦 Built errors object:', errors);
 
         // If no field errors, clear the errors object
         if (Object.keys(errors).length === 0) {
@@ -636,23 +672,23 @@ class ApiClient {
         status
       };
       
-      console.log('✅ Final normalized error:', result);
-      console.log('Final normalized error JSON:', JSON.stringify(result, null, 2));
-      console.groupEnd();
+      apiDebug.log('✅ Final normalized error:', result);
+      apiDebug.log('Final normalized error JSON:', JSON.stringify(result, null, 2));
+      apiDebug.groupEnd();
       
       return result;
     } else if (error?.request) {
       // Request made but no response
-      console.log('⚠️ No response from server');
-      console.groupEnd();
+      apiDebug.log('⚠️ No response from server');
+      apiDebug.groupEnd();
       return {
         message: 'No response from server. Please check your connection.',
         status: 0
       };
     } else {
       // Error in request setup
-      console.log('⚠️ Error in request setup');
-      console.groupEnd();
+      apiDebug.log('⚠️ Error in request setup');
+      apiDebug.groupEnd();
       return {
         message: error?.message || 'An unexpected error occurred',
         status: 0
@@ -727,45 +763,45 @@ class ApiClient {
     
     return this.deduplicateRequest(cacheKey, async () => {
       try {
-        console.group('🌐 API Client GET Request');
-        console.log('URL:', url);
-        console.log('Config:', config);
-        console.log('Base URL:', API_BASE_URL);
-        console.log('Full URL:', `${API_BASE_URL}${url}`);
-        console.log('Access Token:', tokenManager.getAccessToken() ? 'Present' : 'Missing');
-        console.groupEnd();
+        apiDebug.group('🌐 API Client GET Request');
+        apiDebug.log('URL:', url);
+        apiDebug.log('Config:', config);
+        apiDebug.log('Base URL:', API_BASE_URL);
+        apiDebug.log('Full URL:', `${API_BASE_URL}${url}`);
+        apiDebug.log('Access Token:', tokenManager.getAccessToken() ? 'Present' : 'Missing');
+        apiDebug.groupEnd();
         
         const response = await this.instance.get<T>(url, config);
         
-        console.group('✅ API Client GET Response');
-        console.log('Status:', response.status);
-        console.log('Data:', response.data);
-        console.groupEnd();
+        apiDebug.group('✅ API Client GET Response');
+        apiDebug.log('Status:', response.status);
+        apiDebug.log('Data:', response.data);
+        apiDebug.groupEnd();
         
         return this.wrapResponse(response.data);
       } catch (error: any) {
-        console.group('❌ API Client GET Error');
-        console.log('Error caught in GET method');
-        console.log('Error type:', typeof error);
-        console.log('Error constructor:', error?.constructor?.name);
-        console.log('Is AxiosError?', error?.isAxiosError);
-        console.log('Error object:', error);
-        console.log('Error message:', error?.message);
-        console.log('Error response:', error?.response);
-        console.log('Error response status:', error?.response?.status);
-        console.log('Error response data:', error?.response?.data);
-        console.log('Error request:', error?.request);
-        console.log('Error config:', error?.config);
-        console.groupEnd();
+        apiDebug.group('❌ API Client GET Error');
+        apiDebug.log('Error caught in GET method');
+        apiDebug.log('Error type:', typeof error);
+        apiDebug.log('Error constructor:', error?.constructor?.name);
+        apiDebug.log('Is AxiosError?', error?.isAxiosError);
+        apiDebug.log('Error object:', error);
+        apiDebug.log('Error message:', error?.message);
+        apiDebug.log('Error response:', error?.response);
+        apiDebug.log('Error response status:', error?.response?.status);
+        apiDebug.log('Error response data:', error?.response?.data);
+        apiDebug.log('Error request:', error?.request);
+        apiDebug.log('Error config:', error?.config);
+        apiDebug.groupEnd();
         
         const normalized = this.ensureApiError(error);
         
-        console.group('🔄 Normalized Error (GET)');
-        console.log('Normalized error:', normalized);
-        console.log('Normalized error type:', typeof normalized);
-        console.log('Normalized error keys:', Object.keys(normalized));
-        console.log('Normalized error JSON:', JSON.stringify(normalized, null, 2));
-        console.groupEnd();
+        apiDebug.group('🔄 Normalized Error (GET)');
+        apiDebug.log('Normalized error:', normalized);
+        apiDebug.log('Normalized error type:', typeof normalized);
+        apiDebug.log('Normalized error keys:', Object.keys(normalized));
+        apiDebug.log('Normalized error JSON:', JSON.stringify(normalized, null, 2));
+        apiDebug.groupEnd();
         
         throw normalized;
       }
@@ -794,8 +830,8 @@ class ApiClient {
     keysToDelete.forEach(key => this.pendingRequests.delete(key));
     
     if (keysToDelete.length > 0) {
-      console.log(`🗑️ Cleared ${keysToDelete.length} cached requests for pattern: ${urlPattern}`);
-      console.log(`🗑️ Cleared keys:`, keysToDelete);
+      apiDebug.log(`🗑️ Cleared ${keysToDelete.length} cached requests for pattern: ${urlPattern}`);
+      apiDebug.log(`🗑️ Cleared keys:`, keysToDelete);
     }
   }
 
@@ -804,21 +840,21 @@ class ApiClient {
    */
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      console.group('🌐 API Client POST Request');
-      console.log('URL:', url);
-      console.log('Data:', data);
-      console.log('Config:', config);
-      console.log('Base URL:', API_BASE_URL);
-      console.log('Full URL:', `${API_BASE_URL}${url}`);
-      console.log('Access Token:', tokenManager.getAccessToken() ? 'Present' : 'Missing');
-      console.groupEnd();
+      apiDebug.group('🌐 API Client POST Request');
+      apiDebug.log('URL:', url);
+      apiDebug.log('Data:', data);
+      apiDebug.log('Config:', config);
+      apiDebug.log('Base URL:', API_BASE_URL);
+      apiDebug.log('Full URL:', `${API_BASE_URL}${url}`);
+      apiDebug.log('Access Token:', tokenManager.getAccessToken() ? 'Present' : 'Missing');
+      apiDebug.groupEnd();
       
       const response = await this.instance.post<T>(url, data, config);
       
-      console.group('✅ API Client POST Response');
-      console.log('Status:', response.status);
-      console.log('Data:', response.data);
-      console.groupEnd();
+      apiDebug.group('✅ API Client POST Response');
+      apiDebug.log('Status:', response.status);
+      apiDebug.log('Data:', response.data);
+      apiDebug.groupEnd();
       
       // Clear cache for related GET requests after successful POST
       // Clear both the exact URL and the base URL to ensure all related caches are cleared
@@ -833,28 +869,28 @@ class ApiClient {
       
       return this.wrapResponse(response.data);
     } catch (error: any) {
-      console.group('❌ API Client POST Error');
-      console.log('Error caught in POST method');
-      console.log('Error type:', typeof error);
-      console.log('Error constructor:', error?.constructor?.name);
-      console.log('Is AxiosError?', error?.isAxiosError);
-      console.log('Error object:', error);
-      console.log('Error message:', error?.message);
-      console.log('Error response:', error?.response);
-      console.log('Error response status:', error?.response?.status);
-      console.log('Error response data:', error?.response?.data);
-      console.log('Error request:', error?.request);
-      console.log('Error config:', error?.config);
-      console.groupEnd();
+      apiDebug.group('❌ API Client POST Error');
+      apiDebug.log('Error caught in POST method');
+      apiDebug.log('Error type:', typeof error);
+      apiDebug.log('Error constructor:', error?.constructor?.name);
+      apiDebug.log('Is AxiosError?', error?.isAxiosError);
+      apiDebug.log('Error object:', error);
+      apiDebug.log('Error message:', error?.message);
+      apiDebug.log('Error response:', error?.response);
+      apiDebug.log('Error response status:', error?.response?.status);
+      apiDebug.log('Error response data:', error?.response?.data);
+      apiDebug.log('Error request:', error?.request);
+      apiDebug.log('Error config:', error?.config);
+      apiDebug.groupEnd();
       
       const normalized = this.ensureApiError(error);
       
-      console.group('🔄 Normalized Error');
-      console.log('Normalized error:', normalized);
-      console.log('Normalized error type:', typeof normalized);
-      console.log('Normalized error keys:', Object.keys(normalized));
-      console.log('Normalized error JSON:', JSON.stringify(normalized, null, 2));
-      console.groupEnd();
+      apiDebug.group('🔄 Normalized Error');
+      apiDebug.log('Normalized error:', normalized);
+      apiDebug.log('Normalized error type:', typeof normalized);
+      apiDebug.log('Normalized error keys:', Object.keys(normalized));
+      apiDebug.log('Normalized error JSON:', JSON.stringify(normalized, null, 2));
+      apiDebug.groupEnd();
       
       throw normalized;
     }
@@ -936,8 +972,8 @@ class ApiClient {
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<T>> {
     try {
-      console.log('API Client: Starting upload to', url);
-      console.log('API Client: FormData entries:', Array.from(formData.entries()).map(([key, value]) => ({
+      apiDebug.log('API Client: Starting upload to', url);
+      apiDebug.log('API Client: FormData entries:', Array.from(formData.entries()).map(([key, value]) => ({
         key,
         value: value instanceof File ? `File: ${value.name} (${value.size} bytes)` : value
       })));
@@ -946,24 +982,24 @@ class ApiClient {
         onUploadProgress: (progressEvent) => {
           if (onProgress && progressEvent.total) {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log('Upload progress:', progress + '%');
+            apiDebug.log('Upload progress:', progress + '%');
             onProgress(progress);
           }
         },
       });
       
-      console.log('API Client: Upload successful', response.data);
+      apiDebug.log('API Client: Upload successful', response.data);
       return this.wrapResponse(response.data);
     } catch (error: any) {
-      console.error('API Client: Upload failed', error);
-      console.error('API Client: Error response:', error?.response);
-      console.error('API Client: Error response data:', error?.response?.data);
-      console.error('API Client: Error status:', error?.response?.status);
-      console.error('API Client: Error message:', error?.message);
+      apiDebug.error('API Client: Upload failed', error);
+      apiDebug.error('API Client: Error response:', error?.response);
+      apiDebug.error('API Client: Error response data:', error?.response?.data);
+      apiDebug.error('API Client: Error status:', error?.response?.status);
+      apiDebug.error('API Client: Error message:', error?.message);
       
       const normalized = this.ensureApiError(error);
       
-      console.error('API Client: Normalized error:', normalized);
+      apiDebug.error('API Client: Normalized error:', normalized);
       throw normalized;
     }
   }

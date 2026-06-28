@@ -1,7 +1,7 @@
 /**
  * Test Authentication API
  * 
- * Run with: node test-auth.js
+ * Run with: node scripts/dev/test-auth.js
  */
 
 const axios = require('axios');

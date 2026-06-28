@@ -42,6 +42,12 @@ frontend/
   public/
 ```
 
+## Documentation
+
+- Setup: this README
+- Internal notes: [doc/INDEX.md](./doc/INDEX.md)
+- Dev utilities: [scripts/dev/](./scripts/dev/)
+
 ## Getting started
 
 **Prerequisites:** Node.js 18+ and the [backend API](https://github.com/everpeaknp/Job-Portal-Backend) running.

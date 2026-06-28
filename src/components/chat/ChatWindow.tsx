@@ -13,6 +13,7 @@ import { chatService } from '@/services/chat.service';
 import { Message } from '@/types';
 import { buildChatWebSocketUrl, isWebSocketsEnabled } from '@/lib/chatWebSocket';
 import UserAvatar from '@/components/common/UserAvatar';
+import { devLog, devError } from '@/lib/devLog';
 
 interface ChatWindowProps {
   taskId: number;
@@ -47,10 +48,10 @@ export default function ChatWindow({
       handleWebSocketMessage(message);
     },
     onConnect: () => {
-      console.log('Chat WebSocket connected');
+      devLog('Chat WebSocket connected');
     },
     onDisconnect: () => {
-      console.log('Chat WebSocket disconnected');
+      devLog('Chat WebSocket disconnected');
     },
   });
 
@@ -74,7 +75,7 @@ export default function ChatWindow({
         setMessages(nextMessages);
       }
     } catch (error) {
-      console.error('Failed to fetch messages:', error);
+      devError('Failed to fetch messages:', error);
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +127,7 @@ export default function ChatWindow({
         break;
 
       default:
-        console.log('Unknown message type:', type);
+        devLog('Unknown message type:', type);
     }
   };
 
@@ -152,7 +153,7 @@ export default function ChatWindow({
         // setMessages((prev) => [...prev, response.data]);
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
+      devError('Failed to send message:', error);
     }
   };
 

@@ -8,6 +8,7 @@ import {
   discoverHeadline,
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
 const SUGGESTIONS_DATABASE = [
   'Website Designer',
@@ -32,8 +33,7 @@ const LOCATION_OPTIONS = [
   { value: 'Remote', label: 'Remote' },
 ];
 
-const MAIN_PORTRAIT =
-  'https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fhome6-hero-img-1.png&w=1200&q=75';
+const MAIN_PORTRAIT = MARKETPLACE_HERO_IMAGE;
 
 interface SearchBoxProps {
   onSearchSubmit?: (query: string, location: string) => void;

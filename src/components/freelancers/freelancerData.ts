@@ -1,3 +1,5 @@
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
+
 export type FreelancerLevel = 'Entry' | 'Mid' | 'Senior' | 'Expert';
 
 export interface Freelancer {
@@ -635,8 +637,7 @@ export const FREELANCER_LOCATION_OPTIONS = [
   { value: 'Remote', label: 'Remote' },
 ];
 
-export const FREELANCER_HERO_PORTRAIT =
-  'https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fhome6-hero-img-1.png&w=1200&q=75';
+export const FREELANCER_HERO_PORTRAIT = MARKETPLACE_HERO_IMAGE;
 
 export function filterFreelancers(
   freelancers: Freelancer[],

@@ -10,6 +10,7 @@ import {
 } from '@/components/LangingHome/landingTypography';
 import { loadCategories } from '@/lib/dashboardListingApi';
 import { flattenCategoriesForSelect } from '@/lib/taskUtils';
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
 type CategoryOption = { id: string; name: string };
 
@@ -60,8 +61,7 @@ const SUGGESTIONS_DATABASE = [
   'Website design',
 ];
 
-const MAIN_PORTRAIT =
-  'https://freeio-app-nextjs.vercel.app/_next/image?url=%2Fimages%2Fabout%2Fhome6-hero-img-1.png&w=1200&q=75';
+const MAIN_PORTRAIT = MARKETPLACE_HERO_IMAGE;
 
 interface SearchBoxProps {
   onSearchSubmit?: (query: string, category: string) => void;

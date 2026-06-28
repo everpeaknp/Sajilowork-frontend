@@ -11,6 +11,7 @@ import DashboardRecharges, { type Recharge } from '@/app/dashboard/DashboardRech
 import DashboardStatements from '@/app/dashboard/DashboardStatements';
 import { DashboardMetricCards } from '@/app/dashboard/DashboardMetricCards';
 import { useDashboardSidebarRole } from '@/app/dashboard/DashboardRoleSwitchContext';
+import { devLog, devError } from '@/lib/devLog';
 
 const fieldLabelClass = 'text-sm font-semibold text-gray-600';
 const fieldInputClass =
@@ -207,7 +208,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         setPaymentMethods([]);
       }
     } catch (error: unknown) {
-      console.error('Failed to fetch payment methods:', error);
+      devError('Failed to fetch payment methods:', error);
       setPaymentMethods([]);
     }
   };
@@ -270,7 +271,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         setWithdrawalHistory([]);
       }
     } catch (error: any) {
-      console.error('Failed to fetch wallet data:', error);
+      devError('Failed to fetch wallet data:', error);
       toast.error(error.message || 'Failed to load wallet data');
       setWalletTransactions([]);
       setWithdrawalHistory([]);
@@ -313,24 +314,24 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         failure_url: `${window.location.origin}/payment/esewa/failure`
       });
 
-      console.log('eSewa API Full Response:', JSON.stringify(response, null, 2));
+      devLog('eSewa API Full Response:', JSON.stringify(response, null, 2));
       
       if (response.success) {
         const paymentData = response.data || response;
         const { payment_url, form_data, transaction_id } = paymentData;
         
-        console.log('Payment URL:', payment_url);
-        console.log('Form Data:', form_data);
-        console.log('Transaction ID:', transaction_id);
+        devLog('Payment URL:', payment_url);
+        devLog('Form Data:', form_data);
+        devLog('Transaction ID:', transaction_id);
         
         if (!payment_url) {
-          console.error('Missing payment_url in response:', paymentData);
+          devError('Missing payment_url in response:', paymentData);
           toast.error('Invalid payment response: missing payment URL');
           return;
         }
 
         if (!form_data) {
-          console.error('Missing form_data in response:', paymentData);
+          devError('Missing form_data in response:', paymentData);
           toast.error('Invalid payment response: missing form data');
           return;
         }
@@ -353,15 +354,15 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         });
 
         document.body.appendChild(form);
-        console.log('Submitting form to:', payment_url);
-        console.log('Form data being submitted:', form_data);
+        devLog('Submitting form to:', payment_url);
+        devLog('Form data being submitted:', form_data);
         form.submit();
       } else {
-        console.error('Payment initiation failed:', response);
+        devError('Payment initiation failed:', response);
         toast.error('Failed to initiate eSewa payment');
       }
     } catch (error: any) {
-      console.error('eSewa payment error:', error);
+      devError('eSewa payment error:', error);
       
       if (error?.status === 404) {
         toast.error('Payment endpoint not found. Check backend server.');

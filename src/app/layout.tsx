@@ -5,6 +5,7 @@ import { AuthProvider } from "@/providers";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
 import { buildSiteMetadata, fetchSiteSettings } from "@/lib/siteSettings";
 import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
+import SentryInit from "@/components/SentryInit";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -56,6 +57,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <GlobalJsonLd />
         <AuthProvider>
+          <SentryInit />
           {children}
           {modal}
           <MobileBottomNav />

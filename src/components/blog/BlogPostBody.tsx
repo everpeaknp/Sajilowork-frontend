@@ -1,3 +1,5 @@
+import DOMPurify from 'isomorphic-dompurify';
+
 type BlogPostBodyProps = {
   html: string;
 };
@@ -11,10 +13,12 @@ export default function BlogPostBody({ html }: BlogPostBodyProps) {
     );
   }
 
+  const safeHtml = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+
   return (
     <div
       className="blog-content"
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
   );
 }

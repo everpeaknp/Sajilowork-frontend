@@ -18,7 +18,6 @@ import {
   ensureMarketplaceSkill,
   ensureMarketplaceCategory,
   loadCategories,
-  loadAllCategories,
   loadLanguages,
   loadSkills,
   languageNamesForSelect,
@@ -115,7 +114,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
   const persistJobCategory = useCallback(async (categoryName: string) => {
     const created = await ensureMarketplaceCategory(categoryName, 'job');
     if (!created?.name) return null;
-    const refreshed = await loadAllCategories();
+    const refreshed = await loadCategories('job');
     setJobCategories(refreshed);
     return created.name;
   }, []);
@@ -192,19 +191,65 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
   }, [user]);
 
   useEffect(() => {
-    void loadCategories('task').then((rows) => {
-      setCategories(rows);
-      setTaskCategoriesLoaded(true);
-    });
-    void loadCategories('project').then(setProjectCategories);
-    void loadCategories('service').then(setServiceCategories);
-    void loadAllCategories().then(setJobCategories);
-    void loadSkills('job').then(setJobSkills);
-    void loadSkills('project').then(setProjectSkills);
-    void loadSkills('service').then(setServiceSkills);
-    void loadLanguages('project').then(setProjectLanguages);
-    void loadLanguages('service').then(setServiceLanguages);
-  }, []);
+    let cancelled = false;
+
+    const loadForTab = async () => {
+      try {
+        if (tab === 'jobs') {
+          const [cats, skills] = await Promise.all([loadCategories('job'), loadSkills('job')]);
+          if (!cancelled) {
+            setJobCategories(cats);
+            setJobSkills(skills);
+          }
+          return;
+        }
+
+        if (tab === 'services') {
+          const [cats, skills, langs] = await Promise.all([
+            loadCategories('service'),
+            loadSkills('service'),
+            loadLanguages('service'),
+          ]);
+          if (!cancelled) {
+            setServiceCategories(cats);
+            setServiceSkills(skills);
+            setServiceLanguages(langs);
+          }
+          return;
+        }
+
+        if (tab === 'project') {
+          const [cats, skills, langs] = await Promise.all([
+            loadCategories('project'),
+            loadSkills('project'),
+            loadLanguages('project'),
+          ]);
+          if (!cancelled) {
+            setProjectCategories(cats);
+            setProjectSkills(skills);
+            setProjectLanguages(langs);
+          }
+          return;
+        }
+
+        const cats = await loadCategories('task');
+        if (!cancelled) {
+          setCategories(cats);
+          setTaskCategoriesLoaded(true);
+        }
+      } catch {
+        if (!cancelled && tab === 'task') {
+          setTaskCategoriesLoaded(true);
+        }
+      }
+    };
+
+    void loadForTab();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tab]);
 
   useEffect(() => {
     if (!editSlug) return;
@@ -315,7 +360,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         const created = await ensureMarketplaceCategory(data.category, 'job');
         categoryId = created?.id;
         if (created) {
-          const refreshed = await loadAllCategories();
+          const refreshed = await loadCategories('job');
           setJobCategories(refreshed);
         }
       }

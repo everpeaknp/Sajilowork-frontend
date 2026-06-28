@@ -21,6 +21,10 @@ import {
   formatTaskDisplayTitle,
 } from '@/lib/taskUtils';
 import { getMediaUrl, isTaskImageAttachment } from '@/lib/utils';
+import {
+  LISTING_COVER_FALLBACK,
+  listingCoverFallbackImage,
+} from '@/lib/placeholderImages';
 import { projectService } from '@/services/project.service';
 import { jobService } from '@/services/job.service';
 import { serviceService } from '@/services/service.service';
@@ -37,16 +41,14 @@ function hasPaginatedNextPage(data: unknown): boolean {
 const LISTING_TAG_PREFIX = 'listing:';
 
 /** Generic cover when a listing has no uploaded gallery images. */
-export const DEFAULT_SERVICE_IMAGE =
-  'https://images.unsplash.com/photo-1541462608141-ad4979e458c9?auto=format&fit=crop&w=800&q=80';
+export const DEFAULT_SERVICE_IMAGE = LISTING_COVER_FALLBACK;
 
 export function serviceListingFallbackImage(seedSource: {
   slug?: string | null;
   id?: string | null;
   title?: string | null;
 }): string {
-  const seed = encodeURIComponent(String(seedSource.slug || seedSource.id || seedSource.title || 'service'));
-  return `https://picsum.photos/seed/${seed}/800/600`;
+  return listingCoverFallbackImage(seedSource);
 }
 
 export function parseServiceSkills(value?: string | string[]): string[] {
@@ -671,9 +673,35 @@ export async function syncTaskGallery(
   await uploadTaskFiles(task.id, newGalleryFiles, listingKind);
 }
 
+const TAXONOMY_CACHE_TTL_MS = 10 * 60 * 1000;
+const taxonomyCache = new Map<string, { data: unknown; expiresAt: number }>();
+
+function getTaxonomyCache<T>(key: string): T | null {
+  const entry = taxonomyCache.get(key);
+  if (!entry || Date.now() > entry.expiresAt) {
+    if (entry) taxonomyCache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+function setTaxonomyCache<T>(key: string, data: T): void {
+  taxonomyCache.set(key, { data, expiresAt: Date.now() + TAXONOMY_CACHE_TTL_MS });
+}
+
+function invalidateTaxonomyCache(prefix: string): void {
+  for (const key of taxonomyCache.keys()) {
+    if (key.startsWith(prefix)) taxonomyCache.delete(key);
+  }
+}
+
 export async function loadCategories(
   listingKind: 'task' | 'job' | 'project' | 'service' = 'task',
 ): Promise<Category[]> {
+  const cacheKey = `categories:${listingKind}`;
+  const cached = getTaxonomyCache<Category[]>(cacheKey);
+  if (cached) return cached;
+
   const all: Category[] = [];
   let page = 1;
 
@@ -692,18 +720,13 @@ export async function loadCategories(
     page += 1;
   }
 
+  setTaxonomyCache(cacheKey, all);
   return all;
 }
 
+/** @deprecated Use loadCategories('job') — loading all kinds triggers rate limits. */
 export async function loadAllCategories(): Promise<Category[]> {
-  const kinds: Array<'task' | 'job' | 'project' | 'service'> = [
-    'task',
-    'job',
-    'project',
-    'service',
-  ];
-  const batches = await Promise.all(kinds.map((kind) => loadCategories(kind)));
-  return batches.flat();
+  return loadCategories('job');
 }
 
 function extractSkillList(data: unknown): MarketplaceSkill[] {
@@ -721,13 +744,19 @@ export function skillNamesForSelect(skills: MarketplaceSkill[]): string[] {
 export async function loadSkills(
   listingKind: 'job' | 'project' | 'service',
 ): Promise<MarketplaceSkill[]> {
+  const cacheKey = `skills:${listingKind}`;
+  const cached = getTaxonomyCache<MarketplaceSkill[]>(cacheKey);
+  if (cached) return cached;
+
   const { skillService } = await import('@/services/skill.service');
   const response = await skillService.getSkills({
     listing_kind: listingKind,
     page_size: 200,
   });
   if (!response.success || !response.data) return [];
-  return extractSkillList(response.data);
+  const skills = extractSkillList(response.data);
+  setTaxonomyCache(cacheKey, skills);
+  return skills;
 }
 
 export async function ensureMarketplaceSkill(
@@ -745,6 +774,7 @@ export async function ensureMarketplaceSkill(
 
   if (!response.success || !response.data) return null;
 
+  invalidateTaxonomyCache(`skills:${listingKind}`);
   const skill = response.data as MarketplaceSkill;
   return skill?.name?.trim() ? skill : null;
 }
@@ -764,6 +794,7 @@ export async function ensureMarketplaceCategory(
 
   if (!response.success || !response.data) return null;
 
+  invalidateTaxonomyCache(`categories:${listingKind}`);
   const category = response.data as Category;
   return category?.name?.trim() ? category : null;
 }
@@ -826,11 +857,17 @@ export function languageNamesForSelect(languages: MarketplaceLanguage[]): string
 export async function loadLanguages(
   listingKind: 'profile' | 'project' | 'service',
 ): Promise<MarketplaceLanguage[]> {
+  const cacheKey = `languages:${listingKind}`;
+  const cached = getTaxonomyCache<MarketplaceLanguage[]>(cacheKey);
+  if (cached) return cached;
+
   const { languageService } = await import('@/services/language.service');
   const response = await languageService.getLanguages({
     listing_kind: listingKind,
     page_size: 200,
   });
   if (!response.success || !response.data) return [];
-  return extractLanguageList(response.data);
+  const languages = extractLanguageList(response.data);
+  setTaxonomyCache(cacheKey, languages);
+  return languages;
 }
