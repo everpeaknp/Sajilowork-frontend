@@ -16,6 +16,7 @@ import {
   getListingKind,
   jobFormToTaskPayload,
   ensureMarketplaceSkill,
+  ensureMarketplaceCategory,
   loadCategories,
   loadAllCategories,
   loadLanguages,
@@ -71,15 +72,24 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
   const isEdit = Boolean(editSlug);
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [projectCategories, setProjectCategories] = useState<Category[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<Category[]>([]);
   const [jobCategories, setJobCategories] = useState<Category[]>([]);
   const [jobSkills, setJobSkills] = useState<MarketplaceSkill[]>([]);
   const [projectSkills, setProjectSkills] = useState<MarketplaceSkill[]>([]);
   const [serviceSkills, setServiceSkills] = useState<MarketplaceSkill[]>([]);
   const [projectLanguages, setProjectLanguages] = useState<MarketplaceLanguage[]>([]);
   const [serviceLanguages, setServiceLanguages] = useState<MarketplaceLanguage[]>([]);
-  const serviceCategoryOptions = useMemo(() => categoryNamesForSelect(categories), [categories]);
+  const serviceCategoryOptions = useMemo(
+    () => categoryNamesForSelect(serviceCategories),
+    [serviceCategories],
+  );
   const jobCategoryOptions = useMemo(() => categoryNamesForSelect(jobCategories), [jobCategories]);
-  const projectCategoryOptions = serviceCategoryOptions;
+  const projectCategoryOptions = useMemo(
+    () => categoryNamesForSelect(projectCategories),
+    [projectCategories],
+  );
+  const taskCategoryOptions = useMemo(() => categoryNamesForSelect(categories), [categories]);
   const jobSkillOptions = useMemo(() => skillNamesForSelect(jobSkills), [jobSkills]);
   const projectSkillOptions = useMemo(() => skillNamesForSelect(projectSkills), [projectSkills]);
   const serviceSkillOptions = useMemo(() => skillNamesForSelect(serviceSkills), [serviceSkills]);
@@ -99,6 +109,54 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     if (!created?.name) return null;
     const refreshed = await loadSkills('job');
     setJobSkills(refreshed);
+    return created.name;
+  }, []);
+
+  const persistJobCategory = useCallback(async (categoryName: string) => {
+    const created = await ensureMarketplaceCategory(categoryName, 'job');
+    if (!created?.name) return null;
+    const refreshed = await loadAllCategories();
+    setJobCategories(refreshed);
+    return created.name;
+  }, []);
+
+  const persistProjectSkill = useCallback(async (skillName: string) => {
+    const created = await ensureMarketplaceSkill(skillName, 'project');
+    if (!created?.name) return null;
+    const refreshed = await loadSkills('project');
+    setProjectSkills(refreshed);
+    return created.name;
+  }, []);
+
+  const persistServiceSkill = useCallback(async (skillName: string) => {
+    const created = await ensureMarketplaceSkill(skillName, 'service');
+    if (!created?.name) return null;
+    const refreshed = await loadSkills('service');
+    setServiceSkills(refreshed);
+    return created.name;
+  }, []);
+
+  const persistProjectCategory = useCallback(async (categoryName: string) => {
+    const created = await ensureMarketplaceCategory(categoryName, 'project');
+    if (!created?.name) return null;
+    const refreshed = await loadCategories('project');
+    setProjectCategories(refreshed);
+    return created.name;
+  }, []);
+
+  const persistServiceCategory = useCallback(async (categoryName: string) => {
+    const created = await ensureMarketplaceCategory(categoryName, 'service');
+    if (!created?.name) return null;
+    const refreshed = await loadCategories('service');
+    setServiceCategories(refreshed);
+    return created.name;
+  }, []);
+
+  const persistTaskCategory = useCallback(async (categoryName: string) => {
+    const created = await ensureMarketplaceCategory(categoryName, 'task');
+    if (!created?.name) return null;
+    const refreshed = await loadCategories('task');
+    setCategories(refreshed);
     return created.name;
   }, []);
 
@@ -138,6 +196,8 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
       setCategories(rows);
       setTaskCategoriesLoaded(true);
     });
+    void loadCategories('project').then(setProjectCategories);
+    void loadCategories('service').then(setServiceCategories);
     void loadAllCategories().then(setJobCategories);
     void loadSkills('job').then(setJobSkills);
     void loadSkills('project').then(setProjectSkills);
@@ -195,7 +255,15 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     setSubmitting(true);
 
     try {
-      const categoryId = await resolveCategoryId(data.category, categories);
+      let categoryId = await resolveCategoryId(data.category, serviceCategories);
+      if (!categoryId && data.category.trim()) {
+        const created = await ensureMarketplaceCategory(data.category, 'service');
+        categoryId = created?.id;
+        if (created) {
+          const refreshed = await loadCategories('service');
+          setServiceCategories(refreshed);
+        }
+      }
       const payload = serviceFormToTaskPayload(data, categoryId);
 
       if (isEdit && editTask?.slug) {
@@ -242,7 +310,15 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     setSubmitting(true);
 
     try {
-      const categoryId = await resolveCategoryId(data.category, jobCategories);
+      let categoryId = await resolveCategoryId(data.category, jobCategories);
+      if (!categoryId && data.category.trim()) {
+        const created = await ensureMarketplaceCategory(data.category, 'job');
+        categoryId = created?.id;
+        if (created) {
+          const refreshed = await loadAllCategories();
+          setJobCategories(refreshed);
+        }
+      }
       const payload = jobFormToTaskPayload(data, categoryId);
 
       if (isEdit && editTask?.slug) {
@@ -286,7 +362,15 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     setSubmitting(true);
 
     try {
-      const categoryId = await resolveCategoryId(data.category, categories);
+      let categoryId = await resolveCategoryId(data.category, projectCategories);
+      if (!categoryId && data.category.trim()) {
+        const created = await ensureMarketplaceCategory(data.category, 'project');
+        categoryId = created?.id;
+        if (created) {
+          const refreshed = await loadCategories('project');
+          setProjectCategories(refreshed);
+        }
+      }
       const payload = projectFormToTaskPayload(data, categoryId);
       const galleryFiles = uploads.galleryFiles;
       const attachmentFiles = uploads.attachmentFiles;
@@ -349,7 +433,19 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     setSubmitting(true);
 
     try {
-      let payload = buildPostTaskApiPayload(data, data.categoryId);
+      let categoryId = data.categoryId;
+      if (!categoryId && data.categoryName.trim()) {
+        categoryId = (await resolveCategoryId(data.categoryName, categories)) ?? undefined;
+      }
+      if (!categoryId && data.categoryName.trim()) {
+        const created = await ensureMarketplaceCategory(data.categoryName, 'task');
+        categoryId = created?.id;
+        if (created) {
+          const refreshed = await loadCategories('task');
+          setCategories(refreshed);
+        }
+      }
+      let payload = buildPostTaskApiPayload(data, categoryId);
       payload = await enrichPostTaskPayloadWithGeocode(data, payload);
 
       if (isEdit && editTask?.slug) {
@@ -438,6 +534,8 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         categoryOptions={serviceCategoryOptions}
         skillOptions={serviceSkillOptions}
         languageOptions={serviceLanguageOptions}
+        onPersistCustomSkill={persistServiceSkill}
+        onPersistCustomCategory={persistServiceCategory}
       />
     );
   }
@@ -455,6 +553,7 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         categoryOptions={jobCategoryOptions}
         skillOptions={jobSkillOptions}
         onPersistCustomSkill={persistJobSkill}
+        onPersistCustomCategory={persistJobCategory}
       />
     );
   }
@@ -469,7 +568,9 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
         initialData={editTask ? taskToSimilarPrefill(editTask) : undefined}
         categories={categories}
         categoriesLoaded={taskCategoriesLoaded}
+        categoryOptions={taskCategoryOptions}
         isLoading={submitting}
+        onPersistCustomCategory={persistTaskCategory}
       />
     );
   }
@@ -491,6 +592,8 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
       categoryOptions={projectCategoryOptions}
       skillOptions={projectSkillOptions}
       languageOptions={projectLanguageOptions}
+      onPersistCustomSkill={persistProjectSkill}
+      onPersistCustomCategory={persistProjectCategory}
     />
   );
 }

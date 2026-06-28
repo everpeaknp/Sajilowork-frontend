@@ -1,15 +1,10 @@
 'use client';
 
 import {
-  useCallback,
-  useEffect,
   useRef,
   useState,
-  type CSSProperties,
   type FormEvent,
-  type MouseEvent,
 } from 'react';
-import { createPortal } from 'react-dom';
 import { ArrowUpRight, ChevronLeft, FileText, FolderKanban, ImageIcon, MapPin, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { normalizeProjectFormData } from '@/lib/dashboardListingApi';
@@ -17,6 +12,14 @@ import ScheduleFields, { type ScheduleTimeSlot } from '@/components/post-task/Sc
 import LocationFields, { type LocationType } from '@/components/post-task/LocationFields';
 import FormAccordionSection from './FormAccordionSection';
 import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
+import {
+  dedupeSkills,
+  listingFieldClass as fieldClass,
+  listingLabelClass as labelClass,
+  MultiSelectField,
+  SearchableSelectField,
+  SelectField,
+} from './listingFormFields';
 import { CURRENCY_INPUT_PREFIX, formatDashboardTypeCost, formatNPR } from '@/lib/nepalLocale';
 import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
 import type { Project as PublicProject } from '@/components/projects/projectListData';
@@ -126,193 +129,6 @@ const SKILLS = [
   'SEO',
 ];
 
-const fieldClass =
-  'w-full rounded-none border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400';
-const labelClass = 'mb-2 block text-sm font-normal text-neutral-800';
-const selectClass = `${fieldClass} appearance-none bg-[length:12px] bg-[right_1rem_center] bg-no-repeat pr-10`;
-
-function SelectField({
-  label,
-  value,
-  onChange,
-  placeholder = 'Select',
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  options: string[];
-}) {
-  return (
-    <div>
-      <label className={labelClass}>{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={selectClass}
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-        }}
-      >
-        <option value="">{placeholder}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function MultiSelectField({
-  label,
-  value,
-  onChange,
-  placeholder = 'Nothing selected',
-  options,
-}: {
-  label: string;
-  value: string[];
-  onChange: (value: string[]) => void;
-  placeholder?: string;
-  options: string[];
-}) {
-  const [open, setOpen] = useState(false);
-  const [panelStyle, setPanelStyle] = useState<CSSProperties>({});
-  const containerRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  const updatePanelPosition = useCallback(() => {
-    const trigger = triggerRef.current;
-    if (!trigger) return;
-    const rect = trigger.getBoundingClientRect();
-    setPanelStyle({
-      position: 'fixed',
-      top: rect.bottom + 4,
-      left: rect.left,
-      width: rect.width,
-      zIndex: 9999,
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    updatePanelPosition();
-    window.addEventListener('resize', updatePanelPosition);
-    window.addEventListener('scroll', updatePanelPosition, true);
-    return () => {
-      window.removeEventListener('resize', updatePanelPosition);
-      window.removeEventListener('scroll', updatePanelPosition, true);
-    };
-  }, [open, updatePanelPosition]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: globalThis.MouseEvent) => {
-      const target = event.target as Node;
-      if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) {
-        return;
-      }
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
-  }, [open]);
-
-  const toggle = (option: string) => {
-    if (value.includes(option)) {
-      onChange(value.filter((item) => item !== option));
-      return;
-    }
-    onChange([...value, option]);
-  };
-
-  const remove = (option: string, event: MouseEvent) => {
-    event.stopPropagation();
-    onChange(value.filter((item) => item !== option));
-  };
-
-  return (
-    <div ref={containerRef} className="relative">
-      <label className={labelClass}>{label}</label>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => {
-          setOpen((prev) => {
-            if (!prev) updatePanelPosition();
-            return !prev;
-          });
-        }}
-        className={`${fieldClass} flex min-h-[46px] w-full flex-wrap items-center gap-1.5 text-left`}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-      >
-        {value.length === 0 ? (
-          <span className="text-neutral-400">{placeholder}</span>
-        ) : (
-          value.map((item) => (
-            <span
-              key={item}
-              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800"
-            >
-              {item}
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={(event) => remove(item, event)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    remove(item, event as unknown as MouseEvent);
-                  }
-                }}
-                className="text-neutral-500 hover:text-neutral-800"
-                aria-label={`Remove ${item}`}
-              >
-                <X className="h-3 w-3" />
-              </span>
-            </span>
-          ))
-        )}
-      </button>
-      {open && typeof document !== 'undefined'
-        ? createPortal(
-            <div
-              ref={panelRef}
-              role="listbox"
-              aria-multiselectable
-              style={panelStyle}
-              className="max-h-56 overflow-y-auto border border-neutral-200 bg-white shadow-lg"
-            >
-              {options.map((option) => {
-                const checked = value.includes(option);
-                return (
-                  <label
-                    key={option}
-                    className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggle(option)}
-                      className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35]"
-                    />
-                    {option}
-                  </label>
-                );
-              })}
-            </div>,
-            document.body,
-          )
-        : null}
-    </div>
-  );
-}
-
 interface DashboardCreateProjectProps {
   onBack: () => void;
   onSubmit: (data: CreateProjectFormData, uploads: FormUploadsPayload) => void;
@@ -323,6 +139,8 @@ interface DashboardCreateProjectProps {
   categoryOptions?: string[];
   skillOptions?: string[];
   languageOptions?: string[];
+  onPersistCustomSkill?: (skillName: string) => Promise<string | null>;
+  onPersistCustomCategory?: (categoryName: string) => Promise<string | null>;
 }
 
 const LEVEL_TO_EXPERIENCE: Record<string, PublicProject['experienceLevel']> = {
@@ -415,6 +233,8 @@ export default function DashboardCreateProject({
   categoryOptions = [],
   skillOptions = [],
   languageOptions = [],
+  onPersistCustomSkill,
+  onPersistCustomCategory,
 }: DashboardCreateProjectProps) {
   const isEdit = mode === 'edit';
   const [form, setForm] = useState<CreateProjectFormData>(() => ({
@@ -560,12 +380,25 @@ export default function DashboardCreateProject({
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <SelectField
-              label="Category"
-              value={form.category}
-              onChange={(category) => update({ category })}
-              options={categories}
-            />
+            <div>
+              <SearchableSelectField
+                label="Category"
+                value={form.category}
+                onChange={(category) => update({ category })}
+                placeholder="Select a category"
+                options={categories}
+                searchPlaceholder="Search categories..."
+                emptySearchLabel="No categories match your search."
+                emptyListLabel="No categories available."
+                customSectionTitle="Category not listed? Add it manually (only if it is not in the list above)."
+                customPlaceholder="Type a custom category"
+                allowCustom
+                onPersistCustom={onPersistCustomCategory}
+              />
+              <p className="mt-1.5 text-xs font-normal text-neutral-500">
+                Search the list or add a custom category only when it is not already available.
+              </p>
+            </div>
             <SelectField
               label="Freelancer Type"
               value={form.freelancerType}
@@ -645,10 +478,21 @@ export default function DashboardCreateProject({
           <MultiSelectField
             label="Skills"
             value={form.skills}
-            onChange={(skills) => update({ skills })}
+            onChange={(skills) => update({ skills: dedupeSkills(skills) })}
             placeholder="Nothing selected"
             options={skillChoices}
+            searchable
+            allowCustom
+            searchPlaceholder="Search skills..."
+            emptySearchLabel="No skills match your search."
+            emptyListLabel="No skills available."
+            customSectionTitle="Skill not listed? Add it manually (only if it is not in the list above)."
+            customPlaceholder="Type a custom skill"
+            onPersistCustom={onPersistCustomSkill}
           />
+          <p className="mt-1.5 text-xs font-normal text-neutral-500">
+            Search the list or add a custom skill only when it is not already available.
+          </p>
 
           <div>
             <label className={labelClass}>Project Detail</label>

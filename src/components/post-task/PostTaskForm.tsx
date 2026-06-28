@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, ChevronLeft, ClipboardList, MapPin, Paperclip, Trash2 } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ClipboardList, ImageIcon, MapPin, X } from 'lucide-react';
+import { toast } from 'sonner';
 import FormAccordionSection from '@/app/dashboard/FormAccordionSection';
+import { SearchableSelectField } from '@/app/dashboard/listingFormFields';
 import ScheduleFields from '@/components/post-task/ScheduleFields';
 import LocationFields from '@/components/post-task/LocationFields';
 import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
@@ -10,8 +12,6 @@ import {
   dashboardErrorClass,
   dashboardFieldClass,
   dashboardLabelClass,
-  dashboardSelectChevronStyle,
-  dashboardSelectClass,
 } from '@/lib/dashboardFormStyles';
 import {
   BUDGET_MAX_NPR,
@@ -23,6 +23,31 @@ import { flattenCategoriesForSelect } from '@/lib/taskUtils';
 import type { Category } from '@/types';
 import type { EmployerPostingContext } from '@/lib/employerBusinessProfile';
 import type { TaskData } from '@/components/post-task/TitleDateStep';
+
+type TaskGalleryItem = {
+  id: string;
+  preview: string;
+  name: string;
+  file: File;
+};
+
+function isImageUploadFile(file: File): boolean {
+  if (file.type.startsWith('image/')) return true;
+  return /\.(jpe?g|png|webp|gif)$/i.test(file.name);
+}
+
+function galleryItemId(file: File): string {
+  return `task-img-${file.name}-${file.size}-${file.lastModified}`;
+}
+
+function filesToGalleryItems(files: File[]): TaskGalleryItem[] {
+  return files.map((file) => ({
+    id: galleryItemId(file),
+    preview: URL.createObjectURL(file),
+    name: file.name,
+    file,
+  }));
+}
 
 export type PostTaskFormErrors = Partial<
   Record<
@@ -44,6 +69,8 @@ type PostTaskFormProps = {
   updateData: (updates: Partial<TaskData>) => void;
   categories: Category[];
   categoriesLoaded: boolean;
+  categoryOptions?: string[];
+  onPersistCustomCategory?: (categoryName: string) => Promise<string | null>;
   onBack: () => void;
   onSubmit: () => void | Promise<void>;
   isLoading?: boolean;
@@ -65,6 +92,8 @@ export default function PostTaskForm({
   updateData,
   categories,
   categoriesLoaded,
+  categoryOptions = [],
+  onPersistCustomCategory,
   onBack,
   onSubmit,
   isLoading = false,
@@ -81,25 +110,68 @@ export default function PostTaskForm({
 }: PostTaskFormProps) {
   const min = typeof minBudget === 'number' ? minBudget : BUDGET_MIN_NPR;
   const max = typeof maxBudget === 'number' ? maxBudget : BUDGET_MAX_NPR;
-  const categoryOptions = useMemo(
+  const categoryOptionsFlat = useMemo(
     () => flattenCategoriesForSelect(categories),
     [categories],
   );
-
-  const [openSection, setOpenSection] = useState<string | null>('basic');
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const [imagePreviews, setImagePreviews] = useState<{ name: string; url: string }[]>([]);
+  const baseCategoryNames = useMemo(() => {
+    if (categoryOptions.length > 0) return categoryOptions;
+    return categoryOptionsFlat.map((option) => option.name);
+  }, [categoryOptions, categoryOptionsFlat]);
+  const categoryNames = useMemo(() => {
+    const name = data.categoryName.trim();
+    if (name && !baseCategoryNames.some((item) => item.toLowerCase() === name.toLowerCase())) {
+      return [name, ...baseCategoryNames];
+    }
+    return baseCategoryNames;
+  }, [baseCategoryNames, data.categoryName]);
 
   useEffect(() => {
-    const previews = (data.images || []).map((file) => ({
-      name: file.name,
-      url: URL.createObjectURL(file),
-    }));
-    setImagePreviews(previews);
-    return () => {
-      previews.forEach((preview) => URL.revokeObjectURL(preview.url));
-    };
+    const name = data.categoryName.trim();
+    if (!name || data.categoryId) return;
+    const match = categoryOptionsFlat.find(
+      (option) => option.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (match?.id) {
+      updateData({ categoryId: match.id });
+    }
+  }, [categoryOptionsFlat, data.categoryId, data.categoryName]);
+
+  const [openSection, setOpenSection] = useState<string | null>('basic');
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [galleryItems, setGalleryItems] = useState<TaskGalleryItem[]>(() =>
+    filesToGalleryItems(data.images || []),
+  );
+  const galleryItemsRef = useRef(galleryItems);
+  galleryItemsRef.current = galleryItems;
+
+  useEffect(() => {
+    const files = data.images || [];
+    setGalleryItems((prev) => {
+      if (
+        prev.length === files.length &&
+        prev.every((item, index) => item.file === files[index])
+      ) {
+        return prev;
+      }
+      prev.forEach((item) => {
+        if (item.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(item.preview);
+        }
+      });
+      return filesToGalleryItems(files);
+    });
   }, [data.images]);
+
+  useEffect(() => {
+    return () => {
+      galleryItemsRef.current.forEach((item) => {
+        if (item.preview.startsWith('blob:')) {
+          URL.revokeObjectURL(item.preview);
+        }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     if (!showErrors) return;
@@ -129,27 +201,57 @@ export default function PostTaskForm({
     void onSubmit();
   };
 
-  const onPickImages = (files: FileList | null) => {
-    if (!files) return;
-    const picked = Array.from(files).filter((file) => file.type.startsWith('image/'));
-    if (picked.length === 0) return;
+  const onGallerySelected = (list: FileList | null) => {
+    if (!list?.length) return;
 
-    const next = [...(data.images || [])];
-    for (const file of picked) {
-      const exists = next.some(
-        (existing) =>
-          existing.name === file.name &&
-          existing.size === file.size &&
-          existing.lastModified === file.lastModified,
-      );
-      if (!exists) next.push(file);
+    const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+    const allowedExtensions = /\.(jpe?g|png|webp|gif)$/i;
+
+    const validFiles = Array.from(list).filter((file) => {
+      const typeOk = file.type ? allowedTypes.has(file.type) : allowedExtensions.test(file.name);
+      const extOk = allowedExtensions.test(file.name);
+      return (typeOk || extOk) && isImageUploadFile(file);
+    });
+
+    if (!validFiles.length) {
+      toast.error('Only JPG, PNG, WEBP, and GIF images are allowed.');
+      return;
     }
-    updateData({ images: next });
+
+    const existing = new Set((data.images || []).map(galleryItemId));
+    const nextItems: TaskGalleryItem[] = [];
+    for (const file of validFiles) {
+      const id = galleryItemId(file);
+      if (existing.has(id)) continue;
+      existing.add(id);
+      nextItems.push({
+        id,
+        preview: URL.createObjectURL(file),
+        name: file.name,
+        file,
+      });
+    }
+
+    if (!nextItems.length) return;
+
+    const merged = [...galleryItems, ...nextItems];
+    setGalleryItems(merged);
+    updateData({ images: merged.map((item) => item.file) });
   };
 
-  const removeImage = (name: string) => {
-    updateData({ images: (data.images || []).filter((file) => file.name !== name) });
+  const removeGalleryItem = (id: string) => {
+    setGalleryItems((prev) => {
+      const target = prev.find((item) => item.id === id);
+      if (target?.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(target.preview);
+      }
+      const next = prev.filter((item) => item.id !== id);
+      updateData({ images: next.map((item) => item.file) });
+      return next;
+    });
   };
+
+  const firstImageIndex = galleryItems.findIndex((item) => Boolean(item.preview));
 
   const showFieldError = (key: keyof PostTaskFormErrors) =>
     showErrors && errors[key] ? errors[key] : null;
@@ -226,30 +328,32 @@ export default function PostTaskForm({
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className={dashboardLabelClass}>Category</label>
-                <select
-                  value={data.categoryId}
-                  onChange={(event) => {
-                    const categoryId = event.target.value;
-                    const match = categoryOptions.find((option) => option.id === categoryId);
+                <SearchableSelectField
+                  label="Category"
+                  value={data.categoryName}
+                  onChange={(categoryName) => {
+                    const match = categoryOptionsFlat.find(
+                      (option) => option.name.toLowerCase() === categoryName.toLowerCase(),
+                    );
                     updateData({
-                      categoryId,
-                      categoryName: match?.name ?? '',
+                      categoryName,
+                      categoryId: match?.id ?? '',
                     });
                   }}
-                  className={dashboardSelectClass}
-                  style={dashboardSelectChevronStyle}
+                  placeholder={categoriesLoaded ? 'Select a category' : 'Loading categories…'}
+                  options={categoryNames}
+                  searchPlaceholder="Search categories..."
+                  emptySearchLabel="No categories match your search."
+                  emptyListLabel="No categories available."
+                  customSectionTitle="Category not listed? Add it manually (only if it is not in the list above)."
+                  customPlaceholder="Type a custom category"
+                  allowCustom
                   disabled={!categoriesLoaded}
-                >
-                  <option value="">
-                    {categoriesLoaded ? 'Select a category' : 'Loading categories…'}
-                  </option>
-                  {categoryOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
+                  onPersistCustom={onPersistCustomCategory}
+                />
+                <p className="mt-1.5 text-xs font-normal text-neutral-500">
+                  Search the list or add a custom category only when it is not already available.
+                </p>
                 {showFieldError('categoryId') ? (
                   <p className={dashboardErrorClass}>{showFieldError('categoryId')}</p>
                 ) : null}
@@ -348,51 +452,59 @@ export default function PostTaskForm({
           </FormAccordionSection>
 
           <FormAccordionSection
-            title="Upload Images"
-            icon={Paperclip}
-            description="Photos to help taskers understand the job (optional)"
+            title="Attachment"
+            icon={ImageIcon}
+            description="Upload photos to help taskers understand the job (optional)"
             isOpen={openSection === 'attachments'}
             onToggle={() => toggleSection('attachments')}
           >
             <input
-              ref={imageInputRef}
+              ref={galleryInputRef}
               type="file"
-              accept="image/*"
               multiple
+              accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
               className="hidden"
               onChange={(event) => {
-                onPickImages(event.target.files);
+                onGallerySelected(event.target.files);
                 event.target.value = '';
               }}
             />
-            <button
-              type="button"
-              onClick={() => imageInputRef.current?.click()}
-              className="flex w-full cursor-pointer flex-col items-center justify-center rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] px-6 py-10 text-sm font-normal text-neutral-700 transition-colors hover:bg-[#ffede8]"
-            >
-              Upload Images
-            </button>
-            <p className="text-xs font-normal text-neutral-400">JPG, PNG, WEBP, or GIF</p>
-            {imagePreviews.length > 0 ? (
-              <ul className="space-y-2">
-                {imagePreviews.map((preview) => (
-                  <li
-                    key={preview.url}
-                    className="flex items-center justify-between gap-3 rounded-none border border-neutral-100 bg-neutral-50 px-3 py-2 text-sm font-normal text-neutral-700"
+            <div className="flex flex-wrap gap-3">
+              {galleryItems.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 bg-neutral-50"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.preview} alt="" className="h-full w-full object-cover" />
+                  {index === firstImageIndex ? (
+                    <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      Main
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryItem(item.id)}
+                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black"
+                    aria-label={`Remove ${item.name}`}
                   >
-                    <span className="truncate">{preview.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(preview.name)}
-                      className="shrink-0 rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-800"
-                      aria-label={`Remove ${preview.name}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8]"
+              >
+                <ImageIcon className="h-5 w-5 text-neutral-400" />
+                Upload
+              </button>
+            </div>
+            <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500">
+              Upload multiple images — the first image is used as the main cover. JPG, PNG, WEBP, or
+              GIF — max 10 MB per file.
+            </p>
           </FormAccordionSection>
         </div>
       </form>

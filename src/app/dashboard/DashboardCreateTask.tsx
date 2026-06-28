@@ -37,6 +37,8 @@ type DashboardCreateTaskProps = {
   postingContext?: EmployerPostingContext | null;
   categories?: Category[];
   categoriesLoaded?: boolean;
+  categoryOptions?: string[];
+  onPersistCustomCategory?: (categoryName: string) => Promise<string | null>;
   isLoading?: boolean;
   onBack: () => void;
   onSubmit: (data: TaskData) => void | Promise<void>;
@@ -48,6 +50,8 @@ export default function DashboardCreateTask({
   postingContext,
   categories = [],
   categoriesLoaded = false,
+  categoryOptions = [],
+  onPersistCustomCategory,
   isLoading = false,
   onBack,
   onSubmit,
@@ -158,6 +162,8 @@ export default function DashboardCreateTask({
       updateData={(updates) => setTaskData((prev) => ({ ...prev, ...updates }))}
       categories={categories}
       categoriesLoaded={categoriesLoaded}
+      categoryOptions={categoryOptions}
+      onPersistCustomCategory={onPersistCustomCategory}
       onBack={onBack}
       onSubmit={handleSubmit}
       isLoading={isLoading}

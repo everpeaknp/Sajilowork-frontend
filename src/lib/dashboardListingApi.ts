@@ -748,6 +748,25 @@ export async function ensureMarketplaceSkill(
   return skill?.name?.trim() ? skill : null;
 }
 
+export async function ensureMarketplaceCategory(
+  name: string,
+  listingKind: 'task' | 'job' | 'project' | 'service',
+): Promise<Category | null> {
+  const trimmed = normalizeSkillLabel(name);
+  if (!trimmed) return null;
+
+  const { taskService } = await import('@/services/task.service');
+  const response = await taskService.createCategory({
+    name: trimmed,
+    listing_kind: listingKind,
+  });
+
+  if (!response.success || !response.data) return null;
+
+  const category = response.data as Category;
+  return category?.name?.trim() ? category : null;
+}
+
 function normalizeSkillLabel(skill: string): string {
   return skill.trim().replace(/\s+/g, ' ');
 }

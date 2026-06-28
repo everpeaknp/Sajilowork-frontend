@@ -171,6 +171,13 @@ export const taskService = {
     return apiClient.get<Category[]>('/tasks/categories/', { params });
   },
 
+  async createCategory(data: {
+    name: string;
+    listing_kind: 'task' | 'job' | 'project' | 'service';
+  }): Promise<ApiResponse<Category>> {
+    return apiClient.post<Category>('/tasks/categories/', data);
+  },
+
   /**
    * Get category by ID
    */
