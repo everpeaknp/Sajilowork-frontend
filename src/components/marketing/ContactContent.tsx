@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import {
   MapPin,
   Phone,
@@ -41,7 +42,6 @@ export default function ContactContent() {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string>('');
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; message?: string }>({});
 
   const [selectedLocationId] = useState<string>('kathmandu');
@@ -79,7 +79,6 @@ export default function ContactContent() {
     if (!name || !email || !message) return;
 
     // Clear previous errors
-    setError('');
     setFieldErrors({});
     setIsSubmitting(true);
     
@@ -95,20 +94,33 @@ export default function ContactContent() {
       setName('');
       setEmail('');
       setMessage('');
-    } catch (err: any) {
-      console.error('Failed to submit contact form:', err);
-      
-      // Handle validation errors from backend
-      if (err?.errors && typeof err.errors === 'object') {
-        // Field-specific errors
-        setFieldErrors(err.errors);
-        setError('Please fix the errors below.');
-      } else if (err?.message) {
-        // General error message
-        setError(err.message);
-      } else {
-        setError('Failed to send message. Please try again.');
+      toast.success('Message sent successfully! Our team will connect back shortly.');
+    } catch (err: unknown) {
+      const apiErr = err as {
+        status?: number;
+        message?: string;
+        errors?: Record<string, string[]>;
+      };
+
+      const nextFieldErrors: { name?: string; email?: string; message?: string } = {};
+
+      if (apiErr?.errors && typeof apiErr.errors === 'object') {
+        for (const [key, messages] of Object.entries(apiErr.errors)) {
+          if (messages?.[0] && (key === 'name' || key === 'email' || key === 'message')) {
+            nextFieldErrors[key] = messages[0];
+          }
+        }
+        setFieldErrors(nextFieldErrors);
       }
+
+      const toastMessage =
+        nextFieldErrors.message ||
+        nextFieldErrors.name ||
+        nextFieldErrors.email ||
+        apiErr?.message ||
+        'Failed to send message. Please try again.';
+
+      toast.error(toastMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -184,34 +196,6 @@ export default function ContactContent() {
                         type="button"
                         onClick={() => setSubmitted(false)}
                         className="ml-auto cursor-pointer text-xs font-normal text-emerald-800 underline transition-colors hover:text-emerald-900"
-                      >
-                        Dismiss
-                      </button>
-                    </motion.div>
-                  ) : null}
-                  
-                  {error && !submitted ? (
-                    <motion.div
-                      className="mb-5 flex items-start gap-3.5 rounded-xl border border-red-200 bg-red-50 p-4"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                    >
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100">
-                        <span className="text-xs font-semibold text-red-600">!</span>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-sm font-normal text-red-900">
-                          {error}
-                        </h4>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setError('');
-                          setFieldErrors({});
-                        }}
-                        className="ml-auto cursor-pointer text-xs font-normal text-red-800 underline transition-colors hover:text-red-900"
                       >
                         Dismiss
                       </button>
