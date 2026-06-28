@@ -992,11 +992,6 @@ export default function DashboardCreateJob({
                 options={SOFT_SKILLS}
                 searchable
                 allowCustom
-                searchPlaceholder="Search soft skills..."
-                emptySearchLabel="No soft skills match your search."
-                emptyListLabel="No soft skills available."
-                customSectionTitle="Soft skill not listed? Add it manually (only if it is not in the list above)."
-                customPlaceholder="Type a custom soft skill"
               />
               <p className="mt-1.5 text-xs font-normal text-neutral-500">
                 Shown below Skills Required on the public job page.
