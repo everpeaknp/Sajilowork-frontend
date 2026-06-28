@@ -58,6 +58,7 @@ export type CreateJobFormData = {
   hoursLabel: string;
   postedLabel: string;
   skills: string[];
+  softSkills: string[];
   description: string;
   keyResponsibilities: string[];
   workExperience: string[];
@@ -83,6 +84,7 @@ const EMPTY_CREATE_FORM: CreateJobFormData = {
   hoursLabel: '',
   postedLabel: '',
   skills: [],
+  softSkills: [],
   description: '',
   keyResponsibilities: [''],
   workExperience: [''],
@@ -166,6 +168,26 @@ const SKILLS = [
   'Python',
   'DevOps',
   'Project Management',
+];
+const SOFT_SKILLS = [
+  'Communication',
+  'Teamwork',
+  'Problem Solving',
+  'Time Management',
+  'Leadership',
+  'Adaptability',
+  'Critical Thinking',
+  'Creativity',
+  'Work Ethic',
+  'Interpersonal Skills',
+  'Conflict Resolution',
+  'Emotional Intelligence',
+  'Attention to Detail',
+  'Collaboration',
+  'Negotiation',
+  'Active Listening',
+  'Decision Making',
+  'Stress Management',
 ];
 const fieldClass =
   'w-full rounded-none border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400';
@@ -638,6 +660,7 @@ export function createPublicJobFromForm(data: CreateJobFormData, id?: string): P
     budgetLabel: budget.label,
     description: summary,
     skills: skills.length ? skills : ['General'],
+    softSkills: data.softSkills.map((skill) => skill.trim()).filter(Boolean),
     city: data.city.trim() || undefined,
     hoursLabel: data.hoursLabel.trim() || undefined,
     postedLabel: data.postedLabel.trim() || undefined,
@@ -812,6 +835,28 @@ export default function DashboardCreateJob({
         </FormAccordionSection>
 
         <FormAccordionSection
+          title="Description"
+          icon={AlignLeft}
+          description="Full job description for the public page"
+          isOpen={openSection === 'description'}
+          onToggle={() => toggleSection('description')}
+        >
+          <div>
+            <label className={labelClass}>Job Description</label>
+            <p className="mb-2 text-xs font-normal text-neutral-500">
+              Separate paragraphs with a blank line — shown in the About section on the job page.
+            </p>
+            <textarea
+              value={form.description}
+              onChange={(e) => update({ description: e.target.value })}
+              placeholder="Write the full job description..."
+              rows={8}
+              className={`${fieldClass} min-h-[180px] resize-y`}
+            />
+          </div>
+        </FormAccordionSection>
+
+        <FormAccordionSection
           title="Job Overview"
           icon={ClipboardList}
           description="Location, budget, type, and skills"
@@ -938,28 +983,25 @@ export default function DashboardCreateJob({
                 Search the list or add a custom skill only when it is not already available.
               </p>
             </div>
-          </div>
-        </FormAccordionSection>
-
-        <FormAccordionSection
-          title="Description"
-          icon={AlignLeft}
-          description="Full job description for the public page"
-          isOpen={openSection === 'description'}
-          onToggle={() => toggleSection('description')}
-        >
-          <div>
-            <label className={labelClass}>Job Description</label>
-            <p className="mb-2 text-xs font-normal text-neutral-500">
-              Separate paragraphs with a blank line — shown in the About section on the job page.
-            </p>
-            <textarea
-              value={form.description}
-              onChange={(e) => update({ description: e.target.value })}
-              placeholder="Write the full job description..."
-              rows={8}
-              className={`${fieldClass} min-h-[180px] resize-y`}
-            />
+            <div className="sm:col-span-2">
+              <MultiSelectField
+                label="Soft Skills"
+                value={form.softSkills}
+                onChange={(softSkills) => update({ softSkills: dedupeSkills(softSkills) })}
+                placeholder="Nothing selected"
+                options={SOFT_SKILLS}
+                searchable
+                allowCustom
+                searchPlaceholder="Search soft skills..."
+                emptySearchLabel="No soft skills match your search."
+                emptyListLabel="No soft skills available."
+                customSectionTitle="Soft skill not listed? Add it manually (only if it is not in the list above)."
+                customPlaceholder="Type a custom soft skill"
+              />
+              <p className="mt-1.5 text-xs font-normal text-neutral-500">
+                Shown below Skills Required on the public job page.
+              </p>
+            </div>
           </div>
         </FormAccordionSection>
 

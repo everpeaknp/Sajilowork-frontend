@@ -27,6 +27,7 @@ export interface Job {
   budgetMax: number;
   description: string;
   skills: string[];
+  softSkills?: string[];
   city?: string;
   hoursLabel?: string;
   postedLabel?: string;

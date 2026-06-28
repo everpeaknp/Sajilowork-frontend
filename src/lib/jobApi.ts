@@ -435,6 +435,8 @@ export function mapTaskToPublicJob(task: Task): Job {
 
     skills: parseSkills(form, task.description),
 
+    softSkills: parseServiceSkills(form?.softSkills),
+
     city: form?.city?.trim() || (task.city?.trim() ? task.city.trim() : undefined),
 
     hoursLabel: form?.hoursLabel?.trim() || undefined,

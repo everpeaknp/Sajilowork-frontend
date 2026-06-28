@@ -3,6 +3,7 @@ export { default as JobList } from './JobList';
 export { default as JobAbout } from './JobAbout';
 export { default as JobKeyResponsibilities } from './JobKeyResponsibilities';
 export { default as JobSkillsRequired } from './JobSkillsRequired';
+export { default as JobSoftSkills } from './JobSoftSkills';
 export { default as JobRelatedJobs } from './JobRelatedJobs';
 export { default as JobWorkExperience } from './JobWorkExperience';
 export { default as JobProfileHero } from './JobProfileHero';

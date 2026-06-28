@@ -87,6 +87,7 @@ export function normalizeJobFormData(
   return {
     ...data,
     skills: parseServiceSkills(data.skills),
+    softSkills: parseServiceSkills(data.softSkills),
     budgetPricing: data.budgetPricing ?? 'negotiable',
     budgetFixed: data.budgetFixed ?? '',
   };

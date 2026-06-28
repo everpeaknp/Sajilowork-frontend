@@ -13,6 +13,7 @@ import { getJobDetailPath, getJobEditHref, isJobOwner } from './jobSlug';
 import JobAbout from './JobAbout';
 import JobKeyResponsibilities from './JobKeyResponsibilities';
 import JobSkillsRequired from './JobSkillsRequired';
+import JobSoftSkills from './JobSoftSkills';
 import JobProfileHero from './JobProfileHero';
 import JobRelatedJobs from './JobRelatedJobs';
 import JobSendApplication from './JobSendApplication';
@@ -103,6 +104,7 @@ export default function SingleJobPage({
           <div className="mt-10 sm:mt-12">
             <JobSkillsRequired job={job} />
           </div>
+          <JobSoftSkills job={job} />
           <JobKeyResponsibilities job={job} />
           <JobWorkExperience job={job} onApply={handleApplyClick} isOwner={isOwner} editHref={editHref} />
           {!hideApplication && !useApplicationModal ? (
