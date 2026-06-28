@@ -510,8 +510,12 @@ class ApiClient {
       !error?.response
     ) {
       console.groupEnd();
+      const isLocalApi =
+        /localhost|127\.0\.0\.1/.test(API_BASE_URL);
       return {
-        message: `Cannot reach the API at ${API_BASE_URL}. Start the Django backend with "python manage.py runserver" on port 8000.`,
+        message: isLocalApi
+          ? `Cannot reach the API at ${API_BASE_URL}. Start the Django backend with "python manage.py runserver" on port 8000.`
+          : `Cannot reach the API at ${API_BASE_URL}. The server may be temporarily unavailable — please try again shortly.`,
         status: 0,
       };
     }
