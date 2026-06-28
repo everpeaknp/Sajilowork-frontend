@@ -28,6 +28,7 @@ import {
 import { normalizeJobFormData } from '@/lib/dashboardListingApi';
 import { getFallbackCategoryNames } from '@/lib/taskUtils';
 import FormAccordionSection from './FormAccordionSection';
+import { SearchableSelectField } from './listingFormFields';
 import EmployerPostingBanner from '@/components/employers/EmployerPostingBanner';
 import {
   resolveJobBudgetFromForm,
@@ -604,6 +605,7 @@ interface DashboardCreateJobProps {
   categoryOptions?: string[];
   skillOptions?: string[];
   onPersistCustomSkill?: (skillName: string) => Promise<string | null>;
+  onPersistCustomCategory?: (categoryName: string) => Promise<string | null>;
 }
 
 function parseDescriptionParagraphs(text: string): string[] {
@@ -669,6 +671,7 @@ export default function DashboardCreateJob({
   categoryOptions = [],
   skillOptions = [],
   onPersistCustomSkill,
+  onPersistCustomCategory,
 }: DashboardCreateJobProps) {
   const isEdit = mode === 'edit';
   const [form, setForm] = useState<CreateJobFormData>(() => ({
@@ -767,12 +770,25 @@ export default function DashboardCreateJob({
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <SelectField
-              label="Category"
-              value={form.category}
-              onChange={(category) => update({ category })}
-              options={categories}
-            />
+            <div>
+              <SearchableSelectField
+                label="Category"
+                value={form.category}
+                onChange={(category) => update({ category })}
+                placeholder="Select a category"
+                options={categories}
+                searchPlaceholder="Search categories..."
+                emptySearchLabel="No categories match your search."
+                emptyListLabel="No categories available."
+                customSectionTitle="Category not listed? Add it manually (only if it is not in the list above)."
+                customPlaceholder="Type a custom category"
+                allowCustom
+                onPersistCustom={onPersistCustomCategory}
+              />
+              <p className="mt-1.5 text-xs font-normal text-neutral-500">
+                Search the list or add a custom category only when it is not already available.
+              </p>
+            </div>
             {!postingContext ? (
               <div>
                 <label className={labelClass}>Company name</label>

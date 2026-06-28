@@ -433,9 +433,9 @@ export default function DashboardCreateRoute({ tab, editSlug }: DashboardCreateR
     setSubmitting(true);
 
     try {
-      let categoryId = data.categoryId;
+      let categoryId: string | undefined = data.categoryId || undefined;
       if (!categoryId && data.categoryName.trim()) {
-        categoryId = (await resolveCategoryId(data.categoryName, categories)) ?? undefined;
+        categoryId = await resolveCategoryId(data.categoryName, categories);
       }
       if (!categoryId && data.categoryName.trim()) {
         const created = await ensureMarketplaceCategory(data.categoryName, 'task');
