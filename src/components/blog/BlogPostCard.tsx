@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import type { BlogPost } from '@/types/blog';
 import { getBlogPostHref, isExternalBlogHref } from '@/lib/blog';
+import { landingHeadlineSm } from '@/components/LangingHome/landingTypography';
 
 type BlogPostCardProps = {
   post: BlogPost;
@@ -17,32 +18,43 @@ export default function BlogPostCard({ post, className = '' }: BlogPostCardProps
 
   const card = (
     <article
-      className={`bg-white rounded-3xl overflow-hidden border border-gray-100 h-full transition-all hover:-translate-y-1 hover:shadow-lg ${className}`}
+      className={`group h-full overflow-hidden rounded-2xl border border-border bg-surface transition-all hover:-translate-y-1 hover:border-brand-emerald/40 hover:shadow-lg ${className}`}
     >
       {post.image ? (
-        <div className="h-48 overflow-hidden">
-          <img src={post.image} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
+        <div className="h-48 overflow-hidden bg-surface-container">
+          <img
+            src={post.image}
+            alt={post.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
         </div>
-      ) : null}
+      ) : (
+        <div className="h-2 bg-gradient-to-r from-brand-emerald via-primary to-brand-dark" />
+      )}
       <div className="p-6">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-[10px] font-black text-[#1161fe] uppercase tracking-[0.2em]">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <span className="rounded-full bg-brand-light-bg px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-emerald">
             {post.category}
           </span>
           {publishedLabel ? (
             <time
               dateTime={post.published_at}
-              className="text-[10px] font-semibold text-[#384179]/70"
+              className="text-[10px] font-semibold text-muted-foreground"
             >
               {publishedLabel}
             </time>
           ) : null}
         </div>
-        <h2 className="font-['Outfit'] font-black text-xl text-[#0b1442] leading-tight">
+        <h2 className={`${landingHeadlineSm} text-xl leading-tight text-brand-dark`}>
           {post.title}
         </h2>
-        <p className="text-[#384179] text-sm mt-3 opacity-80 line-clamp-3">{post.excerpt}</p>
-        <span className="inline-block mt-4 text-sm font-bold text-[#1161fe]">Read article →</span>
+        <p className="mt-3 line-clamp-3 font-body text-sm leading-relaxed text-muted-foreground">
+          {post.excerpt}
+        </p>
+        <span className="mt-4 inline-block text-sm font-semibold text-brand-emerald transition-colors group-hover:text-brand-dark">
+          Read article →
+        </span>
       </div>
     </article>
   );

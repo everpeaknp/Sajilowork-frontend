@@ -24,7 +24,10 @@ export const FOOTER_SECTIONS: FooterSection[] = [
   },
   {
     title: 'Company',
-    links: [{ label: 'About Us', href: '/about' }],
+    links: [
+      { label: 'About Us', href: '/about' },
+      { label: 'Blog', href: '/blog' },
+    ],
   },
   {
     title: 'Help',

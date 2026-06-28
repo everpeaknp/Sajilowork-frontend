@@ -1,10 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ChevronLeft, Loader2 } from 'lucide-react';
-import Navbar from '@/components/common/navbar';
-import Footer from '@/components/common/footer';
+import { Loader2 } from 'lucide-react';
+import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import BlogPostCard from '@/components/blog/BlogPostCard';
 import { blogService } from '@/services/blog.service';
 import type { BlogPost } from '@/types/blog';
@@ -31,37 +29,33 @@ export default function BlogIndexPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#E7F0FF] flex flex-col">
-      <Navbar />
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-[#1161fe] font-bold mb-8 hover:underline"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Back to home
-        </Link>
-        <h1 className="font-['Outfit'] font-black text-4xl md:text-5xl text-[#0b1442] italic uppercase mb-4">
-          Tips and guides
-        </h1>
-        <p className="text-[#384179] font-medium max-w-2xl mb-12">
-          Practical advice for cleaning, repairs, gardening, and getting the most from local taskers.
-        </p>
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-10 w-10 animate-spin text-[#1161fe]" aria-label="Loading" />
-          </div>
-        ) : posts.length === 0 ? (
-          <p className="text-[#384179] font-medium">No articles published yet.</p>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {posts.map((post) => (
-              <BlogPostCard key={post.id} post={post} />
-            ))}
-          </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+    <MarketingPageLayout
+      title="Tips and guides"
+      description="Practical advice for cleaning, repairs, gardening, and getting the most from local taskers."
+      backHref="/"
+      backLabel="Back to home"
+      contentClassName="max-w-7xl"
+    >
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2
+            className="h-10 w-10 animate-spin text-brand-emerald"
+            aria-label="Loading"
+          />
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-brand-light-bg px-6 py-14 text-center">
+          <p className="font-body text-base font-medium text-muted-foreground">
+            No articles published yet. Check back soon for tips and guides.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => (
+            <BlogPostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
+    </MarketingPageLayout>
   );
 }

@@ -9,6 +9,7 @@ import { discoverPageRoot, discoverPageTypo } from '@/components/LangingHome/lan
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import SingleEmployerPage from '@/components/employers/SingleEmployerPage';
+import EmployerDetailSkeleton from '@/components/employers/EmployerDetailSkeleton';
 import type { SingleReview } from '@/components/employers/EmployerReviews';
 import type { Employer } from '@/components/employers/employerData';
 import {
@@ -23,11 +24,10 @@ export default function EmployerSlugPage() {
   const [notification, setNotification] = useState<string | null>(null);
 
   const [employer, setEmployer] = useState<Employer | undefined>(undefined);
-  const [projects, setProjects] = useState<EmployerListingCard[] | undefined>(undefined);
-  const [jobs, setJobs] = useState<EmployerListingCard[] | undefined>(undefined);
-  const [reviews, setReviews] = useState<SingleReview[] | undefined>(undefined);
+  const [projects, setProjects] = useState<EmployerListingCard[]>([]);
+  const [jobs, setJobs] = useState<EmployerListingCard[]>([]);
+  const [reviews, setReviews] = useState<SingleReview[]>([]);
   const [resolved, setResolved] = useState(false);
-  const [useMockListings, setUseMockListings] = useState(false);
   const loadRequestRef = useRef(0);
 
   useEffect(() => {
@@ -39,10 +39,9 @@ export default function EmployerSlugPage() {
 
     const requestId = ++loadRequestRef.current;
     setEmployer(undefined);
-    setProjects(undefined);
-    setJobs(undefined);
-    setReviews(undefined);
-    setUseMockListings(false);
+    setProjects([]);
+    setJobs([]);
+    setReviews([]);
     setResolved(false);
 
     void loadEmployerPageData(slug)
@@ -55,16 +54,9 @@ export default function EmployerSlugPage() {
         }
 
         setEmployer(data.employer);
-        setUseMockListings(data.useMockListings);
-        if (data.useMockListings) {
-          setProjects(undefined);
-          setJobs(undefined);
-          setReviews(undefined);
-        } else {
-          setProjects(data.projects);
-          setJobs(data.jobs);
-          setReviews(data.reviews);
-        }
+        setProjects(data.projects);
+        setJobs(data.jobs);
+        setReviews(data.reviews);
       })
       .catch((error) => {
         if (requestId !== loadRequestRef.current) return;
@@ -89,7 +81,17 @@ export default function EmployerSlugPage() {
   }
 
   if (!employer) {
-    return null;
+    return (
+      <div
+        className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white text-black selection:bg-[#1161fe] selection:text-white`}
+      >
+        <Navbar />
+        <main className="w-full max-w-none px-0 py-0">
+          <EmployerDetailSkeleton />
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   const triggerNotification = (msg: string) => {
@@ -144,11 +146,9 @@ export default function EmployerSlugPage() {
 
         <SingleEmployerPage
           employer={employer}
-          projects={useMockListings ? undefined : (projects ?? [])}
-          jobs={useMockListings ? undefined : (jobs ?? [])}
-          reviews={useMockListings ? undefined : (reviews ?? [])}
-          useMockProjects={useMockListings}
-          useMockJobs={useMockListings}
+          projects={projects}
+          jobs={jobs}
+          reviews={reviews}
           onContact={(name) => triggerNotification(`Message sent to ${name}.`)}
           onNotification={triggerNotification}
           onProjectSelect={handleProjectSelect}

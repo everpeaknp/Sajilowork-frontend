@@ -28,8 +28,6 @@ interface SingleEmployerPageProps {
   projects?: EmployerListingCard[];
   jobs?: EmployerListingCard[];
   reviews?: SingleReview[];
-  useMockProjects?: boolean;
-  useMockJobs?: boolean;
   embedded?: boolean;
   onContact?: (name: string) => void;
   onNotification?: (message: string) => void;
@@ -245,29 +243,11 @@ function renderProfileLogo(logoKey: string, name: string, compact = false, logoU
   );
 }
 
-const ABOUT_COMPANY_INTRO = [
-  'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using \'Content here, content here\', making it look like readable English.',
-  'Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for \'lorem ipsum\' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
-] as const;
-
-const ABOUT_COMPANY_SECTIONS = [
-  {
-    title: 'Who are we?',
-    body: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using \'Content here, content here\', making it look like readable English.',
-  },
-  {
-    title: 'What do we do?',
-    body: 'Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for \'lorem ipsum\' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
-  },
-] as const;
-
 export default function SingleEmployerPage({
   employer,
   projects,
   jobs,
   reviews,
-  useMockProjects = false,
-  useMockJobs = false,
   embedded = false,
   onContact,
   onNotification,
@@ -526,29 +506,11 @@ export default function SingleEmployerPage({
                         </p>
                       ))
                   ) : (
-                    ABOUT_COMPANY_INTRO.map((paragraph, index) => (
-                      <p
-                        key={index}
-                        className="text-sm font-normal leading-relaxed text-black/80 sm:text-base"
-                      >
-                        {paragraph}
-                      </p>
-                    ))
+                    <p className="text-sm font-normal leading-relaxed text-neutral-500 sm:text-base">
+                      No company description provided yet.
+                    </p>
                   )}
                 </div>
-
-                {!employer.description.trim()
-                  ? ABOUT_COMPANY_SECTIONS.map((section) => (
-                      <div key={section.title} className="space-y-2">
-                        <h3 className="text-base font-normal tracking-tight text-black sm:text-lg">
-                          {section.title}
-                        </h3>
-                        <p className="text-sm font-normal leading-relaxed text-black/80 sm:text-base">
-                          {section.body}
-                        </p>
-                      </div>
-                    ))
-                  : null}
 
                 {employer.galleryImages?.length ? (
                   <div className="pt-4">
@@ -563,7 +525,6 @@ export default function SingleEmployerPage({
                     logoUrl={employer.logoUrl}
                     logoText={employer.logoText}
                     projects={projects}
-                    useMockFallback={useMockProjects}
                     triggerNotification={onNotification}
                     onProjectSelect={
                       onProjectSelect ??
@@ -579,7 +540,7 @@ export default function SingleEmployerPage({
                     employerName={employer.name}
                     initialRating={displayRating}
                     initialReviews={reviews}
-                    preferApiReviews={reviews !== undefined}
+                    preferApiReviews
                     revieweeUserId={revieweeUserId}
                     onReviewsUpdated={handleReviewsUpdated}
                     showToast={onNotification}
@@ -597,7 +558,6 @@ export default function SingleEmployerPage({
                 logoUrl={employer.logoUrl}
                 logoText={employer.logoText}
                 jobs={jobs}
-                useMockFallback={useMockJobs}
                 jobsLive={jobs?.length ?? employer.openJobs}
                 triggerNotification={onNotification}
                 onJobSelect={

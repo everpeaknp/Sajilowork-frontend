@@ -6,7 +6,6 @@ import { Star, ChevronLeft, ChevronRight, ChevronDown, Check, AlertCircle } from
 import { motion, AnimatePresence } from 'motion/react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import {
-  DEFAULT_EMPLOYERS,
   EMPLOYER_INDUSTRIES,
   EMPLOYER_TEAM_SIZES,
   ITEMS_PER_PAGE,
@@ -16,6 +15,7 @@ import { GreenSparkSparkle, renderEmployerBrandLogo } from './employerLogos';
 import { getEmployerProfilePath } from './employerSlug';
 import { fetchPublicEmployers } from '@/lib/employerApi';
 import { toggleEmployerSaved, useSavedEmployerIds } from './employerBookmarks';
+import { EmployerFilterRowSkeleton, EmployerListSkeleton } from './EmployerListSkeleton';
 
 interface EmployerListProps {
   searchQuery: string;
@@ -62,11 +62,11 @@ export default function EmployerList({ searchQuery, searchNonce, onNotify, onCle
     void fetchPublicEmployers({ page_size: 200 })
       .then(({ employers: list }) => {
         if (cancelled) return;
-        setEmployers(list.length > 0 ? list : DEFAULT_EMPLOYERS);
+        setEmployers(list);
       })
       .catch(() => {
         if (!cancelled) {
-          setEmployers(DEFAULT_EMPLOYERS);
+          setEmployers([]);
         }
       })
       .finally(() => {
@@ -281,7 +281,10 @@ export default function EmployerList({ searchQuery, searchNonce, onNotify, onCle
         </div>
 
         {loadState === 'loading' && employers.length === 0 ? (
-          <div className="min-h-[200px]" aria-busy="true" aria-label="Loading employers" />
+          <>
+            <EmployerFilterRowSkeleton />
+            <EmployerListSkeleton count={8} />
+          </>
         ) : filteredEmployers.length === 0 ? (
           <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
             <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />

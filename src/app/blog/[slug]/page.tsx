@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { format } from 'date-fns';
-import { ChevronLeft, Loader2 } from 'lucide-react';
-import Navbar from '@/components/common/navbar';
-import Footer from '@/components/common/footer';
+import { Loader2 } from 'lucide-react';
+import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import BlogPostBody from '@/components/blog/BlogPostBody';
+import { landingHeadline } from '@/components/LangingHome/landingTypography';
 import { blogService } from '@/services/blog.service';
 import type { BlogPostDetail } from '@/types/blog';
 
@@ -54,71 +54,72 @@ export default function BlogPostPage() {
     post?.published_at && format(new Date(post.published_at), 'dd MMMM yyyy');
 
   return (
-    <div className="min-h-screen bg-[#E7F0FF] flex flex-col">
-      <Navbar />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 pb-16">
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-[#1161fe] font-bold mb-8 hover:underline"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          All articles
-        </Link>
-
-        {loading ? (
-          <div className="flex justify-center py-24">
-            <Loader2 className="h-10 w-10 animate-spin text-[#1161fe]" aria-label="Loading" />
-          </div>
-        ) : error || !post ? (
-          <div className="bg-white rounded-3xl border border-gray-100 p-10 text-center">
-            <p className="text-[#384179] font-medium">{error || 'Article not found'}</p>
-            <Link
-              href="/blog"
-              className="inline-block mt-6 text-[#1161fe] font-bold hover:underline"
-            >
-              Browse all articles
-            </Link>
-          </div>
-        ) : (
-          <article className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
-            {post.image ? (
-              <div className="aspect-[21/9] max-h-[420px] overflow-hidden bg-gray-100">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : null}
-            <div className="p-8 md:p-12">
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span className="text-[10px] font-black text-[#1161fe] uppercase tracking-[0.2em]">
-                  {post.category}
-                </span>
-                {publishedLabel ? (
-                  <time
-                    dateTime={post.published_at}
-                    className="text-sm font-semibold text-[#384179]/70"
-                  >
-                    {publishedLabel}
-                  </time>
-                ) : null}
-              </div>
-              <h1 className="font-['Outfit'] font-black text-3xl md:text-4xl text-[#0b1442] leading-tight mb-8">
-                {post.title}
-              </h1>
-              {post.excerpt ? (
-                <p className="text-lg text-[#384179] font-medium mb-10 border-l-4 border-[#1161fe] pl-4">
-                  {post.excerpt}
-                </p>
-              ) : null}
-              <BlogPostBody html={post.content} />
+    <MarketingPageLayout
+      title={post?.title ?? 'Article'}
+      hideHero
+      backHref="/blog"
+      backLabel="All articles"
+      contentClassName="max-w-4xl"
+    >
+      {loading ? (
+        <div className="flex justify-center py-24">
+          <Loader2
+            className="h-10 w-10 animate-spin text-brand-emerald"
+            aria-label="Loading"
+          />
+        </div>
+      ) : error || !post ? (
+        <div className="rounded-2xl border border-border bg-surface px-6 py-14 text-center shadow-sm">
+          <p className="font-body text-base font-medium text-muted-foreground">
+            {error || 'Article not found'}
+          </p>
+          <Link
+            href="/blog"
+            className="mt-6 inline-block text-sm font-semibold text-brand-emerald transition-colors hover:text-brand-dark"
+          >
+            Browse all articles
+          </Link>
+        </div>
+      ) : (
+        <article className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+          {post.image ? (
+            <div className="aspect-[21/9] max-h-[420px] overflow-hidden bg-surface-container">
+              <img
+                src={post.image}
+                alt={post.title}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
             </div>
-          </article>
-        )}
-      </main>
-      <Footer />
-    </div>
+          ) : null}
+          <div className="p-8 md:p-12">
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-brand-light-bg px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-emerald">
+                {post.category}
+              </span>
+              {publishedLabel ? (
+                <time
+                  dateTime={post.published_at}
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  {publishedLabel}
+                </time>
+              ) : null}
+            </div>
+            <h1
+              className={`${landingHeadline} mb-8 text-3xl leading-tight text-brand-dark md:text-4xl`}
+            >
+              {post.title}
+            </h1>
+            {post.excerpt ? (
+              <p className="mb-10 border-l-4 border-brand-emerald pl-4 text-lg font-medium leading-relaxed text-muted-foreground">
+                {post.excerpt}
+              </p>
+            ) : null}
+            <BlogPostBody html={post.content} />
+          </div>
+        </article>
+      )}
+    </MarketingPageLayout>
   );
 }

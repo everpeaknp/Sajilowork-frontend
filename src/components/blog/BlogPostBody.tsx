@@ -5,7 +5,9 @@ type BlogPostBodyProps = {
 export default function BlogPostBody({ html }: BlogPostBodyProps) {
   if (!html?.trim()) {
     return (
-      <p className="text-[#384179] font-medium">This article has no body content yet.</p>
+      <p className="font-body text-base font-medium text-muted-foreground">
+        This article has no body content yet.
+      </p>
     );
   }
 

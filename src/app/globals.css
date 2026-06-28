@@ -154,7 +154,8 @@ body {
 
 /* Blog article HTML from admin TinyMCE */
 .blog-content {
-  color: #384179;
+  color: var(--on-surface-variant);
+  font-family: var(--font-stack-body);
   font-size: 1.0625rem;
   line-height: 1.75;
 }
@@ -163,8 +164,8 @@ body {
 .blog-content h2,
 .blog-content h3,
 .blog-content h4 {
-  color: #0b1442;
-  font-family: Outfit, system-ui, sans-serif;
+  color: var(--brand-dark);
+  font-family: var(--font-stack-formula);
   font-weight: 800;
   line-height: 1.25;
   margin-top: 2rem;
@@ -202,9 +203,13 @@ body {
 }
 
 .blog-content a {
-  color: #1161fe;
+  color: var(--primary);
   font-weight: 600;
   text-decoration: underline;
+}
+
+.blog-content a:hover {
+  color: var(--brand-emerald);
 }
 
 .blog-content img {
@@ -215,8 +220,8 @@ body {
 }
 
 .blog-content blockquote {
-  border-left: 4px solid #1161fe;
-  color: #0b1442;
+  border-left: 4px solid var(--brand-emerald);
+  color: var(--brand-dark);
   font-style: italic;
   margin: 1.5rem 0;
   padding-left: 1rem;
@@ -224,7 +229,7 @@ body {
 
 .blog-content pre,
 .blog-content code {
-  background: #f3f4f6;
+  background: var(--surface-container);
   border-radius: 0.5rem;
   font-size: 0.9em;
 }

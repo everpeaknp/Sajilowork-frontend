@@ -106,8 +106,6 @@ export default function ProposalEmployerProfile({
         projects={pageData.projects}
         jobs={pageData.jobs}
         reviews={pageData.reviews}
-        useMockProjects={pageData.useMockListings}
-        useMockJobs={pageData.useMockListings}
         embedded
         />
       </div>

@@ -1,7 +1,6 @@
 import type { SingleReview } from '@/components/employers/EmployerReviews';
 import { mapEmployerReviewDtoToProfileRow } from '@/lib/profileReviewDisplay';
 import type { Employer, EmployerGalleryImage } from '@/components/employers/employerData';
-import { findEmployerBySlug, isStaticDemoEmployer } from '@/components/employers/employerSlug';
 import type { EmployerBusinessProfile } from '@/lib/employerBusinessProfile';
 import { parseTaskDashboardMeta } from '@/lib/dashboardListingApi';
 import {
@@ -279,7 +278,6 @@ export async function loadEmployerPageData(slug: string): Promise<{
   projects: EmployerListingCard[];
   jobs: EmployerListingCard[];
   reviews: SingleReview[];
-  useMockListings: boolean;
 } | null> {
   const normalizedSlug = slug.trim().toLowerCase();
   if (!normalizedSlug) {
@@ -306,15 +304,12 @@ export async function loadEmployerPageData(slug: string): Promise<{
     let employer: Employer | undefined;
 
     if (profileResponse.success && profileResponse.data) {
-      employer = mapEmployerPublicDtoToEmployer(profileResponse.data as any);
+      employer = mapEmployerPublicDtoToEmployer(profileResponse.data as EmployerPublicDto);
     } else {
-      employer = findEmployerBySlug(normalizedSlug);
-      if (!employer) {
-        const firstListing =
-          projectsResponse.data?.results?.[0] ?? jobsResponse.data?.results?.[0];
-        if (firstListing) {
-          employer = buildEmployerFromListingTask(firstListing, normalizedSlug) ?? undefined;
-        }
+      const firstListing =
+        projectsResponse.data?.results?.[0] ?? jobsResponse.data?.results?.[0];
+      if (firstListing) {
+        employer = buildEmployerFromListingTask(firstListing, normalizedSlug) ?? undefined;
       }
     }
 
@@ -322,27 +317,16 @@ export async function loadEmployerPageData(slug: string): Promise<{
       return null;
     }
 
-    const useMockListings = isStaticDemoEmployer(employer);
-    if (useMockListings) {
-      return { employer, projects: [], jobs: [], reviews: [], useMockListings: true };
-    }
-
-    const listings = mapListingResponses(
-      employer.name,
-      projectsResponse,
-      jobsResponse,
-      reviewsResponse,
-    );
-
-    return { employer, ...listings, useMockListings: false };
+    return {
+      employer,
+      ...mapListingResponses(
+        employer.name,
+        projectsResponse,
+        jobsResponse,
+        reviewsResponse,
+      ),
+    };
   } catch {
-    const fallback = findEmployerBySlug(normalizedSlug);
-    if (!fallback) {
-      return null;
-    }
-    if (isStaticDemoEmployer(fallback)) {
-      return { employer: fallback, projects: [], jobs: [], reviews: [], useMockListings: true };
-    }
-    return { employer: fallback, projects: [], jobs: [], reviews: [], useMockListings: false };
+    return null;
   }
 }
