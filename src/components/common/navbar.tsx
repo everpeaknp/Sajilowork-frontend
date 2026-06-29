@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
 import SiteBrand from '@/components/common/SiteBrand';
+import RouteListingBreadcrumbs from '@/components/seo/RouteListingBreadcrumbs';
 import AccountRoleMode from '@/components/common/AccountRoleMode';
 import { useSiteSettings } from '@/providers';
 import { isConfirmModalTarget } from '@/app/dashboard/DeleteConfirmModal';
@@ -456,6 +457,7 @@ export default function Navbar() {
   );
 
   return (
+    <>
     <header className={`sticky top-0 z-[9999] isolate w-full min-w-0 overflow-x-clip bg-white ${landingBody} antialiased`}>
       <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-1 px-2.5 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
         {/* Left section: Logo & Primary Links */}
@@ -907,5 +909,7 @@ export default function Navbar() {
         </nav>
       )}
     </header>
+    <RouteListingBreadcrumbs />
+    </>
   );
 }

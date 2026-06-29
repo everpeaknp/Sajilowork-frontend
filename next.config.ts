@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
+/** Local Django API + media in dev (browser CSP blocks http://127.0.0.1 otherwise). */
+const devLocalHttpSrc = isDev
+  ? " http://127.0.0.1:8000 http://localhost:8000"
+  : "";
+const devLocalWsSrc = isDev
+  ? " ws://127.0.0.1:8000 ws://localhost:8000"
+  : "";
+
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -16,9 +26,9 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://vercel.live",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https:",
+      `img-src 'self' data: blob: https:${devLocalHttpSrc}`,
       "font-src 'self' data:",
-      "connect-src 'self' https: wss:",
+      `connect-src 'self' https: wss:${devLocalHttpSrc}${devLocalWsSrc}`,
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",

@@ -51,7 +51,7 @@ class ApiErrorClass extends Error {
 // Configuration
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
 const TOKEN_REFRESH_ENDPOINT = '/auth/token/refresh/';
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 
@@ -550,7 +550,7 @@ class ApiClient {
         /localhost|127\.0\.0\.1/.test(API_BASE_URL);
       return {
         message: isLocalApi
-          ? `Cannot reach the API at ${API_BASE_URL}. Start the Django backend with "python manage.py runserver" on port 8000.`
+          ? `Cannot reach the API at ${API_BASE_URL}. Start the Django backend with "python manage.py runserver" on port 8000 (listening on 127.0.0.1).`
           : `Cannot reach the API at ${API_BASE_URL}. The server may be temporarily unavailable — please try again shortly.`,
         status: 0,
       };

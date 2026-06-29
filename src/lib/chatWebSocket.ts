@@ -3,7 +3,7 @@
  * NEXT_PUBLIC_WS_URL should be the base only, e.g. ws://localhost:8000/ws
  */
 export function buildChatWebSocketUrl(conversationId: string): string {
-  const base = (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws').replace(/\/$/, '');
+  const base = (process.env.NEXT_PUBLIC_WS_URL || 'ws://127.0.0.1:8000/ws').replace(/\/$/, '');
   return `${base}/chat/${conversationId}/`;
 }
 

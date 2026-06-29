@@ -18,6 +18,7 @@ import {
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, languageNamesForSelect, loadAllSkills, loadLanguages, serviceListingFallbackImage, uniqueSkillNamesForSelect } from '@/lib/dashboardListingApi';
+import { formatServiceStartingPrice } from '@/lib/serviceApi';
 import { searchBrowseServices } from '@/lib/listingSearchApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 import type { Service as ServiceItem } from './serviceListData';
@@ -701,7 +702,7 @@ export default function AvailableServices({
                                 Starting at
                               </span>
                               <span className={`${discoverBody} text-[14px] font-normal text-neutral-800 sm:text-[15px]`}>
-                                {formatNPR(card.startingPrice)}
+                                {formatServiceStartingPrice(card)}
                               </span>
                             </div>
                           </div>

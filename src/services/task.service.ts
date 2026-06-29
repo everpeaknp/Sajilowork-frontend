@@ -6,7 +6,7 @@
 
 import { apiClient } from '@/lib/api/client';
 import { getCloudinaryFolder, type CloudinaryFolderKey } from '@/lib/cloudinaryFolders';
-import { getCloudinaryConfig, isImageFile, uploadFileToCloudinary } from '@/services/cloudinary.service';
+import { getCloudinaryConfig, uploadFileToCloudinary } from '@/services/cloudinary.service';
 import { 
   Task, 
   Category,
@@ -201,30 +201,31 @@ export const taskService = {
     formData.append('task', taskId);
     const onProgress = options?.onProgress;
 
-    if (isImageFile(file)) {
-      const config = await getCloudinaryConfig();
-      if (config.enabled) {
-        try {
-          const folder =
-            options?.folder ??
-            (options?.listingKind && options.listingKind !== 'task'
-              ? await getCloudinaryFolder(options.listingKind as CloudinaryFolderKey)
-              : await getCloudinaryFolder('tasks', taskId));
+    const config = await getCloudinaryConfig();
+    if (config.enabled) {
+      try {
+        const folder =
+          options?.folder ??
+          (options?.listingKind && options.listingKind !== 'task'
+            ? await getCloudinaryFolder(options.listingKind as CloudinaryFolderKey)
+            : await getCloudinaryFolder('tasks', taskId));
 
-          const cloudinaryResult = await uploadFileToCloudinary(file, {
-            folder,
-            onProgress,
-          });
+        const cloudinaryResult = await uploadFileToCloudinary(file, {
+          folder,
+          onProgress,
+        });
 
-          if (cloudinaryResult.url) {
-            formData.append('file_url', cloudinaryResult.url);
-            formData.append('file_name', file.name);
-            formData.append('file_size', String(file.size));
-            return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
+        if (cloudinaryResult.url) {
+          formData.append('file_url', cloudinaryResult.url);
+          formData.append('file_name', file.name);
+          formData.append('file_size', String(file.size));
+          if (file.type) {
+            formData.append('content_type', file.type);
           }
-        } catch {
-          // Fall back to backend attachment upload (local media or server Cloudinary).
+          return apiClient.upload<TaskAttachment>('/tasks/attachments/', formData, onProgress);
         }
+      } catch {
+        // Fall back to backend attachment upload (server-side Cloudinary or local media).
       }
     }
 

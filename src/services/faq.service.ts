@@ -17,7 +17,7 @@ export type FaqListResponse = {
 };
 
 function faqApiRoot(): string {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1';
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
   return base.replace(/\/api\/v1\/?$/, '');
 }
 

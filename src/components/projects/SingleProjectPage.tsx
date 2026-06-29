@@ -35,6 +35,14 @@ interface SingleProjectPageProps {
   /** Full-page project detail: open wallet-gated proposal modal instead of inline form. */
   proposalPresentation?: 'inline' | 'modal';
   hideSendProposal?: boolean;
+  /** Rendered above the status timeline (e.g. dashboard back link and actions). */
+  topSlot?: React.ReactNode;
+  /** Rendered below the main grid (e.g. dashboard management links). */
+  managementSlot?: React.ReactNode;
+  hideShareActions?: boolean;
+  hideDirectoryFooter?: boolean;
+  offerRefreshKey?: number;
+  enableWalletGate?: boolean;
 }
 
 export default function SingleProjectPage({
@@ -43,11 +51,18 @@ export default function SingleProjectPage({
   onContactBuyer,
   proposalPresentation = 'inline',
   hideSendProposal = false,
+  topSlot,
+  managementSlot,
+  hideShareActions = false,
+  hideDirectoryFooter = false,
+  offerRefreshKey: offerRefreshKeyProp,
+  enableWalletGate = false,
 }: SingleProjectPageProps) {
   const router = useRouter();
   const { user } = useAuth();
   const useProposalModal = proposalPresentation === 'modal';
   const [proposalRefreshKey, setProposalRefreshKey] = useState(0);
+  const offerRefreshKey = offerRefreshKeyProp ?? proposalRefreshKey;
   const { showProfilePopup, goToCheckout, completeProfileGate, cancelProfileGate } =
     useCheckoutProfileGate();
   const sendProposalRef = useRef<HTMLDivElement>(null);
@@ -96,15 +111,17 @@ export default function SingleProjectPage({
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        {topSlot ? <div className="mb-4 sm:mb-5">{topSlot}</div> : null}
+
         <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <TaskStatusTimeline status={project.status || 'open'} />
-          <ProjectShareSaveActions project={project} />
+          {!hideShareActions ? <ProjectShareSaveActions project={project} /> : null}
         </div>
 
         <ProjectProfileHero project={project} />
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 sm:mt-10 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8 min-w-0">
             <ProjectAbout project={project} />
 
             <div className="mt-12">
@@ -118,8 +135,9 @@ export default function SingleProjectPage({
                 listingKind="project"
                 taskStatus={project.status}
                 initialOfferCount={project.ownerReviews ?? 0}
-                offerRefreshKey={proposalRefreshKey}
+                offerRefreshKey={offerRefreshKey}
                 onOfferAccepted={handleProposalSubmitted}
+                enableWalletGate={enableWalletGate}
               />
             </div>
             {!hideSendProposal && !useProposalModal ? (
@@ -150,18 +168,22 @@ export default function SingleProjectPage({
           />
         </div>
 
-        <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <p className="text-sm font-normal text-neutral-500">
-            Browse more opportunities on the full projects directory.
-          </p>
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
-          >
-            Back to all projects
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </div>
+        {managementSlot ? <div className="mt-10 sm:mt-14">{managementSlot}</div> : null}
+
+        {!hideDirectoryFooter ? (
+          <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <p className="text-sm font-normal text-neutral-500">
+              Browse more opportunities on the full projects directory.
+            </p>
+            <Link
+              href="/projects"
+              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+            >
+              Back to all projects
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {showProfilePopup ? (

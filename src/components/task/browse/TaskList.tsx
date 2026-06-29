@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft,
@@ -53,6 +54,7 @@ export default function TaskList({
   initialTasks,
   initialTotal = 0,
 }: TaskListProps) {
+  const router = useRouter();
   const hasInitialData = Boolean(initialTasks?.length);
   const [tasks, setTasks] = useState<Task[]>(initialTasks ?? []);
   const [loadingTasks, setLoadingTasks] = useState(!hasInitialData);
@@ -127,6 +129,9 @@ export default function TaskList({
         if (res.success && res.data) {
           setCategories(extractCategoryList(res.data));
         }
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
       })
       .finally(() => {
         if (!cancelled) setCategoriesLoaded(true);
@@ -336,6 +341,7 @@ export default function TaskList({
                       allowDemoLookup: false,
                     });
                     const displaySkills = taskBrowseDisplayTags(task, categories);
+                    const taskHref = getTaskDetailPath(task);
 
                     const employerAvatar = (
                       <EmployerAvatarCircle
@@ -357,8 +363,16 @@ export default function TaskList({
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.25 }}
                       >
-                        <Link
-                          href={getTaskDetailPath(task)}
+                        <div
+                          role="link"
+                          tabIndex={0}
+                          onClick={() => router.push(taskHref)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              router.push(taskHref);
+                            }
+                          }}
                           className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
                         >
                           <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
@@ -453,7 +467,7 @@ export default function TaskList({
                               </span>
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       </motion.div>
                     );
                   })}

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
@@ -76,6 +77,7 @@ export default function JobList({
   initialJobs,
   initialTotal = 0,
 }: JobListProps) {
+  const router = useRouter();
   const hasInitialData = Boolean(initialJobs?.length);
   const [jobs, setJobs] = useState<Job[]>(initialJobs ?? []);
   const [loadingJobs, setLoadingJobs] = useState(!hasInitialData);
@@ -494,6 +496,7 @@ export default function JobList({
                     </span>
                   </>
                 );
+                const jobHref = getJobDetailPath(job);
                 return (
                   <motion.div
                     layout
@@ -503,8 +506,16 @@ export default function JobList({
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <Link
-                      href={getJobDetailPath(job)}
+                    <div
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => router.push(jobHref)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          router.push(jobHref);
+                        }
+                      }}
                       className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:min-h-[300px] sm:p-7"
                     >
                     <div>
@@ -563,7 +574,7 @@ export default function JobList({
                       <span className="text-neutral-300">|</span>
                       <span>{locationLabel(job.location)}</span>
                     </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 );
               })}

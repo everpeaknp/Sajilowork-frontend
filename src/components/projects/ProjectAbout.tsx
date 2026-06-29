@@ -74,20 +74,23 @@ export default function ProjectAbout({ project }: ProjectAboutProps) {
   }
 
   return (
-    <div>
+    <div className="min-w-0">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {metaItems.map((item) => (
             <MetaItem key={item.label} icon={item.icon} label={item.label} value={item.value} />
           ))}
         </div>
 
-        <div className="mt-12 border-t border-neutral-200 pt-10">
+        <div className="mt-12 min-w-0 overflow-hidden border-t border-neutral-200 pt-10">
           <h2 className="mb-4 text-base font-normal tracking-tight text-black sm:text-lg">Description</h2>
           <div
-            className={`${discoverBody} max-w-3xl space-y-3 text-[13px] font-light leading-[1.6] text-black antialiased sm:text-sm [&_p]:font-light [&_p]:text-black`}
+            className={`${discoverBody} max-w-3xl min-w-0 space-y-3 text-[13px] font-light leading-[1.6] text-black antialiased sm:text-sm [&_p]:font-light [&_p]:text-black`}
           >
             {paragraphs.map((paragraph, index) => (
-              <p key={index} className="font-light text-black">
+              <p
+                key={index}
+                className="font-light text-black whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
+              >
                 {paragraph}
               </p>
             ))}

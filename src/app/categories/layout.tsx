@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
 import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
-import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
 import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
 
 const serp = getStaticPageSerp('categories');
@@ -24,7 +23,6 @@ export default function CategoriesLayout({ children }: { children: React.ReactNo
         breadcrumbLabel={serp.breadcrumb}
         feed={LISTING_FEEDS.categories}
       />
-      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/categories" />
       {children}
     </>
   );

@@ -7,7 +7,7 @@ import { Star, Heart, ArrowLeft, ArrowRight } from 'lucide-react';
 import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
-import { fetchPublicServices } from '@/lib/serviceApi';
+import { fetchPublicServices, formatServiceStartingPrice } from '@/lib/serviceApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 import { MarketplaceServiceCarouselSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 import type { Service } from './serviceListData';
@@ -228,7 +228,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                           Starting at
                         </span>
                         <span className={`${discoverBody} text-[14px] font-normal text-neutral-800 sm:text-[15px]`}>
-                          {formatNPR(card.startingPrice)}
+                          {formatServiceStartingPrice(card)}
                         </span>
                       </div>
                     </div>

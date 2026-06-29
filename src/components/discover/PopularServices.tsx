@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Star, Heart } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
-import { fetchPublicServices } from '@/lib/serviceApi';
+import { fetchPublicServices, formatServiceStartingPrice } from '@/lib/serviceApi';
 import { DEFAULT_SERVICE_IMAGE } from '@/lib/dashboardListingApi';
 import type { Service } from '@/components/services/serviceListData';
 import { getServiceDetailPath } from '@/components/services/serviceSlug';
@@ -249,7 +249,7 @@ export default function PopularServices({ className = '', initialServices }: Pop
                             <span
                               className={`${discoverMedium} whitespace-nowrap text-lg tabular-nums text-brand-dark`}
                             >
-                              {formatNPR(service.startingPrice)}
+                              {formatServiceStartingPrice(service)}
                             </span>
                           </div>
                         </div>

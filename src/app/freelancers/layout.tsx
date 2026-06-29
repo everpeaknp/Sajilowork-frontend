@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
 import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
-import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
 import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
 
 const serp = getStaticPageSerp('freelancers');
@@ -24,7 +23,6 @@ export default function FreelancersLayout({ children }: { children: React.ReactN
         breadcrumbLabel={serp.breadcrumb}
         feed={LISTING_FEEDS.freelancers}
       />
-      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/freelancers" />
       {children}
     </>
   );

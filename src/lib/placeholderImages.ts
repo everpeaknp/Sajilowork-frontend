@@ -1,8 +1,7 @@
 import { hashStringSeed } from '@/lib/placeholderAvatar';
 
-/** Stable marketplace hero imagery (no third-party demo-app CDN dependencies). */
-export const MARKETPLACE_HERO_IMAGE =
-  'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1200';
+/** Stable marketplace hero imagery (bundled under public/images). */
+export const MARKETPLACE_HERO_IMAGE = '/images/about/home6-hero-img-1.png';
 
 export const MARKETPLACE_CTA_IMAGE =
   'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1920';

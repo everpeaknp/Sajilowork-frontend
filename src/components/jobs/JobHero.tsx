@@ -9,6 +9,7 @@ import {
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
 import HeroImage from '@/components/ui/hero-image';
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
 const SUGGESTIONS_DATABASE = [
   'Website Designer',
@@ -33,8 +34,7 @@ const LOCATION_OPTIONS = [
   { value: 'Remote', label: 'Remote' },
 ];
 
-const MAIN_PORTRAIT =
-  'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1200';
+const MAIN_PORTRAIT = MARKETPLACE_HERO_IMAGE;
 
 interface SearchBoxProps {
   onSearchSubmit?: (query: string, location: string) => void;

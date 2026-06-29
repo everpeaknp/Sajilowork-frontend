@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
 import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
-import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
 import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
 
 const serp = getStaticPageSerp('discover');
@@ -24,7 +23,6 @@ export default function DiscoverLayout({ children }: { children: React.ReactNode
         breadcrumbLabel={serp.breadcrumb}
         feed={LISTING_FEEDS.services}
       />
-      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/discover" />
       {children}
     </>
   );

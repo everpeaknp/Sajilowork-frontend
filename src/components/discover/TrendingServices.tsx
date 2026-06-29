@@ -9,7 +9,7 @@ import {
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
 import { formatNPR } from '@/lib/nepalLocale';
-import { fetchPublicServices } from '@/lib/serviceApi';
+import { fetchPublicServices, formatServiceStartingPrice } from '@/lib/serviceApi';
 import { DEFAULT_SERVICE_IMAGE } from '@/lib/dashboardListingApi';
 import type { Service } from '@/components/services/serviceListData';
 import { getServiceDetailPath } from '@/components/services/serviceSlug';
@@ -256,7 +256,7 @@ export default function TrendingServices({ className = '', initialServices }: Tr
                             <span
                               className={`${discoverMedium} text-[15px] leading-none tracking-tight text-brand-dark`}
                             >
-                              {formatNPR(service.startingPrice)}
+                              {formatServiceStartingPrice(service)}
                             </span>
                           </div>
                         </div>

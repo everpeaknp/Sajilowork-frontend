@@ -8,9 +8,11 @@ import {
   serviceListingFallbackImage,
   parseServiceSkills,
   parseTaskDashboardMeta,
+  getServiceListingPrice,
 } from '@/lib/dashboardListingApi';
 
-import { formatTaskLocationShort } from '@/lib/nepalLocale';
+import { formatNPR, formatTaskLocationShort } from '@/lib/nepalLocale';
+import { JOB_MIN_BUDGET_NPR } from '@/components/jobs/jobListData';
 
 import { extractTaskList, formatTaskDisplayTitle } from '@/lib/taskUtils';
 
@@ -371,6 +373,32 @@ function resolveServiceDetail(task: Task, meta: ReturnType<typeof parseTaskDashb
 
 
 
+/** Starting price from package tiers when set; otherwise stored budget_amount. */
+export function resolveServiceStartingPrice(
+  task: Task,
+  packagesConfig?: PackagesConfig | null,
+): number {
+  const stored = Number(task.budget_amount) || 0;
+  if (packagesConfig?.tiers?.length && packagesConfig?.rows?.length) {
+    const fromPackages = getServiceListingPrice(packagesConfig);
+    if (fromPackages > 1) return fromPackages;
+  }
+  return stored;
+}
+
+/** NPR 100 is the platform minimum — often used as a negotiable placeholder, not a real price. */
+export function isServiceStartingPriceNegotiable(price: number): boolean {
+  return price <= JOB_MIN_BUDGET_NPR;
+}
+
+export function formatServiceStartingPrice(
+  service: Pick<Service, 'startingPrice' | 'startingPriceLabel'>,
+): string {
+  if (service.startingPriceLabel) return service.startingPriceLabel;
+  if (isServiceStartingPriceNegotiable(service.startingPrice)) return 'Negotiable';
+  return formatNPR(service.startingPrice);
+}
+
 export function mapTaskToPublicService(task: Task): Service {
 
   const meta = parseTaskDashboardMeta(task);
@@ -379,7 +407,9 @@ export function mapTaskToPublicService(task: Task): Service {
 
   const languages = parseServiceSkills(meta?.languages ?? meta?.language ?? meta?.englishLevel);
 
-  const basePrice = Number(task.budget_amount) || 0;
+  const packagesConfig = meta?.packages;
+
+  const basePrice = resolveServiceStartingPrice(task, packagesConfig);
 
   const images =
     task.attachments
@@ -387,8 +417,6 @@ export function mapTaskToPublicService(task: Task): Service {
       .filter((url): url is string => Boolean(url)) ?? [];
 
   const image = resolveServiceCoverImage(task);
-
-  const packagesConfig = meta?.packages;
 
   const apiPackages =
 
@@ -458,6 +486,8 @@ export function mapTaskToPublicService(task: Task): Service {
     },
 
     startingPrice: basePrice,
+
+    startingPriceLabel: isServiceStartingPriceNegotiable(basePrice) ? 'Negotiable' : undefined,
 
     deliveryTime: mapDeliveryTime(meta?.deliveryTime),
 

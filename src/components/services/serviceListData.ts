@@ -95,6 +95,8 @@ export interface Service {
     jobSuccess?: number;
   };
   startingPrice: number;
+  /** When set (e.g. negotiable placeholder budget), shown instead of formatted NPR. */
+  startingPriceLabel?: string;
   deliveryTime: '24h' | '3days' | '7days' | 'anytime';
   /** Raw delivery time from dashboard form (e.g. "3 Days") */
   deliveryTimeLabel?: string;

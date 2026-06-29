@@ -28,13 +28,15 @@ export function BrandMark({
     >
       <div
         style={{
+          display: 'flex',
           fontSize: titleSize,
           fontWeight: 800,
           letterSpacing: '-0.04em',
           marginBottom: subtitle ? 16 : 0,
         }}
       >
-        Sajilo<span style={{ color: '#a7f3d0' }}>Work</span>
+        <span>Sajilo</span>
+        <span style={{ color: '#a7f3d0' }}>Work</span>
       </div>
       {subtitle ? (
         <div

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 
 import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
-import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
 import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
 
 const serp = getStaticPageSerp('tasks');
@@ -24,7 +23,6 @@ export default function TaskLayout({ children }: { children: React.ReactNode }) 
         breadcrumbLabel={serp.breadcrumb}
         feed={LISTING_FEEDS.tasks}
       />
-      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/task" />
       {children}
     </>
   );

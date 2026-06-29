@@ -1,4 +1,5 @@
 import SerpBreadcrumbs from '@/components/seo/SerpBreadcrumbs';
+import { cn } from '@/lib/utils';
 
 type ListingPageBreadcrumbsProps = {
   sectionLabel: string;
@@ -12,8 +13,8 @@ export default function ListingPageBreadcrumbs({
   className,
 }: ListingPageBreadcrumbsProps) {
   return (
-    <div className={className}>
-      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+    <div className={cn('bg-white', className)}>
+      <div className="mx-auto max-w-7xl px-4 py-2.5 sm:px-6 lg:px-8">
         <SerpBreadcrumbs
           items={[
             { label: 'Home', href: '/' },

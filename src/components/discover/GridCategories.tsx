@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
+import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
 interface Category {
   id: string;
@@ -31,8 +32,7 @@ const CATEGORIES_DATA: Category[] = [
     id: 'cat-3',
     title: 'Digital Marketing',
     skillsCount: '95+ taskers',
-    image:
-      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=300',
+    image: MARKETPLACE_HERO_IMAGE,
   },
   {
     id: 'cat-4',
