@@ -38,6 +38,7 @@ export interface SearchTaskResult {
   bid_count?: number;
   created_at?: string;
   requirements?: Array<{ type?: string; value?: string }>;
+  listing_kind?: 'task' | 'job' | 'project' | 'service';
 }
 
 export interface SearchTaskerResult {

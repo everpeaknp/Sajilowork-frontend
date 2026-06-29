@@ -5,6 +5,7 @@
 import { mapTaskToPublicJob } from '@/lib/jobApi';
 import { mapTaskToPublicProject } from '@/lib/projectApi';
 import { mapTaskToPublicService } from '@/lib/serviceApi';
+import { getListingKind } from '@/lib/dashboardListingApi';
 import { normalizeTaskForDisplay } from '@/lib/taskUtils';
 import { searchService, type SearchTaskResult } from '@/services/search.service';
 import type { Job } from '@/components/jobs/jobListData';
@@ -44,7 +45,19 @@ function listingTag(kind: BrowseListingKind): string {
   return kind === 'task' ? 'listing:task' : `listing:${kind}`;
 }
 
+function resolveSearchListingKind(
+  result: SearchTaskResult,
+  fallback: BrowseListingKind,
+): BrowseListingKind {
+  const kind = result.listing_kind;
+  if (kind === 'service' || kind === 'project' || kind === 'job' || kind === 'task') {
+    return kind;
+  }
+  return fallback;
+}
+
 function searchResultToTask(result: SearchTaskResult, kind: BrowseListingKind): Task {
+  const resolvedKind = resolveSearchListingKind(result, kind);
   const budget = Number(result.budget) || 0;
   return normalizeTaskForDisplay({
     id: String(result.id),
@@ -75,8 +88,8 @@ function searchResultToTask(result: SearchTaskResult, kind: BrowseListingKind): 
     bid_count: result.bid_count,
     created_at: result.created_at,
     requirements: result.requirements,
-    tags: [listingTag(kind)],
-    listing_kind: kind === 'task' ? undefined : kind,
+    tags: resolvedKind === 'task' ? [] : [listingTag(resolvedKind)],
+    listing_kind: resolvedKind === 'task' ? undefined : resolvedKind,
   } as unknown as Task);
 }
 
@@ -146,7 +159,9 @@ export async function searchBrowseJobs(params: BrowseSearchParams = {}): Promise
   const result = await searchBrowseListings('job', params);
   return {
     ...result,
-    items: result.items.map(mapTaskToPublicJob),
+    items: result.items
+      .filter((task) => getListingKind(task) === 'job')
+      .map(mapTaskToPublicJob),
   };
 }
 
@@ -154,7 +169,9 @@ export async function searchBrowseProjects(params: BrowseSearchParams = {}): Pro
   const result = await searchBrowseListings('project', params);
   return {
     ...result,
-    items: result.items.map(mapTaskToPublicProject),
+    items: result.items
+      .filter((task) => getListingKind(task) === 'project')
+      .map(mapTaskToPublicProject),
   };
 }
 
@@ -162,7 +179,9 @@ export async function searchBrowseServices(params: BrowseSearchParams = {}): Pro
   const result = await searchBrowseListings('service', params);
   return {
     ...result,
-    items: result.items.map(mapTaskToPublicService),
+    items: result.items
+      .filter((task) => getListingKind(task) === 'service')
+      .map(mapTaskToPublicService),
   };
 }
 

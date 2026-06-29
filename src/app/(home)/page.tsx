@@ -1,4 +1,4 @@
-import { searchBrowseServices } from '@/lib/listingSearchApi';
+import { fetchPublicServices } from '@/lib/serviceApi';
 import type { Service } from '@/components/services/serviceListData';
 
 import HomeClient from '@/components/home/HomeClient';
@@ -9,11 +9,11 @@ export default async function HomePage() {
 
   try {
     const [popular, trending] = await Promise.all([
-      searchBrowseServices({ page: 1, page_size: 12, sort_by: 'newest' }),
-      searchBrowseServices({ page: 1, page_size: 12, sort_by: 'budget_high' }),
+      fetchPublicServices({ ordering: '-bids_count', page_size: 12 }),
+      fetchPublicServices({ ordering: '-views_count', page_size: 12 }),
     ]);
-    popularServices = popular.items;
-    trendingServices = trending.items;
+    popularServices = popular;
+    trendingServices = trending;
   } catch {
     // Client sections will retry after hydration.
   }
