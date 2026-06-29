@@ -21,7 +21,9 @@ import { dashboardMessageConversationHref, DASHBOARD_MESSAGES_PATH } from '@/lib
 import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
+import SiteBrand from '@/components/common/SiteBrand';
 import AccountRoleMode from '@/components/common/AccountRoleMode';
+import { useSiteSettings } from '@/providers';
 import { isConfirmModalTarget } from '@/app/dashboard/DeleteConfirmModal';
 import type { Conversation, Notification as NotificationType, PaginatedResponse } from '@/types';
 import { normalizeNotificationCurrency } from '@/lib/nepalLocale';
@@ -120,6 +122,7 @@ export default function Navbar() {
   const taskerDashboardNav = useTaskerDashboardNavOptional();
   const isTaskerDashboard = pathname.startsWith('/tasker-dashboard');
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { display_name: displayName, logo_url: logoUrl } = useSiteSettings();
   const authResolved = !isLoading;
   const showSignedOutCtas = authResolved && !isAuthenticated;
   
@@ -457,14 +460,13 @@ export default function Navbar() {
       <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-1 px-2.5 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
         {/* Left section: Logo & Primary Links */}
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8 md:flex-none">
-          <Link
+          <SiteBrand
+            displayName={displayName}
+            logoUrl={logoUrl}
             href={isAuthenticated ? '/discover' : '/'}
-            className="flex shrink-0 items-center focus:outline-none cursor-pointer"
-          >
-            <span className={`${landingHeadline} text-base text-brand-emerald min-[380px]:text-lg sm:text-2xl`}>
-              Sajilo<span className="text-brand-dark">Work</span>
-            </span>
-          </Link>
+            showIconFallback={false}
+            size="header"
+          />
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-5 lg:space-x-6">

@@ -1,6 +1,8 @@
 export type SiteSettings = {
   site_name: string;
+  display_name: string;
   site_domain: string;
+  logo_url: string | null;
   favicon_url: string | null;
   meta_description: string | null;
   og_image_url: string | null;
@@ -32,6 +34,12 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
         data.site_name?.trim() && !isPlaceholderSiteName(data.site_name)
           ? data.site_name.trim()
           : 'Sajilowork',
+      display_name:
+        data.display_name?.trim() && !isPlaceholderSiteName(data.display_name)
+          ? data.display_name.trim()
+          : data.site_name?.trim() && !isPlaceholderSiteName(data.site_name)
+            ? data.site_name.trim()
+            : 'Sajilowork',
       site_domain:
         data.site_domain?.trim() && !isPlaceholderSiteDomain(data.site_domain)
           ? data.site_domain.trim()
@@ -40,7 +48,9 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
   } catch {
     return {
       site_name: 'Sajilowork',
+      display_name: 'Sajilowork',
       site_domain: '',
+      logo_url: null,
       favicon_url: null,
       meta_description: null,
       og_image_url: null,

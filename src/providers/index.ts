@@ -5,3 +5,4 @@
  */
 
 export { AuthProvider } from './AuthProvider';
+export { SiteSettingsProvider, useSiteSettings } from './SiteSettingsProvider';

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
+import SiteBrand from '@/components/common/SiteBrand';
+import { useSiteSettings } from '@/providers';
 import { FOOTER_SECTIONS } from '@/lib/marketing/footerLinks';
 import { cn } from '@/lib/utils';
 
@@ -70,6 +72,7 @@ type FooterProps = {
 };
 
 export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
+  const { display_name: displayName, logo_url: logoUrl } = useSiteSettings();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     Discover: true,
   });
@@ -84,19 +87,13 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
         <div className="mx-auto max-w-7xl px-4 py-12 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-16 md:py-20 lg:px-8">
           <div className="mb-12 grid gap-10 sm:mb-16 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
             <div className="min-w-0 lg:col-span-2">
-              <Link href="/" className="mb-6 flex items-center gap-2.5 lg:mb-8">
-                <div
-                  aria-hidden="true"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-emerald/10 ring-1 ring-brand-emerald/20"
-                >
-                  <span className="font-['Outfit'] text-xl font-extrabold tracking-tighter text-brand-emerald">
-                    s
-                  </span>
-                </div>
-                <span className="font-['Outfit'] text-2xl font-extrabold tracking-tighter text-brand-emerald">
-                  Sajilo<span className="text-brand-dark">Work</span>
-                </span>
-              </Link>
+              <SiteBrand
+                displayName={displayName}
+                logoUrl={logoUrl}
+                href="/"
+                size="footer"
+                className="mb-6 lg:mb-8"
+              />
               <p className="max-w-sm text-sm leading-relaxed text-neutral-500 sm:text-base">
                 Connecting people who need tasks done with those who have the skills to do them.
                 Nepal&apos;s marketplace for hiring taskers and finding freelance work.
@@ -197,7 +194,7 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
             </div>
             
             <p className="w-full text-center text-[13px] leading-relaxed text-neutral-400 sm:w-auto sm:text-right">
-              © {new Date().getFullYear()} SajiloWork Marketplace. All rights reserved.
+              © {new Date().getFullYear()} {displayName}. All rights reserved.
             </p>
           </div>
         </div>
