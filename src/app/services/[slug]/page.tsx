@@ -1,83 +1,21 @@
-'use client';
+import { notFound } from 'next/navigation';
 
-import { useEffect, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
-import '@/components/LangingHome/landing-home.css';
-import { discoverDmSans } from '@/components/LangingHome/landingTypography';
-import Navbar from '@/components/common/navbar';
-import Footer from '@/components/common/footer';
-import SingleServicePage from '@/components/services/SingleServicePage';
-import ServiceDetailSkeleton from '@/components/services/ServiceDetailSkeleton';
-import type { Service } from '@/components/services/serviceListData';
 import { fetchPublicServiceBySlug } from '@/lib/serviceApi';
 
-export default function ServiceSlugPage() {
-  const params = useParams();
-  const slug = typeof params.slug === 'string' ? params.slug : '';
-  const [service, setService] = useState<Service | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFoundState, setNotFoundState] = useState(false);
+import ServiceSlugPageClient from './ServiceSlugPageClient';
 
-  useEffect(() => {
-    if (!slug) {
-      setNotFoundState(true);
-      setLoading(false);
-      return;
-    }
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
-    let cancelled = false;
-    setLoading(true);
-    setNotFoundState(false);
+export default async function ServiceSlugPage({ params }: Props) {
+  const { slug } = await params;
+  if (!slug) notFound();
 
-    void fetchPublicServiceBySlug(slug)
-      .then((apiService) => {
-        if (cancelled) return;
-        if (apiService) {
-          setService(apiService);
-          return;
-        }
-        setNotFoundState(true);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setNotFoundState(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+  const service = await fetchPublicServiceBySlug(slug);
+  if (!service) notFound();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
-
-  if (!slug || notFoundState) {
-    notFound();
-  }
-
-  if (loading || !service) {
-    return (
-      <div
-        className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white font-normal text-black selection:bg-[#1161fe] selection:text-white tracking-tight`}
-      >
-        <Navbar />
-        <main className="w-full max-w-none overflow-x-clip px-0 py-0 pb-2 md:pb-0">
-          <ServiceDetailSkeleton />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`${discoverDmSans} discover-page antialiased mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white font-normal text-black selection:bg-[#1161fe] selection:text-white [&_a]:font-normal [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal tracking-tight`}
-    >
-      <Navbar />
-      <main className="w-full max-w-none overflow-x-clip px-0 py-0 pb-2 md:pb-0">
-        <SingleServicePage service={service} />
-      </main>
-      <Footer />
-    </div>
-  );
+  return <ServiceSlugPageClient service={service} />;
 }
+
+export const revalidate = 300;

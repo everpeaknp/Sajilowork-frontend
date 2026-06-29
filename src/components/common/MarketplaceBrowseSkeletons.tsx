@@ -180,3 +180,43 @@ export function MarketplaceJobGridSkeleton({
     </div>
   );
 }
+
+function MarketplaceFreelancerCardSkeleton() {
+  return (
+    <div className="flex animate-pulse flex-col items-stretch justify-between rounded-none border border-neutral-200/55 bg-white p-6">
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-5 mt-1 h-[105px] w-[105px] rounded-full bg-neutral-100" />
+        <div className="h-4 w-28 rounded bg-neutral-100" />
+        <div className="mt-2 h-3 w-20 rounded bg-neutral-100" />
+        <div className="mt-4 flex gap-1.5">
+          <div className="h-7 w-14 rounded-full bg-neutral-100" />
+          <div className="h-7 w-14 rounded-full bg-neutral-100" />
+        </div>
+      </div>
+      <div className="mt-5 h-10 w-full rounded bg-neutral-100" />
+    </div>
+  );
+}
+
+export function MarketplaceFreelancerGridSkeleton({
+  count = 12,
+  className,
+}: {
+  count?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+        className,
+      )}
+      aria-busy="true"
+      aria-label="Loading freelancers"
+    >
+      {Array.from({ length: count }).map((_, index) => (
+        <MarketplaceFreelancerCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+}

@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronLeft,
@@ -42,6 +41,8 @@ interface TaskListProps {
   searchLocation?: string;
   categoryFromUrl?: string;
   onClearSearch?: () => void;
+  initialTasks?: Task[];
+  initialTotal?: number;
 }
 
 export default function TaskList({
@@ -49,11 +50,13 @@ export default function TaskList({
   searchLocation = '',
   categoryFromUrl = '',
   onClearSearch,
+  initialTasks,
+  initialTotal = 0,
 }: TaskListProps) {
-  const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loadingTasks, setLoadingTasks] = useState(true);
-  const [totalTasks, setTotalTasks] = useState(0);
+  const hasInitialData = Boolean(initialTasks?.length);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks ?? []);
+  const [loadingTasks, setLoadingTasks] = useState(!hasInitialData);
+  const [totalTasks, setTotalTasks] = useState(initialTotal);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
@@ -61,8 +64,21 @@ export default function TaskList({
   const [alertText, setAlertText] = useState<string | null>(null);
 
   const itemsPerPage = 8;
+  const skipInitialFetchRef = useRef(hasInitialData);
+
+  const isDefaultBrowse =
+    !searchQuery.trim() &&
+    !searchLocation.trim() &&
+    !categoryFromUrl.trim() &&
+    currentPage === 1 &&
+    !hasActiveFilters(filters);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current && isDefaultBrowse) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     let cancelled = false;
     setLoadingTasks(true);
 
@@ -100,7 +116,7 @@ export default function TaskList({
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, searchLocation, categoryFromUrl, filters, currentPage]);
+  }, [searchQuery, searchLocation, categoryFromUrl, filters, currentPage, isDefaultBrowse, initialTasks]);
 
   useEffect(() => {
     let cancelled = false;
@@ -341,16 +357,8 @@ export default function TaskList({
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.25 }}
                       >
-                        <div
-                          role="link"
-                          tabIndex={0}
-                          onClick={() => router.push(getTaskDetailPath(task))}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              router.push(getTaskDetailPath(task));
-                            }
-                          }}
+                        <Link
+                          href={getTaskDetailPath(task)}
                           className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
                         >
                           <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
@@ -445,7 +453,7 @@ export default function TaskList({
                               </span>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </motion.div>
                     );
                   })}

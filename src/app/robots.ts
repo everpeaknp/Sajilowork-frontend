@@ -23,6 +23,9 @@ const DISALLOW_PATHS = [
   '/search/',
   '/users/',
   '/taskmap/',
+  '/disputes/',
+  '/profile/',
+  '/settings/',
   '/api/',
 ];
 

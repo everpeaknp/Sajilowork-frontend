@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Star, ChevronLeft, ChevronRight, ChevronDown, Check, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
@@ -20,6 +20,7 @@ import { EmployerFilterRowSkeleton, EmployerListSkeleton } from './EmployerListS
 interface EmployerListProps {
   searchQuery: string;
   searchNonce: number;
+  initialEmployers?: Employer[];
   onNotify: (message: string) => void;
   onClearSearch?: () => void;
 }
@@ -40,10 +41,17 @@ const SORT_OPTIONS = [
   { value: 'open-jobs', label: 'Open Jobs' },
 ];
 
-export default function EmployerList({ searchQuery, searchNonce, onNotify, onClearSearch }: EmployerListProps) {
-  const router = useRouter();
-  const [employers, setEmployers] = useState<Employer[]>([]);
-  const [loadState, setLoadState] = useState<'loading' | 'ready'>('loading');
+export default function EmployerList({
+  searchQuery,
+  searchNonce,
+  initialEmployers,
+  onNotify,
+  onClearSearch,
+}: EmployerListProps) {
+  const hasInitial = Boolean(initialEmployers?.length);
+  const skipInitialFetchRef = useRef(hasInitial);
+  const [employers, setEmployers] = useState<Employer[]>(initialEmployers ?? []);
+  const [loadState, setLoadState] = useState<'loading' | 'ready'>(hasInitial ? 'ready' : 'loading');
   const savedEmployerIds = useSavedEmployerIds();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -57,6 +65,11 @@ export default function EmployerList({ searchQuery, searchNonce, onNotify, onCle
   }, [searchNonce, selectedCategory, selectedTeamSize, sortBy, searchQuery]);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current && searchNonce === 0) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     let cancelled = false;
     setLoadState('loading');
     void fetchPublicEmployers({ page_size: 200 })
@@ -189,10 +202,6 @@ export default function EmployerList({ searchQuery, searchNonce, onNotify, onCle
     });
   };
 
-  const handleCardClick = (emp: Employer) => {
-    router.push(getEmployerProfilePath(emp));
-  };
-
   return (
     <section className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12">
       <div className="w-full max-w-none">
@@ -313,14 +322,11 @@ export default function EmployerList({ searchQuery, searchNonce, onNotify, onCle
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.25 }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => handleCardClick(emp)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') handleCardClick(emp);
-                    }}
-                    className="group relative flex min-h-[200px] cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
                   >
+                    <Link
+                      href={getEmployerProfilePath(emp)}
+                      className="group relative flex min-h-[200px] cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+                    >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full">
@@ -354,6 +360,7 @@ export default function EmployerList({ searchQuery, searchNonce, onNotify, onCle
                       <span className="mx-3 h-3.5 w-px bg-neutral-300" aria-hidden />
                       <span className="font-medium text-[#2563eb]">Open {emp.openJobs} Jobs</span>
                     </div>
+                    </Link>
                   </motion.div>
                 );
               })}

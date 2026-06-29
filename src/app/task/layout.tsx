@@ -1,16 +1,33 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
+import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
+import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
+
+const serp = getStaticPageSerp('tasks');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Tasks near you',
-    description:
-      'Browse local tasks and hire trusted taskers for cleaning, delivery, repairs, moving, and more across Nepal.',
+    title: serp.title,
+    description: serp.description,
     path: '/task',
   });
 }
 
 export default function TaskLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <ListingIndexJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/task"
+        breadcrumbLabel={serp.breadcrumb}
+        feed={LISTING_FEEDS.tasks}
+      />
+      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/task" />
+      {children}
+    </>
+  );
 }
+
+export const revalidate = 300;

@@ -99,7 +99,7 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
               </Link>
               <p className="max-w-sm text-sm leading-relaxed text-neutral-500 sm:text-base">
                 Connecting people who need tasks done with those who have the skills to do them.
-                Trusted by millions worldwide.
+                Nepal&apos;s marketplace for hiring taskers and finding freelance work.
               </p>
             </div>
 

@@ -1,34 +1,13 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
-import { buildPageMetadata, fetchCategorySeo } from '@/lib/seo';
+import { fetchCategorySeo } from '@/lib/seo';
 import { POST_TASK_PATH } from '@/lib/postTaskPath';
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateMetadata({ params }: Pick<Props, 'params'>): Promise<Metadata> {
-  const { slug } = await params;
-  const category = await fetchCategorySeo(slug);
-  if (!category?.name) {
-    return buildPageMetadata({
-      title: 'Category',
-      path: `/categories/${slug}`,
-      noindex: true,
-    });
-  }
-
-  return buildPageMetadata({
-    title: `${category.name} services and tasks in Nepal`,
-    description:
-      category.description ||
-      `Browse ${category.name} tasks, jobs, and services on Sajilowork. Hire freelancers or find work in Nepal.`,
-    path: `/categories/${slug}`,
-  });
-}
 
 export default async function CategorySlugPage({ params }: Props) {
   const { slug } = await params;

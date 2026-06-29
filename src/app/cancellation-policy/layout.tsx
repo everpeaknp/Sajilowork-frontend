@@ -1,15 +1,27 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import MarketingPageJsonLd from '@/components/seo/MarketingPageJsonLd';
+import { buildPageMetadata, getStaticPageSerp } from '@/lib/seo';
+
+const serp = getStaticPageSerp('cancellationPolicy');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Cancellation policy',
-    description: 'Understand Sajilowork cancellation and refund rules for tasks, services, and bookings.',
+    title: serp.title,
+    description: serp.description,
     path: '/cancellation-policy',
   });
 }
 
 export default function CancellationPolicyLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <MarketingPageJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/cancellation-policy"
+      />
+      {children}
+    </>
+  );
 }

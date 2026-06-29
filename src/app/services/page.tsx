@@ -1,41 +1,21 @@
-'use client';
+import { searchBrowseServices } from '@/lib/listingSearchApi';
+import type { Service } from '@/components/services/serviceListData';
 
-import { useState } from 'react';
-import '@/components/LangingHome/landing-home.css';
-import { discoverPageRoot, discoverPageTypo } from '@/components/LangingHome/landingTypography';
-import { ServicesHero, BestServices, AvailableServices } from '@/components/services';
-import Navbar from '@/components/common/navbar';
-import Footer from '@/components/common/footer';
+import ServicesPageClient from './ServicesPageClient';
 
-export default function ServicesPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchCategory, setSearchCategory] = useState('');
+export default async function ServicesPage() {
+  let initialServices: Service[] = [];
+  let initialTotal = 0;
 
-  const handleServiceSearch = (query: string, category: string) => {
-    setSearchQuery(query);
-    setSearchCategory(category);
-  };
+  try {
+    const result = await searchBrowseServices({ page: 1, page_size: 6, sort_by: 'newest' });
+    initialServices = result.items;
+    initialTotal = result.total;
+  } catch {
+    // Client will retry after hydration.
+  }
 
-  const clearServiceSearch = () => {
-    setSearchQuery('');
-    setSearchCategory('');
-  };
-
-  return (
-    <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-[#1161fe] selection:text-white md:pb-0`}
-    >
-      <Navbar />
-      <main className="pb-2 md:pb-0">
-        <ServicesHero onSearchSubmit={handleServiceSearch} />
-        <BestServices />
-        <AvailableServices
-          searchQuery={searchQuery}
-          searchCategory={searchCategory}
-          onClearSearch={clearServiceSearch}
-        />
-      </main>
-      <Footer />
-    </div>
-  );
+  return <ServicesPageClient initialServices={initialServices} initialTotal={initialTotal} />;
 }
+
+export const revalidate = 300;

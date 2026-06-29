@@ -1,16 +1,33 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
+import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
+import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
+
+const serp = getStaticPageSerp('freelancers');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Freelancers in Nepal',
-    description:
-      'Browse verified freelancers — designers, developers, writers, and specialists available for hire on Sajilowork.',
+    title: serp.title,
+    description: serp.description,
     path: '/freelancers',
   });
 }
 
 export default function FreelancersLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <ListingIndexJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/freelancers"
+        breadcrumbLabel={serp.breadcrumb}
+        feed={LISTING_FEEDS.freelancers}
+      />
+      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/freelancers" />
+      {children}
+    </>
+  );
 }
+
+export const revalidate = 300;

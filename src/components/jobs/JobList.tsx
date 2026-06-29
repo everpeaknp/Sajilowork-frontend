@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
@@ -65,6 +64,8 @@ interface JobListProps {
   searchQuery?: string;
   searchLocation?: string;
   onClearSearch?: () => void;
+  initialJobs?: Job[];
+  initialTotal?: number;
 }
 
 export default function JobList({
@@ -72,11 +73,13 @@ export default function JobList({
   searchQuery = '',
   searchLocation = '',
   onClearSearch,
+  initialJobs,
+  initialTotal = 0,
 }: JobListProps) {
-  const router = useRouter();
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loadingJobs, setLoadingJobs] = useState(true);
-  const [totalJobs, setTotalJobs] = useState(0);
+  const hasInitialData = Boolean(initialJobs?.length);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs ?? []);
+  const [loadingJobs, setLoadingJobs] = useState(!hasInitialData);
+  const [totalJobs, setTotalJobs] = useState(initialTotal);
   const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -89,6 +92,7 @@ export default function JobList({
   const filterRowRef = useRef<HTMLDivElement>(null);
 
   const itemsPerPage = 16;
+  const skipInitialFetchRef = useRef(hasInitialData);
 
   function salaryRange(): { min_budget?: number; max_budget?: number } {
     switch (selectedSalary) {
@@ -105,7 +109,25 @@ export default function JobList({
     }
   }
 
+  const isDefaultBrowse =
+    !searchQuery.trim() &&
+    !searchLocation.trim() &&
+    selectedCategory === 'All' &&
+    selectedSalary === 'All' &&
+    selectedType === 'All' &&
+    selectedLevel === 'All' &&
+    currentPage === 1 &&
+    sortBy === 'best-seller';
+
   useEffect(() => {
+    if (skipInitialFetchRef.current && isDefaultBrowse) {
+      skipInitialFetchRef.current = false;
+      if (initialJobs?.length) {
+        setSavedSlugs(buildBookmarkSlugSet(initialJobs));
+      }
+      return;
+    }
+
     let cancelled = false;
     setLoadingJobs(true);
 
@@ -155,6 +177,8 @@ export default function JobList({
     selectedLevel,
     sortBy,
     currentPage,
+    isDefaultBrowse,
+    initialJobs,
   ]);
 
   useEffect(() => {
@@ -479,16 +503,8 @@ export default function JobList({
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <div
-                      role="link"
-                      tabIndex={0}
-                      onClick={() => router.push(getJobDetailPath(job))}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          router.push(getJobDetailPath(job));
-                        }
-                      }}
+                    <Link
+                      href={getJobDetailPath(job)}
                       className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:min-h-[300px] sm:p-7"
                     >
                     <div>
@@ -506,7 +522,10 @@ export default function JobList({
                         )}
                         <button
                           type="button"
-                          onClick={(e) => void toggleStar(job, e)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            void toggleStar(job, e);
+                          }}
                           className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
                             isStarred
                               ? 'border-amber-300 bg-amber-50 text-amber-500 shadow-sm'
@@ -544,7 +563,7 @@ export default function JobList({
                       <span className="text-neutral-300">|</span>
                       <span>{locationLabel(job.location)}</span>
                     </div>
-                    </div>
+                    </Link>
                   </motion.div>
                 );
               })}

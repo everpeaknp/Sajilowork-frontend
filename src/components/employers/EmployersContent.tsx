@@ -5,8 +5,13 @@ import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import EmployerHero from './EmployerHero';
 import EmployerList from './EmployerList';
+import type { Employer } from './employerData';
 
-export default function EmployersContent() {
+export default function EmployersContent({
+  initialEmployers,
+}: {
+  initialEmployers?: Employer[];
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchNonce, setSearchNonce] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
@@ -56,6 +61,7 @@ export default function EmployersContent() {
       <EmployerList
         searchQuery={searchQuery}
         searchNonce={searchNonce}
+        initialEmployers={initialEmployers}
         onNotify={triggerNotification}
         onClearSearch={() => {
           setSearchQuery('');

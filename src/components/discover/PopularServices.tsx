@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import { Star, Heart } from 'lucide-react';
@@ -10,9 +10,11 @@ import { fetchPublicServices } from '@/lib/serviceApi';
 import { DEFAULT_SERVICE_IMAGE } from '@/lib/dashboardListingApi';
 import type { Service } from '@/components/services/serviceListData';
 import { getServiceDetailPath } from '@/components/services/serviceSlug';
+import OptimizedImage from '@/components/ui/optimized-image';
 
 interface PopularServicesProps {
   className?: string;
+  initialServices?: Service[];
 }
 
 function topCategories(services: Service[], limit = 5): string[] {
@@ -28,13 +30,22 @@ function topCategories(services: Service[], limit = 5): string[] {
     .slice(0, limit);
 }
 
-export default function PopularServices({ className = '' }: PopularServicesProps) {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function PopularServices({ className = '', initialServices }: PopularServicesProps) {
+  const hasInitial = Boolean(initialServices?.length);
+  const [services, setServices] = useState<Service[]>(initialServices ?? []);
+  const [loading, setLoading] = useState(!hasInitial);
   const [activeCategory, setActiveCategory] = useState('');
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
+  const skipInitialFetchRef = useRef(hasInitial);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      const categories = topCategories(initialServices ?? []);
+      setActiveCategory(categories[0] ?? '');
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     void fetchPublicServices({ ordering: '-bids_count', page_size: 50 })
@@ -163,15 +174,13 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                       className="group flex h-full min-h-[192px] w-full flex-col overflow-hidden rounded-xl border border-neutral-200/70 bg-white transition-all duration-300 hover:border-neutral-300 md:flex-row"
                     >
                       <div className="relative h-[192px] w-full shrink-0 overflow-hidden bg-neutral-100 md:w-[190px]">
-                        <img
+                        <OptimizedImage
                           src={service.image}
                           alt={service.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = DEFAULT_SERVICE_IMAGE;
-                          }}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 190px"
+                          fallbackSrc={DEFAULT_SERVICE_IMAGE}
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>
 
@@ -215,11 +224,12 @@ export default function PopularServices({ className = '' }: PopularServicesProps
                         <div className="mt-4 flex shrink-0 items-center justify-between border-t border-neutral-100 pt-4">
                           <div className="flex min-w-0 flex-1 items-center gap-3 pr-3">
                             <div className="relative shrink-0">
-                              <img
+                              <OptimizedImage
                                 src={service.author.avatar}
                                 alt={service.author.name}
+                                width={32}
+                                height={32}
                                 className="h-8 w-8 rounded-full border border-neutral-200 object-cover"
-                                referrerPolicy="no-referrer"
                               />
                               {service.author.online && (
                                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />

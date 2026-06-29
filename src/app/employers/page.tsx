@@ -1,21 +1,19 @@
-'use client';
+import type { Employer } from '@/components/employers/employerData';
 
-import '@/components/LangingHome/landing-home.css';
-import { discoverPageRoot, discoverPageTypo } from '@/components/LangingHome/landingTypography';
-import { EmployersContent } from '@/components/employers';
-import Navbar from '@/components/common/navbar';
-import Footer from '@/components/common/footer';
+import { fetchServerEmployers } from '@/lib/seo/server-employers';
 
-export default function EmployersPage() {
-  return (
-    <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white selection:bg-[#1161fe] selection:text-white`}
-    >
-      <Navbar />
-      <main className="pb-2 md:pb-0">
-        <EmployersContent />
-      </main>
-      <Footer />
-    </div>
-  );
+import EmployersPageClient from './EmployersPageClient';
+
+export default async function EmployersPage() {
+  let initialEmployers: Employer[] = [];
+
+  try {
+    initialEmployers = await fetchServerEmployers(200);
+  } catch {
+    // Client will retry after hydration.
+  }
+
+  return <EmployersPageClient initialEmployers={initialEmployers} />;
 }
+
+export const revalidate = 300;

@@ -22,7 +22,7 @@ export function NotFoundPage({ className, homeHref = "/" }: NotFoundPageProps) {
         <div className="flex justify-center">
           <div className="w-full text-center sm:w-10/12 md:w-8/12">
             <div
-              className="h-[250px] bg-[url(https://cdn.dribbble.com/users/285475/screenshots/2083086/dribbble_1.gif)] bg-contain bg-center bg-no-repeat sm:h-[350px] md:h-[400px]"
+              className="flex h-[220px] items-center justify-center bg-gradient-to-br from-brand-emerald/10 via-white to-brand-dark/5 sm:h-[280px] md:h-[320px]"
               aria-hidden="true"
             >
               <h1 className="pt-6 text-center text-6xl text-black sm:pt-8 sm:text-7xl md:text-8xl">

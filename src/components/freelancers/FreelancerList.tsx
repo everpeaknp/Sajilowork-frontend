@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
@@ -64,7 +64,6 @@ export default function FreelancerList({
   onRetry,
   onInquire,
 }: FreelancerListProps) {
-  const router = useRouter();
   const [selectedSkills, setSelectedSkills] = useState('All');
   const [selectedPrice, setSelectedPrice] = useState('All');
   const [selectedLocation, setSelectedLocation] = useState('All');
@@ -449,14 +448,13 @@ export default function FreelancerList({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => router.push(getFreelancerProfilePath(fl))}
+                    <Link
+                      href={getFreelancerProfilePath(fl)}
                       className="mt-5 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-none border border-neutral-200 bg-neutral-50 py-3.5 text-xs font-normal tracking-tight text-black transition-all hover:border-[#5bbb7b] hover:bg-[#5bbb7b] hover:text-white"
                     >
                       <span>View Profile</span>
                       <ArrowUpRight className="h-3.5 w-3.5" />
-                    </button>
+                    </Link>
                   </div>
                 </motion.div>
               ))}

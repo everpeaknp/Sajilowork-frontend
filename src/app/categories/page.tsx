@@ -5,7 +5,7 @@ export default function CategoriesPage() {
   return (
     <MarketingPageLayout
       title="Categories"
-      description="See popular services you can book on sajilowork."
+      description="See popular services you can book on Sajilowork."
       contentClassName="max-w-5xl"
     >
       <CategoriesPageContent />

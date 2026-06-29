@@ -24,7 +24,7 @@ const STEPS = [
 const FOR_TASKERS = [
   'Browse open tasks in your area and submit offers that fit your skills.',
   'Build your reputation with verified reviews after each completed job.',
-  'Get paid securely through sajilowork when the poster approves the work.',
+  'Get paid securely through Sajilowork when the poster approves the work.',
 ] as const;
 
 export default function HowItWorksContent() {
@@ -63,7 +63,7 @@ export default function HowItWorksContent() {
         <h2 className="text-lg font-bold text-brand-dark sm:text-xl">Earn money as a Tasker</h2>
         <p className="mt-2 text-sm text-[#6a719a] sm:text-base">
           Whether you are handy around the home or offer professional services, find your next job on
-          sajilowork.
+          Sajilowork.
         </p>
         <ul className="mt-4 space-y-3">
           {FOR_TASKERS.map((line) => (

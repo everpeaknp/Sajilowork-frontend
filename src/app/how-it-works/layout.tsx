@@ -1,16 +1,27 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import MarketingPageJsonLd from '@/components/seo/MarketingPageJsonLd';
+import { buildPageMetadata, getStaticPageSerp } from '@/lib/seo';
+
+const serp = getStaticPageSerp('howItWorks');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'How it works',
-    description:
-      'See how Sajilowork works for employers and freelancers — post tasks, apply for jobs, and get paid securely in Nepal.',
+    title: serp.title,
+    description: serp.description,
     path: '/how-it-works',
   });
 }
 
 export default function HowItWorksLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <MarketingPageJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/how-it-works"
+      />
+      {children}
+    </>
+  );
 }

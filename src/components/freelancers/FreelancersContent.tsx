@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import FreelancerHero from './FreelancerHero';
@@ -59,11 +59,17 @@ async function fetchAllFreelancers(): Promise<Freelancer[]> {
   return mapDirectoryEntriesToFreelancers(entries);
 }
 
-export default function FreelancersContent() {
-  const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function FreelancersContent({
+  initialFreelancers,
+}: {
+  initialFreelancers?: Freelancer[];
+}) {
+  const hasInitial = Boolean(initialFreelancers?.length);
+  const [freelancers, setFreelancers] = useState<Freelancer[]>(initialFreelancers ?? []);
+  const [loading, setLoading] = useState(!hasInitial);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
+  const skipInitialFetchRef = useRef(hasInitial);
 
   const loadFreelancers = useCallback(async () => {
     setLoading(true);
@@ -84,6 +90,10 @@ export default function FreelancersContent() {
   }, []);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
     void loadFreelancers();
   }, [loadFreelancers]);
 

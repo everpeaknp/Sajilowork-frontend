@@ -1,15 +1,23 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import MarketingPageJsonLd from '@/components/seo/MarketingPageJsonLd';
+import { buildPageMetadata, getStaticPageSerp } from '@/lib/seo';
+
+const serp = getStaticPageSerp('terms');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Terms of service',
-    description: 'Read the Sajilowork terms of service governing use of our marketplace platform in Nepal.',
+    title: serp.title,
+    description: serp.description,
     path: '/terms',
   });
 }
 
 export default function TermsLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <MarketingPageJsonLd title={serp.title} description={serp.description} path="/terms" />
+      {children}
+    </>
+  );
 }

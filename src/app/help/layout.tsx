@@ -1,15 +1,23 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import MarketingPageJsonLd from '@/components/seo/MarketingPageJsonLd';
+import { buildPageMetadata, getStaticPageSerp } from '@/lib/seo';
+
+const serp = getStaticPageSerp('help');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Help centre',
-    description: 'Find answers and guidance on using Sajilowork — posting tasks, hiring, payments, and account help.',
+    title: serp.title,
+    description: serp.description,
     path: '/help',
   });
 }
 
 export default function HelpLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <MarketingPageJsonLd title={serp.title} description={serp.description} path="/help" />
+      {children}
+    </>
+  );
 }

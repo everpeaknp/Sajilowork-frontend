@@ -53,7 +53,7 @@ export default function CategoryCarousel({ onSelectCategory }: CategoryCarouselP
             Our top categories
           </h2>
           <p className={`${discoverBody} mt-2 text-xs text-gray-600 sm:text-sm`}>
-            Find the exact help you need on sajilowork right now.
+            Find the exact help you need on Sajilowork right now.
           </p>
         </div>
 

@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-import { NOINDEX_METADATA } from '@/lib/seo';
+import { buildNoIndexPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Reset password',
-  ...NOINDEX_METADATA,
-};
+export const metadata: Metadata = buildNoIndexPageMetadata('Reset password');
 
-export default function ResetPasswordLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }
+

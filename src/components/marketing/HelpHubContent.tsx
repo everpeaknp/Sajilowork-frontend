@@ -29,7 +29,7 @@ const HELP_LINKS = [
   {
     href: '/terms',
     title: 'Terms of Service',
-    description: 'The agreement between you and sajilowork when using the platform.',
+    description: 'The agreement between you and Sajilowork when using the platform.',
     icon: FileText,
   },
   {

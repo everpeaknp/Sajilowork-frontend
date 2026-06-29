@@ -17,8 +17,6 @@ const protectedRoutes = [
   '/my-tasks',
   '/tasker-dashboard',
   '/message',
-  '/profile',
-  '/settings',
 ];
 
 const authRoutes = ['/signin', '/signup'];
@@ -61,6 +59,6 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|manifest|opengraph-image|twitter-image|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

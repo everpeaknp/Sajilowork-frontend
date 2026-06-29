@@ -1,11 +1,6 @@
 import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import HelpHubContent from '@/components/marketing/HelpHubContent';
 
-export const metadata = {
-  title: 'Help',
-  description: 'Help centre — FAQ, contact, policies, and safety information.',
-};
-
 export default function HelpPage() {
   return (
     <MarketingPageLayout

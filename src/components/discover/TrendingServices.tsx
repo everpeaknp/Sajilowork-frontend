@@ -13,16 +13,20 @@ import { fetchPublicServices } from '@/lib/serviceApi';
 import { DEFAULT_SERVICE_IMAGE } from '@/lib/dashboardListingApi';
 import type { Service } from '@/components/services/serviceListData';
 import { getServiceDetailPath } from '@/components/services/serviceSlug';
+import OptimizedImage from '@/components/ui/optimized-image';
 
 interface TrendingServicesProps {
   className?: string;
+  initialServices?: Service[];
 }
 
-export default function TrendingServices({ className = '' }: TrendingServicesProps) {
+export default function TrendingServices({ className = '', initialServices }: TrendingServicesProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const hasInitial = Boolean(initialServices?.length);
+  const [services, setServices] = useState<Service[]>(initialServices ?? []);
+  const [loading, setLoading] = useState(!hasInitial);
+  const skipInitialFetchRef = useRef(hasInitial);
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -31,6 +35,11 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
   };
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     void fetchPublicServices({ ordering: '-views_count', page_size: 12 })
@@ -165,15 +174,13 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
                       className="group flex h-[360px] w-[min(82vw,250px)] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:h-[385px] sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)]"
                     >
                       <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden bg-neutral-100 lg:h-[215px]">
-                        <img
+                        <OptimizedImage
                           src={service.image}
                           alt={service.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = DEFAULT_SERVICE_IMAGE;
-                          }}
+                          fill
+                          sizes="(max-width: 640px) 82vw, (max-width: 1024px) 33vw, 250px"
+                          fallbackSrc={DEFAULT_SERVICE_IMAGE}
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
 
                         <button
@@ -224,11 +231,12 @@ export default function TrendingServices({ className = '' }: TrendingServicesPro
                         <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
                           <div className="flex min-w-0 items-center gap-2">
                             <div className="relative flex-shrink-0">
-                              <img
+                              <OptimizedImage
                                 src={service.author.avatar}
                                 alt={service.author.name}
+                                width={28}
+                                height={28}
                                 className="h-7 w-7 rounded-full border border-neutral-200 object-cover"
-                                referrerPolicy="no-referrer"
                               />
                               {service.author.online && (
                                 <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-2 border-white bg-emerald-500" />

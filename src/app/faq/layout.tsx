@@ -1,7 +1,18 @@
 import type { Metadata } from 'next';
 
 import JsonLd from '@/components/seo/JsonLd';
-import { buildFaqPageSchema, buildPageMetadata, fetchPublicJson } from '@/lib/seo';
+import {
+  buildBreadcrumbSchema,
+  buildFaqPageSchema,
+  buildPageMetadata,
+  buildSchemaGraph,
+  buildWebPageSchema,
+  fetchPublicJson,
+  getStaticPageSerp,
+} from '@/lib/seo';
+import { fetchSiteSettings } from '@/lib/siteSettings';
+
+const serp = getStaticPageSerp('faq');
 
 type FaqItem = {
   question: string;
@@ -14,25 +25,45 @@ type FaqResponse = {
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'FAQ',
-    description:
-      'Answers about posting tasks, secure payments, cancellations, and using Sajilowork in Nepal.',
+    title: serp.title,
+    description: serp.description,
     path: '/faq',
   });
 }
 
 export default async function FaqLayout({ children }: { children: React.ReactNode }) {
-  const data = await fetchPublicJson<FaqResponse>('/faq/', { revalidate: 3600 });
+  const [data, settings] = await Promise.all([
+    fetchPublicJson<FaqResponse>('/faq/', { revalidate: 3600 }),
+    fetchSiteSettings(),
+  ]);
   const items = data?.results || [];
-  const schema = items.length
-    ? buildFaqPageSchema(
-        items.map((item) => ({ question: item.question, answer: item.answer })),
-      )
-    : null;
+
+  const schemas = [
+    buildBreadcrumbSchema(
+      [
+        { name: 'Home', path: '/' },
+        { name: serp.breadcrumb, path: '/faq' },
+      ],
+      settings,
+    ),
+    buildWebPageSchema({
+      title: serp.title,
+      description: serp.description,
+      path: '/faq',
+      settings,
+    }),
+    ...(items.length
+      ? [
+          buildFaqPageSchema(
+            items.map((item) => ({ question: item.question, answer: item.answer })),
+          ),
+        ]
+      : []),
+  ];
 
   return (
     <>
-      {schema ? <JsonLd data={schema} /> : null}
+      <JsonLd data={buildSchemaGraph(schemas)} />
       {children}
     </>
   );

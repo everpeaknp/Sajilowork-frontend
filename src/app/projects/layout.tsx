@@ -1,16 +1,33 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
+import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
+import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
+
+const serp = getStaticPageSerp('projects');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Projects',
-    description:
-      'Discover project-based work and hire specialists for design, development, and professional services in Nepal.',
+    title: serp.title,
+    description: serp.description,
     path: '/projects',
   });
 }
 
 export default function ProjectsLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <ListingIndexJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/projects"
+        breadcrumbLabel={serp.breadcrumb}
+        feed={LISTING_FEEDS.projects}
+      />
+      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/projects" />
+      {children}
+    </>
+  );
 }
+
+export const revalidate = 300;

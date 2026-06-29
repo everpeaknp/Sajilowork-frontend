@@ -1,16 +1,25 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo/metadata';
+import HomePageJsonLd from '@/components/seo/HomePageJsonLd';
+import { buildPageMetadata, getStaticPageSerp } from '@/lib/seo';
+
+const serp = getStaticPageSerp('home');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Hire skilled taskers and get things done',
-    description:
-      'Post tasks, hire local taskers, find freelance jobs, and book services across Nepal. Secure payments and trusted marketplace on Sajilowork.',
+    title: serp.title,
+    description: serp.description,
     path: '/',
   });
 }
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <HomePageJsonLd />
+      {children}
+    </>
+  );
 }
+
+export const revalidate = 300;

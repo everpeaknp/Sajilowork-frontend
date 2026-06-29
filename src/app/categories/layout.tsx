@@ -1,16 +1,33 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
+import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
+import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
+
+const serp = getStaticPageSerp('categories');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Browse categories',
-    description:
-      'Explore task, job, service, and project categories on Sajilowork to find the right work or hire help in Nepal.',
+    title: serp.title,
+    description: serp.description,
     path: '/categories',
   });
 }
 
 export default function CategoriesLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <ListingIndexJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/categories"
+        breadcrumbLabel={serp.breadcrumb}
+        feed={LISTING_FEEDS.categories}
+      />
+      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/categories" />
+      {children}
+    </>
+  );
 }
+
+export const revalidate = 300;

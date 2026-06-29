@@ -69,13 +69,20 @@ export function buildListingDetailSchemaGraph(input: {
         settings: input.settings,
       }),
     );
-  } else if (input.type === 'service') {
+  } else if (
+    input.type === 'service' ||
+    input.type === 'task' ||
+    input.type === 'project'
+  ) {
+    const serviceType =
+      input.type === 'task' ? 'Task' : input.type === 'project' ? 'Project' : 'Service';
     schemas.push(
       buildServiceSchema({
         title,
         description,
         path,
         image: input.record.primary_image || input.record.image || input.record.image_url,
+        serviceType,
         settings: input.settings,
       }),
     );

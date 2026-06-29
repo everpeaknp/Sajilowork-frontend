@@ -70,8 +70,10 @@ function lastModified(record?: SlugRecord): Date | undefined {
 }
 
 function staticEntries(base: string, routes: StaticRoute[]): MetadataRoute.Sitemap {
+  const lastModified = new Date();
   return routes.map((route) => ({
     url: `${base}${route.path}`,
+    lastModified,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));

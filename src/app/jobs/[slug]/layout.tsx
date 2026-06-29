@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 
 import JsonLd from '@/components/seo/JsonLd';
+import CrawlableDetailShell from '@/components/seo/CrawlableDetailShell';
 import {
   buildListingDetailSchemaGraph,
+  buildDetailSerpTitle,
   buildListingMetadata,
   fetchListingSeo,
 } from '@/lib/seo';
@@ -17,8 +19,8 @@ export async function generateMetadata({ params }: Pick<Props, 'params'>): Promi
   const { slug } = await params;
   const job = await fetchListingSeo('/jobs', slug);
   return buildListingMetadata({
-    title: job?.title,
-    description: job?.description,
+    title: job?.title ? buildDetailSerpTitle(job.title, 'Job in Nepal') : null,
+    description: job?.description || job?.excerpt,
     image: job?.primary_image,
     path: `/jobs/${slug}`,
   });
@@ -43,7 +45,12 @@ export default async function JobSlugLayout({ children, params }: Props) {
   return (
     <>
       {schema ? <JsonLd data={schema} /> : null}
+      {job?.title ? (
+        <CrawlableDetailShell title={job.title} description={job.description || job.excerpt} />
+      ) : null}
       {children}
     </>
   );
 }
+
+export const revalidate = 300;

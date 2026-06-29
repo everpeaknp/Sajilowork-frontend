@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
 
-import { NOINDEX_METADATA } from '@/lib/seo';
+import { buildNoIndexPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Messages',
-  ...NOINDEX_METADATA,
-};
+export const metadata: Metadata = buildNoIndexPageMetadata('Messages');
 
-export default function MessageLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
 }
+

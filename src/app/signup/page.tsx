@@ -115,7 +115,7 @@ function SignUpForm() {
           {/* Logo */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-brand-dark mb-2">Create your account</h2>
-            <p className="text-on-surface-variant">Get started with sajilowork</p>
+            <p className="text-on-surface-variant">Get started with Sajilowork</p>
           </div>
 
           {/* Sign Up Card */}

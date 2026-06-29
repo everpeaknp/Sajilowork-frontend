@@ -1,16 +1,33 @@
 import type { Metadata } from 'next';
 
-import { buildPageMetadata } from '@/lib/seo';
+import ListingIndexJsonLd from '@/components/seo/ListingIndexJsonLd';
+import ListingPageBreadcrumbs from '@/components/seo/ListingPageBreadcrumbs';
+import { buildPageMetadata, getStaticPageSerp, LISTING_FEEDS } from '@/lib/seo';
+
+const serp = getStaticPageSerp('services');
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
-    title: 'Home and local services',
-    description:
-      'Book verified local services including cleaning, repairs, moving, and home maintenance across Nepal on Sajilowork.',
+    title: serp.title,
+    description: serp.description,
     path: '/services',
   });
 }
 
 export default function ServicesLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <ListingIndexJsonLd
+        title={serp.title}
+        description={serp.description}
+        path="/services"
+        breadcrumbLabel={serp.breadcrumb}
+        feed={LISTING_FEEDS.services}
+      />
+      <ListingPageBreadcrumbs sectionLabel={serp.breadcrumb} sectionPath="/services" />
+      {children}
+    </>
+  );
 }
+
+export const revalidate = 300;

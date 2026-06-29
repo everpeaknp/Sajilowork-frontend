@@ -2,11 +2,6 @@ import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import { MarketingProse, MarketingLead } from '@/components/marketing/MarketingProse';
 import { PRIVACY_SECTIONS } from '@/components/marketing/legalContent';
 
-export const metadata = {
-  title: 'Privacy Policy',
-  description: 'How sajilowork collects, uses, and protects your personal information.',
-};
-
 export default function PrivacyPage() {
   return (
     <MarketingPageLayout
@@ -16,7 +11,7 @@ export default function PrivacyPage() {
       backLabel="Back to help"
     >
       <MarketingLead>
-        This policy describes what information we collect when you use sajilowork, why we collect
+        This policy describes what information we collect when you use Sajilowork, why we collect
         it, and the choices you have.
       </MarketingLead>
       <MarketingProse sections={[...PRIVACY_SECTIONS]} />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -24,6 +24,7 @@ import type { Service as ServiceItem } from './serviceListData';
 import { SERVICE_LANGUAGE_FALLBACK, SERVICE_LOCATIONS } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
+import OptimizedImage from '@/components/ui/optimized-image';
 import { MarketplaceServiceGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 
 const BUDGET_MIN = 3000;
@@ -39,6 +40,8 @@ interface AvailableServicesProps {
   searchQuery?: string;
   searchCategory?: string;
   onClearSearch?: () => void;
+  initialServices?: ServiceItem[];
+  initialTotal?: number;
 }
 
 export default function AvailableServices({
@@ -46,10 +49,14 @@ export default function AvailableServices({
   searchQuery = '',
   searchCategory = '',
   onClearSearch,
+  initialServices,
+  initialTotal = 0,
 }: AvailableServicesProps) {
+  const hasInitialData = Boolean(initialServices?.length);
   const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
-  const [servicesData, setServicesData] = useState<ServiceItem[]>([]);
-  const [loadingServices, setLoadingServices] = useState(true);
+  const [servicesData, setServicesData] = useState<ServiceItem[]>(initialServices ?? []);
+  const [loadingServices, setLoadingServices] = useState(!hasInitialData);
+  const [totalServices, setTotalServices] = useState(initialTotal);
   const [currentPage, setCurrentPage] = useState(1);
   const [cardSlideIndex, setCardSlideIndex] = useState<Record<string, number>>({ 'av-2': 1 });
 
@@ -60,6 +67,19 @@ export default function AvailableServices({
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('best-seller');
+  const skipInitialFetchRef = useRef(hasInitialData);
+
+  const isDefaultBrowse =
+    !searchQuery.trim() &&
+    !searchCategory.trim() &&
+    deliveryTime === 'all' &&
+    maxBudget === BUDGET_DEFAULT &&
+    selectedSkills.length === 0 &&
+    selectedLocations.length === 0 &&
+    selectedLanguages.length === 0 &&
+    selectedLevels.length === 0 &&
+    sortBy === 'best-seller' &&
+    currentPage === 1;
   const [languageOptions, setLanguageOptions] = useState<string[]>([...SERVICE_LANGUAGE_FALLBACK]);
   const [skillOptions, setSkillOptions] = useState<string[]>([]);
 
@@ -115,6 +135,14 @@ export default function AvailableServices({
   }, []);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current && isDefaultBrowse) {
+      skipInitialFetchRef.current = false;
+      if (initialServices?.length) {
+        setSavedSlugs(buildBookmarkSlugSet(initialServices));
+      }
+      return;
+    }
+
     let cancelled = false;
     setLoadingServices(true);
 
@@ -131,6 +159,7 @@ export default function AvailableServices({
       .then((result) => {
         if (cancelled) return;
         setServicesData(result.items);
+        setTotalServices(result.total);
         setSavedSlugs(buildBookmarkSlugSet(result.items));
       })
       .catch(() => {
@@ -154,6 +183,8 @@ export default function AvailableServices({
     selectedLevels,
     sortBy,
     currentPage,
+    isDefaultBrowse,
+    initialServices,
   ]);
 
   const toggleSection = (section: string) => {
@@ -570,16 +601,13 @@ export default function AvailableServices({
                           href={getServiceDetailPath(card)}
                           className="group relative block aspect-[1.18/1] w-full flex-shrink-0 overflow-hidden bg-neutral-100"
                         >
-                          <img
+                          <OptimizedImage
                             src={displayImage}
                             alt={card.title}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                            referrerPolicy="no-referrer"
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src =
-                                serviceListingFallbackImage(card) || DEFAULT_SERVICE_IMAGE;
-                            }}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            fallbackSrc={serviceListingFallbackImage(card) || DEFAULT_SERVICE_IMAGE}
+                            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                           />
 
                           {hasMultiImages && card.images && (
@@ -653,11 +681,12 @@ export default function AvailableServices({
                               onClick={(e) => e.stopPropagation()}
                             >
                               <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full border border-neutral-200/60">
-                                <img
+                                <OptimizedImage
                                   src={card.author.avatar}
                                   alt={card.author.name}
-                                  className="h-full w-full object-cover"
-                                  referrerPolicy="no-referrer"
+                                  fill
+                                  sizes="24px"
+                                  className="object-cover"
                                 />
                                 {card.author.online && (
                                   <span className="absolute bottom-0 right-0 h-1.5 w-1.5 rounded-full bg-[#43b06d] ring-1 ring-white" />

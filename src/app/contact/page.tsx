@@ -2,12 +2,6 @@ import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
 import ContactContent from '@/components/marketing/ContactContent';
 import FaqContent from '@/components/marketing/FaqContent';
 
-export const metadata = {
-  title: 'Contact Us',
-  description:
-    'Contact Sajilowork support for help with tasks, payments, account access, and marketplace safety.',
-};
-
 export default function ContactPage() {
   return (
     <MarketingPageLayout

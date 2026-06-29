@@ -18,13 +18,25 @@ export {
 export { buildSiteMetadata } from '@/lib/seo/metadata';
 
 export async function fetchSiteSettings(): Promise<SiteSettings> {
-  const { getApiBaseUrl } = await import('@/lib/seo/constants');
+  const { getApiBaseUrl, isPlaceholderSiteDomain, isPlaceholderSiteName } =
+    await import('@/lib/seo/constants');
   try {
     const response = await fetch(`${getApiBaseUrl()}/site/settings/`, {
       next: { revalidate: 300 },
     });
     if (!response.ok) throw new Error('Failed to load site settings');
-    return (await response.json()) as SiteSettings;
+    const data = (await response.json()) as SiteSettings;
+    return {
+      ...data,
+      site_name:
+        data.site_name?.trim() && !isPlaceholderSiteName(data.site_name)
+          ? data.site_name.trim()
+          : 'Sajilowork',
+      site_domain:
+        data.site_domain?.trim() && !isPlaceholderSiteDomain(data.site_domain)
+          ? data.site_domain.trim()
+          : '',
+    };
   } catch {
     return {
       site_name: 'Sajilowork',

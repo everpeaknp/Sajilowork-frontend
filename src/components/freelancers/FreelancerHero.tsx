@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
+import HeroImage from '@/components/ui/hero-image';
 import { FREELANCER_HERO_PORTRAIT } from './freelancerData';
 
 export default function FreelancerHero() {
@@ -71,16 +72,21 @@ export default function FreelancerHero() {
             </div>
 
             <div className="relative mt-2 flex h-[140px] w-full items-end justify-end self-end select-none sm:h-[180px] lg:col-span-5 lg:mt-0 lg:h-[250px] xl:h-[280px]">
-              <motion.img
-                src={FREELANCER_HERO_PORTRAIT}
-                alt="Designer illustrator working on tablet screen"
-                className="relative z-10 h-full w-auto object-contain object-bottom"
+              <motion.div
+                className="relative z-10 h-full"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
-                referrerPolicy="no-referrer"
-                draggable={false}
-              />
+              >
+                <HeroImage
+                  src={FREELANCER_HERO_PORTRAIT}
+                  alt="Freelancer professional portrait"
+                  className="block h-full w-auto object-contain object-bottom"
+                  width={480}
+                  height={560}
+                  priority
+                />
+              </motion.div>
             </div>
           </div>
         </div>

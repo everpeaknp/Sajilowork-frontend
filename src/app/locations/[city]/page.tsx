@@ -1,32 +1,13 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import MarketingPageLayout from '@/components/marketing/MarketingPageLayout';
-import { buildPageMetadata, getSeoLocationPage } from '@/lib/seo';
+import { getSeoLocationPage } from '@/lib/seo';
 import { POST_TASK_PATH } from '@/lib/postTaskPath';
 
 type Props = {
   params: Promise<{ city: string }>;
 };
-
-export async function generateMetadata({ params }: Pick<Props, 'params'>): Promise<Metadata> {
-  const { city } = await params;
-  const location = getSeoLocationPage(city);
-  if (!location) {
-    return buildPageMetadata({
-      title: 'Location',
-      path: `/locations/${city}`,
-      noindex: true,
-    });
-  }
-
-  return buildPageMetadata({
-    title: `Hire freelancers in ${location.name}, Nepal`,
-    description: location.description,
-    path: `/locations/${location.slug}`,
-  });
-}
 
 export default async function LocationPage({ params }: Props) {
   const { city } = await params;

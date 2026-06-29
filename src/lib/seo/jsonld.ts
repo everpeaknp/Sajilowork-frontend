@@ -110,9 +110,17 @@ export function buildOrganizationSchema(settings: SiteSettings) {
     '@type': 'Organization',
     name: siteName,
     url,
-    logo: settings.favicon_url || absoluteUrl('/favicon-48x48.png', settings),
+    logo: settings.favicon_url || absoluteUrl('/icon', settings),
     ...(settings.contact_email ? { email: settings.contact_email } : {}),
     sameAs: settings.same_as?.length ? settings.same_as : [],
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'NP',
+    },
+    areaServed: {
+      '@type': 'Country',
+      name: 'Nepal',
+    },
   };
 }
 
@@ -125,6 +133,62 @@ export function buildWebsiteSchema(settings: SiteSettings) {
     name: siteName,
     url,
     description: settings.meta_description || undefined,
+    inLanguage: 'en-NP',
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      url,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${url}/discover?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+export function buildCollectionPageSchema(input: {
+  name: string;
+  description?: string;
+  path: string;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: input.name,
+    description: input.description,
+    url: absoluteUrl(input.path, input.settings),
+    isPartOf: {
+      '@type': 'WebSite',
+      name: resolveSiteName(input.settings),
+      url: resolveSiteOrigin(input.settings),
+    },
+    inLanguage: 'en-NP',
+  };
+}
+
+export function buildItemListSchema(input: {
+  name: string;
+  path: string;
+  items: Array<{ name: string; path: string }>;
+  settings?: SiteSettings;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: input.name,
+    url: absoluteUrl(input.path, input.settings),
+    numberOfItems: input.items.length,
+    itemListElement: input.items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      url: absoluteUrl(item.path, input.settings),
+    })),
   };
 }
 
@@ -180,13 +244,90 @@ export function buildArticleSchema(input: {
     datePublished: input.publishedAt || undefined,
     dateModified: input.updatedAt || input.publishedAt || undefined,
     mainEntityOfPage: absoluteUrl(input.path, input.settings),
+    inLanguage: 'en-NP',
     publisher: {
       '@type': 'Organization',
       name: publisherName,
       logo: {
         '@type': 'ImageObject',
-        url: input.settings?.favicon_url || absoluteUrl('/favicon-48x48.png', input.settings),
+        url: input.settings?.favicon_url || absoluteUrl('/icon', input.settings),
       },
+    },
+  };
+}
+
+export function buildBlogPostingSchema(input: {
+  title: string;
+  description?: string;
+  path: string;
+  image?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+  settings?: SiteSettings;
+}) {
+  const publisherName = resolveSiteName(input.settings);
+  const url = absoluteUrl(input.path, input.settings);
+  const origin = resolveSiteOrigin(input.settings);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: input.title,
+    description: input.description,
+    image: input.image ? [input.image] : undefined,
+    datePublished: input.publishedAt || undefined,
+    dateModified: input.updatedAt || input.publishedAt || undefined,
+    url,
+    inLanguage: 'en-NP',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    author: {
+      '@type': 'Organization',
+      name: publisherName,
+      url: origin,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: publisherName,
+      logo: {
+        '@type': 'ImageObject',
+        url: input.settings?.favicon_url || absoluteUrl('/icon', input.settings),
+      },
+    },
+  };
+}
+
+export function buildLocalBusinessSchema(input: {
+  name: string;
+  description: string;
+  path: string;
+  city: string;
+  settings?: SiteSettings;
+}) {
+  const siteName = resolveSiteName(input.settings);
+  const origin = resolveSiteOrigin(input.settings);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: `${siteName} — ${input.city}`,
+    description: input.description,
+    url: absoluteUrl(input.path, input.settings),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: input.city,
+      addressCountry: 'NP',
+    },
+    areaServed: {
+      '@type': 'City',
+      name: input.city,
+    },
+    parentOrganization: {
+      '@type': 'Organization',
+      name: siteName,
+      url: origin,
     },
   };
 }
@@ -238,6 +379,7 @@ export function buildServiceSchema(input: {
   description: string;
   path: string;
   image?: string | null;
+  serviceType?: string;
   settings?: SiteSettings;
 }) {
   return {
@@ -245,6 +387,7 @@ export function buildServiceSchema(input: {
     '@type': 'Service',
     name: input.title,
     description: input.description,
+    ...(input.serviceType ? { serviceType: input.serviceType } : {}),
     provider: {
       '@type': 'Organization',
       name: resolveSiteName(input.settings),
@@ -255,5 +398,30 @@ export function buildServiceSchema(input: {
     },
     url: absoluteUrl(input.path, input.settings),
     image: input.image || undefined,
+  };
+}
+
+export function buildSoftwareApplicationSchema(settings: SiteSettings) {
+  const siteName = resolveSiteName(settings);
+  const url = resolveSiteOrigin(settings);
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: siteName,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url,
+    inLanguage: 'en-NP',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'NPR',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      url,
+    },
   };
 }

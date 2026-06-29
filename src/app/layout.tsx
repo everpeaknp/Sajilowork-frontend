@@ -1,41 +1,12 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist, Geist_Mono, Manrope, Outfit } from "next/font/google";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
 import { buildSiteMetadata, fetchSiteSettings } from "@/lib/siteSettings";
 import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
 import SentryInit from "@/components/SentryInit";
+import { fontClassNames } from "@/lib/fonts";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-/** Display headlines (discover / marketing). Falls back when PP Formula files are absent. */
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["700", "800", "900"],
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSiteSettings();
@@ -50,10 +21,7 @@ export default function RootLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${outfit.variable} ${dmSans.variable} h-full antialiased`}
-    >
+    <html lang="en-NP" className={`${fontClassNames} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <GlobalJsonLd />
         <AuthProvider>

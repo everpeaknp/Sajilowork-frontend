@@ -1,78 +1,21 @@
-'use client';
+import { searchBrowseTasks } from '@/lib/listingSearchApi';
+import type { Task } from '@/types';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import '@/components/LangingHome/landing-home.css';
-import { discoverPageRoot, discoverPageTypo } from '@/components/LangingHome/landingTypography';
-import { TaskHero, TaskList } from '@/components/task/browse';
-import Navbar from '@/components/common/navbar';
-import Footer from '@/components/common/footer';
+import TaskPageClient from './TaskPageClient';
 
-function TaskBrowsePageContent() {
-  const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchLocation, setSearchLocation] = useState('');
-  const [categoryFromUrl, setCategoryFromUrl] = useState('');
+export default async function TaskBrowsePage() {
+  let initialTasks: Task[] = [];
+  let initialTotal = 0;
 
-  useEffect(() => {
-    const q = searchParams.get('q') ?? '';
-    const location = searchParams.get('location') ?? '';
-    const category = searchParams.get('category') ?? '';
-    setSearchQuery(q);
-    setSearchLocation(location);
-    setCategoryFromUrl(category);
+  try {
+    const result = await searchBrowseTasks({ page: 1, page_size: 8, sort_by: 'newest' });
+    initialTasks = result.items;
+    initialTotal = result.total;
+  } catch {
+    // Client will retry after hydration.
+  }
 
-    if (q || location) {
-      requestAnimationFrame(() => {
-        document.getElementById('custom-task-board-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    }
-  }, [searchParams]);
-
-  const handleTaskSearch = (query: string, location: string) => {
-    setSearchQuery(query);
-    setSearchLocation(location);
-  };
-
-  const clearTaskSearch = () => {
-    setSearchQuery('');
-    setSearchLocation('');
-    const url = new URL(window.location.href);
-    url.searchParams.delete('q');
-    url.searchParams.delete('location');
-    window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
-  };
-
-  return (
-    <main className="pb-2 md:pb-0">
-      <TaskHero onSearchSubmit={handleTaskSearch} />
-      <TaskList
-        searchQuery={searchQuery}
-        searchLocation={searchLocation}
-        categoryFromUrl={categoryFromUrl}
-        onClearSearch={clearTaskSearch}
-      />
-    </main>
-  );
+  return <TaskPageClient initialTasks={initialTasks} initialTotal={initialTotal} />;
 }
 
-export default function TaskBrowsePage() {
-  return (
-    <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-[#1161fe] selection:text-white md:pb-0`}
-    >
-      <Navbar />
-      <Suspense
-        fallback={
-          <main className="pb-2 md:pb-0">
-            <TaskHero />
-            <TaskList />
-          </main>
-        }
-      >
-        <TaskBrowsePageContent />
-      </Suspense>
-      <Footer />
-    </div>
-  );
-}
+export const revalidate = 300;

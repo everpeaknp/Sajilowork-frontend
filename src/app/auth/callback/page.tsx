@@ -40,6 +40,19 @@ function AuthCallbackContent() {
       return;
     }
 
+    // Remove tokens from the address bar immediately (history, referrers, logs).
+    if (typeof window !== 'undefined') {
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('access');
+      cleanUrl.searchParams.delete('refresh');
+      const remaining = cleanUrl.searchParams.toString();
+      window.history.replaceState(
+        {},
+        '',
+        remaining ? `${cleanUrl.pathname}?${remaining}` : cleanUrl.pathname,
+      );
+    }
+
     let cancelled = false;
 
     (async () => {

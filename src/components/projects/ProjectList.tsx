@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronDown,
@@ -175,17 +174,21 @@ interface ProjectListProps {
   searchQuery?: string;
   searchLocation?: string;
   onClearSearch?: () => void;
+  initialProjects?: Project[];
+  initialTotal?: number;
 }
 
 export default function ProjectList({
   searchQuery = '',
   searchLocation = '',
   onClearSearch,
+  initialProjects,
+  initialTotal = 0,
 }: ProjectListProps) {
-  const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
-  const [totalProjects, setTotalProjects] = useState(0);
+  const hasInitialData = Boolean(initialProjects?.length);
+  const [projects, setProjects] = useState<Project[]>(initialProjects ?? []);
+  const [loadingProjects, setLoadingProjects] = useState(!hasInitialData);
+  const [totalProjects, setTotalProjects] = useState(initialTotal);
   const itemsPerPage = 8;
 
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
@@ -211,6 +214,20 @@ export default function ProjectList({
   const [alertText, setAlertText] = useState<string | null>(null);
 
   const sortMenuRef = useRef<HTMLDivElement>(null);
+  const skipInitialFetchRef = useRef(hasInitialData);
+
+  const isDefaultBrowse =
+    !searchQuery.trim() &&
+    !searchLocation.trim() &&
+    selectedCategory === 'All' &&
+    selectedSalary === 'All' &&
+    selectedType === 'All' &&
+    selectedLevel === 'All' &&
+    selectedLocation === 'All' &&
+    selectedLanguage === 'All' &&
+    selectedSkill === 'All' &&
+    sortBy === 'best-seller' &&
+    currentPage === 1;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -228,6 +245,11 @@ export default function ProjectList({
   ]);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current && isDefaultBrowse) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     let cancelled = false;
     setLoadingProjects(true);
 
@@ -280,6 +302,8 @@ export default function ProjectList({
     selectedSkill,
     sortBy,
     currentPage,
+    isDefaultBrowse,
+    initialProjects,
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalProjects / itemsPerPage));
@@ -633,16 +657,8 @@ export default function ProjectList({
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.25 }}
                       >
-                        <div
-                          role="link"
-                          tabIndex={0}
-                          onClick={() => router.push(getProjectDetailPath(project))}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              router.push(getProjectDetailPath(project));
-                            }
-                          }}
+                        <Link
+                          href={getProjectDetailPath(project)}
                           className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
                         >
                         <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
@@ -741,7 +757,7 @@ export default function ProjectList({
                             </span>
                           </div>
                         </div>
-                        </div>
+                        </Link>
                       </motion.div>
                     );
                   })}

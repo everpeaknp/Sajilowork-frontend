@@ -18,10 +18,20 @@ import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
 import HomeAuthRedirect from '@/app/_components/HomeAuthRedirect';
 
+import type { Service } from '@/components/services/serviceListData';
+
 const sectionPad = '!py-12 sm:!py-14';
 const sectionPadLoose = '!py-12 sm:!py-16';
 
-export default function HomeClient() {
+type HomeClientProps = {
+  popularServices?: Service[];
+  trendingServices?: Service[];
+};
+
+export default function HomeClient({
+  popularServices,
+  trendingServices,
+}: HomeClientProps) {
   const router = useRouter();
 
   const handleCapture = (e: React.MouseEvent) => {
@@ -60,11 +70,11 @@ export default function HomeClient() {
           className={sectionPad}
           onSelectGridCategory={() => router.push('/signin')}
         />
-        <PopularServices className={sectionPad} />
+        <PopularServices className={sectionPad} initialServices={popularServices} />
         <BottomCTA className="!pt-10 sm:!pt-14 !pb-6" />
         <DiscoverStats className="!pt-4 !pb-10 sm:!pt-5 sm:!pb-12" />
         <Testimonials className={`${sectionPadLoose} !pb-8 sm:!pb-10`} />
-        <TrendingServices className={`${sectionPadLoose} !pt-12 sm:!pt-14`} />
+        <TrendingServices className={`${sectionPadLoose} !pt-12 sm:!pt-14`} initialServices={trendingServices} />
         <OurBlog className={sectionPad} />
         <Partners className="!py-10 sm:!py-12" />
         <Newsletter className="!py-14 sm:!py-16" />

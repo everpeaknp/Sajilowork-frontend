@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
+import SerpBreadcrumbs, { type SerpBreadcrumbItem } from '@/components/seo/SerpBreadcrumbs';
 import { landingHeadline } from '@/components/LangingHome/landingTypography';
 
 type MarketingPageLayoutProps = {
@@ -9,6 +10,7 @@ type MarketingPageLayoutProps = {
   description?: string;
   backHref?: string;
   backLabel?: string;
+  breadcrumbItems?: SerpBreadcrumbItem[];
   children: React.ReactNode;
   contentClassName?: string;
   hideHero?: boolean;
@@ -19,6 +21,7 @@ export default function MarketingPageLayout({
   description,
   backHref = '/',
   backLabel = 'Back to home',
+  breadcrumbItems,
   children,
   contentClassName = 'max-w-3xl',
   hideHero = false,
@@ -29,6 +32,9 @@ export default function MarketingPageLayout({
       <main className="flex-1">
         {hideHero && backHref ? (
           <div className="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6 sm:pt-8">
+            {breadcrumbItems?.length ? (
+              <SerpBreadcrumbs items={breadcrumbItems} className="mb-4" />
+            ) : null}
             <Link
               href={backHref}
               className="inline-flex items-center gap-2 text-sm font-semibold text-brand-dark transition-colors hover:text-brand-emerald"
@@ -42,6 +48,9 @@ export default function MarketingPageLayout({
         <div className="relative overflow-hidden bg-gradient-to-br from-brand-dark via-[#1e5c48] to-brand-emerald text-white">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-300/25 via-brand-emerald/10 to-transparent opacity-40" />
           <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-12 md:py-14">
+            {breadcrumbItems?.length ? (
+              <SerpBreadcrumbs items={breadcrumbItems} className="mb-4 text-emerald-100/80 [&_a]:text-emerald-100 [&_a:hover]:text-white [&_span]:text-emerald-100" />
+            ) : null}
             {backHref ? (
               <Link
                 href={backHref}

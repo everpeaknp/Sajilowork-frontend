@@ -4,11 +4,6 @@ import MarketingCta from '@/components/marketing/MarketingCta';
 import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import { ABOUT_SECTIONS } from '@/components/marketing/legalContent';
 
-export const metadata = {
-  title: 'About Us',
-  description: 'Learn about Sajilowork — Nepal’s marketplace to hire taskers and get work done.',
-};
-
 export default function AboutPage() {
   return (
     <MarketingPageLayout
@@ -16,7 +11,7 @@ export default function AboutPage() {
       description="Connecting people who need tasks done with those who have the skills to do them."
     >
       <MarketingLead>
-        sajilowork is a local services marketplace built for Nepal — inspired by the simple,
+        Sajilowork is a local services marketplace built for Nepal — inspired by the simple,
         trusted model used by global platforms.
       </MarketingLead>
       <MarketingProse sections={[...ABOUT_SECTIONS]} />

@@ -8,6 +8,7 @@ import {
   discoverHeadline,
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
+import HeroImage from '@/components/ui/hero-image';
 import { loadCategories } from '@/lib/dashboardListingApi';
 import { flattenCategoriesForSelect } from '@/lib/taskUtils';
 import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
@@ -325,16 +326,21 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
             </div>
 
             <div className="relative mt-2 flex h-[160px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:mt-0 sm:h-[200px] lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(260px,95%)] lg:max-w-[38%] lg:justify-center xl:right-10">
-              <motion.img
-                src={MAIN_PORTRAIT}
-                alt="Local tasker ready to help"
-                className="relative z-10 block h-full max-w-full w-auto object-contain object-bottom drop-shadow-2xl"
+              <motion.div
+                className="relative z-10 h-full"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
-                referrerPolicy="no-referrer"
-                draggable={false}
-              />
+              >
+                <HeroImage
+                  src={MAIN_PORTRAIT}
+                  alt="Local tasker ready to help"
+                  className="block h-full max-w-full w-auto object-contain object-bottom drop-shadow-2xl"
+                  width={480}
+                  height={560}
+                  priority
+                />
+              </motion.div>
             </div>
           </div>
         </div>

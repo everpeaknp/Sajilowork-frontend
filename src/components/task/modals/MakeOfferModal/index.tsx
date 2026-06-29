@@ -179,7 +179,7 @@ export default function MakeOfferModal({
     const monthDiff = today.getMonth() - birthDate.getMonth();
     
     if (age < 18 || (age === 18 && monthDiff < 0)) {
-      toast.error('You must be 18 or older to use sajilowork');
+      toast.error('You must be 18 or older to use Sajilowork');
       return;
     }
 

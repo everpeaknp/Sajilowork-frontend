@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 
 import JsonLd from '@/components/seo/JsonLd';
+import CrawlableDetailShell from '@/components/seo/CrawlableDetailShell';
 import {
   buildBreadcrumbSchema,
+  buildDetailSerpTitle,
   buildEmployerOrganizationSchema,
   buildListingMetadata,
   buildSchemaGraph,
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: Pick<Props, 'params'>): Promi
 
   const name = profile.name || profile.slug || slug;
   return buildListingMetadata({
-    title: `${name} — Employer on Sajilowork`,
+    title: buildDetailSerpTitle(name, 'Employer in Nepal'),
     description: profile.description || profile.tagline,
     image: profile.logo_url,
     path: `/employers/${slug}`,
@@ -79,7 +81,10 @@ export default async function EmployerSlugLayout({ children, params }: Props) {
   return (
     <>
       <JsonLd data={schema} />
+      <CrawlableDetailShell title={name} description={description} />
       {children}
     </>
   );
 }
+
+export const revalidate = 300;

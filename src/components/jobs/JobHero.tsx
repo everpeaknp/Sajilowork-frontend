@@ -8,7 +8,7 @@ import {
   discoverHeadline,
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
-import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
+import HeroImage from '@/components/ui/hero-image';
 
 const SUGGESTIONS_DATABASE = [
   'Website Designer',
@@ -33,7 +33,8 @@ const LOCATION_OPTIONS = [
   { value: 'Remote', label: 'Remote' },
 ];
 
-const MAIN_PORTRAIT = MARKETPLACE_HERO_IMAGE;
+const MAIN_PORTRAIT =
+  'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1200';
 
 interface SearchBoxProps {
   onSearchSubmit?: (query: string, location: string) => void;
@@ -213,16 +214,21 @@ export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps
 
             {/* Right: Image — no background shape, just clean portrait */}
             <div className="relative mt-2 flex h-[160px] w-full max-w-full items-end justify-center self-end overflow-hidden select-none sm:mt-0 sm:h-[200px] sm:justify-end lg:absolute lg:bottom-0 lg:right-6 lg:col-span-4 lg:mt-0 lg:h-[min(260px,95%)] lg:max-w-[38%] lg:justify-center xl:right-10">
-              <motion.img
-                src={MAIN_PORTRAIT}
-                alt="Professional worker"
-                className="relative z-10 block h-full max-w-full w-auto object-contain object-bottom"
+              <motion.div
+                className="relative z-10 h-full"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.3 }}
-                referrerPolicy="no-referrer"
-                draggable={false}
-              />
+              >
+                <HeroImage
+                  src={MAIN_PORTRAIT}
+                  alt="Professional worker"
+                  className="block h-full max-w-full w-auto object-contain object-bottom"
+                  width={480}
+                  height={560}
+                  priority
+                />
+              </motion.div>
             </div>
           </div>
         </div>
