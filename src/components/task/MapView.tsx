@@ -63,18 +63,24 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const createPriceIcon = (price: number) => {
-  const label = formatNPR(price, { compact: true });
+const createPriceIcon = (label: string) => {
+  const safeLabel = label
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+  const width = Math.max(56, Math.min(132, safeLabel.length * 6.5 + 28));
+  const anchorX = width / 2;
   return L.divIcon({
     className: 'custom-div-icon',
     html: `<div class="flex flex-col items-center group">
       <div class="bg-brand-emerald text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg border-2 border-white whitespace-nowrap transform group-hover:scale-110 transition-transform">
-        ${label}
+        ${safeLabel}
       </div>
       <div class="w-3 h-3 bg-brand-emerald rounded-full -mt-1 border-2 border-white shadow-sm"></div>
     </div>`,
-    iconSize: [60, 40],
-    iconAnchor: [30, 40],
+    iconSize: [width, 40],
+    iconAnchor: [anchorX, 40],
   });
 };
 
@@ -463,7 +469,7 @@ function TaskMarker({
   return (
     <Marker
       position={task.coordinates}
-      icon={createPriceIcon(task.price)}
+      icon={createPriceIcon(task.priceLabel ?? formatNPR(task.price, { compact: true }))}
       zIndexOffset={stackOrder}
       eventHandlers={{ click: handleMarkerClick }}
     />

@@ -3,6 +3,7 @@ import type { Task as MapBrowseTask } from '@/components/task/types';
 import type { Task as MyTaskView } from '@/components/my-task/types';
 import { getMediaUrl } from '@/lib/utils';
 import { formatTaskLocationShort } from '@/lib/nepalLocale';
+import { resolveMapMarkerPriceLabel } from '@/lib/mapMarkerPrice';
 import {
   formatMyTaskStatusLabel,
   formatTaskDisplayTitle,
@@ -163,6 +164,7 @@ export function transformMyTasksForMapBrowse(
         location: view.location,
         coordinates: view.coordinates,
         price: view.price,
+        priceLabel: resolveMapMarkerPriceLabel(task),
         category: view.category,
         workType: view.workType,
         postedDate: view.postedDate,

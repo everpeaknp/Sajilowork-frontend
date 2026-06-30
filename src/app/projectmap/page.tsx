@@ -31,6 +31,7 @@ import {
 } from '@/lib/projectMapFilters';
 import { searchBrowseProjectTasks } from '@/lib/listingSearchApi';
 import { taskBudgetAmount } from '@/lib/taskFilters';
+import { resolveMapMarkerPriceLabel } from '@/lib/mapMarkerPrice';
 import { formatTaskLocationShort } from '@/lib/nepalLocale';
 import { extractTaskList } from '@/lib/taskUtils';
 import {
@@ -302,6 +303,7 @@ function ProjectmapPageContent() {
           location: formatTaskLocationShort(task),
           coordinates: [toCoord(task.latitude), toCoord(task.longitude)] as [number, number],
           price: taskBudgetAmount(task),
+          priceLabel: resolveMapMarkerPriceLabel(task),
           browseOrder,
           category: categoryName,
           workType:

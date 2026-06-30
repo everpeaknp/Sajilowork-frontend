@@ -16,6 +16,8 @@ export interface Task {
   location: string;
   coordinates: [number, number];
   price: number;
+  /** When set, shown on the map pin instead of formatting `price` as NPR. */
+  priceLabel?: string;
   category: string;
   workType: 'in-person' | 'remotely' | 'all';
   postedDate: Date;

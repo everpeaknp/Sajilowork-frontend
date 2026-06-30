@@ -27,6 +27,7 @@ import { POST_TASK_PATH } from '@/lib/postTaskPath';
 import type { SearchFilters, Task } from '@/types';
 import { getMediaUrl } from '@/lib/utils';
 import { filterAndSortTasks, taskBudgetAmount } from '@/lib/taskFilters';
+import { resolveMapMarkerPriceLabel } from '@/lib/mapMarkerPrice';
 import { getListingKind } from '@/lib/dashboardListingApi';
 import { formatTaskLocationShort } from '@/lib/nepalLocale';
 import {
@@ -371,6 +372,7 @@ function TaskmapPageContent() {
         location: formatTaskLocationShort(task),
         coordinates: [toCoord(task.latitude), toCoord(task.longitude)] as [number, number],
         price: taskBudgetAmount(task),
+        priceLabel: resolveMapMarkerPriceLabel(task),
         browseOrder,
         category: categoryName,
         workType:
