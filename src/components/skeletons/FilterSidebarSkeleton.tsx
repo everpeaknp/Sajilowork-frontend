@@ -70,7 +70,7 @@ export const FilterSidebarSkeleton = memo(function FilterSidebarSkeleton({
       ) : null}
       {labels.map((label) => (
         <AccordionSection
-          key={label}
+       key={label}
           showSlider={label === 'Budget' || label === 'Price'}
         />
       ))}

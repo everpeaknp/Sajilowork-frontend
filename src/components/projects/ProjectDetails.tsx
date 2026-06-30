@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Loader2, X } from 'lucide-react';
 import SingleProjectPage from '@/components/projects/SingleProjectPage';
 import { fetchPublicProjectBySlug } from '@/lib/projectApi';
+import { PROJECT_MAP_PATH } from '@/lib/projectBrowsePath';
 import type { Project } from './projectListData';
 
 interface ProjectDetailsProps {
@@ -57,7 +58,12 @@ export default function ProjectDetails({ projectSlug, onClose }: ProjectDetailsP
           Loading project…
         </div>
       ) : project ? (
-        <SingleProjectPage project={project} proposalPresentation="modal" />
+        <SingleProjectPage
+          project={project}
+          proposalPresentation="modal"
+          variant="overlay"
+          backLink={{ href: PROJECT_MAP_PATH, label: 'Back to project map' }}
+        />
       ) : (
         <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-neutral-500">
           Project not found.

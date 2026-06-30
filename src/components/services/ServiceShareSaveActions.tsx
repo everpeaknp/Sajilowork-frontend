@@ -3,18 +3,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Heart, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import type { Service } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import { resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 interface ServiceShareSaveActionsProps {
   service: Service;
+  className?: string;
 }
 
 const circleClass =
   'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 transition-colors group-hover:border-neutral-300';
 
-export default function ServiceShareSaveActions({ service }: ServiceShareSaveActionsProps) {
+export default function ServiceShareSaveActions({
+  service,
+  className,
+}: ServiceShareSaveActionsProps) {
   const slug = resolveListingSlug(service.slug, service.id);
   const [isSaved, setIsSaved] = useState(Boolean(service.isBookmarked));
   const [shareLoading, setShareLoading] = useState(false);
@@ -74,7 +79,7 @@ export default function ServiceShareSaveActions({ service }: ServiceShareSaveAct
   };
 
   return (
-    <div className="flex w-full items-center justify-end gap-4 sm:gap-8">
+    <div className={cn('flex w-full items-center justify-end gap-4 sm:gap-8', className)}>
       <button
         type="button"
         onClick={() => void handleShare()}

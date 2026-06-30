@@ -5,11 +5,13 @@ import { ExternalLink, Heart, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTaskDetailPath } from '@/lib/taskPageApi';
 import { resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
+import { cn } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface TaskShareSaveActionsProps {
   task: Task;
   onBookmarkChange?: (bookmarked: boolean) => void;
+  className?: string;
 }
 
 const circleClass =
@@ -18,6 +20,7 @@ const circleClass =
 export default function TaskShareSaveActions({
   task,
   onBookmarkChange,
+  className,
 }: TaskShareSaveActionsProps) {
   const [isSaved, setIsSaved] = useState(Boolean(task.is_bookmarked));
   const [saveLoading, setSaveLoading] = useState(false);
@@ -79,7 +82,7 @@ export default function TaskShareSaveActions({
   };
 
   return (
-    <div className="flex w-full items-center justify-end gap-4 sm:gap-8">
+    <div className={cn('flex w-full items-center justify-end gap-4 sm:gap-8', className)}>
       <button
         type="button"
         onClick={() => void handleShare()}

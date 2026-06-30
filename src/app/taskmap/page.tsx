@@ -20,6 +20,7 @@ import {
   TaskCardListSkeleton,
   TaskMapSkeleton,
 } from '@/components/task/TaskBrowseSkeletons';
+import { MapViewSkeleton } from '@/components/skeletons';
 import { useSidebar } from '@/hooks/useSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { useTaskStore } from '@/store';
@@ -52,6 +53,8 @@ function TaskmapPageContent() {
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
   const [isCompactSidebar, setIsCompactSidebar] = useState(false);
   const [sheetSnap, setSheetSnap] = useState<BrowseSheetSnap>('map');
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   
   const tasks = useTaskStore((s) => s.tasks);
   const filters = useTaskStore((s) => s.filters);
@@ -158,6 +161,10 @@ function TaskmapPageContent() {
         if (!cancelled) {
           toast.error('Failed to load tasks');
         }
+      } finally {
+        if (!cancelled) {
+          setInitialLoadComplete(true);
+        }
       }
     })();
 
@@ -165,6 +172,8 @@ function TaskmapPageContent() {
       cancelled = true;
     };
   }, [fetchCategories, fetchTasks]);
+
+  const isBrowseLoading = !initialLoadComplete || isLoading;
 
   const filteredTaskList = useMemo(() => {
     const marketplaceTasks = taskList.filter((task) => getListingKind(task) === 'task');
@@ -402,6 +411,12 @@ function TaskmapPageContent() {
     [filteredTaskList, browseTasksOrderKey]
   );
 
+  const handleMapReady = useCallback(() => {
+    setIsMapReady(true);
+  }, []);
+
+  const showMapSkeleton = !isMapReady || !initialLoadComplete;
+
   const previewMapTask = useMemo(() => {
     if (!focusedTaskId || detailTaskId) return null;
     return (
@@ -427,7 +442,7 @@ function TaskmapPageContent() {
           >
             {isCompactSidebar ? (
               <div className="flex-1 overflow-y-auto py-6 scrollbar-thin scrollbar-thumb-outline-variant">
-                {isLoading ? (
+                {isBrowseLoading ? (
                   <TaskAvatarListSkeleton />
                 ) : (
                   <div className="flex flex-col gap-4 items-center">
@@ -457,7 +472,7 @@ function TaskmapPageContent() {
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto px-10 py-6 scrollbar-thin scrollbar-thumb-outline-variant">
-                {isLoading ? (
+                {isBrowseLoading ? (
                   <TaskCardListSkeleton />
                 ) : (
                   <div className="flex flex-col gap-3 pb-2">
@@ -531,7 +546,12 @@ function TaskmapPageContent() {
           />
 
           <div className="flex-1 min-h-0 bg-surface-dim relative overflow-hidden">
-            <div className="absolute inset-0">
+            <div
+              className={`absolute inset-0 transition-opacity duration-500 ${
+                showMapSkeleton ? 'opacity-0' : 'opacity-100'
+              }`}
+              aria-hidden={showMapSkeleton}
+            >
               <MapView
                 tasks={mappedTasks}
                 tasksOrderKey={browseTasksOrderKey}
@@ -540,6 +560,7 @@ function TaskmapPageContent() {
                 onTaskFocus={(id) => handleTaskFocus(String(id))}
                 userCenter={userMapCenter}
                 radiusKm={safeFilters.distance_km ?? DEFAULT_TASK_RADIUS_KM}
+                onReady={handleMapReady}
                 onUserLocationFound={(lat, lng) => {
                   setFilters({
                     ...useTaskStore.getState().filters,
@@ -553,6 +574,17 @@ function TaskmapPageContent() {
                   });
                 }}
               />
+            </div>
+
+            <div
+              className={`absolute inset-0 z-[15] transition-opacity duration-500 ${
+                showMapSkeleton
+                  ? 'opacity-100'
+                  : 'pointer-events-none opacity-0'
+              }`}
+              aria-hidden={!showMapSkeleton}
+            >
+              <MapViewSkeleton />
             </div>
 
             {previewMapTask && (
@@ -570,7 +602,7 @@ function TaskmapPageContent() {
               taskCount={filteredTaskList.length}
               hidden={Boolean(detailTask)}
             >
-              {isLoading ? (
+              {isBrowseLoading ? (
                 <TaskCardListSkeleton count={4} />
               ) : filteredTaskList.length > 0 ? (
                 <div className="flex flex-col gap-3 pb-2">
@@ -614,7 +646,7 @@ function TaskmapPageContent() {
               )}
             </TaskBrowseMobileSheet>
 
-            {!isLoading &&
+            {!isBrowseLoading &&
               !detailTask &&
               filteredTaskList.length > 0 &&
               mappedTasks.length === 0 && (

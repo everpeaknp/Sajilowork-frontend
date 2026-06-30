@@ -7,6 +7,7 @@ import { isProjectOpenForBids } from '@/lib/taskUtils';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectBuyerMeta, type Project } from './projectListData';
+import type { ReactNode } from 'react';
 
 function CompanyLogo({
   type,
@@ -76,12 +77,15 @@ interface ProjectSidebarProps {
   project: Project;
   onSubmitProposal?: () => void;
   onContactBuyer?: () => void;
+  /** Rendered below the “About Buyer” card (e.g. Share / Save on map overlay). */
+  belowBuyer?: ReactNode;
 }
 
 export default function ProjectSidebar({
   project,
   onSubmitProposal,
   onContactBuyer,
+  belowBuyer,
 }: ProjectSidebarProps) {
   const { user } = useAuth();
   const buyer = getProjectBuyerMeta(project);
@@ -184,6 +188,12 @@ export default function ProjectSidebar({
             <ArrowUpRight className="h-4 w-4 stroke-[2.5]" />
           </button>
         </div>
+
+        {belowBuyer ? (
+          <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
+            {belowBuyer}
+          </div>
+        ) : null}
       </div>
     </aside>
   );

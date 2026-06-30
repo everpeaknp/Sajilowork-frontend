@@ -20,14 +20,24 @@ import { getCheckoutHref } from '@/lib/checkout';
 import { useCheckoutProfileGate } from '@/hooks/useCheckoutProfileGate';
 import MakeOfferModal from '@/components/task/modals/MakeOfferModal';
 import { getServiceMeta, getServicePackages, type Service, type ServicePackage } from './serviceListData';
+import { getServiceDetailPath } from './serviceSlug';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 
 interface SingleServicePageProps {
   service: Service;
+  variant?: 'page' | 'overlay';
+  backLink?: { href: string; label: string };
+  footerHint?: string;
 }
 
-export default function SingleServicePage({ service }: SingleServicePageProps) {
+export default function SingleServicePage({
+  service,
+  variant = 'page',
+  backLink,
+  footerHint,
+}: SingleServicePageProps) {
+  const isOverlay = variant === 'overlay';
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const meta = getServiceMeta(service);
@@ -123,10 +133,12 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
 
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-4 flex justify-end sm:mb-5">
-          <ServiceShareSaveActions service={service} />
-        </div>
+      <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
+        {!isOverlay ? (
+          <div className="mb-4 flex justify-end sm:mb-5">
+            <ServiceShareSaveActions service={service} />
+          </div>
+        ) : null}
 
         <ServiceDetailHero service={service} />
 
@@ -159,21 +171,43 @@ export default function SingleServicePage({ service }: SingleServicePageProps) {
                 />
               </div>
               <ServiceSellerCard service={service} onContact={handleContactSeller} />
+              {isOverlay ? (
+                <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
+                  <ServiceShareSaveActions
+                    service={service}
+                    className="justify-center sm:justify-center"
+                  />
+                </div>
+              ) : null}
             </div>
           </aside>
         </div>
 
         <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <p className="text-sm font-normal text-neutral-500">
-            Browse more services on the full marketplace directory.
+            {footerHint ??
+              (isOverlay
+                ? 'Browse more services on the service map.'
+                : 'Browse more services on the full marketplace directory.')}
           </p>
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
-          >
-            Back to all services
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            {isOverlay ? (
+              <Link
+                href={getServiceDetailPath(service)}
+                className="inline-flex items-center gap-1.5 text-sm font-normal text-[#52C47F] transition-opacity hover:opacity-80"
+              >
+                Open full page
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            ) : null}
+            <Link
+              href={backLink?.href ?? '/services'}
+              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+            >
+              {backLink?.label ?? 'Back to all services'}
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </div>
 

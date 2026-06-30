@@ -9,6 +9,7 @@ import {
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
 import HeroImage from '@/components/ui/hero-image';
+import MarketplaceHeroBreadcrumbs from '@/components/marketplace/MarketplaceHeroBreadcrumbs';
 import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
 const SUGGESTIONS_DATABASE = [
@@ -166,6 +167,7 @@ export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps
     <section className={`select-none bg-white px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8 lg:px-8 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
         <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl bg-[#f6f5f0] sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+          <MarketplaceHeroBreadcrumbs serpKey="jobs" sectionPath="/jobs" variant="light" />
 
           {/* Left wave — warm neutral instead of yellow */}
           <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 hidden select-none sm:block">
@@ -181,7 +183,7 @@ export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps
           </div>
 
           {/* Content */}
-          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-7 sm:gap-6 sm:pl-20 sm:pr-10 sm:pt-9 md:pl-24 md:pr-14 lg:grid-cols-12 lg:pb-0 lg:pl-32 lg:pr-14 lg:pt-10">
+          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-11 sm:gap-6 sm:pl-20 sm:pr-10 sm:pt-12 md:pl-24 md:pr-14 lg:grid-cols-12 lg:pb-0 lg:pl-32 lg:pr-14 lg:pt-14">
 
             {/* Left: Text */}
             <div className="flex flex-col justify-center pb-4 lg:col-span-8 lg:pb-10">

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Loader2, X } from 'lucide-react';
 import SingleServicePage from '@/components/services/SingleServicePage';
 import { fetchPublicServiceBySlug } from '@/lib/serviceApi';
+import { SERVICE_MAP_PATH } from '@/lib/serviceBrowsePath';
 import type { Service } from './serviceListData';
 
 interface ServiceDetailsProps {
@@ -57,7 +58,11 @@ export default function ServiceDetails({ serviceSlug, onClose }: ServiceDetailsP
           Loading service…
         </div>
       ) : service ? (
-        <SingleServicePage service={service} />
+        <SingleServicePage
+          service={service}
+          variant="overlay"
+          backLink={{ href: SERVICE_MAP_PATH, label: 'Back to service map' }}
+        />
       ) : (
         <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-neutral-500">
           Service not found.

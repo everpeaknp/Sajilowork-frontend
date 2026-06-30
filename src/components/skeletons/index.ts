@@ -41,3 +41,6 @@ export { JobsPageSkeleton } from './JobsPageSkeleton';
 export { ProjectsPageSkeleton } from './ProjectsPageSkeleton';
 export { ServicesPageSkeleton } from './ServicesPageSkeleton';
 export { TaskPageSkeleton } from './TaskPageSkeleton';
+
+export { MapViewSkeleton } from './MapViewSkeleton';
+export type { MapViewSkeletonProps } from './MapViewSkeleton';

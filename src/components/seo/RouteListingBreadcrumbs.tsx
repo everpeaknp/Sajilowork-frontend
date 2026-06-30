@@ -7,10 +7,6 @@ import { getStaticPageSerp, type StaticSerpPageKey } from '@/lib/seo';
 
 /** Marketplace index routes that show Home > Section breadcrumbs below the navbar. */
 const LISTING_INDEX_ROUTES: Record<string, { serpKey: StaticSerpPageKey; path: string }> = {
-  '/jobs': { serpKey: 'jobs', path: '/jobs' },
-  '/task': { serpKey: 'tasks', path: '/task' },
-  '/services': { serpKey: 'services', path: '/services' },
-  '/projects': { serpKey: 'projects', path: '/projects' },
   '/freelancers': { serpKey: 'freelancers', path: '/freelancers' },
   '/employers': { serpKey: 'employers', path: '/employers' },
   '/categories': { serpKey: 'categories', path: '/categories' },

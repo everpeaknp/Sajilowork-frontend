@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { MapViewSkeleton } from '@/components/skeletons';
 
 export function TaskCardSkeleton({ className }: { className?: string }) {
   return (
@@ -63,10 +64,5 @@ export function TaskAvatarListSkeleton({ count = 6 }: { count?: number }) {
 }
 
 export function TaskMapSkeleton() {
-  return (
-    <div
-      className="h-full w-full animate-pulse bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200"
-      aria-hidden
-    />
-  );
+  return <MapViewSkeleton />;
 }

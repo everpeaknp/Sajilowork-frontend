@@ -139,12 +139,43 @@ export default function SingleTaskPage({
         ? undefined
         : null;
 
+  const sidebarBelowPoster =
+    isOverlay || showMoreOptions ? (
+      <>
+        {showMoreOptions ? (
+          <TaskMoreOptions
+            embedded
+            reportOnly={isOverlay}
+            canRaiseDispute={canRaiseDispute}
+            onPostSimilar={onPostSimilar!}
+            onSetUpAlerts={onSetUpAlerts!}
+            onRaiseDispute={onRaiseDispute!}
+            onReport={onReport!}
+          />
+        ) : null}
+        {isOverlay ? (
+          <>
+            {showMoreOptions ? (
+              <div className="mt-6 border-t border-neutral-200 pt-6" aria-hidden />
+            ) : null}
+            <TaskShareSaveActions
+              task={task}
+              onBookmarkChange={() => onTaskUpdated?.()}
+              className="justify-center sm:justify-center"
+            />
+          </>
+        ) : null}
+      </>
+    ) : null;
+
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
       <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
         <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <TaskStatusTimeline status={task.status || 'open'} />
-          <TaskShareSaveActions task={task} onBookmarkChange={() => onTaskUpdated?.()} />
+          {!isOverlay ? (
+            <TaskShareSaveActions task={task} onBookmarkChange={() => onTaskUpdated?.()} />
+          ) : null}
         </div>
 
         <ProjectProfileHero project={project} />
@@ -200,18 +231,7 @@ export default function SingleTaskPage({
             project={project}
             onMakeOffer={handleMakeOfferClick}
             primaryAction={resolvedSidebarPrimaryAction}
-            belowPoster={
-              showMoreOptions ? (
-                <TaskMoreOptions
-                  embedded
-                  canRaiseDispute={canRaiseDispute}
-                  onPostSimilar={onPostSimilar!}
-                  onSetUpAlerts={onSetUpAlerts!}
-                  onRaiseDispute={onRaiseDispute!}
-                  onReport={onReport!}
-                />
-              ) : null
-            }
+            belowPoster={sidebarBelowPoster}
           />
         </div>
 
@@ -223,16 +243,6 @@ export default function SingleTaskPage({
                 : 'Browse more tasks on the full task directory.')}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            {isOverlay && onClose ? (
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
-              >
-                Close
-                <ArrowUpRight className="h-4 w-4 rotate-45" />
-              </button>
-            ) : null}
             {isOverlay ? (
               <Link
                 href={getTaskDetailPath(task)}

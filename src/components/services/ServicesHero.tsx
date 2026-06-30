@@ -9,6 +9,7 @@ import {
   discoverMedium,
 } from '@/components/LangingHome/landingTypography';
 import HeroImage from '@/components/ui/hero-image';
+import MarketplaceHeroBreadcrumbs from '@/components/marketplace/MarketplaceHeroBreadcrumbs';
 import { loadCategories } from '@/lib/dashboardListingApi';
 import { flattenCategoriesForSelect } from '@/lib/taskUtils';
 import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
@@ -260,6 +261,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="relative flex min-h-[200px] w-full items-stretch overflow-visible rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+          <MarketplaceHeroBreadcrumbs serpKey="services" sectionPath="/services" variant="dark" />
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl sm:rounded-[24px]">
             <div className="absolute bottom-0 left-0 top-0 hidden select-none sm:block">
               <svg
@@ -295,7 +297,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
             </div>
           </div>
 
-          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-7 sm:gap-6 sm:px-12 sm:pt-9 md:px-16 lg:grid-cols-12 lg:pb-0 lg:pt-10">
+          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-11 sm:gap-6 sm:px-12 sm:pt-12 md:px-16 lg:grid-cols-12 lg:pb-0 lg:pt-14">
             <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-10">
               <motion.h1
                 className={`${discoverHeadline} mb-2.5 text-2xl leading-tight text-white sm:text-3xl md:text-[38px] lg:text-[40px]`}

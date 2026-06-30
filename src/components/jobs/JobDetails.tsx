@@ -64,7 +64,12 @@ export default function JobDetails({ jobSlug, onClose }: JobDetailsProps) {
           Loading job…
         </div>
       ) : job ? (
-        <SingleJobPage job={job} applicationPresentation="modal" />
+        <SingleJobPage
+          job={job}
+          applicationPresentation="modal"
+          variant="overlay"
+          backLink={{ href: '/jobmap', label: 'Back to job map' }}
+        />
       ) : (
         <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-neutral-500">
           Job not found.

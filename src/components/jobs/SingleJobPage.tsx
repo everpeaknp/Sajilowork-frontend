@@ -29,6 +29,9 @@ interface SingleJobPageProps {
   /** Full-page job detail: open wallet-gated apply modal instead of inline form. */
   applicationPresentation?: 'inline' | 'modal';
   hideApplication?: boolean;
+  variant?: 'page' | 'overlay';
+  backLink?: { href: string; label: string };
+  footerHint?: string;
 }
 
 export default function SingleJobPage({
@@ -36,7 +39,11 @@ export default function SingleJobPage({
   relatedJobs,
   applicationPresentation = 'inline',
   hideApplication = false,
+  variant = 'page',
+  backLink,
+  footerHint,
 }: SingleJobPageProps) {
+  const isOverlay = variant === 'overlay';
   const router = useRouter();
   const { user } = useAuth();
   const useApplicationModal = applicationPresentation === 'modal';
@@ -92,10 +99,12 @@ export default function SingleJobPage({
 
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-4 flex justify-end sm:mb-5">
-          <JobShareSaveActions job={job} />
-        </div>
+      <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
+        {!isOverlay ? (
+          <div className="mb-4 flex justify-end sm:mb-5">
+            <JobShareSaveActions job={job} />
+          </div>
+        ) : null}
 
         <JobProfileHero job={job} onApply={handleApplyClick} isOwner={isOwner} editHref={editHref} />
 
@@ -118,17 +127,40 @@ export default function SingleJobPage({
           ) : null}
           <JobRelatedJobs job={job} relatedJobs={relatedJobs} />
 
-          <div className="mt-10 flex flex-col items-center gap-4 text-center sm:mt-14 sm:flex-row sm:justify-between sm:text-left">
+          {isOverlay ? (
+            <div className="mt-10 sm:mt-12">
+              <JobShareSaveActions
+                job={job}
+                className="justify-center sm:justify-center"
+              />
+            </div>
+          ) : null}
+
+          <div className="mt-10 flex flex-col items-center gap-4 text-center sm:mt-14 sm:flex-row sm:flex-wrap sm:justify-between sm:text-left">
             <p className="text-sm font-normal text-neutral-500">
-              Browse more opportunities on the full jobs directory.
+              {footerHint ??
+                (isOverlay
+                  ? 'Browse more jobs on the job map.'
+                  : 'Browse more opportunities on the full jobs directory.')}
             </p>
-            <Link
-              href="/jobs"
-              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
-            >
-              Back to all jobs
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {isOverlay ? (
+                <Link
+                  href={getJobDetailPath(job)}
+                  className="inline-flex items-center gap-1.5 text-sm font-normal text-[#52C47F] transition-opacity hover:opacity-80"
+                >
+                  Open full page
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              ) : null}
+              <Link
+                href={backLink?.href ?? '/jobs'}
+                className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+              >
+                {backLink?.label ?? 'Back to all jobs'}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

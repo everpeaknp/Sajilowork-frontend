@@ -69,7 +69,7 @@ const createPriceIcon = (label: string) => {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-  const width = Math.max(56, Math.min(132, safeLabel.length * 6.5 + 28));
+  const width = Math.max(56, Math.min(180, safeLabel.length * 6.2 + 28));
   const anchorX = width / 2;
   return L.divIcon({
     className: 'custom-div-icon',
@@ -99,6 +99,8 @@ interface MapViewProps {
   radiusKm?: number;
   /** When user taps "my location" on the map */
   onUserLocationFound?: (lat: number, lng: number) => void;
+  /** Fires once the map container and visible tiles are ready */
+  onReady?: () => void;
 }
 
 /** Zoom level when focusing a marker or detecting user location */
@@ -146,7 +148,13 @@ function UserLocationDot({ center }: { center: [number, number] }) {
   );
 }
 
-function SwitchableTileLayer({ layerId }: { layerId: MapLayerId }) {
+function SwitchableTileLayer({
+  layerId,
+  onTilesReady,
+}: {
+  layerId: MapLayerId;
+  onTilesReady?: () => void;
+}) {
   const layer = MAP_LAYERS[layerId];
   return (
     <TileLayer
@@ -154,8 +162,46 @@ function SwitchableTileLayer({ layerId }: { layerId: MapLayerId }) {
       attribution={layer.attribution}
       url={layer.url}
       {...(layer.subdomains ? { subdomains: layer.subdomains } : {})}
+      eventHandlers={
+        onTilesReady
+          ? {
+              load: () => onTilesReady(),
+            }
+          : undefined
+      }
     />
   );
+}
+
+function MapLoadNotifier({ onReady }: { onReady: () => void }) {
+  const map = useMap();
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    notifiedRef.current = false;
+    let cancelled = false;
+    let timeoutId: number | undefined;
+
+    const notify = () => {
+      if (cancelled || notifiedRef.current) return;
+      notifiedRef.current = true;
+      onReady();
+    };
+
+    map.whenReady(() => {
+      if (cancelled) return;
+      map.once('load', notify);
+      timeoutId = window.setTimeout(notify, 1600);
+    });
+
+    return () => {
+      cancelled = true;
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      map.off('load', notify);
+    };
+  }, [map, onReady]);
+
+  return null;
 }
 
 function MapToolbar({
@@ -485,6 +531,7 @@ export default function MapView({
   userCenter,
   radiusKm,
   onUserLocationFound,
+  onReady,
 }: MapViewProps) {
   const effectiveRadius = resolveMapRadiusKm(radiusKm);
   const effectiveCenter: [number, number] = userCenter ?? [
@@ -497,7 +544,22 @@ export default function MapView({
   focusTaskIdRef.current = focusTaskId;
   const [isClient, setIsClient] = useState(false);
   const [mapLayer, setMapLayer] = useState<MapLayerId>(getInitialMapLayer);
+  const [tilesReady, setTilesReady] = useState(false);
   const activeTileFilter = MAP_LAYERS[mapLayer].tileFilter;
+
+  const handleTilesReady = useCallback(() => {
+    setTilesReady(true);
+  }, []);
+
+  useEffect(() => {
+    setTilesReady(false);
+  }, [mapLayer]);
+
+  useEffect(() => {
+    if (isClient && tilesReady) {
+      onReady?.();
+    }
+  }, [isClient, onReady, tilesReady]);
 
   const handleUserLocationFound = useCallback(
     (lat: number, lng: number) => {
@@ -520,15 +582,11 @@ export default function MapView({
   );
 
   if (!isClient) {
-    return (
-      <div className="w-full h-full min-h-[300px] flex items-center justify-center bg-surface-dim">
-        <div className="w-12 h-12 border-4 border-brand-emerald border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <div className="h-full min-h-[300px] w-full" aria-hidden />;
   }
 
   return (
-    <div className="w-full h-full min-h-[300px] relative">
+    <div className="relative h-full min-h-[300px] w-full">
       <MapContainer
         center={effectiveCenter}
         zoom={12}
@@ -538,7 +596,8 @@ export default function MapView({
         attributionControl={false}
         style={{ height: '100%', width: '100%', minHeight: 300 }}
       >
-        <SwitchableTileLayer layerId={mapLayer} />
+        <SwitchableTileLayer layerId={mapLayer} onTilesReady={handleTilesReady} />
+        <MapLoadNotifier onReady={handleTilesReady} />
         <MapToolbar
           radiusKm={effectiveRadius}
           layerId={mapLayer}

@@ -43,6 +43,9 @@ interface SingleProjectPageProps {
   hideDirectoryFooter?: boolean;
   offerRefreshKey?: number;
   enableWalletGate?: boolean;
+  variant?: 'page' | 'overlay';
+  backLink?: { href: string; label: string };
+  footerHint?: string;
 }
 
 export default function SingleProjectPage({
@@ -57,7 +60,11 @@ export default function SingleProjectPage({
   hideDirectoryFooter = false,
   offerRefreshKey: offerRefreshKeyProp,
   enableWalletGate = false,
+  variant = 'page',
+  backLink,
+  footerHint,
 }: SingleProjectPageProps) {
+  const isOverlay = variant === 'overlay';
   const router = useRouter();
   const { user } = useAuth();
   const useProposalModal = proposalPresentation === 'modal';
@@ -110,12 +117,14 @@ export default function SingleProjectPage({
 
   return (
     <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
         {topSlot ? <div className="mb-4 sm:mb-5">{topSlot}</div> : null}
 
         <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <TaskStatusTimeline status={project.status || 'open'} />
-          {!hideShareActions ? <ProjectShareSaveActions project={project} /> : null}
+          {!hideShareActions && !isOverlay ? (
+            <ProjectShareSaveActions project={project} />
+          ) : null}
         </div>
 
         <ProjectProfileHero project={project} />
@@ -165,6 +174,14 @@ export default function SingleProjectPage({
             project={project}
             onSubmitProposal={handleSubmitProposalClick}
             onContactBuyer={onContactBuyer}
+            belowBuyer={
+              isOverlay && !hideShareActions ? (
+                <ProjectShareSaveActions
+                  project={project}
+                  className="justify-center sm:justify-center"
+                />
+              ) : null
+            }
           />
         </div>
 
@@ -173,15 +190,29 @@ export default function SingleProjectPage({
         {!hideDirectoryFooter ? (
           <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <p className="text-sm font-normal text-neutral-500">
-              Browse more opportunities on the full projects directory.
+              {footerHint ??
+                (isOverlay
+                  ? 'Browse more projects on the project map.'
+                  : 'Browse more opportunities on the full projects directory.')}
             </p>
-            <Link
-              href="/projects"
-              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
-            >
-              Back to all projects
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              {isOverlay ? (
+                <Link
+                  href={getProjectDetailPath(project)}
+                  className="inline-flex items-center gap-1.5 text-sm font-normal text-[#52C47F] transition-opacity hover:opacity-80"
+                >
+                  Open full page
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              ) : null}
+              <Link
+                href={backLink?.href ?? '/projects'}
+                className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+              >
+                {backLink?.label ?? 'Back to all projects'}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         ) : null}
       </div>

@@ -10,6 +10,7 @@ import {
 } from '@/components/LangingHome/landingTypography';
 
 import HeroImage from '@/components/ui/hero-image';
+import MarketplaceHeroBreadcrumbs from '@/components/marketplace/MarketplaceHeroBreadcrumbs';
 import { fetchSearchSuggestions } from '@/lib/listingSearchApi';
 import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
@@ -148,6 +149,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
     <section className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
         <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+          <MarketplaceHeroBreadcrumbs serpKey="tasks" sectionPath="/task" variant="light" />
           <div className="pointer-events-none absolute -left-16 -top-10 z-0 hidden h-44 w-44 select-none rounded-full bg-[#fcd074] sm:block sm:-left-20 sm:-top-12 sm:h-56 sm:w-56 lg:-left-24 lg:-top-16 lg:h-64 lg:w-64" />
 
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.22] mix-blend-overlay">
@@ -171,7 +173,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
             </svg>
           </div>
 
-          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-7 sm:gap-6 sm:pl-20 sm:pr-10 sm:pt-9 md:pl-24 md:pr-14 lg:grid-cols-12 lg:pb-0 lg:pl-32 lg:pr-14 lg:pt-10">
+          <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-11 sm:gap-6 sm:pl-20 sm:pr-10 sm:pt-12 md:pl-24 md:pr-14 lg:grid-cols-12 lg:pb-0 lg:pl-32 lg:pr-14 lg:pt-14">
             <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-10">
               <motion.h1
                 className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-black sm:text-3xl md:text-[38px]`}

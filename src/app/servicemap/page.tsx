@@ -32,7 +32,7 @@ import {
 } from '@/lib/serviceMapFilters';
 import { searchBrowseServiceTasks } from '@/lib/listingSearchApi';
 import { taskBudgetAmount } from '@/lib/taskFilters';
-import { resolveMapMarkerPriceLabel } from '@/lib/mapMarkerPrice';
+import { resolveServiceMapMarkerCategoryLabel } from '@/lib/mapMarkerPrice';
 import { formatTaskLocationShort } from '@/lib/nepalLocale';
 import { extractTaskList } from '@/lib/taskUtils';
 import {
@@ -291,7 +291,7 @@ function ServicemapPageContent() {
           location: formatTaskLocationShort(task),
           coordinates: [toCoord(task.latitude), toCoord(task.longitude)] as [number, number],
           price: taskBudgetAmount(task),
-          priceLabel: resolveMapMarkerPriceLabel(task),
+          priceLabel: resolveServiceMapMarkerCategoryLabel(task),
           browseOrder,
           category: categoryName,
           workType:
