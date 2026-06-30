@@ -156,12 +156,23 @@ export async function searchBrowseListings(
 }
 
 export async function searchBrowseJobs(params: BrowseSearchParams = {}): Promise<BrowseSearchResult<Job>> {
-  const result = await searchBrowseListings('job', params);
+  const result = await searchBrowseJobTasks(params);
   return {
     ...result,
     items: result.items
       .filter((task) => getListingKind(task) === 'job')
       .map(mapTaskToPublicJob),
+  };
+}
+
+/** Raw task rows for job map (keeps latitude/longitude). */
+export async function searchBrowseJobTasks(
+  params: BrowseSearchParams = {},
+): Promise<BrowseSearchResult<Task>> {
+  const result = await searchBrowseListings('job', params);
+  return {
+    ...result,
+    items: result.items.filter((task) => getListingKind(task) === 'job'),
   };
 }
 
@@ -175,6 +186,17 @@ export async function searchBrowseProjects(params: BrowseSearchParams = {}): Pro
   };
 }
 
+/** Raw task rows for project map (keeps latitude/longitude). */
+export async function searchBrowseProjectTasks(
+  params: BrowseSearchParams = {},
+): Promise<BrowseSearchResult<Task>> {
+  const result = await searchBrowseListings('project', params);
+  return {
+    ...result,
+    items: result.items.filter((task) => getListingKind(task) === 'project'),
+  };
+}
+
 export async function searchBrowseServices(params: BrowseSearchParams = {}): Promise<BrowseSearchResult<Service>> {
   const result = await searchBrowseListings('service', params);
   return {
@@ -182,6 +204,17 @@ export async function searchBrowseServices(params: BrowseSearchParams = {}): Pro
     items: result.items
       .filter((task) => getListingKind(task) === 'service')
       .map(mapTaskToPublicService),
+  };
+}
+
+/** Raw task rows for service map (keeps latitude/longitude). */
+export async function searchBrowseServiceTasks(
+  params: BrowseSearchParams = {},
+): Promise<BrowseSearchResult<Task>> {
+  const result = await searchBrowseListings('service', params);
+  return {
+    ...result,
+    items: result.items.filter((task) => getListingKind(task) === 'service'),
   };
 }
 

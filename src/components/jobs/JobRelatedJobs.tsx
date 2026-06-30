@@ -13,6 +13,8 @@ import {
 import { getJobsLiveSubtitle } from '@/lib/jobApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
+const EMPTY_RELATED_JOBS: Job[] = [];
+
 interface JobRelatedJobsProps {
   job: Job;
   relatedJobs?: Job[];
@@ -22,13 +24,24 @@ function MetaDivider() {
   return <span className="mx-2 text-neutral-300" aria-hidden>|</span>;
 }
 
-export default function JobRelatedJobs({ job, relatedJobs = [] }: JobRelatedJobsProps) {
-  const related = relatedJobs;
-  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set());
+export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps) {
+  const related = relatedJobs ?? EMPTY_RELATED_JOBS;
+  const relatedSlugsKey = related
+    .map((item) => resolveListingSlug(item.slug, item.id))
+    .sort()
+    .join('|');
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(() => buildBookmarkSlugSet(related));
 
   useEffect(() => {
-    setSavedSlugs(buildBookmarkSlugSet(related));
-  }, [related]);
+    const jobs = relatedJobs ?? EMPTY_RELATED_JOBS;
+    const next = buildBookmarkSlugSet(jobs);
+    setSavedSlugs((prev) => {
+      if (prev.size === next.size && [...prev].every((slug) => next.has(slug))) {
+        return prev;
+      }
+      return next;
+    });
+  }, [relatedSlugsKey]);
 
   const toggleStar = async (relatedJob: Job, e: MouseEvent) => {
     e.preventDefault();

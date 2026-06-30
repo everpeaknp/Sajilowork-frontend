@@ -10,15 +10,17 @@ import {
   ChevronRight,
   Check,
   AlertCircle,
+  Map,
 } from 'lucide-react';
 import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
+import { JOB_MAP_PATH } from '@/lib/jobBrowsePath';
 import { searchBrowseJobs } from '@/lib/listingSearchApi';
 import { type Job } from './jobListData';
 import JobCompanyLogo from './JobCompanyLogo';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import { getJobDetailPath } from './jobSlug';
-import { MarketplaceJobGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
+import { GridSkeleton } from '@/components/skeletons';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
 
 const FILTER_CATEGORIES = [
@@ -311,81 +313,93 @@ export default function JobList({
 
         <div
           ref={filterRowRef}
-          className="mb-6 flex flex-col justify-between gap-4 pb-2 sm:mb-8 sm:gap-5 sm:pb-4 md:flex-row md:items-center"
+          className="relative z-30 mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pb-2 sm:mb-8 sm:pb-4"
         >
-          <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
-            <div className="flex w-max max-w-full flex-nowrap items-center gap-2 sm:w-auto sm:flex-wrap">
-            <FilterDropdown
-              id="category"
-              label="Category"
-              active={selectedCategory !== 'All'}
-              open={openDropdown === 'category'}
-              onToggle={() => handleDropdownToggle('category')}
-              options={FILTER_CATEGORIES}
-              selected={selectedCategory}
-              onSelect={(v) => {
-                setSelectedCategory(v);
-                setOpenDropdown(null);
-              }}
-            />
-            <FilterDropdown
-              id="salary"
-              label="Salary"
-              active={selectedSalary !== 'All'}
-              open={openDropdown === 'salary'}
-              onToggle={() => handleDropdownToggle('salary')}
-              options={FILTER_SALARIES}
-              selected={selectedSalary}
-              onSelect={(v) => {
-                setSelectedSalary(v);
-                setOpenDropdown(null);
-              }}
-            />
-            <FilterDropdown
-              id="type"
-              label="Job Type"
-              active={selectedType !== 'All'}
-              open={openDropdown === 'type'}
-              onToggle={() => handleDropdownToggle('type')}
-              options={FILTER_TYPES}
-              selected={selectedType}
-              onSelect={(v) => {
-                setSelectedType(v);
-                setOpenDropdown(null);
-              }}
-            />
-            <FilterDropdown
-              id="level"
-              label="Level"
-              active={selectedLevel !== 'All'}
-              open={openDropdown === 'level'}
-              onToggle={() => handleDropdownToggle('level')}
-              options={FILTER_LEVELS}
-              selected={selectedLevel}
-              onSelect={(v) => {
-                setSelectedLevel(v);
-                setOpenDropdown(null);
-              }}
-            />
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className={`${discoverMedium} ml-2 block cursor-pointer py-2 text-xs font-bold text-neutral-400 transition-colors hover:text-black`}
-              >
-                Reset
-              </button>
-            )}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <FilterDropdown
+                id="category"
+                label="Category"
+                active={selectedCategory !== 'All'}
+                open={openDropdown === 'category'}
+                onToggle={() => handleDropdownToggle('category')}
+                options={FILTER_CATEGORIES}
+                selected={selectedCategory}
+                onSelect={(v) => {
+                  setSelectedCategory(v);
+                  setOpenDropdown(null);
+                }}
+              />
+              <FilterDropdown
+                id="salary"
+                label="Salary"
+                active={selectedSalary !== 'All'}
+                open={openDropdown === 'salary'}
+                onToggle={() => handleDropdownToggle('salary')}
+                options={FILTER_SALARIES}
+                selected={selectedSalary}
+                onSelect={(v) => {
+                  setSelectedSalary(v);
+                  setOpenDropdown(null);
+                }}
+              />
+              <FilterDropdown
+                id="type"
+                label="Job Type"
+                active={selectedType !== 'All'}
+                open={openDropdown === 'type'}
+                onToggle={() => handleDropdownToggle('type')}
+                options={FILTER_TYPES}
+                selected={selectedType}
+                onSelect={(v) => {
+                  setSelectedType(v);
+                  setOpenDropdown(null);
+                }}
+              />
+              <FilterDropdown
+                id="level"
+                label="Level"
+                active={selectedLevel !== 'All'}
+                open={openDropdown === 'level'}
+                onToggle={() => handleDropdownToggle('level')}
+                options={FILTER_LEVELS}
+                selected={selectedLevel}
+                onSelect={(v) => {
+                  setSelectedLevel(v);
+                  setOpenDropdown(null);
+                }}
+              />
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className={`${discoverMedium} ml-1 shrink-0 cursor-pointer py-2 text-xs font-bold text-neutral-400 transition-colors hover:text-black`}
+                >
+                  Reset
+                </button>
+              )}
             </div>
+
+            <p className={`${discoverBody} shrink-0 whitespace-nowrap text-sm font-medium text-neutral-800 sm:text-base`}>
+              <span className={`${discoverMedium} font-bold text-neutral-900`}>{totalJobs}</span> jobs available
+            </p>
           </div>
 
-          <div className="flex w-full items-center justify-between gap-1.5 md:w-auto md:justify-end md:self-auto">
-            <span className={`${discoverBody} text-[13px] font-medium text-neutral-400`}>Sort by</span>
-            <div className="relative">
+          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            <Link
+              href={JOB_MAP_PATH}
+              className={`${discoverMedium} inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-[#52C47F] transition-opacity hover:opacity-80`}
+            >
+              <Map className="h-4 w-4" />
+              View job map
+            </Link>
+
+            <div className={`relative flex items-center gap-1.5 ${openDropdown === 'sort' ? 'z-50' : ''}`}>
+              <span className={`${discoverBody} whitespace-nowrap text-[13px] font-medium text-neutral-400`}>Sort by</span>
               <button
                 type="button"
                 onClick={() => handleDropdownToggle('sort')}
-                className={`${discoverMedium} flex cursor-pointer items-center gap-1 text-[13px] text-neutral-800 transition-all hover:text-black focus:outline-none`}
+                className={`${discoverMedium} flex cursor-pointer items-center gap-1 whitespace-nowrap text-[13px] text-neutral-800 transition-all hover:text-black focus:outline-none`}
               >
                 <span>{SORT_OPTIONS.find((o) => o.value === sortBy)?.label}</span>
                 <ChevronDown className="h-4 w-4 text-neutral-500" />
@@ -396,7 +410,7 @@ export default function JobList({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 3 }}
-                    className="absolute right-0 z-30 mt-1.5 w-48 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
+                    className="absolute right-0 top-full z-50 mt-1.5 w-48 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
                   >
                     {SORT_OPTIONS.map((opt) => (
                       <button
@@ -441,7 +455,7 @@ export default function JobList({
         ) : null}
 
         {loadingJobs ? (
-          <MarketplaceJobGridSkeleton count={8} className="mt-2" />
+          <GridSkeleton count={8} cardType="job" className="relative z-0 mt-2" label="Loading jobs" />
         ) : paginatedJobsList.length === 0 ? (
           <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
             <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
@@ -462,7 +476,7 @@ export default function JobList({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="relative z-0 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             <AnimatePresence mode="popLayout">
               {paginatedJobsList.map((job) => {
                 const slug = resolveListingSlug(job.slug, job.id);
@@ -635,7 +649,7 @@ function FilterDropdown({
   onSelect: (value: string) => void;
 }) {
   return (
-    <div className="relative">
+    <div className={`relative ${open ? 'z-50' : ''}`}>
       <button
         type="button"
         onClick={onToggle}
@@ -652,7 +666,7 @@ function FilterDropdown({
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 3 }}
-            className="absolute left-0 z-30 mt-1.5 w-56 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
+            className="absolute left-0 top-full z-50 mt-1.5 w-56 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
           >
             {options.map((opt) => (
               <button

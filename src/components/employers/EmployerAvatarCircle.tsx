@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import type { Project } from '@/components/projects/projectListData';
 import { resolveEmployerLogoLabel, resolveOwnerAvatarBg } from '@/lib/employerAvatarUtils';
+import { cn } from '@/lib/utils';
 
 type EmployerAvatarCircleProps = {
   name: string;
@@ -32,9 +33,12 @@ export default function EmployerAvatarCircle({
   const showDemoIcon = useDemoIcon && !avatarUrl && iconType && renderIcon;
 
   return (
-    <>
+    <div className={cn('relative shrink-0', sizeClass)}>
       <div
-        className={`flex ${sizeClass} items-center justify-center overflow-hidden rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] ${bg}`}
+        className={cn(
+          'flex h-full w-full items-center justify-center overflow-hidden rounded-full text-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]',
+          bg,
+        )}
       >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -47,10 +51,10 @@ export default function EmployerAvatarCircle({
       </div>
       {verified ? (
         <div
-          className="absolute right-0.5 top-0.5 flex h-[14px] w-[14px] items-center justify-center rounded-full border-2 border-white bg-[#52C47F] shadow-xs"
+          className="absolute right-0 top-0 flex h-[14px] w-[14px] items-center justify-center rounded-full border-2 border-white bg-[#52C47F] shadow-xs"
           title="Verified Employer"
         />
       ) : null}
-    </>
+    </div>
   );
 }

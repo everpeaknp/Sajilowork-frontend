@@ -4,6 +4,9 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Briefcase, ClipboardList, FolderKanban, UserCircle, Wrench } from 'lucide-react';
 import { TASK_BROWSE_PATH, TASK_MAP_PATH } from '@/lib/taskBrowsePath';
+import { JOB_BROWSE_PATH, JOB_MAP_PATH } from '@/lib/jobBrowsePath';
+import { PROJECT_MAP_PATH } from '@/lib/projectBrowsePath';
+import { SERVICE_MAP_PATH } from '@/lib/serviceBrowsePath';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +63,9 @@ const NAV_ITEMS: NavItem[] = [
     icon: FolderKanban,
     href: '/projects',
     match: (pathname) =>
-      pathname === '/projects' || pathname.startsWith('/projects/'),
+      pathname === '/projects' ||
+      pathname === PROJECT_MAP_PATH ||
+      pathname.startsWith('/projects/'),
   },
   {
     id: 'account',
@@ -77,15 +82,19 @@ const NAV_ITEMS: NavItem[] = [
     icon: Wrench,
     href: '/services',
     match: (pathname) =>
-      pathname === '/services' || pathname.startsWith('/services/'),
+      pathname === '/services' ||
+      pathname === SERVICE_MAP_PATH ||
+      pathname.startsWith('/services/'),
   },
   {
     id: 'jobs',
     label: 'Jobs',
     icon: Briefcase,
-    href: '/jobs',
+    href: JOB_BROWSE_PATH,
     match: (pathname) =>
-      pathname === '/jobs' || pathname.startsWith('/jobs/'),
+      pathname === JOB_BROWSE_PATH ||
+      pathname === JOB_MAP_PATH ||
+      pathname.startsWith('/jobs/'),
   },
 ];
 

@@ -26,6 +26,8 @@ interface TaskBrowseMobileSheetProps {
   snap: BrowseSheetSnap;
   onSnapChange: (snap: BrowseSheetSnap) => void;
   taskCount: number;
+  /** Singular label for the listing kind (default: task). */
+  countLabel?: string;
   /** Hide while full-screen task details are open */
   hidden?: boolean;
   children: ReactNode;
@@ -35,6 +37,7 @@ export default function TaskBrowseMobileSheet({
   snap,
   onSnapChange,
   taskCount,
+  countLabel = 'task',
   hidden = false,
   children,
 }: TaskBrowseMobileSheetProps) {
@@ -124,7 +127,7 @@ export default function TaskBrowseMobileSheet({
           </div>
 
           <p className="px-4 pb-2 text-center text-xs font-semibold text-on-surface-variant">
-            {taskCount} {taskCount === 1 ? 'task' : 'tasks'} · swipe up for list
+            {taskCount} {taskCount === 1 ? countLabel : `${countLabel}s`} · swipe up for list
           </p>
 
           <div className="mx-4 mb-2 flex rounded-full bg-[#f1f4f9] p-1">

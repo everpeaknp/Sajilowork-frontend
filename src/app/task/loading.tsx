@@ -1,15 +1,13 @@
-import { MarketplaceBrowseRowListSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
 import Navbar from '@/components/common/navbar';
 import Footer from '@/components/common/footer';
-import { TaskHero } from '@/components/task/browse';
+import { TaskPageSkeleton } from '@/components/skeletons';
 
 export default function TaskLoading() {
   return (
-    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0">
+    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 dark:bg-neutral-950 md:pb-0">
       <Navbar />
       <main className="pb-2 md:pb-0">
-        <TaskHero />
-        <MarketplaceBrowseRowListSkeleton count={6} />
+        <TaskPageSkeleton />
       </main>
       <Footer />
     </div>

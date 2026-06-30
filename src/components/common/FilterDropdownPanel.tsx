@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useState, type ReactNode, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 
@@ -29,14 +29,14 @@ export function FilterPanelActions({
       <button
         type="button"
         onClick={onCancel}
-        className="min-h-[44px] px-2 font-sans text-[16px] font-bold text-primary hover:underline"
+        className="min-h-[44px] px-2 font-sans text-[16px] font-bold text-brand-emerald hover:underline"
       >
         Cancel
       </button>
       <button
         type="button"
         onClick={onApply}
-        className="min-h-[44px] px-2 font-sans text-[16px] font-extrabold text-primary hover:underline"
+        className="min-h-[44px] px-2 font-sans text-[16px] font-extrabold text-brand-emerald hover:underline"
       >
         Apply
       </button>
@@ -79,6 +79,8 @@ export default function FilterDropdownPanel({
 }: FilterDropdownPanelProps) {
   const isMobileFromHook = useIsMobileFilterViewport();
   const [mounted, setMounted] = useState(false);
+  const internalPanelRef = useRef<HTMLDivElement>(null);
+  const resolvedPanelRef = panelRef ?? internalPanelRef;
   const [desktopPos, setDesktopPos] = useState({ top: 0, left: 0, right: 0 });
 
   useEffect(() => setMounted(true), []);
@@ -97,21 +99,39 @@ export default function FilterDropdownPanel({
       const el = anchorRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      setDesktopPos({
-        top: rect.bottom + 8,
-        left: rect.left,
-        right: window.innerWidth - rect.right,
-      });
+      const padding = 12;
+      const panelWidth = resolvedPanelRef.current?.offsetWidth || 320;
+      const top = rect.bottom + 8;
+
+      let left = rect.left;
+      let right = window.innerWidth - rect.right;
+
+      if (align === 'right') {
+        right = Math.max(padding, right);
+        const panelLeftEdge = window.innerWidth - right - panelWidth;
+        if (panelLeftEdge < padding) {
+          right = Math.max(padding, window.innerWidth - padding - panelWidth);
+        }
+      } else {
+        left = Math.max(padding, left);
+        if (left + panelWidth > window.innerWidth - padding) {
+          left = Math.max(padding, window.innerWidth - padding - panelWidth);
+        }
+      }
+
+      setDesktopPos({ top, left, right });
     };
 
     update();
+    const raf = window.requestAnimationFrame(update);
     window.addEventListener('resize', update);
     window.addEventListener('scroll', update, true);
     return () => {
+      window.cancelAnimationFrame(raf);
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     };
-  }, [open, isMobile, anchorRef]);
+  }, [open, isMobile, anchorRef, align, resolvedPanelRef]);
 
   useEffect(() => {
     if (!open) return;
@@ -134,7 +154,7 @@ export default function FilterDropdownPanel({
           <button
             type="button"
             onClick={onClose}
-            className="font-sans text-[14px] font-bold text-primary hover:underline sm:hidden"
+            className="font-sans text-[14px] font-bold text-brand-emerald hover:underline sm:hidden"
           >
             Close
           </button>
@@ -161,7 +181,7 @@ export default function FilterDropdownPanel({
 
           {isMobile ? (
             <motion.div
-              ref={panelRef}
+              ref={resolvedPanelRef}
               role="dialog"
               aria-modal="true"
               initial={{ y: '100%' }}
@@ -178,7 +198,7 @@ export default function FilterDropdownPanel({
             </motion.div>
           ) : (
             <motion.div
-              ref={panelRef}
+              ref={resolvedPanelRef}
               role="dialog"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -187,9 +207,7 @@ export default function FilterDropdownPanel({
               className={`fixed z-[510] max-h-[min(80vh,calc(100vh-6rem))] w-[min(calc(100vw-1.5rem),100%)] cursor-default overflow-hidden rounded-2xl border border-outline-variant bg-white p-4 shadow-2xl sm:rounded-3xl md:p-6 ${desktopClassName}`}
               style={{
                 top: desktopPos.top,
-                ...(align === 'right'
-                  ? { right: Math.max(12, desktopPos.right) }
-                  : { left: Math.max(12, desktopPos.left) }),
+                ...(align === 'right' ? { right: desktopPos.right } : { left: desktopPos.left }),
                 maxWidth: align === 'right' ? undefined : 'min(calc(100vw - 24px), 650px)',
               }}
               onClick={(e) => e.stopPropagation()}

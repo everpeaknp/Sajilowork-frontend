@@ -289,3 +289,64 @@ body {
     display: none;
   }
 }
+
+/* Premium skeleton shimmer — respects reduced motion */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(229 231 235 / 0.55) 0%,
+    rgb(243 244 246 / 0.95) 45%,
+    rgb(229 231 235 / 0.55) 90%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.85s ease-in-out infinite;
+}
+
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(38 38 38 / 0.65) 0%,
+    rgb(64 64 64 / 0.9) 45%,
+    rgb(38 38 38 / 0.65) 90%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: rgb(229 231 235 / 0.7);
+  }
+
+  .dark .skeleton-shimmer {
+    background: rgb(64 64 64 / 0.75);
+  }
+}
+
+.skeleton-fade-in {
+  animation: skeleton-fade-in 0.4s ease-out both;
+}
+
+@keyframes skeleton-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-fade-in {
+    animation: none;
+  }
+}

@@ -11,6 +11,7 @@ import {
   Check,
   AlertCircle,
   MapPin,
+  Map,
   FileText,
   ArrowUpRight,
   Calendar,
@@ -22,10 +23,11 @@ import {
   locationDisplay,
 } from './projectListData';
 import { searchBrowseProjects } from '@/lib/listingSearchApi';
+import { PROJECT_MAP_PATH } from '@/lib/projectBrowsePath';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import { getProjectDetailPath } from './projectSlug';
-import { MarketplaceBrowseRowListSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
+import { ListSkeleton } from '@/components/skeletons';
 
 const CustomLogo: React.FC<{
   type: Project['companyIconType'];
@@ -543,7 +545,16 @@ export default function ProjectList({
                 projects available
               </p>
 
-              <div className="relative flex items-center gap-1.5" ref={sortMenuRef}>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={PROJECT_MAP_PATH}
+                  className={`${discoverMedium} inline-flex items-center gap-1.5 text-sm font-semibold text-[#52C47F] transition-opacity hover:opacity-80`}
+                >
+                  <Map className="h-4 w-4" />
+                  View project map
+                </Link>
+
+                <div className="relative flex items-center gap-1.5" ref={sortMenuRef}>
                 <span className={`${discoverBody} select-none text-sm font-medium text-neutral-400`}>
                   Sort by
                 </span>
@@ -586,6 +597,7 @@ export default function ProjectList({
                   )}
                 </AnimatePresence>
               </div>
+              </div>
             </div>
 
             {hasActiveSearch ? (
@@ -608,7 +620,7 @@ export default function ProjectList({
             ) : null}
 
             {loadingProjects ? (
-              <MarketplaceBrowseRowListSkeleton count={4} />
+              <ListSkeleton count={4} cardType="project" label="Loading projects" />
             ) : paginatedProjectsList.length === 0 ? (
               <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
                 <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />

@@ -9,6 +9,7 @@ import {
   parseServiceSkills,
   parseTaskDashboardMeta,
   getServiceListingPrice,
+  getListingKind,
 } from '@/lib/dashboardListingApi';
 
 import { formatNPR, formatTaskLocationShort } from '@/lib/nepalLocale';
@@ -537,7 +538,9 @@ export async function fetchPublicServices(
 
   }
 
-  return extractTaskList(response.data).map(mapTaskToPublicService);
+  return extractTaskList(response.data)
+    .filter((task) => getListingKind(task) === 'service')
+    .map(mapTaskToPublicService);
 
 }
 
@@ -551,6 +554,10 @@ export async function fetchPublicServiceBySlug(slug: string): Promise<Service | 
 
     return null;
 
+  }
+
+  if (getListingKind(response.data) !== 'service') {
+    return null;
   }
 
   return mapTaskToPublicService(response.data);

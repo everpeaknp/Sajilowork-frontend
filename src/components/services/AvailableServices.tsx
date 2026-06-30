@@ -26,7 +26,7 @@ import { SERVICE_LANGUAGE_FALLBACK, SERVICE_LOCATIONS } from './serviceListData'
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
 import OptimizedImage from '@/components/ui/optimized-image';
-import { MarketplaceServiceGridSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
+import { GridSkeleton, HeaderSkeleton } from '@/components/skeletons';
 
 const BUDGET_MIN = 3000;
 const BUDGET_MAX = 20000;
@@ -502,10 +502,7 @@ export default function AvailableServices({
           <div className="flex-1">
             <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
               {loadingServices ? (
-                <>
-                  <div className="h-5 w-40 animate-pulse rounded bg-neutral-200" />
-                  <div className="h-9 w-36 animate-pulse rounded bg-neutral-100" />
-                </>
+                <HeaderSkeleton variant="browse" showMapLink={false} className="w-full" />
               ) : (
                 <>
                   <span className={`${discoverBody} text-sm font-normal text-[#131118] sm:text-base md:text-lg`}>
@@ -550,7 +547,7 @@ export default function AvailableServices({
             ) : null}
 
             {loadingServices ? (
-              <MarketplaceServiceGridSkeleton count={6} />
+              <GridSkeleton count={6} cardType="service" label="Loading services" />
             ) : filteredServices.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}

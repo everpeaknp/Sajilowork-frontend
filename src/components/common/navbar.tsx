@@ -17,6 +17,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTaskerDashboardNavOptional } from '@/context/TaskerDashboardNavContext';
 import { useAuth } from '@/hooks/useAuth';
 import { TASK_BROWSE_PATH, TASK_MAP_PATH } from '@/lib/taskBrowsePath';
+import { JOB_BROWSE_PATH, JOB_MAP_PATH } from '@/lib/jobBrowsePath';
+import { PROJECT_MAP_PATH } from '@/lib/projectBrowsePath';
+import { SERVICE_MAP_PATH } from '@/lib/serviceBrowsePath';
 import { dashboardMessageConversationHref, DASHBOARD_MESSAGES_PATH } from '@/lib/dashboardChat';
 import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
@@ -359,11 +362,18 @@ export default function Navbar() {
     router.push('/my-tasks');
   };
 
-  const isJobsActive = pathname === '/jobs' || pathname.startsWith('/jobs/');
+  const isJobsActive =
+    pathname === JOB_BROWSE_PATH ||
+    pathname === JOB_MAP_PATH ||
+    pathname.startsWith('/jobs/');
   const isProjectsActive =
-    pathname === '/projects' || pathname.startsWith('/projects/');
+    pathname === '/projects' ||
+    pathname === PROJECT_MAP_PATH ||
+    pathname.startsWith('/projects/');
   const isServicesActive =
-    pathname === '/services' || pathname.startsWith('/services/');
+    pathname === '/services' ||
+    pathname === SERVICE_MAP_PATH ||
+    pathname.startsWith('/services/');
   const isBrowseTasksActive =
     pathname === TASK_BROWSE_PATH ||
     pathname === TASK_MAP_PATH ||

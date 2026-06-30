@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Star, Heart, ArrowLeft, ArrowRight } from 'lucide-react';
-import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
+import { Star, Heart, ArrowLeft, ArrowRight, Map } from 'lucide-react';
+import { discoverBody, discoverHeadline, discoverMedium } from '@/components/LangingHome/landingTypography';
+import { SERVICE_MAP_PATH } from '@/lib/serviceBrowsePath';
 import { formatNPR } from '@/lib/nepalLocale';
 import { DEFAULT_SERVICE_IMAGE, serviceListingFallbackImage } from '@/lib/dashboardListingApi';
 import { fetchPublicServices, formatServiceStartingPrice } from '@/lib/serviceApi';
 import { buildBookmarkSlugSet, resolveListingSlug, toggleListingBookmark } from '@/lib/listingBookmark';
-import { MarketplaceServiceCarouselSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
+import { ServiceCardSkeleton, SkeletonSurface } from '@/components/skeletons';
 import type { Service } from './serviceListData';
 import { getServiceDetailPath } from './serviceSlug';
 import ServiceAuthorLink from './ServiceAuthorLink';
@@ -91,7 +92,15 @@ export default function BestServices({ className = '' }: BestServicesProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <Link
+              href={SERVICE_MAP_PATH}
+              className={`${discoverMedium} inline-flex items-center gap-1.5 text-sm font-semibold text-[#52C47F] transition-opacity hover:opacity-80`}
+            >
+              <Map className="h-4 w-4" />
+              View service map
+            </Link>
+
             <button
               type="button"
               onClick={handlePrev}
@@ -135,7 +144,17 @@ export default function BestServices({ className = '' }: BestServicesProps) {
 
         <div className="relative -mx-1 w-full overflow-hidden px-1">
           {loadingBestServices ? (
-            <MarketplaceServiceCarouselSkeleton count={5} />
+            <SkeletonSurface
+              className="flex gap-6 overflow-hidden pb-4"
+              label="Loading featured services"
+            >
+              {Array.from({ length: 5 }).map((_, index) => (
+                <ServiceCardSkeleton
+                  key={index}
+                  className="w-full shrink-0 sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)]"
+                />
+              ))}
+            </SkeletonSurface>
           ) : (
           <motion.div
             className="mx-1 flex cursor-grab gap-6 pb-4 active:cursor-grabbing"

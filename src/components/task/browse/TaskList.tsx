@@ -33,7 +33,7 @@ import { extractCategoryList } from '@/lib/taskUtils';
 import { resolveEmployerProfileHref } from '@/components/employers/employerSlug';
 import EmployerAvatarCircle from '@/components/employers/EmployerAvatarCircle';
 import TaskBrowseFilterSidebar from '@/components/task/browse/TaskBrowseFilterSidebar';
-import { MarketplaceBrowseRowListSkeleton } from '@/components/common/MarketplaceBrowseSkeletons';
+import { ListSkeleton } from '@/components/skeletons';
 import { taskService } from '@/services/task.service';
 import type { Category, SearchFilters, Task } from '@/types';
 
@@ -310,7 +310,7 @@ export default function TaskList({
             ) : null}
 
             {loadingTasks ? (
-              <MarketplaceBrowseRowListSkeleton count={4} />
+              <ListSkeleton count={4} cardType="task" label="Loading tasks" />
             ) : paginatedTasks.length === 0 ? (
               <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
                 <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
