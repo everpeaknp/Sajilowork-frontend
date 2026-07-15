@@ -32,6 +32,7 @@ import {
   DASHBOARD_SUBTABS_ROW,
   DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 export default function DashboardReviews() {
@@ -148,12 +149,7 @@ export default function DashboardReviews() {
     toast.message('Thanks for the report. Our team will review flagged feedback.');
   };
 
-  const subTabClass = (tab: ReviewsSubTab) =>
-    `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
-      activeSubTab === tab
-        ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
-        : 'text-neutral-400 hover:text-neutral-900'
-    }`;
+  const subTabClass = (tab: ReviewsSubTab) => dashboardSubtabClass(activeSubTab === tab);
 
   return (
     <div className={DASHBOARD_PAGE_ROOT}>
@@ -219,7 +215,7 @@ export default function DashboardReviews() {
               </div>
             ) : (
               paginatedReviews.map((review) => (
-                <div key={review.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0">
+                <div key={review.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0 dark:border-neutral-800">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                       {review.authorAvatar ? (
@@ -241,7 +237,7 @@ export default function DashboardReviews() {
                       )}
 
                       <div className="space-y-1">
-                        <h4 className="text-[15px] font-medium leading-tight tracking-tight text-neutral-900">
+                        <h4 className="text-[15px] font-medium leading-tight tracking-tight text-neutral-900 dark:text-stone-100">
                           {review.authorName}
                         </h4>
                         <div className="flex flex-wrap items-center gap-2.5 text-xs text-neutral-500">
@@ -271,25 +267,25 @@ export default function DashboardReviews() {
                     </button>
                   </div>
 
-                  <p className="mt-5 max-w-[840px] font-sans text-sm font-normal leading-relaxed text-neutral-600">
+                  <p className="mt-5 max-w-[840px] font-sans text-sm font-normal leading-relaxed text-neutral-600 dark:text-neutral-300">
                     {review.content}
                   </p>
 
                   {review.response ? (
-                    <div className="animate-in fade-in mt-4 ml-6 max-w-[800px] rounded-r-xl border-l-2 border-[#52C47F]/40 bg-[#FAFBF9] p-4 duration-300">
-                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-[#183B32]">
+                    <div className="animate-in fade-in mt-4 ml-6 max-w-[800px] rounded-r-xl border-l-2 border-[#52C47F]/40 bg-[#FAFBF9] p-4 duration-300 dark:bg-neutral-800/50">
+                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-[#183B32] dark:text-[#52C47F]">
                         <CornerDownRight className="h-3.5 w-3.5 text-[#52C47F]" />
                         <span className="uppercase tracking-wider">Your Response</span>
                       </div>
-                      <p className="text-sm font-normal italic text-neutral-600">&quot;{review.response}&quot;</p>
+                      <p className="text-sm font-normal italic text-neutral-600 dark:text-neutral-300">&quot;{review.response}&quot;</p>
                     </div>
                   ) : null}
 
                   {review.canRespond ? (
                     <div className="mt-5">
                       {activeReplyId === review.id ? (
-                        <div className="animate-in slide-in-from-bottom-2 mt-4 max-w-[650px] space-y-3 rounded-xl border border-neutral-100 bg-[#FAFBF9] p-4 duration-300">
-                          <div className="mb-1 text-xs font-medium text-neutral-500">
+                        <div className="animate-in slide-in-from-bottom-2 mt-4 max-w-[650px] space-y-3 rounded-xl border border-neutral-100 bg-[#FAFBF9] p-4 duration-300 dark:border-neutral-800 dark:bg-neutral-800/50">
+                          <div className="mb-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
                             Respond to {review.authorName}:
                           </div>
                           <textarea
@@ -297,14 +293,14 @@ export default function DashboardReviews() {
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder="Write your professional response..."
                             disabled={submittingReplyId === review.id}
-                            className="min-h-[90px] w-full resize-none rounded-xl border border-neutral-200 bg-white p-3 text-sm font-normal text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[#52C47F] disabled:opacity-60"
+                            className="min-h-[90px] w-full resize-none rounded-xl border border-neutral-200 bg-white p-3 text-sm font-normal text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[#52C47F] disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:placeholder:text-neutral-500"
                           />
                           <div className="flex items-center justify-end gap-2.5">
                             <button
                               type="button"
                               onClick={() => setActiveReplyId(null)}
                               disabled={submittingReplyId === review.id}
-                              className="cursor-pointer rounded-xl bg-neutral-100 px-4 py-2 text-xs font-medium text-neutral-600 transition-all hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="cursor-pointer rounded-xl bg-neutral-100 px-4 py-2 text-xs font-medium text-neutral-600 transition-all hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
                             >
                               Cancel
                             </button>
@@ -345,7 +341,7 @@ export default function DashboardReviews() {
                 disabled={activePage === 1}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -392,7 +388,7 @@ export default function DashboardReviews() {
                 disabled={activePage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 

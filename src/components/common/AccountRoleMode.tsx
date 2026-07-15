@@ -198,17 +198,17 @@ export default function AccountRoleMode({
         <div className={cn('w-full', className)}>
           {switching ? (
             <span className="flex h-9 w-full items-center justify-center">
-              <Loader2 className="h-4 w-4 animate-spin text-neutral-700" />
+              <Loader2 className="h-4 w-4 animate-spin text-neutral-700 dark:text-neutral-300" />
             </span>
           ) : (
             <RoleModeToggle
               currentRole={currentRole}
               switching={switching}
               onPickRole={requestRole}
-              containerClassName="border-neutral-200 bg-white"
+              containerClassName="border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
               optionClassName="rounded-md px-2 py-3 text-[13px] font-medium tracking-wide transition-colors disabled:opacity-50"
               activeClassName="bg-[#52C47F] text-white"
-              inactiveClassName="text-neutral-700 hover:bg-neutral-50"
+              inactiveClassName="text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
             />
           )}
         </div>

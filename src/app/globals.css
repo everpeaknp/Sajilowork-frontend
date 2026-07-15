@@ -303,10 +303,9 @@ html.dark .bg-white\/60 {
   background-color: color-mix(in srgb, var(--surface) 92%, transparent) !important;
 }
 
-/* Soft green washes that stay bright in dark mode */
-html.dark .bg-emerald-50,
-html.dark .bg-green-50 {
-  background-color: rgb(6 78 59 / 0.35) !important;
+html.dark .bg-\[\#FAFBF9\],
+html.dark .bg-\[\#fafbf9\] {
+  background-color: color-mix(in srgb, var(--surface-dim) 88%, transparent) !important;
 }
 
 /* Soft overlays on dark chips (sidebar active) — keep translucent */

@@ -189,7 +189,7 @@ export default function DashboardQuestions() {
               const canAnswer = Boolean(item.can_answer && !hasAnswer && item.task_slug);
 
               return (
-                <div key={item.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0">
+                <div key={item.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0 dark:border-neutral-800">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                       <UserAvatar
@@ -199,7 +199,7 @@ export default function DashboardQuestions() {
                         className="h-[52px] w-[52px] shrink-0"
                       />
                       <div className="min-w-0 space-y-1">
-                        <h4 className="text-[15px] font-medium leading-tight tracking-tight text-neutral-900">
+                        <h4 className="text-[15px] font-medium leading-tight tracking-tight text-neutral-900 dark:text-stone-100">
                           {item.asked_by_name || 'User'}
                         </h4>
                         <div className="flex flex-wrap items-center gap-2.5 text-xs text-neutral-500">
@@ -239,19 +239,19 @@ export default function DashboardQuestions() {
                     ) : null}
                   </div>
 
-                  <p className="mt-5 max-w-[840px] font-sans text-sm font-normal leading-relaxed text-neutral-600">
+                  <p className="mt-5 max-w-[840px] font-sans text-sm font-normal leading-relaxed text-neutral-600 dark:text-neutral-300">
                     {item.question}
                   </p>
 
                   {hasAnswer ? (
-                    <div className="animate-in fade-in mt-4 ml-6 max-w-[800px] rounded-r-xl border-l-2 border-[#52C47F]/40 bg-[#FAFBF9] p-4 duration-300">
-                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-[#183B32]">
+                    <div className="animate-in fade-in mt-4 ml-6 max-w-[800px] rounded-r-xl border-l-2 border-[#52C47F]/40 bg-[#FAFBF9] p-4 duration-300 dark:bg-neutral-800/50">
+                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-[#183B32] dark:text-[#52C47F]">
                         <CornerDownRight className="h-3.5 w-3.5 text-[#52C47F]" />
                         <span className="uppercase tracking-wider">
                           {dashboardRole === 'customer' ? 'Your Response' : 'Listing Owner Response'}
                         </span>
                       </div>
-                      <p className="text-sm font-normal italic text-neutral-600">
+                      <p className="text-sm font-normal italic text-neutral-600 dark:text-neutral-300">
                         &quot;{item.answer}&quot;
                       </p>
                       {item.answered_at ? (
@@ -261,8 +261,8 @@ export default function DashboardQuestions() {
                       ) : null}
                     </div>
                   ) : canAnswer ? (
-                    <div className="animate-in slide-in-from-bottom-2 mt-5 max-w-[650px] space-y-3 rounded-xl border border-neutral-100 bg-[#FAFBF9] p-4 duration-300">
-                      <div className="text-xs font-medium text-neutral-500">Your reply</div>
+                    <div className="animate-in slide-in-from-bottom-2 mt-5 max-w-[650px] space-y-3 rounded-xl border border-neutral-100 bg-[#FAFBF9] p-4 duration-300 dark:border-neutral-800 dark:bg-neutral-800/50">
+                      <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Your reply</div>
                       <textarea
                         value={answerDrafts[item.id] ?? ''}
                         onChange={(e) =>
@@ -270,7 +270,7 @@ export default function DashboardQuestions() {
                         }
                         placeholder="Write your answer..."
                         disabled={submittingAnswerId === item.id}
-                        className="min-h-[90px] w-full resize-none rounded-xl border border-neutral-200 bg-white p-3 text-sm font-normal text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[#52C47F] disabled:opacity-60"
+                        className="min-h-[90px] w-full resize-none rounded-xl border border-neutral-200 bg-white p-3 text-sm font-normal text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[#52C47F] disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:placeholder:text-neutral-500"
                       />
                       <div className="flex items-center justify-end">
                         <button
@@ -304,7 +304,7 @@ export default function DashboardQuestions() {
                 disabled={activePage === 1}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -326,7 +326,7 @@ export default function DashboardQuestions() {
                 disabled={activePage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 
