@@ -473,7 +473,7 @@ export default function PostTaskForm({
               {galleryItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 bg-neutral-50"
+                  className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.preview} alt="" className="h-full w-full object-cover" />
@@ -495,7 +495,7 @@ export default function PostTaskForm({
               <button
                 type="button"
                 onClick={() => galleryInputRef.current?.click()}
-                className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8]"
+                className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
               >
                 <ImageIcon className="h-5 w-5 text-neutral-400" />
                 Upload
