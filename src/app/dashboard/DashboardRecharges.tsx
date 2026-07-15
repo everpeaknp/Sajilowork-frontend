@@ -188,7 +188,7 @@ export default function DashboardRecharges({
     `flex h-[44px] w-[44px] cursor-pointer items-center justify-center rounded-full text-sm transition-all ${
       activePage === page
         ? 'bg-[#52C47F] font-semibold text-white shadow-sm'
-        : 'bg-transparent font-normal text-black hover:text-[#52C47F]'
+        : 'bg-transparent font-normal text-black hover:text-[#52C47F] dark:text-stone-200'
     }`;
 
   const handleCreateClick = () => {
@@ -224,7 +224,7 @@ export default function DashboardRecharges({
   };
 
   const outerClass = embedded
-    ? 'animate-in fade-in duration-300 font-sans text-black'
+    ? 'animate-in fade-in duration-300 font-sans text-black dark:text-stone-100'
     : DASHBOARD_PAGE_ROOT;
 
   return (
@@ -232,7 +232,7 @@ export default function DashboardRecharges({
       {!embedded ? (
         <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">Recharges</h1>
+            <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900 dark:text-stone-100">Recharges</h1>
             <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
               Lorem ipsum dolor sit amet, consectetur.
             </p>
@@ -281,14 +281,14 @@ export default function DashboardRecharges({
         }}
       />
 
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
         {loading ? (
           <div className="py-16 text-center text-sm text-neutral-500">Loading recharges…</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full table-auto border-collapse text-left">
               <thead>
-                <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
+                <tr className="border-b border-transparent text-sm font-medium text-neutral-800 dark:text-stone-100">
                   <th className="w-[12%] pb-6 pl-2 pt-2 font-medium">Invoice ID</th>
                   <th className="w-[18%] pb-6 pt-2 font-medium">Amount</th>
                   <th className="w-[18%] pb-6 pt-2 font-medium">Date</th>
@@ -297,7 +297,7 @@ export default function DashboardRecharges({
                   <th className="w-[16%] pb-6 pt-2 pr-2 text-left font-medium">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
                 {currentRecharges.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-sm text-neutral-500">
@@ -308,11 +308,11 @@ export default function DashboardRecharges({
                   </tr>
                 ) : (
                   currentRecharges.map((item) => (
-                    <tr key={item.id} className="transition-colors hover:bg-neutral-50/20">
-                      <td className="py-6 pl-2 align-middle text-sm font-normal text-neutral-900">
+                    <tr key={item.id} className="transition-colors hover:bg-neutral-50/20 dark:hover:bg-neutral-800/50">
+                      <td className="py-6 pl-2 align-middle text-sm font-normal text-neutral-900 dark:text-stone-100">
                         {buildReceiptId(item.id)}
                       </td>
-                      <td className="select-all py-6 align-middle text-[15px] font-medium text-neutral-900">
+                      <td className="select-all py-6 align-middle text-[15px] font-medium text-neutral-900 dark:text-stone-100">
                         {item.amount}
                       </td>
                       <td className="py-6 align-middle text-sm font-normal text-neutral-500">{item.date}</td>
@@ -339,15 +339,15 @@ export default function DashboardRecharges({
         )}
 
         {!loading && filteredRecharges.length > 0 ? (
-          <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans">
+          <div className="mt-8 flex select-none flex-col items-center justify-center gap-4 border-t border-neutral-100 pt-10 font-sans dark:border-neutral-800">
             <div className="flex items-center justify-center gap-6">
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={activePage === 1}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800 dark:disabled:hover:bg-neutral-900"
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex items-center gap-1">
@@ -381,9 +381,9 @@ export default function DashboardRecharges({
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={activePage === totalPages}
-                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-black shadow-[0_2px_6px_rgba(0,0,0,0.01)] transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800 dark:disabled:hover:bg-neutral-900"
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 
@@ -404,9 +404,9 @@ export default function DashboardRecharges({
             className="animate-in fade-in absolute inset-0 bg-neutral-900/40 backdrop-blur-sm duration-300"
           />
 
-          <div className="animate-in slide-in-from-bottom-2 relative z-10 w-full max-w-md space-y-6 rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-3.5">
-              <h3 className="flex items-center gap-2 text-lg font-bold text-neutral-900">
+          <div className="animate-in slide-in-from-bottom-2 relative z-10 w-full max-w-md space-y-6 rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="flex items-center justify-between border-b border-neutral-100 pb-3.5 dark:border-neutral-800">
+              <h3 className="flex items-center gap-2 text-lg font-bold text-neutral-900 dark:text-stone-100">
                 <div className="rounded-lg bg-emerald-50 p-2">
                   <Wallet className="h-5 w-5 text-[#52C47F]" />
                 </div>
@@ -415,7 +415,7 @@ export default function DashboardRecharges({
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="cursor-pointer rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
+                className="cursor-pointer rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black dark:hover:bg-neutral-800 dark:hover:text-stone-100"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -426,7 +426,7 @@ export default function DashboardRecharges({
                 <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
                   Amount (NPR)
                 </label>
-                <div className="flex items-center rounded-xl border border-neutral-200 px-4">
+                <div className="flex items-center rounded-xl border border-neutral-200 px-4 dark:border-neutral-700">
                   <span className="font-bold text-neutral-400">{CURRENCY_INPUT_PREFIX}</span>
                   <input
                     type="number"
@@ -450,7 +450,7 @@ export default function DashboardRecharges({
                 <select
                   value={newMethod}
                   onChange={(e) => setNewMethod(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 outline-none focus:ring-2 focus:ring-[#52C47F]"
+                  className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 outline-none focus:ring-2 focus:ring-[#52C47F] dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                 >
                   <option value="eSewa">eSewa</option>
                   <option value="WhatsApp">WhatsApp</option>
@@ -469,7 +469,7 @@ export default function DashboardRecharges({
                     className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border p-3 text-center text-xs transition-all ${
                       newStatus === 'Pending Orange'
                         ? 'border-[#F2994A] bg-[#FFF6E9] font-bold text-[#F2994A]'
-                        : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
+                        : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-300 dark:hover:bg-neutral-800'
                     }`}
                   >
                     <span className="h-2.5 w-2.5 rounded-full bg-[#F2994A]" />
@@ -481,7 +481,7 @@ export default function DashboardRecharges({
                     className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border p-3 text-center text-xs transition-all ${
                       newStatus === 'Pending Blue'
                         ? 'border-[#2F80ED] bg-[#F3F9FE] font-bold text-[#2F80ED]'
-                        : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
+                        : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-300 dark:hover:bg-neutral-800'
                     }`}
                   >
                     <span className="h-2.5 w-2.5 rounded-full bg-[#2F80ED]" />
@@ -490,7 +490,7 @@ export default function DashboardRecharges({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 border-t border-neutral-100 pt-4">
+              <div className="flex items-center gap-3 border-t border-neutral-100 pt-4 dark:border-neutral-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}

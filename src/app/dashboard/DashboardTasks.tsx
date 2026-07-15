@@ -21,6 +21,7 @@ import {
   DASHBOARD_SUBTABS_ROW,
   DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 type TaskStatus = Project['status'];
@@ -108,13 +109,6 @@ export default function DashboardTasks() {
     }
   };
 
-  const subTabClass = (tab: TaskStatus) =>
-    `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
-      activeSubTab === tab
-        ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
-        : 'text-neutral-400 hover:text-neutral-900'
-    }`;
-
   return (
     <div className={DASHBOARD_PAGE_ROOT}>
       <div className="mx-auto mb-6 flex max-w-7xl flex-col gap-5 pl-1 sm:mb-8 md:flex-row md:items-end md:justify-between">
@@ -148,7 +142,7 @@ export default function DashboardTasks() {
                   setActiveSubTab(tab);
                   setCurrentPage(1);
                 }}
-                className={subTabClass(tab)}
+                className={dashboardSubtabClass(activeSubTab === tab)}
               >
                 {tab}
               </button>
@@ -180,7 +174,7 @@ export default function DashboardTasks() {
                 disabled={activePage === 1}
                 className={DASHBOARD_PAGINATION_ARROW}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -202,7 +196,7 @@ export default function DashboardTasks() {
                 disabled={activePage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
           </div>

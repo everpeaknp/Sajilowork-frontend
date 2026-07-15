@@ -70,13 +70,13 @@ export default function DeleteConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className="relative z-10 w-full max-w-sm rounded-2xl border border-neutral-100 bg-white px-5 py-6 text-center shadow-2xl sm:max-w-md sm:px-8 sm:py-8"
+        className="relative z-10 w-full max-w-sm rounded-2xl border border-neutral-100 bg-white px-5 py-6 text-center shadow-2xl sm:max-w-md sm:px-8 sm:py-8 dark:border-neutral-800 dark:bg-neutral-900"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black sm:right-4 sm:top-4"
+          className="absolute right-3 top-3 rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black sm:right-4 sm:top-4 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -84,11 +84,11 @@ export default function DeleteConfirmModal({
 
         <h3
           id="confirm-modal-title"
-          className="pr-8 text-lg font-semibold tracking-tight text-black sm:text-xl"
+          className="pr-8 text-lg font-semibold tracking-tight text-black sm:text-xl dark:text-stone-100"
         >
           {title}
         </h3>
-        <p className="mx-auto mt-3 text-sm leading-relaxed text-neutral-500 sm:mt-4">
+        <p className="mx-auto mt-3 text-sm leading-relaxed text-neutral-500 sm:mt-4 dark:text-neutral-400">
           {description}
         </p>
 
@@ -96,7 +96,7 @@ export default function DeleteConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
           >
             {cancelLabel}
           </button>

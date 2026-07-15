@@ -911,26 +911,26 @@ function DashboardMessagesContent() {
     <div className={DASHBOARD_PAGE_ROOT}>
       <div className="mx-auto grid min-w-0 max-w-7xl grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
         <div
-          className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-5 lg:col-span-4`}
+          className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 sm:p-5 lg:col-span-4`}
         >
-          <div className="relative mb-5 flex items-center rounded-xl border border-neutral-100 bg-[#F9F9FB] px-4 py-1">
+          <div className="relative mb-5 flex items-center rounded-xl border border-neutral-100 bg-[#F9F9FB] px-4 py-1 dark:border-neutral-800 dark:bg-neutral-900">
             <Search className="mr-2.5 h-[18px] w-[18px] shrink-0 text-neutral-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search conversations"
-              className="w-full border-0 bg-transparent py-3 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0"
+              className="w-full border-0 bg-transparent py-3 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:text-stone-100"
             />
           </div>
 
-          <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-2 overflow-y-auto pr-1">
+          <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-2 overflow-y-auto pr-1 dark:scrollbar-thumb-neutral-700">
             {loadingConversations || resolvingDeepLink ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" />
               </div>
             ) : contacts.length === 0 ? (
-              <div className="py-12 text-center font-sans text-xs text-neutral-400">
+              <div className="py-12 text-center font-sans text-xs text-neutral-400 dark:text-neutral-400">
                 {emptyInboxMessage}
               </div>
             ) : (
@@ -943,8 +943,8 @@ function DashboardMessagesContent() {
                     onClick={() => handleSelectContact(contact.id)}
                     className={`flex w-full cursor-pointer items-center justify-between rounded-xl p-3.5 text-left transition-all ${
                       isSelected
-                        ? 'border border-neutral-100/50 bg-[#F9F9FB]'
-                        : 'border border-transparent hover:bg-neutral-50/70'
+                        ? 'border border-neutral-100/50 bg-[#F9F9FB] dark:border-neutral-800 dark:bg-neutral-800'
+                        : 'border border-transparent hover:bg-neutral-50/70 dark:hover:bg-neutral-800'
                     }`}
                   >
                     <div className="flex min-w-0 items-center gap-3.5">
@@ -952,26 +952,26 @@ function DashboardMessagesContent() {
                         <img
                           src={contact.avatar}
                           alt={contact.name}
-                          className="h-11 w-11 rounded-full border border-neutral-100 object-cover"
+                          className="h-11 w-11 rounded-full border border-neutral-100 object-cover dark:border-neutral-800"
                           referrerPolicy="no-referrer"
                         />
                         {contact.online ? (
-                          <span className="absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full bg-[#27AE60] ring-2 ring-white" />
+                          <span className="absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full bg-[#27AE60] ring-2 ring-white dark:ring-neutral-900" />
                         ) : null}
                       </div>
 
                       <div className="min-w-0">
-                        <h4 className="mb-1 truncate text-sm font-medium leading-tight tracking-tight text-black">
+                        <h4 className="mb-1 truncate text-sm font-medium leading-tight tracking-tight text-black dark:text-stone-100">
                           {contact.name}
                         </h4>
-                        <p className="truncate text-xs font-normal text-neutral-400">
+                        <p className="truncate text-xs font-normal text-neutral-400 dark:text-neutral-400">
                           {contact.role}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex h-9 shrink-0 flex-col items-end justify-between text-right">
-                      <span className="text-[11px] font-normal tracking-tight text-neutral-400">
+                      <span className="text-[11px] font-normal tracking-tight text-neutral-400 dark:text-neutral-400">
                         {contact.time}
                       </span>
 
@@ -994,14 +994,14 @@ function DashboardMessagesContent() {
         </div>
 
         <div
-          className={`${mobilePane === 'list' ? 'hidden lg:flex' : 'flex'} relative ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] lg:col-span-8`}
+          className={`${mobilePane === 'list' ? 'hidden lg:flex' : 'flex'} relative ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 lg:col-span-8`}
         >
-          <div className="flex items-center justify-between gap-3 rounded-t-2xl border-b border-neutral-100 bg-white px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-3 rounded-t-2xl border-b border-neutral-100 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6 sm:py-4">
             <div className="flex min-w-0 items-center gap-2.5 sm:gap-3.5">
               <button
                 type="button"
                 onClick={() => setMobilePane('list')}
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 lg:hidden"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800 lg:hidden"
                 aria-label="Back to conversations"
               >
                 <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
@@ -1010,19 +1010,19 @@ function DashboardMessagesContent() {
                 <img
                   src={activeContact.avatar}
                   alt={activeContact.name}
-                  className="h-11 w-11 rounded-full border border-neutral-100 object-cover"
+                  className="h-11 w-11 rounded-full border border-neutral-100 object-cover dark:border-neutral-800"
                   referrerPolicy="no-referrer"
                 />
                 {activeContact.online ? (
-                  <span className="absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full bg-[#27AE60] ring-2 ring-white" />
+                  <span className="absolute bottom-0 right-0 h-[11px] w-[11px] rounded-full bg-[#27AE60] ring-2 ring-white dark:ring-neutral-900" />
                 ) : null}
               </div>
 
               <div className="leading-tight">
-                <h3 className="text-[15px] font-medium tracking-tight text-black">
+                <h3 className="text-[15px] font-medium tracking-tight text-black dark:text-stone-100">
                   {activeContact.name}
                 </h3>
-                <span className="mt-0.5 block text-[11px] font-normal tracking-tight text-neutral-400">
+                <span className="mt-0.5 block text-[11px] font-normal tracking-tight text-neutral-400 dark:text-neutral-400">
                   {selectedGroup ? activeContact.role : 'Select a conversation'}
                 </span>
               </div>
@@ -1039,7 +1039,7 @@ function DashboardMessagesContent() {
           </div>
 
           {toastMessage ? (
-            <div className="animate-in fade-in absolute left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-4 rounded-xl border border-neutral-200 bg-[#F9F9FB] px-4 py-2.5 text-xs text-neutral-800 shadow-lg duration-300">
+            <div className="animate-in fade-in absolute left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-4 rounded-xl border border-neutral-200 bg-[#F9F9FB] px-4 py-2.5 text-xs text-neutral-800 shadow-lg duration-300 dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100">
               <span>{toastMessage}</span>
               {deletedHistoryBackup ? (
                 <button
@@ -1054,7 +1054,7 @@ function DashboardMessagesContent() {
           ) : null}
 
           {selectedGroup && selectedGroup.conversations.length > 1 ? (
-            <div className="flex gap-2 overflow-x-auto border-b border-neutral-100 bg-white px-4 py-2 sm:px-6">
+            <div className="flex gap-2 overflow-x-auto border-b border-neutral-100 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
               {selectedGroup.conversations.map((conv) => {
                 const id = conversationKey(conv);
                 if (!id) return null;
@@ -1076,8 +1076,8 @@ function DashboardMessagesContent() {
                       isActive
                         ? 'bg-[#52C47F] text-white'
                         : canSend
-                          ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                          : 'bg-neutral-50 text-neutral-400'
+                          ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-100 dark:hover:bg-neutral-700'
+                          : 'bg-neutral-50 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-400'
                     }`}
                     title={canSend ? label : messagingDisabledReason(getTaskStatusFromConversation(conv))}
                   >
@@ -1093,24 +1093,24 @@ function DashboardMessagesContent() {
             </div>
           ) : null}
 
-          <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-6 overflow-y-auto bg-[#FAF9F7]/10 p-6">
+          <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-6 overflow-y-auto bg-[#FAF9F7]/10 p-6 dark:bg-neutral-950/40 dark:scrollbar-thumb-neutral-700">
             {loadingMessages ? (
               <div className="flex h-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" />
               </div>
             ) : !selectedGroup ? (
               <div className="flex h-full flex-col items-center justify-center space-y-2 p-8 text-center">
-                <p className="text-sm font-medium text-neutral-900">Select a conversation</p>
-                <p className="text-xs text-neutral-400">
+                <p className="text-sm font-medium text-neutral-900 dark:text-stone-100">Select a conversation</p>
+                <p className="text-xs text-neutral-400 dark:text-neutral-400">
                   Choose someone from the list to view messages.
                 </p>
               </div>
             ) : activeMessages.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center space-y-2 p-8 text-center">
-                <p className="text-sm font-medium text-neutral-900">
+                <p className="text-sm font-medium text-neutral-900 dark:text-stone-100">
                   This conversation has been cleared
                 </p>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-neutral-400 dark:text-neutral-400">
                   Send an introductory message to start talking again.
                 </p>
                 {deletedHistoryBackup ? (
@@ -1134,22 +1134,22 @@ function DashboardMessagesContent() {
                       className="animate-in fade-in flex flex-col items-end space-y-2 duration-300"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-[11.5px] font-normal text-neutral-400">
+                        <span className="text-[11.5px] font-normal text-neutral-400 dark:text-neutral-400">
                           {msg.time}
                         </span>
-                        <span className="text-[13px] font-medium text-neutral-700">
+                        <span className="text-[13px] font-medium text-neutral-700 dark:text-stone-100">
                           {msg.senderName}
                         </span>
                         <img
                           src={msg.senderAvatar}
                           alt="Your avatar profile portrait"
-                          className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover"
+                          className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover dark:border-neutral-800"
                           referrerPolicy="no-referrer"
                         />
                       </div>
 
-                      <div className="max-w-[70%] rounded-2xl rounded-tr-none border border-[#e5f4ec]/80 bg-[#f0faf4] px-5 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
-                        <p className="font-sans text-[13.5px] font-normal leading-relaxed text-[#2e6b4e]">
+                      <div className="max-w-[70%] rounded-2xl rounded-tr-none border border-[#e5f4ec]/80 bg-[#f0faf4] px-5 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.01)] dark:border-[#52C47F]/30 dark:bg-[#52C47F]/15">
+                        <p className="font-sans text-[13.5px] font-normal leading-relaxed text-[#2e6b4e] dark:text-[#a8e0c0]">
                           {msg.text}
                         </p>
                       </div>
@@ -1166,19 +1166,19 @@ function DashboardMessagesContent() {
                       <img
                         src={msg.senderAvatar}
                         alt={msg.senderName}
-                        className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover"
+                        className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover dark:border-neutral-800"
                         referrerPolicy="no-referrer"
                       />
-                      <span className="text-[13px] font-medium text-neutral-700">
+                      <span className="text-[13px] font-medium text-neutral-700 dark:text-stone-100">
                         {msg.senderName}
                       </span>
-                      <span className="text-[11.5px] font-normal text-neutral-400">
+                      <span className="text-[11.5px] font-normal text-neutral-400 dark:text-neutral-400">
                         {msg.time}
                       </span>
                     </div>
 
-                    <div className="max-w-[70%] rounded-2xl rounded-tl-none border border-neutral-100/50 bg-[#F9F9FB] px-5 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
-                      <p className="font-sans text-[13.5px] font-normal leading-relaxed text-neutral-800">
+                    <div className="max-w-[70%] rounded-2xl rounded-tl-none border border-neutral-100/50 bg-[#F9F9FB] px-5 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-800">
+                      <p className="font-sans text-[13.5px] font-normal leading-relaxed text-neutral-800 dark:text-stone-100">
                         {msg.text}
                       </p>
                     </div>
@@ -1193,15 +1193,15 @@ function DashboardMessagesContent() {
                   <img
                     src={activeContact.avatar}
                     alt={typingDisplayName}
-                    className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover"
+                    className="h-[28px] w-[28px] rounded-full border border-neutral-100 object-cover dark:border-neutral-800"
                     referrerPolicy="no-referrer"
                   />
-                  <span className="text-[13px] font-medium text-neutral-700">
+                  <span className="text-[13px] font-medium text-neutral-700 dark:text-stone-100">
                     {typingDisplayName}
                   </span>
-                  <span className="text-[11px] text-neutral-400">is typing...</span>
+                  <span className="text-[11px] text-neutral-400 dark:text-neutral-400">is typing...</span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-none border border-neutral-100/40 bg-[#F9F9FB] px-5 py-3">
+                <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-none border border-neutral-100/40 bg-[#F9F9FB] px-5 py-3 dark:border-neutral-800 dark:bg-neutral-800">
                   <span
                     className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#52C47F]"
                     style={{ animationDelay: '0ms' }}
@@ -1222,14 +1222,14 @@ function DashboardMessagesContent() {
           </div>
 
           {!canSendMessages && selectedGroup && replyConversation ? (
-            <p className="border-t border-neutral-100 bg-white px-6 py-2 text-xs text-neutral-500">
+            <p className="border-t border-neutral-100 bg-white px-6 py-2 text-xs text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
               {messagingDisabledText}
             </p>
           ) : null}
 
           <form
             onSubmit={(e) => void handleSendMessage(e)}
-            className="flex items-center justify-between gap-4 rounded-b-2xl border-t border-neutral-100 bg-white p-4"
+            className="flex items-center justify-between gap-4 rounded-b-2xl border-t border-neutral-100 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
           >
             <input
               type="text"
@@ -1237,7 +1237,7 @@ function DashboardMessagesContent() {
               onChange={(e) => handleInputChange(e.target.value)}
               disabled={sending || !selectedGroup || !canSendMessages}
               placeholder="Type a Message"
-              className="flex-1 border-0 bg-transparent px-1.5 py-3 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 disabled:opacity-50"
+              className="flex-1 border-0 bg-transparent px-1.5 py-3 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 disabled:opacity-50 dark:text-stone-100"
             />
 
             <button
@@ -1246,7 +1246,7 @@ function DashboardMessagesContent() {
               className={`flex cursor-pointer items-center gap-1.5 rounded-xl px-5 py-3 text-xs font-medium tracking-tight text-white transition-all ${
                 inputText.trim() && !sending && selectedGroup && canSendMessages
                   ? 'bg-[#52C47F] shadow-md hover:scale-[1.02] hover:bg-[#43B26F] active:scale-[0.98]'
-                  : 'cursor-not-allowed border border-neutral-100 bg-neutral-100 text-neutral-400'
+                  : 'cursor-not-allowed border border-neutral-100 bg-neutral-100 text-neutral-400 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-400'
               }`}
             >
               <span>Send Message</span>
@@ -1263,7 +1263,7 @@ export default function DashboardMessages() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[640px] items-center justify-center bg-[#f0efec] text-sm text-neutral-500">
+        <div className="flex min-h-[640px] items-center justify-center bg-[#f0efec] text-sm text-neutral-500 dark:bg-neutral-950 dark:text-neutral-400">
           Loading messages…
         </div>
       }

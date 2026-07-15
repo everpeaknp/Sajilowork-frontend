@@ -22,19 +22,19 @@ export function DashboardMetricCards({ cards }: { cards: DashboardMetricCardItem
         return (
           <div
             key={card.label}
-            className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm"
+            className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
           >
             <div className="z-10 space-y-1.5">
-              <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
+              <span className="text-xs font-medium uppercase tracking-wide text-neutral-400 dark:text-neutral-400">
                 {card.label}
               </span>
-              <h3 className={DASHBOARD_STAT_VALUE}>{card.value}</h3>
+              <h3 className={`${DASHBOARD_STAT_VALUE} dark:text-stone-100`}>{card.value}</h3>
               {card.hint || card.hintMuted ? (
                 <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
                   {card.hint}
                   {card.hint && card.hintMuted ? ' ' : null}
                   {card.hintMuted ? (
-                    <span className="text-neutral-500">{card.hintMuted}</span>
+                    <span className="text-neutral-500 dark:text-neutral-400">{card.hintMuted}</span>
                   ) : null}
                 </p>
               ) : null}

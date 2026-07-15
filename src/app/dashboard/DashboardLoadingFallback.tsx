@@ -13,7 +13,7 @@ export default function DashboardLoadingFallback({
     <div
       className={
         fullScreen
-          ? 'flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-[#f0efec]'
+          ? 'flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-[#f0efec] dark:bg-neutral-950'
           : 'flex flex-col items-center justify-center gap-4 py-16'
       }
       role="status"

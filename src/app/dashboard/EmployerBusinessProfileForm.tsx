@@ -28,9 +28,9 @@ const USERNAME_MAX_LENGTH = 30;
 const USERNAME_PATTERN = /^[a-z0-9._]+$/;
 
 const inputClass =
-  'w-full rounded-xl border-2 border-transparent bg-neutral-50/80 px-4 py-3.5 text-sm font-medium text-neutral-500 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25';
+  'w-full rounded-xl border-2 border-transparent bg-neutral-50/80 px-4 py-3.5 text-sm font-medium text-neutral-500 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-neutral-300 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900 dark:focus:border-[#52C47F]';
 
-const selectClass = `${inputClass} cursor-pointer appearance-none text-neutral-800`;
+const selectClass = `${inputClass} cursor-pointer appearance-none text-neutral-800 dark:text-stone-100`;
 
 const SELECT_CHEVRON_STYLE = {
   backgroundImage:
@@ -336,11 +336,11 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
 
   return (
     <form onSubmit={handleSave} className="space-y-10">
-      <section className="space-y-3 border-b border-neutral-100 pb-8">
-        <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+      <section className="space-y-3 border-b border-neutral-100 pb-8 dark:border-neutral-800">
+        <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
           Account type
         </label>
-        <p className="max-w-2xl text-sm leading-relaxed text-neutral-500">
+        <p className="max-w-2xl text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
           Choose whether you post work as an individual or on behalf of a company. Both can publish
           jobs and projects.
         </p>
@@ -355,13 +355,13 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </select>
       </section>
 
-      <section className="flex flex-col gap-6 border-b border-neutral-100 pb-8 lg:flex-row lg:items-start">
+      <section className="flex flex-col gap-6 border-b border-neutral-100 pb-8 dark:border-neutral-800 lg:flex-row lg:items-start dark:border-neutral-800">
         <div className="shrink-0 space-y-3">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
             {logoLabel}
           </label>
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-start">
-            <div className="flex h-[100px] w-[100px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-neutral-100 bg-neutral-50 shadow-sm">
+            <div className="flex h-[100px] w-[100px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-neutral-100 bg-neutral-50 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
               {logoUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={logoUrl} alt="Company logo preview" className="h-full w-full object-cover" />
@@ -408,7 +408,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
 
         <div className="grid min-w-0 flex-1 grid-cols-1 gap-6">
           <div className="space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
               {displayNameLabel}
             </label>
             <input
@@ -421,7 +421,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
             />
           </div>
           <div className="space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
               Tagline
             </label>
             <input
@@ -435,15 +435,15 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </div>
       </section>
 
-      <section className="space-y-3 border-b border-neutral-100 pb-8">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900">Public profile URL</h3>
+      <section className="space-y-3 border-b border-neutral-100 pb-8 dark:border-neutral-800">
+        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Public profile URL</h3>
         <div className="flex max-w-3xl flex-col gap-2 sm:flex-row sm:items-stretch">
           <div
-            className={`flex min-w-0 flex-1 items-stretch overflow-hidden rounded-xl border-2 border-transparent bg-neutral-50/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all focus-within:border-[#52C47F] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#52C47F]/25 ${
-              !usernameCanChange ? 'bg-neutral-50' : ''
+            className={`flex min-w-0 flex-1 items-stretch overflow-hidden rounded-xl border-2 border-transparent bg-neutral-50/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all focus-within:border-[#52C47F] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:focus-within:bg-neutral-900 ${
+              !usernameCanChange ? 'bg-neutral-50 dark:bg-neutral-800/80' : ''
             }`}
           >
-            <span className="flex shrink-0 items-center border-r border-neutral-200/80 bg-neutral-100/70 px-3 py-3.5 text-sm font-medium text-neutral-600">
+            <span className="flex shrink-0 items-center border-r border-neutral-200/80 bg-neutral-100/70 px-3 py-3.5 text-sm font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
               {profilePrefix}
             </span>
             <input
@@ -454,8 +454,8 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
               disabled={!usernameCanChange}
               readOnly={!usernameCanChange}
               maxLength={USERNAME_MAX_LENGTH}
-              className={`min-w-0 flex-1 border-0 bg-transparent px-3 py-3.5 text-sm font-medium lowercase text-neutral-800 outline-none placeholder:text-neutral-400 sm:px-4 ${
-                !usernameCanChange ? 'cursor-not-allowed text-neutral-500' : ''
+              className={`min-w-0 flex-1 border-0 bg-transparent px-3 py-3.5 text-sm font-medium lowercase text-neutral-800 outline-none placeholder:text-neutral-400 sm:px-4 dark:text-stone-100 dark:placeholder:text-neutral-500 ${
+                !usernameCanChange ? 'cursor-not-allowed text-neutral-500 dark:text-neutral-400' : ''
               }`}
               placeholder="your-company-slug"
             />
@@ -481,12 +481,12 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         ) : null}
       </section>
 
-      <section className="space-y-6 border-b border-neutral-100 pb-8">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900">{detailsHeading}</h3>
+      <section className="space-y-6 border-b border-neutral-100 pb-8 dark:border-neutral-800">
+        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">{detailsHeading}</h3>
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
         {isCompany ? (
           <div className="relative space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
               Industry
             </label>
             <select
@@ -507,7 +507,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
 
         {isCompany ? (
           <div className="relative space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
               Company size
             </label>
             <select
@@ -527,7 +527,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         ) : null}
 
         <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
             Location
           </label>
           <input
@@ -540,7 +540,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </div>
 
         <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
             Cost range
           </label>
           <input
@@ -554,7 +554,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
 
         {isCompany ? (
           <div className="space-y-2 md:col-span-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
               Website
             </label>
             <input
@@ -569,11 +569,11 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </div>
       </section>
 
-      <section className="space-y-6 border-b border-neutral-100 pb-8">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900">Contact</h3>
+      <section className="space-y-6 border-b border-neutral-100 pb-8 dark:border-neutral-800">
+        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Contact</h3>
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
             Contact email
           </label>
           <input
@@ -591,7 +591,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </div>
 
         <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
             Contact phone
           </label>
           <input
@@ -605,8 +605,8 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </div>
       </section>
 
-      <section className="space-y-6 border-b border-neutral-100 pb-8">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900">
+      <section className="space-y-6 border-b border-neutral-100 pb-8 dark:border-neutral-800">
+        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
           {isCompany ? 'About company' : 'About you'}
         </h3>
         <div className="space-y-2">
@@ -618,7 +618,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={6}
-            className="min-h-[160px] w-full rounded-xl border-2 border-transparent bg-neutral-50/80 p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25"
+            className="min-h-[160px] w-full rounded-xl border-2 border-transparent bg-neutral-50/80 p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-stone-200 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900"
             placeholder={
               isCompany
                 ? 'Describe your company, services, and what makes you unique.'
@@ -630,10 +630,10 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
 
       <section className="space-y-4">
         <div>
-          <h3 className="text-base font-semibold tracking-tight text-neutral-900">
+          <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
             {isCompany ? 'Company gallery' : 'Photo gallery'}
           </h3>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             {isCompany
               ? `Images shown on your public employer page. Upload up to ${MAX_GALLERY_IMAGES} images (JPG or PNG, max 1MB each).`
               : `Photos shown on your public profile. Upload up to ${MAX_GALLERY_IMAGES} images (JPG or PNG, max 1MB each).`}
@@ -655,7 +655,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
             {galleryImages.map((item) => (
               <div
                 key={item.id}
-                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-neutral-200"
+                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
@@ -676,7 +676,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
                 type="button"
                 onClick={() => galleryInputRef.current?.click()}
                 disabled={uploadingGallery}
-                className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8] disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8] disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
               >
                 <ImageIcon className="h-5 w-5 text-neutral-400" />
                 {uploadingGallery ? 'Uploading…' : 'Upload'}
@@ -686,7 +686,7 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
         </div>
       </section>
 
-      <div className="flex items-center justify-between border-t border-neutral-100 pt-6">
+      <div className="flex items-center justify-between border-t border-neutral-100 pt-6 dark:border-neutral-800">
         <button
           type="submit"
           disabled={saving}

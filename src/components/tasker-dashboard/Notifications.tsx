@@ -213,13 +213,13 @@ function NotificationSkeleton() {
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="flex gap-4 rounded-2xl border border-outline-variant bg-white p-4 animate-pulse"
+          className="flex gap-4 rounded-2xl border border-outline-variant bg-white p-4 animate-pulse dark:border-neutral-800 dark:bg-neutral-900"
         >
-          <div className="h-11 w-11 shrink-0 rounded-xl bg-slate-100" />
+          <div className="h-11 w-11 shrink-0 rounded-xl bg-slate-100 dark:bg-neutral-800" />
           <div className="flex-1 space-y-2 py-1">
-            <div className="h-4 w-2/5 rounded bg-slate-100" />
-            <div className="h-3 w-full rounded bg-slate-50" />
-            <div className="h-3 w-4/5 rounded bg-slate-50" />
+            <div className="h-4 w-2/5 rounded bg-slate-100 dark:bg-neutral-800" />
+            <div className="h-3 w-full rounded bg-slate-50 dark:bg-neutral-800/60" />
+            <div className="h-3 w-4/5 rounded bg-slate-50 dark:bg-neutral-800/60" />
           </div>
         </div>
       ))}
@@ -352,7 +352,7 @@ export default function Notifications() {
             href="/tasker-dashboard/settings?tab=notifications"
             className={cn(
               landingBody,
-              'inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-outline-variant bg-white px-4 py-2.5 text-sm font-semibold text-brand-dark transition-colors hover:border-brand-emerald/30 hover:text-brand-emerald',
+              'inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-outline-variant bg-white px-4 py-2.5 text-sm font-semibold text-brand-dark transition-colors hover:border-brand-emerald/30 hover:text-brand-emerald dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 dark:hover:border-brand-emerald/30',
             )}
           >
             <Settings className="h-4 w-4" />
@@ -361,7 +361,7 @@ export default function Notifications() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-2xl border border-outline-variant bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800 dark:bg-neutral-900">
         <div className="inline-flex rounded-xl bg-surface-low p-1">
           {(['all', 'unread'] as const).map((tab) => (
             <button
@@ -428,8 +428,8 @@ export default function Notifications() {
       {loading ? (
         <NotificationSkeleton />
       ) : filteredNotifications.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-outline-variant bg-surface-low/50 px-6 py-16 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-outline-variant">
+        <div className="rounded-3xl border border-dashed border-outline-variant bg-surface-low/50 px-6 py-16 text-center dark:border-neutral-800 dark:bg-neutral-900/50">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-outline-variant dark:bg-neutral-900 dark:ring-neutral-800">
             {filter === 'unread' ? (
               <BellOff className="h-8 w-8 text-[#6a719a]" />
             ) : (
@@ -490,10 +490,10 @@ export default function Notifications() {
                     <li key={notification.id}>
                       <div
                         className={cn(
-                          'group relative flex gap-3 rounded-2xl border bg-white p-4 transition-all sm:gap-4 sm:p-5',
+                          'group relative flex gap-3 rounded-2xl border bg-white p-4 transition-all sm:gap-4 sm:p-5 dark:bg-neutral-900',
                           notification.is_read
-                            ? 'border-outline-variant hover:border-brand-emerald/20 hover:shadow-sm'
-                            : 'border-brand-emerald/25 bg-brand-emerald/[0.03] shadow-sm shadow-brand-emerald/5',
+                            ? 'border-outline-variant hover:border-brand-emerald/20 hover:shadow-sm dark:border-neutral-800'
+                            : 'border-brand-emerald/25 bg-brand-emerald/[0.03] shadow-sm shadow-brand-emerald/5 dark:border-brand-emerald/30 dark:bg-brand-emerald/[0.06]',
                         )}
                       >
                         {!notification.is_read ? (
@@ -522,7 +522,7 @@ export default function Notifications() {
                               <h3
                                 className={cn(
                                   landingHeadlineSm,
-                                  'line-clamp-1 text-sm text-brand-dark sm:text-base',
+                                  'line-clamp-1 text-sm text-brand-dark sm:text-base dark:text-stone-100',
                                   !notification.is_read && 'text-brand-dark',
                                 )}
                               >

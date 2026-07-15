@@ -236,24 +236,24 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
           return (
             <div
               key={idx}
-              className="flex items-center justify-between rounded-xl border border-[#e2e1dd] bg-white p-[22px] py-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all hover:shadow-md"
+              className="flex items-center justify-between rounded-xl border border-[#e2e1dd] bg-white p-[22px] py-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] transition-all hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:shadow-none"
             >
               <div className="space-y-1">
-                <span className="text-[13px] font-medium tracking-tight text-neutral-500">
+                <span className="text-[13px] font-medium tracking-tight text-neutral-500 dark:text-neutral-400">
                   {card.title}
                 </span>
-                <h3 className="pt-0.5 text-3xl font-semibold leading-none tracking-tight text-black">
+                <h3 className="pt-0.5 text-3xl font-semibold leading-none tracking-tight text-black dark:text-stone-100">
                   {card.value}
                 </h3>
-                <p className="flex items-center pt-0.5 text-[11.5px] font-medium text-neutral-500">
+                <p className="flex items-center pt-0.5 text-[11.5px] font-medium text-neutral-500 dark:text-neutral-400">
                   <span className="mr-1 font-semibold text-[#3ca871]">{card.changeVal}</span>
                   <span>{card.changeText}</span>
                 </p>
               </div>
 
               <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
-                <div className="absolute bottom-0.5 right-0 h-[34px] w-[34px] rounded-full bg-[#FAF5EE]" />
-                <IconComp strokeWidth={1.5} className="relative z-10 h-[22px] w-[22px] text-[#193E32]" />
+                <div className="absolute bottom-0.5 right-0 h-[34px] w-[34px] rounded-full bg-[#FAF5EE] dark:bg-neutral-800" />
+                <IconComp strokeWidth={1.5} className="relative z-10 h-[22px] w-[22px] text-[#193E32] dark:text-[#52C47F]" />
               </div>
             </div>
           );
@@ -263,23 +263,23 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
       <div className="grid grid-cols-1 gap-[22px] lg:grid-cols-12">
         <div
           id="card_profile_views"
-          className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] lg:col-span-8"
+          className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] lg:col-span-8 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none"
         >
           <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-[15px] font-semibold tracking-tight text-black">Profile Views</h4>
+            <h4 className="text-[15px] font-semibold tracking-tight text-black dark:text-stone-100">Profile Views</h4>
 
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e2e1dd] bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition-all hover:bg-neutral-50"
+                className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e2e1dd] bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition-all hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
               >
                 <span>{timeRange}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
               </button>
 
               {isDropdownOpen ? (
-                <div className="absolute right-0 z-30 mt-1.5 w-32 rounded-lg border border-neutral-200 bg-white py-1 text-xs font-medium shadow-lg">
+                <div className="absolute right-0 z-30 mt-1.5 w-32 rounded-lg border border-neutral-200 bg-white py-1 text-xs font-medium shadow-lg dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-none">
                   {['This Week', 'This Month', 'This Year'].map((opt) => (
                     <button
                       key={opt}
@@ -288,7 +288,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                         setTimeRange(opt);
                         setIsDropdownOpen(false);
                       }}
-                      className="w-full cursor-pointer px-3 py-2 text-left text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-emerald-600"
+                      className="w-full cursor-pointer px-3 py-2 text-left text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-emerald-600 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-emerald-400"
                     >
                       {opt}
                     </button>
@@ -299,7 +299,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
           </div>
 
           <div className="flex justify-center pb-[22px]">
-            <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-neutral-500">
+            <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide text-neutral-500 dark:text-neutral-400">
               <span className="inline-block h-3.5 w-[26px] rounded-sm border border-[#4BBB80] bg-[#4BBB80]/5" />
               <span>Dataset</span>
             </div>
@@ -313,8 +313,8 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
             >
               <defs>
                 <linearGradient id="warmChartBgGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#F9F6EE" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#F9F6EE" stopOpacity="0.05" />
+                  <stop offset="0%" stopColor="#F9F6EE" stopOpacity="0.85" className="dark:[stop-color:#262626]" />
+                  <stop offset="100%" stopColor="#F9F6EE" stopOpacity="0.05" className="dark:[stop-color:#171717]" />
                 </linearGradient>
               </defs>
 
@@ -336,8 +336,8 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                       y1={y}
                       x2={padRight}
                       y2={y}
-                      stroke="#F0F0F0"
                       strokeWidth="0.8"
+                      className="stroke-[#F0F0F0] dark:stroke-neutral-800"
                     />
                   </g>
                 );
@@ -350,8 +350,8 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                     y1={padTop}
                     x2={pt.x}
                     y2={padBottom}
-                    stroke="#F0F0F0"
                     strokeWidth="0.8"
+                    className="stroke-[#F0F0F0] dark:stroke-neutral-800"
                   />
                   <text
                     x={pt.x}
@@ -407,10 +407,9 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                       cx={pt.x}
                       cy={pt.y}
                       r={isHovered ? '5' : '3.8'}
-                      fill="white"
                       stroke="#4BBB80"
                       strokeWidth={isHovered ? '2.5' : '1.8'}
-                      className="transition-all duration-150"
+                      className="fill-white transition-all duration-150 dark:fill-neutral-900"
                     />
                   </g>
                 );
@@ -434,31 +433,31 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
 
         <div
           id="card_traffic_stats"
-          className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] lg:col-span-4"
+          className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] lg:col-span-4 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none"
         >
           <div>
-            <h4 className="mb-4 text-[15px] font-semibold tracking-tight text-black">Traffic</h4>
-            <div className="mb-4 w-full border-b border-neutral-100" />
+            <h4 className="mb-4 text-[15px] font-semibold tracking-tight text-black dark:text-stone-100">Traffic</h4>
+            <div className="mb-4 w-full border-b border-neutral-100 dark:border-neutral-800" />
 
             <div className="mb-5 flex flex-wrap items-center justify-center gap-3 py-1">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
                 <span className="inline-block h-2.5 w-5 rounded-xs bg-[#4BBB80]" />
                 <span>Direct {traffic.direct_percent}%</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500">
-                <span className="inline-block h-2.5 w-5 rounded-xs bg-[#FEECE9]" />
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
+                <span className="inline-block h-2.5 w-5 rounded-xs bg-[#FEECE9] dark:bg-[#5c403c]" />
                 <span>Referal {traffic.referral_percent}%</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500">
-                <span className="inline-block h-2.5 w-5 rounded-xs border border-neutral-200 bg-[#FAF7F0]" />
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
+                <span className="inline-block h-2.5 w-5 rounded-xs border border-neutral-200 bg-[#FAF7F0] dark:border-neutral-700 dark:bg-neutral-800" />
                 <span>Organic {traffic.organic_percent}%</span>
               </div>
             </div>
 
             <div className="relative flex items-center justify-center py-4">
               {trafficTotal === 0 ? (
-                <div className="flex h-60 w-60 max-w-full flex-col items-center justify-center rounded-full border border-dashed border-neutral-200 bg-neutral-50/80 px-6 text-center">
-                  <p className="text-sm font-medium text-neutral-600">No listing views yet</p>
+                <div className="flex h-60 w-60 max-w-full flex-col items-center justify-center rounded-full border border-dashed border-neutral-200 bg-neutral-50/80 px-6 text-center dark:border-neutral-700 dark:bg-neutral-800/80">
+                  <p className="text-sm font-medium text-neutral-600 dark:text-neutral-300">No listing views yet</p>
                   <p className="mt-1 text-[11px] leading-relaxed text-neutral-400">
                     Traffic appears when people view your tasks, jobs, projects, or services.
                   </p>
@@ -486,7 +485,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                     strokeDasharray={`${referralDash} ${circumference}`}
                     strokeDashoffset={`-${directDash}`}
                     fill="none"
-                    className="transition-all duration-300"
+                    className="transition-all duration-300 dark:stroke-[#5c403c]"
                   />
                   <circle
                     cx="100"
@@ -497,18 +496,18 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                     strokeDasharray={`${organicDash} ${circumference}`}
                     strokeDashoffset={`-${directDash + referralDash}`}
                     fill="none"
-                    className="transition-all duration-300"
+                    className="transition-all duration-300 dark:stroke-neutral-700"
                   />
-                  <line x1="100" y1="17" x2="100" y2="43" stroke="white" strokeWidth="2.5" />
-                  <line x1="100" y1="157" x2="100" y2="183" stroke="white" strokeWidth="2.5" />
-                  <line x1="17" y1="100" x2="43" y2="100" stroke="white" strokeWidth="2.5" />
+                  <line x1="100" y1="17" x2="100" y2="43" strokeWidth="2.5" className="stroke-white dark:stroke-neutral-900" />
+                  <line x1="100" y1="157" x2="100" y2="183" strokeWidth="2.5" className="stroke-white dark:stroke-neutral-900" />
+                  <line x1="17" y1="100" x2="43" y2="100" strokeWidth="2.5" className="stroke-white dark:stroke-neutral-900" />
                 </g>
               </svg>
               )}
             </div>
           </div>
 
-          <div className="mt-2 rounded-lg border border-neutral-100/50 bg-neutral-50/50 py-2 text-center text-[10px] font-medium tracking-wide text-neutral-400">
+          <div className="mt-2 rounded-lg border border-neutral-100/50 bg-neutral-50/50 py-2 text-center text-[10px] font-medium tracking-wide text-neutral-400 dark:border-neutral-800 dark:bg-neutral-800/50">
             {trafficTotal > 0
               ? `${trafficTotal} listing views in the last 12 months, grouped by referrer.`
               : 'Analytics breakdown calculated from listing page views and referrers.'}
@@ -517,10 +516,10 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
       </div>
 
       <div className="grid grid-cols-1 gap-[22px] md:grid-cols-2 lg:grid-cols-3">
-        <div className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
+        <div className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
           <div>
-            <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5">
-              <h4 className="text-[14px] font-semibold tracking-tight text-black">
+            <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5 dark:border-neutral-800">
+              <h4 className="text-[14px] font-semibold tracking-tight text-black dark:text-stone-100">
                 {mostViewedCardTitle}
               </h4>
               <Link href={mostViewedViewAllHref} className="text-[11.5px] font-medium text-[#4138C4] hover:underline">
@@ -545,7 +544,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                   return (
                   <div
                     key={service.id}
-                    className="flex items-center gap-3.5 border-b border-neutral-100 pb-4 last:border-0 last:pb-0"
+                    className="flex items-center gap-3.5 border-b border-neutral-100 pb-4 last:border-0 last:pb-0 dark:border-neutral-800"
                   >
                     {role === 'customer' ? (
                       <div className="relative shrink-0">
@@ -571,7 +570,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                     )}
                     <div className="min-w-0 flex-1 space-y-1.5">
                       <h5
-                        className="line-clamp-2 text-[11.5px] font-medium leading-snug text-black"
+                        className="line-clamp-2 text-[11.5px] font-medium leading-snug text-black dark:text-stone-100"
                         title={service.title}
                       >
                         {service.title}
@@ -583,7 +582,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                         </div>
                         <span className="text-[10px] font-medium text-neutral-400">
                           Starting at{' '}
-                          <span className="text-[11px] font-semibold text-black">
+                          <span className="text-[11px] font-semibold text-black dark:text-stone-100">
                             {formatNPR(service.starting_price)}
                           </span>
                         </span>
@@ -597,10 +596,10 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
+        <div className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
           <div>
-            <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5">
-              <h4 className="text-[14px] font-semibold tracking-tight text-black">
+            <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5 dark:border-neutral-800">
+              <h4 className="text-[14px] font-semibold tracking-tight text-black dark:text-stone-100">
                 {middleCardTitle}
               </h4>
               <Link
@@ -621,7 +620,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                   (overview.recent_completed_projects ?? []).map((project, index) => (
                     <div
                       key={`${project.slug}-${index}`}
-                      className="flex items-start gap-3 border-b border-neutral-100 pb-[18px] last:border-0 last:pb-0"
+                      className="flex items-start gap-3 border-b border-neutral-100 pb-[18px] last:border-0 last:pb-0 dark:border-neutral-800"
                     >
                       <UserAvatar
                         src={project.avatar_url}
@@ -630,17 +629,17 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                         className="shrink-0"
                       />
                       <div className="flex-1 space-y-1">
-                        <p className="text-[11.5px] leading-snug text-black">
+                        <p className="text-[11.5px] leading-snug text-black dark:text-stone-100">
                           <span className="font-medium text-[#3ca871]">Completed</span>{' '}
                           {project.project_title}{' '}
-                          <span className="font-medium text-neutral-500">for</span>{' '}
-                          <span className="font-semibold text-black">{project.client_name}</span>
+                          <span className="font-medium text-neutral-500 dark:text-neutral-400">for</span>{' '}
+                          <span className="font-semibold text-black dark:text-stone-100">{project.client_name}</span>
                         </p>
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="font-medium text-neutral-400">
                             {formatOverviewDate(project.date)}
                           </span>
-                          <span className="font-semibold text-black">
+                          <span className="font-semibold text-black dark:text-stone-100">
                             {formatNPR(project.amount)}
                           </span>
                         </div>
@@ -668,7 +667,7 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                     <Link
                       key={listing.id}
                       href={editHref}
-                      className="flex items-start gap-3 border-b border-neutral-100 pb-[18px] last:border-0 last:pb-0 transition-colors hover:bg-neutral-50/60"
+                      className="flex items-start gap-3 border-b border-neutral-100 pb-[18px] last:border-0 last:pb-0 transition-colors hover:bg-neutral-50/60 dark:border-neutral-800 dark:hover:bg-neutral-800"
                     >
                       <div className="relative shrink-0">
                         <EmployerAvatarCircle
@@ -680,19 +679,19 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                         />
                       </div>
                       <div className="min-w-0 flex-1 space-y-1">
-                        <p className="line-clamp-2 text-[11.5px] font-medium leading-snug text-black">
+                        <p className="line-clamp-2 text-[11.5px] font-medium leading-snug text-black dark:text-stone-100">
                           {listing.title}
                         </p>
                         <div className="flex items-center justify-between gap-2 text-[11px]">
                           <div className="flex min-w-0 items-center gap-2">
-                            <span className="shrink-0 rounded-full bg-[#F0F8FF] px-2 py-0.5 text-[10px] font-medium text-[#0080FF]">
+                            <span className="shrink-0 rounded-full bg-[#F0F8FF] px-2 py-0.5 text-[10px] font-medium text-[#0080FF] dark:bg-neutral-800 dark:text-[#5BA8FF]">
                               {listingKindLabel(listing.listing_kind)}
                             </span>
                             <span className="truncate font-medium text-neutral-400">
                               {formatListingStatus(listing.status)}
                             </span>
                           </div>
-                          <span className="shrink-0 font-semibold text-black">
+                          <span className="shrink-0 font-semibold text-black dark:text-stone-100">
                             {formatNPR(listing.budget_amount)}
                           </span>
                         </div>
@@ -708,16 +707,16 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)]">
+        <div className="flex flex-col justify-between rounded-xl border border-[#e2e1dd] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.015)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
           <div>
-            <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5">
-              <h4 className="text-[14px] font-semibold tracking-tight text-black">
+            <div className="mb-5 flex items-center justify-between border-b border-neutral-100 pb-3.5 dark:border-neutral-800">
+              <h4 className="text-[14px] font-semibold tracking-tight text-black dark:text-stone-100">
                 Recent Activity
               </h4>
             </div>
 
             <div className="relative pl-1">
-              <div className="absolute bottom-3 left-[54px] top-2 w-[1.5px] bg-[#f0f0f0]" />
+              <div className="absolute bottom-3 left-[54px] top-2 w-[1.5px] bg-[#f0f0f0] dark:bg-neutral-800" />
 
               <div className="space-y-4">
                 {overview.recent_activity.length === 0 ? (
@@ -730,16 +729,16 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
                       </span>
                       <div className="relative z-10 mr-3 mt-1 flex h-[18px] w-[18px] items-center justify-center">
                         <span
-                          className="h-3.5 w-3.5 rounded-full border-[3px] bg-white"
+                          className="h-3.5 w-3.5 rounded-full border-[3px] bg-white dark:bg-neutral-900"
                           style={{ borderColor: activity.color }}
                         />
                       </div>
                       <div className="flex-1 space-y-0.5">
-                        <p className="text-[11.5px] font-semibold leading-snug text-black">
+                        <p className="text-[11.5px] font-semibold leading-snug text-black dark:text-stone-100">
                           {activity.title}
                         </p>
                         {activity.subtitle ? (
-                          <p className="text-[10.5px] font-normal leading-normal text-neutral-500">
+                          <p className="text-[10.5px] font-normal leading-normal text-neutral-500 dark:text-neutral-400">
                             {activity.subtitle}
                           </p>
                         ) : null}

@@ -40,14 +40,14 @@ export default function ProjectTable({
     <div className="overflow-x-auto" id="projects-table-wrapper">
       <table className="w-full table-auto border-collapse text-left" id="projects-data-table">
         <thead>
-          <tr className="border-b border-neutral-100 text-[15px] font-medium text-neutral-800">
+          <tr className="border-b border-neutral-100 text-[15px] font-medium text-neutral-800 dark:border-neutral-800 dark:text-stone-100">
             <th className="w-[44%] pb-5 pl-2 pt-2 font-medium">Title</th>
             <th className="w-[18%] pb-5 pt-2 font-medium">Category</th>
             <th className="w-[16%] pb-5 pt-2 font-medium">Type/Cost</th>
             <th className="min-w-[10.5rem] w-[22%] pb-5 pt-2 text-center font-medium">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
           {projects.length === 0 ? (
             <tr>
               <td colSpan={4} className="py-20 text-center">
@@ -93,7 +93,7 @@ export default function ProjectTable({
                     handleRowClick(project);
                   }
                 }}
-                className={`transition-colors hover:bg-neutral-50/25 ${
+                className={`transition-colors hover:bg-neutral-50/25 dark:hover:bg-neutral-800/50 ${
                   viewHref ? 'cursor-pointer select-none' : ''
                 }`}
                 id={`project-row-${project.id}`}
@@ -104,12 +104,12 @@ export default function ProjectTable({
                       <Link
                         href={viewHref}
                         onClick={(event) => event.stopPropagation()}
-                        className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 transition-colors hover:text-[#52C47F]"
+                        className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 transition-colors hover:text-[#52C47F] dark:text-stone-100"
                       >
                         {project.title}
                       </Link>
                     ) : (
-                      <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900">
+                      <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 dark:text-stone-100">
                         {project.title}
                       </h4>
                     )}

@@ -96,8 +96,8 @@ export default function FreelancerCvPreview({ data }: FreelancerCvPreviewProps) 
     <section className="mx-auto max-w-7xl">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-neutral-900">Your CV</h2>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Your CV</h2>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             Generated from your profile. Print or save as PDF to share with employers.
           </p>
         </div>

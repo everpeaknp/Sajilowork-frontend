@@ -33,7 +33,7 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
     <div className="overflow-x-auto" id="jobs-table-wrapper">
       <table className="w-full table-auto border-collapse text-left" id="jobs-data-table">
         <thead>
-          <tr className="border-b border-transparent text-[15px] font-medium text-neutral-800">
+          <tr className="border-b border-transparent text-[15px] font-medium text-neutral-800 dark:text-stone-100">
             <th className="w-[45%] pb-6 pl-2 pt-2 font-medium">Title</th>
             <th className="w-[20%] pb-6 pt-2 font-medium">Applications</th>
             <th className="w-[20%] pb-6 pt-2 font-medium">Created & Expired</th>
@@ -41,7 +41,7 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
             <th className="w-[5%] pb-6 pt-2 text-center font-medium">Action</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
           {jobs.length === 0 ? (
             <tr>
               <td colSpan={5} className="py-20 text-center">
@@ -62,7 +62,7 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
             jobs.map((job) => (
               <tr
                 key={job.id}
-                className="transition-colors hover:bg-neutral-50/20"
+                className="transition-colors hover:bg-neutral-50/20 dark:hover:bg-neutral-800/50"
                 id={`job-row-${job.id}`}
               >
                 <td className="select-all py-6 pl-2 align-top">
@@ -75,11 +75,11 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
                         sizeClass="h-[52px] w-[52px]"
                         textClass="text-base font-bold uppercase"
                       />
-                      <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm" />
+                      <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm dark:border-neutral-900" />
                     </div>
 
                     <div className="space-y-0.5">
-                      <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900">
+                      <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 dark:text-stone-100">
                         {job.title}
                       </h4>
                       <div className="text-[15px] font-medium tracking-tight text-[#52C47F]">{job.company}</div>

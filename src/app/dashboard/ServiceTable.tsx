@@ -23,14 +23,14 @@ export default function ServiceTable({
     <div className="overflow-x-auto" id="services-table-wrapper">
       <table className="w-full table-auto border-collapse text-left" id="services-data-table">
         <thead>
-          <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
+          <tr className="border-b border-transparent text-sm font-medium text-neutral-800 dark:text-stone-100">
             <th className="w-[55%] pb-6 pl-2 pt-2 font-medium">Title</th>
             <th className="w-[20%] pb-6 pt-2 font-medium">Category</th>
             <th className="w-[15%] pb-6 pt-2 font-medium">Type/Cost</th>
             <th className="w-[10%] pb-6 pt-2 text-center font-medium">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-100">
+        <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
           {services.length === 0 ? (
             <tr>
               <td colSpan={4} className="py-20 text-center">
@@ -53,12 +53,12 @@ export default function ServiceTable({
             services.map((svc) => (
               <tr
                 key={svc.id}
-                className="transition-colors hover:bg-neutral-50/20"
+                className="transition-colors hover:bg-neutral-50/20 dark:hover:bg-neutral-800/50"
                 id={`service-row-${svc.id}`}
               >
                 <td className="select-all py-6 pl-2 align-top">
                   <div className="flex flex-col items-start gap-5 sm:flex-row">
-                    <div className="h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-100 shadow-inner">
+                    <div className="h-20 w-32 shrink-0 overflow-hidden rounded-xl border border-neutral-100 bg-neutral-100 shadow-inner dark:border-neutral-800 dark:bg-neutral-800">
                       <img
                         src={svc.image || DEFAULT_SERVICE_IMAGE}
                         alt=""
@@ -74,7 +74,7 @@ export default function ServiceTable({
                     </div>
 
                     <div className="space-y-2">
-                      <h4 className="text-[15px] font-medium leading-snug tracking-tight text-neutral-900">
+                      <h4 className="text-[15px] font-medium leading-snug tracking-tight text-neutral-900 dark:text-stone-100">
                         {svc.title}
                       </h4>
                       {svc.bullets.length > 0 ? (

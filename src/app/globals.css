@@ -380,12 +380,18 @@ html.dark .border-zinc-200,
 html.dark .border-stone-200,
 html.dark .border-neutral-200\/60,
 html.dark .border-neutral-200\/80,
-html.dark .border-gray-200\/80 {
+html.dark .border-gray-200\/80,
+html.dark .border-\[\#e2e1dd\],
+html.dark .border-\[\#E2E1DD\] {
   border-color: var(--elevated-border) !important;
 }
 
 html.dark .border-black {
   border-color: #a8a29e !important;
+}
+
+html.dark .after\:bg-black::after {
+  background-color: #f5f5f4 !important;
 }
 
 html.dark .divide-neutral-100 > :not([hidden]) ~ :not([hidden]),

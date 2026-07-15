@@ -335,15 +335,15 @@ export default function DashboardCreateProject({
           <button
             type="button"
             onClick={onBack}
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-stone-100"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to projects
           </button>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900 dark:text-stone-100">
             {isEdit ? 'Edit Project' : 'Create Project'}
           </h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             Lorem ipsum dolor sit amet, consectetur.
           </p>
         </div>
@@ -359,7 +359,7 @@ export default function DashboardCreateProject({
       </div>
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
-        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
         {postingContext ? <EmployerPostingBanner context={postingContext} className="mb-6" /> : null}
         <FormAccordionSection
           title="Basic Information"
@@ -528,7 +528,7 @@ export default function DashboardCreateProject({
             {galleryItems.map((item, index) => (
               <div
                 key={item.id}
-                className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 bg-neutral-50"
+                className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900"
               >
                 {item.kind === 'image' && item.preview ? (
                   <>
@@ -543,7 +543,7 @@ export default function DashboardCreateProject({
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-1 text-center">
                     <FileText className="h-5 w-5 shrink-0 text-neutral-400" />
-                    <span className="line-clamp-2 text-[9px] font-normal leading-tight text-neutral-600">
+                    <span className="line-clamp-2 text-[9px] font-normal leading-tight text-neutral-600 dark:text-neutral-400">
                       {item.name}
                     </span>
                   </div>
@@ -561,13 +561,13 @@ export default function DashboardCreateProject({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8]"
+              className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
             >
               <ImageIcon className="h-5 w-5 text-neutral-400" />
               Upload
             </button>
           </div>
-          <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500">
+          <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500 dark:text-neutral-400">
             Upload multiple images and files — the first image is used as the main cover. JPG, PNG, WEBP,
             GIF, PDF, DOC, or DOCX — max 10 MB per file.
           </p>

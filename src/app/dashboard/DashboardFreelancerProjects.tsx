@@ -22,6 +22,7 @@ import {
   DASHBOARD_SUBTABS_ROW,
   DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 type ProjectStatus = Project['status'];
@@ -76,13 +77,6 @@ export default function DashboardFreelancerProjects() {
     return filteredProjects.slice(start, start + itemsPerPage);
   }, [filteredProjects, activePage, itemsPerPage]);
 
-  const subTabClass = (tab: ProjectStatus) =>
-    `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
-      activeSubTab === tab
-        ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
-        : 'text-neutral-400 hover:text-neutral-900'
-    }`;
-
   return (
     <div className={DASHBOARD_PAGE_ROOT}>
       <div className="mx-auto mb-6 flex max-w-7xl flex-col gap-5 pl-1 sm:mb-8 md:flex-row md:items-end md:justify-between">
@@ -97,7 +91,7 @@ export default function DashboardFreelancerProjects() {
 
         <Link
           href="/projects"
-          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-6 py-3.5 text-sm font-medium text-neutral-800 shadow-sm transition-all hover:bg-neutral-50 active:scale-[0.99] sm:w-auto sm:py-4"
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-6 py-3.5 text-sm font-medium text-neutral-800 shadow-sm transition-all hover:bg-neutral-50 active:scale-[0.99] sm:w-auto sm:py-4 dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
         >
           Browse projects
         </Link>
@@ -114,7 +108,7 @@ export default function DashboardFreelancerProjects() {
                   setActiveSubTab(tab);
                   setCurrentPage(1);
                 }}
-                className={subTabClass(tab)}
+                className={dashboardSubtabClass(activeSubTab === tab)}
               >
                 {tab}
               </button>
@@ -141,7 +135,7 @@ export default function DashboardFreelancerProjects() {
                 disabled={activePage === 1}
                 className={DASHBOARD_PAGINATION_ARROW}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -186,7 +180,7 @@ export default function DashboardFreelancerProjects() {
                 disabled={activePage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
           </div>

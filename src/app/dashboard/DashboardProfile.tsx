@@ -283,7 +283,7 @@ const SELECT_CHEVRON_STYLE = {
 const inputClass =
   'w-full rounded-xl border-2 border-transparent bg-neutral-50/80 px-4 py-3.5 text-sm font-medium text-neutral-500 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-neutral-50 focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-neutral-300 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900 dark:focus:border-[#52C47F]';
 
-const selectClass = `${inputClass} cursor-pointer appearance-none text-neutral-800`;
+const selectClass = `${inputClass} cursor-pointer appearance-none text-neutral-800 dark:text-stone-100`;
 
 const FREELANCER_ONLY_PROFILE_SECTIONS = new Set([
   'profile',
@@ -1041,11 +1041,11 @@ export default function DashboardProfile() {
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} relative`}>
       <div className="mx-auto mb-8 max-w-7xl pl-1">
-        <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900" id="profile-heading-id">
+        <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900 dark:text-stone-100" id="profile-heading-id">
           {isEmployerMode ? 'Business Profile' : 'My Profile'}
         </h1>
         {isEmployerMode ? (
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             Manage your public employer page
             {employerPublicProfilePath ? (
               <>
@@ -1064,7 +1064,7 @@ export default function DashboardProfile() {
             .
           </p>
         ) : (
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             Manage your public freelancer page
             {freelancerPublicProfilePath ? (
               <>
@@ -1105,7 +1105,7 @@ export default function DashboardProfile() {
       ) : null}
 
       <div
-        className={`mx-auto mb-8 max-w-7xl overflow-hidden rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 ${
+        className={`mx-auto mb-8 max-w-7xl overflow-hidden rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border dark:border-neutral-800 dark:bg-neutral-900 ${
           loading || saving ? 'pointer-events-none opacity-60' : ''
         }`}
       >
@@ -1170,10 +1170,10 @@ export default function DashboardProfile() {
 
           <div className="space-y-10">
             <section className="space-y-4">
-              <h4 className="text-base font-semibold tracking-tight text-neutral-900">Basic Details</h4>
+              <h4 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Basic Details</h4>
               <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Full name</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Full name</label>
                   <input
                     type="text"
                     required
@@ -1186,7 +1186,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Phone</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Phone</label>
                   <input
                     type="tel"
                     value={phone}
@@ -1199,7 +1199,7 @@ export default function DashboardProfile() {
 
                 {!isEmployerMode ? (
                   <div className="space-y-2">
-                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Username</label>
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Username</label>
                     <input
                       type="text"
                       required
@@ -1209,7 +1209,7 @@ export default function DashboardProfile() {
                       maxLength={USERNAME_MAX_LENGTH}
                       disabled={!usernameCanChange}
                       readOnly={!usernameCanChange}
-                      className={`${inputClass} lowercase ${!usernameCanChange ? 'cursor-not-allowed bg-neutral-50' : ''}`}
+                      className={`${inputClass} lowercase ${!usernameCanChange ? 'cursor-not-allowed bg-neutral-50 dark:bg-neutral-800/80' : ''}`}
                       placeholder="yourname"
                     />
                     {!usernameCanChange ? (
@@ -1221,19 +1221,19 @@ export default function DashboardProfile() {
                 ) : null}
 
                 <div className="space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Email</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Email</label>
                   <input
                     type="text"
                     required
                     readOnly
                     value={email}
-                    className={`${inputClass} cursor-not-allowed bg-neutral-50`}
+                    className={`${inputClass} cursor-not-allowed bg-neutral-50 dark:bg-neutral-800/80`}
                     placeholder="you@example.com"
                   />
                 </div>
 
                 <div className="relative space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Gender</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Gender</label>
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
@@ -1248,7 +1248,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="space-y-3 md:col-span-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Location</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Location</label>
                   <LocationFields
                     variant="dashboard"
                     enableHybrid
@@ -1277,7 +1277,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">PAN number</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">PAN number</label>
                   <input
                     type="text"
                     value={panNumber}
@@ -1289,7 +1289,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Birthday</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Birthday</label>
                   <input
                     type="date"
                     value={birthday}
@@ -1301,10 +1301,10 @@ export default function DashboardProfile() {
             </section>
 
             <section className="space-y-4">
-              <h4 className="text-base font-semibold tracking-tight text-neutral-900">Profession Details</h4>
+              <h4 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Profession Details</h4>
               <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Tagline</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Tagline</label>
                   <input
                     type="text"
                     required
@@ -1316,7 +1316,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="relative space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Specialization</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Specialization</label>
                   <select
                     value={specialization}
                     onChange={(e) => setSpecialization(e.target.value)}
@@ -1333,7 +1333,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="relative space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Hourly Rate</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Hourly Rate</label>
                   <select
                     value={hourlyRate}
                     onChange={(e) => setHourlyRate(e.target.value)}
@@ -1354,7 +1354,7 @@ export default function DashboardProfile() {
                 </div>
 
                 <div className="relative space-y-2">
-                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Type</label>
+                  <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Type</label>
                   <select
                     value={profileType}
                     onChange={(e) => setProfileType(e.target.value)}
@@ -1370,7 +1370,7 @@ export default function DashboardProfile() {
               </div>
 
               <div className="space-y-3 pt-2">
-                <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Introduce Yourself</label>
+                <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Introduce Yourself</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -1397,14 +1397,14 @@ export default function DashboardProfile() {
 
         {isEmployerMode ? (
           <div className="space-y-8">
-            <div className="flex flex-col gap-4 border-b border-neutral-100 pb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 border-b border-neutral-100 pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800">
               <div className="flex min-w-0 items-start gap-4">
                 <div className="shrink-0 rounded-xl bg-[#52C47F] p-3 text-white">
                   <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold text-neutral-900">Edit business profile</h2>
-                  <p className="mt-1 break-all text-sm text-neutral-500">
+                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-stone-100">Edit business profile</h2>
+                  <p className="mt-1 break-all text-sm text-neutral-500 dark:text-neutral-400">
                     {employerPublicProfilePath
                       ? `Public page at ${employerPublicProfilePath}`
                       : 'Set your slug below to publish your employer page.'}
@@ -1504,7 +1504,7 @@ export default function DashboardProfile() {
                   className="grid grid-cols-1 gap-x-8 gap-y-6 pb-6 last:pb-0 md:grid-cols-[1fr_1fr_auto]"
                 >
                   <div className="relative space-y-2">
-                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
                       Language {index + 1}
                     </label>
                     <select
@@ -1522,7 +1522,7 @@ export default function DashboardProfile() {
                   </div>
 
                   <div className="relative space-y-2">
-                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
                       Language level
                     </label>
                     <select
@@ -1617,7 +1617,7 @@ export default function DashboardProfile() {
                   className="grid grid-cols-1 gap-x-8 gap-y-6 pb-6 last:pb-0 md:grid-cols-[1fr_1fr_auto]"
                 >
                   <div className="relative space-y-2">
-                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
                       Skill {index + 1}
                     </label>
                     <select
@@ -1644,7 +1644,7 @@ export default function DashboardProfile() {
                   </div>
 
                   <div className="relative space-y-2">
-                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900">Point</label>
+                    <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">Point</label>
                     <select
                       value={row.point}
                       onChange={(e) => updateSkillRow(index, 'point', e.target.value)}
@@ -1734,7 +1734,7 @@ export default function DashboardProfile() {
                         </span>
 
                         <div>
-                          <h3 className="text-[17px] font-semibold tracking-tight text-neutral-900">{entry.degree}</h3>
+                          <h3 className="text-[17px] font-semibold tracking-tight text-neutral-900 dark:text-stone-100">{entry.degree}</h3>
                           <p className="mt-1 text-[15px] font-medium text-[#52C47F]">{entry.institution}</p>
                         </div>
 
@@ -1827,7 +1827,7 @@ export default function DashboardProfile() {
                         </span>
 
                         <div>
-                          <h3 className="text-[17px] font-semibold tracking-tight text-neutral-900">{entry.title}</h3>
+                          <h3 className="text-[17px] font-semibold tracking-tight text-neutral-900 dark:text-stone-100">{entry.title}</h3>
                           <p className="mt-1 text-[15px] font-medium text-[#52C47F]">{entry.company}</p>
                         </div>
 
@@ -1927,7 +1927,7 @@ export default function DashboardProfile() {
                   </div>
 
                   <div>
-                    <h3 className="text-[17px] font-semibold tracking-tight text-neutral-900">{entry.title}</h3>
+                    <h3 className="text-[17px] font-semibold tracking-tight text-neutral-900 dark:text-stone-100">{entry.title}</h3>
                     <p className="mt-1 text-[15px] font-medium text-[#52C47F]">{entry.issuer}</p>
                   </div>
 

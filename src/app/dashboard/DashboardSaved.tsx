@@ -39,7 +39,7 @@ function SavedCard({
   onOpen: (item: DashboardSavedItem) => void;
 }) {
   return (
-    <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-neutral-100 bg-white transition-all hover:shadow-md">
+    <div className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-neutral-100 bg-white transition-all hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:shadow-none">
       <div>
         <div className="relative h-[200px] w-full overflow-hidden bg-neutral-100">
           <button
@@ -57,7 +57,7 @@ function SavedCard({
           <button
             type="button"
             onClick={() => onDelete(item)}
-            className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-100 bg-white text-black shadow-sm outline-none transition-all hover:scale-110 hover:text-red-500 active:scale-95"
+            className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-100 bg-white text-black shadow-sm outline-none transition-all hover:scale-110 hover:text-red-500 active:scale-95 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
             title="Remove from bookmarks"
           >
             <Trash2 className="h-4 w-4 text-neutral-800" strokeWidth={1.5} />
@@ -72,7 +72,7 @@ function SavedCard({
           <span className="block text-xs font-normal tracking-tight text-neutral-500">
             {item.category}
           </span>
-          <h4 className="line-clamp-2 h-11 text-sm font-normal leading-snug tracking-tight text-black">
+          <h4 className="line-clamp-2 h-11 text-sm font-normal leading-snug tracking-tight text-black dark:text-stone-100">
             {item.title}
           </h4>
           <div className="flex items-center gap-1.5 text-xs font-normal text-neutral-800">
@@ -124,12 +124,12 @@ function SavedCard({
               <div className="text-xs font-normal text-neutral-950">
                 <span className="mb-0.5 block text-[10.5px] text-neutral-500">Starting</span>
                 <span className="mb-0.5 block text-[11.5px] text-neutral-500">at </span>
-                <span className="text-sm font-medium text-black">{formatNPR(item.price)}</span>
+                <span className="text-sm font-medium text-black dark:text-stone-100">{formatNPR(item.price)}</span>
               </div>
             ) : (
               <div className="text-xs font-normal">
                 <span className="text-[10px] text-neutral-500">Starting at </span>
-                <span className="text-sm font-medium text-black">{formatNPR(item.price)}</span>
+                <span className="text-sm font-medium text-black dark:text-stone-100">{formatNPR(item.price)}</span>
               </div>
             )}
           </div>
@@ -242,8 +242,8 @@ export default function DashboardSaved() {
   const subTabClass = (tab: SavedSubTab) =>
     `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
       activeSubTab === tab
-        ? 'text-black after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-black'
-        : 'text-neutral-500 hover:text-neutral-900'
+        ? 'text-black after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-black dark:text-stone-100 dark:after:bg-stone-100'
+        : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-stone-100'
     }`;
 
   return (
@@ -300,7 +300,7 @@ export default function DashboardSaved() {
                   disabled={safePage === 1}
                   className={DASHBOARD_PAGINATION_ARROW_PLAIN}
                 >
-                  <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                  <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
                 </button>
 
                 <div className="flex shrink-0 items-center gap-1">
@@ -340,7 +340,7 @@ export default function DashboardSaved() {
                   disabled={safePage === totalPages}
                   className={DASHBOARD_PAGINATION_ARROW_PLAIN}
                 >
-                  <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                  <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
                 </button>
               </div>
 

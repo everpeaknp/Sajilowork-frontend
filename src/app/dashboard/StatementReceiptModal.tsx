@@ -211,22 +211,22 @@ export default function StatementReceiptModal({
       />
 
       <div className="animate-in fade-in slide-in-from-bottom-4 pointer-events-none fixed inset-0 z-[10051] flex items-end justify-center p-0 duration-300 sm:items-center sm:p-4">
-        <div className="pointer-events-auto flex max-h-[min(92dvh,calc(100dvh-5rem))] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-neutral-200/80 bg-neutral-50 shadow-2xl sm:max-h-[92vh] sm:rounded-3xl">
+        <div className="pointer-events-auto flex max-h-[min(92dvh,calc(100dvh-5rem))] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-neutral-200/80 bg-neutral-50 shadow-2xl sm:max-h-[92vh] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-900">
           {/* Toolbar */}
-          <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-5 py-4 sm:px-6">
+          <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-5 py-4 sm:px-6 dark:border-neutral-800 dark:bg-neutral-900">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-400 dark:ring-emerald-900/50">
                 <Receipt className="h-5 w-5" strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-neutral-900">{documentTitle}</h3>
-                <p className="text-xs text-neutral-500">{documentSubtitle}</p>
+                <h3 className="text-base font-semibold text-neutral-900 dark:text-stone-100">{documentTitle}</h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">{documentSubtitle}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900"
+              className="rounded-xl p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
             >
               <X className="h-5 w-5" />
             </button>
@@ -357,12 +357,12 @@ export default function StatementReceiptModal({
           </div>
 
           {/* Actions */}
-          <div className="shrink-0 border-t border-neutral-200 bg-white px-5 py-4 sm:px-6">
+          <div className="shrink-0 border-t border-neutral-200 bg-white px-5 py-4 sm:px-6 dark:border-neutral-800 dark:bg-neutral-900">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
               >
                 {copied ? (
                   <Check className="h-4 w-4 text-emerald-600" />
@@ -374,7 +374,7 @@ export default function StatementReceiptModal({
               <button
                 type="button"
                 onClick={handlePrint}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-100 px-4 py-3 text-xs font-semibold text-neutral-800 transition-colors hover:bg-neutral-200"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-neutral-100 px-4 py-3 text-xs font-semibold text-neutral-800 transition-colors hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-100 dark:hover:bg-neutral-700"
               >
                 <Printer className="h-4 w-4" />
                 Print

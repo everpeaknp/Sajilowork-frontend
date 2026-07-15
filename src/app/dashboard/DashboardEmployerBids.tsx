@@ -312,21 +312,21 @@ export default function DashboardEmployerBids() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Listings</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.listings}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.listings}</p>
           <p className="mt-1 text-xs text-neutral-500">
             {isCustomer ? 'Tasks & projects with bids' : 'Listings with your bids'}
           </p>
         </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Total bids</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.totalBids}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.totalBids}</p>
           <p className="mt-1 text-xs text-neutral-500">Across filtered listings</p>
         </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Pending</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.pendingBids}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.pendingBids}</p>
           <p className="mt-1 text-xs text-neutral-500">
             {isCustomer ? 'Awaiting your review' : 'Still under review'}
           </p>
@@ -361,7 +361,7 @@ export default function DashboardEmployerBids() {
       />
 
       <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-10`}>
-        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid">
+        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid dark:border-neutral-800 dark:text-stone-100">
           <div className="col-span-12 md:col-span-6">Listing</div>
           <div className="col-span-6 md:col-span-2">Type</div>
           <div className="col-span-6 md:col-span-2">Bids</div>
@@ -397,7 +397,7 @@ export default function DashboardEmployerBids() {
                   <div className="flex items-center gap-4">
                     <ListingBidAvatar group={group} />
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      <h4 className="truncate text-[15px] font-medium tracking-tight text-black">
+                      <h4 className="truncate text-[15px] font-medium tracking-tight text-black dark:text-stone-100">
                         {group.title}
                       </h4>
                       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-neutral-800">
@@ -466,7 +466,7 @@ export default function DashboardEmployerBids() {
                 disabled={currentPage === 1}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -488,7 +488,7 @@ export default function DashboardEmployerBids() {
                 disabled={currentPage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 

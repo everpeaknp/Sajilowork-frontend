@@ -33,6 +33,7 @@ import {
   DASHBOARD_SUBTABS_ROW,
   DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 type ApplicationViewTab = 'applications' | 'shortlisted';
@@ -369,16 +370,11 @@ export default function DashboardEmployerApplications() {
       ? shortlistedRows.length > 0 && filteredShortlisted.length === 0
       : groups.length > 0 && filteredGroups.length === 0);
 
-  const viewTabClass = (tab: ApplicationViewTab) =>
-    `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
-      viewTab === tab
-        ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
-        : 'text-neutral-400 hover:text-neutral-900'
-    }`;
+  const viewTabClass = (tab: ApplicationViewTab) => dashboardSubtabClass(viewTab === tab);
 
   if (!isCustomer) {
     return (
-      <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-600">
+      <div className="rounded-xl bg-white p-8 text-center text-sm text-neutral-600 dark:border dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-300">
         Applications review is available for employer accounts.
       </div>
     );
@@ -396,21 +392,21 @@ export default function DashboardEmployerApplications() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Jobs</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.jobs}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.jobs}</p>
           <p className="mt-1 text-xs text-neutral-500">Posted job listings</p>
         </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Applications</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.totalApplications}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.totalApplications}</p>
           <p className="mt-1 text-xs text-neutral-500">
             {totals.jobsWithApplications} job{totals.jobsWithApplications === 1 ? '' : 's'} with applicants
           </p>
         </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Shortlisted</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.shortlisted}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.shortlisted}</p>
           <p className="mt-1 text-xs text-neutral-500">Accepted freelancers</p>
         </div>
       </div>
@@ -457,7 +453,7 @@ export default function DashboardEmployerApplications() {
 
         {isShortlistedView ? (
           <>
-            <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid">
+            <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid dark:border-neutral-800 dark:text-stone-100">
               <div className="col-span-12 md:col-span-4">Freelancer</div>
               <div className="col-span-12 md:col-span-3">Job</div>
               <div className="col-span-6 md:col-span-2">Offer</div>
@@ -497,7 +493,7 @@ export default function DashboardEmployerApplications() {
                           className="!h-11 !w-11 shrink-0 ring-1 ring-neutral-100"
                         />
                         <div className="min-w-0">
-                          <p className="truncate text-[15px] font-medium text-black">
+                          <p className="truncate text-[15px] font-medium text-black dark:text-stone-100">
                             {row.freelancerName}
                           </p>
                           <span className="mt-1 inline-flex rounded-full bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
@@ -541,7 +537,7 @@ export default function DashboardEmployerApplications() {
           </>
         ) : (
           <>
-        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid">
+        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid dark:border-neutral-800 dark:text-stone-100">
           <div className="col-span-12 md:col-span-6">Job</div>
           <div className="col-span-6 md:col-span-2">Applications</div>
           <div className="col-span-6 md:col-span-2">Status</div>
@@ -574,7 +570,7 @@ export default function DashboardEmployerApplications() {
                   <div className="flex items-center gap-4">
                     <JobApplicationAvatar group={group} />
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      <h4 className="truncate text-[15px] font-medium tracking-tight text-black">
+                      <h4 className="truncate text-[15px] font-medium tracking-tight text-black dark:text-stone-100">
                         {group.title}
                       </h4>
                       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-neutral-800">
@@ -653,7 +649,7 @@ export default function DashboardEmployerApplications() {
                 disabled={currentPage === 1}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -675,7 +671,7 @@ export default function DashboardEmployerApplications() {
                 disabled={currentPage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 

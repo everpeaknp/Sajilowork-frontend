@@ -12,10 +12,6 @@ import DashboardStatements from '@/app/dashboard/DashboardStatements';
 import { DashboardMetricCards } from '@/app/dashboard/DashboardMetricCards';
 import { useDashboardSidebarRole } from '@/app/dashboard/DashboardRoleSwitchContext';
 import { devLog, devError } from '@/lib/devLog';
-
-const fieldLabelClass = 'text-sm font-semibold text-gray-600';
-const fieldInputClass =
-  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-base font-semibold text-brand-dark outline-none transition-all placeholder:text-gray-400 focus:border-brand-emerald focus:bg-white focus:ring-2 focus:ring-brand-emerald/15';
 import { cn } from '@/lib/utils';
 import { paymentService } from '@/services';
 import { PaymentMethodData } from '@/types';
@@ -29,6 +25,10 @@ import { mapWithdrawalStatusToPayout } from '@/lib/walletTabStats';
 import { USER_PROFILE_UPDATED } from '@/lib/userProfileSync';
 import { useAuthStore } from '@/store/auth.store';
 import { DASHBOARD_HEADING } from '@/app/dashboard/dashboardResponsive';
+
+const fieldLabelClass = 'text-sm font-semibold text-gray-600 dark:text-neutral-400';
+const fieldInputClass =
+  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-base font-semibold text-brand-dark outline-none transition-all placeholder:text-gray-400 focus:border-brand-emerald focus:bg-white focus:ring-2 focus:ring-brand-emerald/15 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900';
 
 interface WalletData {
   id: string;
@@ -810,7 +810,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         <div className="flex flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className={DASHBOARD_HEADING}>{tabHeading.title}</h1>
-            <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+            <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
               {tabHeading.subtitle}
             </p>
           </div>
@@ -839,7 +839,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                 type="button"
                 onClick={openWithdrawModal}
                 disabled={isWithdrawing || walletData?.is_frozen || withdrawableBalance < 10}
-                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-6 py-4 text-sm font-medium text-brand-dark shadow-sm transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-6 py-4 text-sm font-medium text-brand-dark shadow-sm transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800 dark:disabled:bg-neutral-800 dark:disabled:text-neutral-500"
               >
                 {isWithdrawing ? (
                   <>
@@ -882,15 +882,15 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
 
         {/* Custom Tabs */}
         <div className="w-full max-w-full overflow-x-auto">
-          <div className="inline-flex min-w-max gap-1 rounded-2xl bg-neutral-100 p-1.5">
+          <div className="inline-flex min-w-max gap-1 rounded-2xl bg-neutral-100 p-1.5 dark:bg-neutral-800">
             <button
               type="button"
               onClick={() => selectTab('wallet')}
               className={cn(
                 'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
                 activeTab === 'wallet'
-                  ? 'bg-white text-brand-dark shadow-sm'
-                  : 'text-gray-600 hover:text-brand-dark'
+                  ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
+                  : 'text-gray-600 hover:text-brand-dark dark:text-neutral-400 dark:hover:text-stone-100'
               )}
             >
               <Wallet className="h-4 w-4" />
@@ -903,8 +903,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                 className={cn(
                   'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
                   activeTab === 'statements'
-                    ? 'bg-white text-brand-dark shadow-sm'
-                    : 'text-gray-600 hover:text-brand-dark'
+                    ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
+                    : 'text-gray-600 hover:text-brand-dark dark:text-neutral-400 dark:hover:text-stone-100'
                 )}
               >
                 <TrendingUp className="h-4 w-4" />
@@ -917,8 +917,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               className={cn(
                 'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
                 activeTab === 'recharges'
-                  ? 'bg-white text-brand-dark shadow-sm'
-                  : 'text-gray-600 hover:text-brand-dark'
+                  ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
+                  : 'text-gray-600 hover:text-brand-dark dark:text-neutral-400 dark:hover:text-stone-100'
               )}
             >
               <Zap className="h-4 w-4" />
@@ -930,8 +930,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               className={cn(
                 'flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-all sm:px-8',
                 activeTab === 'payouts'
-                  ? 'bg-white text-brand-dark shadow-sm'
-                  : 'text-gray-600 hover:text-brand-dark'
+                  ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
+                  : 'text-gray-600 hover:text-brand-dark dark:text-neutral-400 dark:hover:text-stone-100'
               )}
             >
               <ArrowUpRight className="h-4 w-4" />
@@ -946,7 +946,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
           {walletLoading ? (
             <div className="py-16 text-center">
               <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-brand-emerald border-t-transparent" />
-              <p className="font-medium text-gray-500">Loading wallet data…</p>
+              <p className="font-medium text-gray-500 dark:text-neutral-400">Loading wallet data…</p>
             </div>
           ) : (
             <>
@@ -1004,7 +1004,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
             aria-labelledby="withdraw-modal-title"
           >
             <div
-              className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
+              className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px] dark:bg-neutral-900 dark:border dark:border-neutral-800"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="shrink-0 px-6 pb-5 pt-6">
@@ -1014,10 +1014,10 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                       <ArrowUpRight className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 id="withdraw-modal-title" className="text-xl font-bold text-brand-dark">
+                      <h3 id="withdraw-modal-title" className="text-xl font-bold text-brand-dark dark:text-stone-100">
                         Withdraw
                       </h3>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-gray-500 dark:text-neutral-400">
                         Transfer balance to your linked account
                       </p>
                     </div>
@@ -1025,15 +1025,15 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                   <button
                     type="button"
                     onClick={() => setShowWithdrawModal(false)}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
                     aria-label="Close"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
-                <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
-                  <span className="text-sm text-gray-500">Available to withdraw</span>
-                  <span className="text-lg font-bold text-brand-dark">
+                <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3 dark:bg-neutral-800">
+                  <span className="text-sm text-gray-500 dark:text-neutral-400">Available to withdraw</span>
+                  <span className="text-lg font-bold text-brand-dark dark:text-stone-100">
                     {formatNPR(withdrawableBalance)}
                   </span>
                 </div>
@@ -1075,7 +1075,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
 
                 <div className="space-y-3">
                   <label className={fieldLabelClass}>Withdrawal method</label>
-                  <div className="flex rounded-2xl bg-gray-100 p-1">
+                  <div className="flex rounded-2xl bg-gray-100 p-1 dark:bg-neutral-800">
                     <button
                       type="button"
                       onClick={() => {
@@ -1089,8 +1089,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                       className={cn(
                         'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
                         withdrawMethod === 'esewa'
-                          ? 'bg-white text-brand-dark shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700',
+                          ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
+                          : 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-stone-100',
                         esewaPaymentMethods.length === 0 && 'cursor-not-allowed opacity-40'
                       )}
                     >
@@ -1108,8 +1108,8 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                       className={cn(
                         'flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all',
                         withdrawMethod === 'bank_transfer'
-                          ? 'bg-white text-brand-dark shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
+                          : 'text-gray-500 hover:text-gray-700 dark:text-neutral-400 dark:hover:text-stone-100'
                       )}
                     >
                       Bank transfer
@@ -1141,13 +1141,13 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                               'w-full rounded-xl border px-4 py-3 text-left transition-all',
                               selectedEsewaMethodId === pm.id
                                 ? 'border-brand-emerald bg-brand-emerald/5 ring-1 ring-brand-emerald/20'
-                                : 'border-gray-200 bg-white hover:border-gray-300'
+                                : 'border-gray-200 bg-white hover:border-gray-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
                             )}
                           >
-                            <p className="font-semibold text-brand-dark">
+                            <p className="font-semibold text-brand-dark dark:text-stone-100">
                               {pm.esewa_account_name || 'eSewa account'}
                             </p>
-                            <p className="mt-0.5 text-sm text-gray-500">{pm.esewa_phone_number}</p>
+                            <p className="mt-0.5 text-sm text-gray-500 dark:text-neutral-400">{pm.esewa_phone_number}</p>
                           </button>
                         ))}
                       </div>
@@ -1184,13 +1184,13 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                 )}
 
                 {withdrawFee !== null && withdrawNetAmount !== null && (
-                  <div className="rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-4">
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50/80 px-4 py-4 dark:border-neutral-800 dark:bg-neutral-800/80">
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-neutral-400">
                       <span>Processing fee</span>
                       <span>{formatNPR(withdrawFee)}</span>
                     </div>
-                    <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3">
-                      <span className="font-semibold text-brand-dark">You receive</span>
+                    <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-neutral-700">
+                      <span className="font-semibold text-brand-dark dark:text-stone-100">You receive</span>
                       <span className="text-lg font-bold text-brand-emerald">
                         {formatNPR(withdrawNetAmount)}
                       </span>
@@ -1241,7 +1241,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
           />
           <div className="fixed inset-0 z-[10051] flex items-end justify-center p-0 sm:items-center sm:p-6 pointer-events-none">
             <div
-              className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
+              className="pointer-events-auto flex w-full max-w-lg max-h-[min(92vh,calc(100dvh-1rem))] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px] dark:bg-neutral-900 dark:border dark:border-neutral-800"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="shrink-0 px-6 pb-5 pt-6">
@@ -1251,14 +1251,14 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                       <Wallet className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-brand-dark">Recharge wallet</h3>
-                      <p className="mt-1 text-sm text-gray-500">Add funds to your balance</p>
+                      <h3 className="text-xl font-bold text-brand-dark dark:text-stone-100">Recharge wallet</h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-neutral-400">Add funds to your balance</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowRechargeModal(false)}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
                     aria-label="Close"
                   >
                     <X className="h-5 w-5" />
@@ -1311,7 +1311,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                   <button
                     type="button"
                     onClick={proceedRechargeViaWhatsAppFromModal}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-50 active:scale-[0.99]"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-3.5 text-base font-semibold text-brand-dark transition-all hover:bg-gray-50 active:scale-[0.99] dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
                   >
                     <MessageCircle className="h-5 w-5 text-[#25D366]" />
                     Request via WhatsApp

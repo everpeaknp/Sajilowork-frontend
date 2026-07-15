@@ -190,8 +190,8 @@ const SOFT_SKILLS = [
   'Stress Management',
 ];
 const fieldClass =
-  'w-full rounded-none border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400';
-const labelClass = 'mb-2 block text-sm font-normal text-neutral-800';
+  'w-full rounded-none border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100';
+const labelClass = 'mb-2 block text-sm font-normal text-neutral-800 dark:text-stone-100';
 const selectClass = `${fieldClass} appearance-none bg-[length:12px] bg-[right_1rem_center] bg-no-repeat pr-10`;
 function SelectField({
   label,
@@ -443,7 +443,7 @@ function MultiSelectField({
           value.map((item) => (
             <span
               key={item}
-              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800"
+              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
             >
               {item}
               <span
@@ -456,7 +456,7 @@ function MultiSelectField({
                     remove(item, event as unknown as MouseEvent);
                   }
                 }}
-                className="text-neutral-500 hover:text-neutral-800"
+                className="text-neutral-500 hover:text-neutral-800 dark:hover:text-stone-100"
                 aria-label={`Remove ${item}`}
               >
                 <X className="h-3 w-3" />
@@ -472,10 +472,10 @@ function MultiSelectField({
               role="listbox"
               aria-multiselectable
               style={panelStyle}
-              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg"
+              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900"
             >
               {searchable ? (
-                <div className="border-b border-neutral-100 p-2">
+                <div className="border-b border-neutral-100 p-2 dark:border-neutral-800">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                     <input
@@ -483,7 +483,7 @@ function MultiSelectField({
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder="Search skills..."
-                      className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                       onClick={(event) => event.stopPropagation()}
                     />
                   </div>
@@ -500,7 +500,7 @@ function MultiSelectField({
                     return (
                       <label
                         key={option}
-                        className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
+                        className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
                       >
                         <input
                           type="checkbox"
@@ -515,7 +515,7 @@ function MultiSelectField({
                 )}
               </div>
               {allowCustom ? (
-                <div className="border-t border-neutral-100 bg-neutral-50 p-3">
+                <div className="border-t border-neutral-100 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900">
                   <p className="mb-2 text-xs font-normal text-neutral-500">
                     Skill not listed? Add it manually (only if it is not in the list above).
                   </p>
@@ -530,7 +530,7 @@ function MultiSelectField({
                       }}
                       onKeyDown={handleCustomKeyDown}
                       placeholder="Type a custom skill"
-                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                       onClick={(event) => event.stopPropagation()}
                     />
                     <button
@@ -609,7 +609,7 @@ function ListEditor({
       <button
         type="button"
         onClick={addItem}
-        className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+        className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
       >
         <Plus className="h-4 w-4" />
         Add item
@@ -748,15 +748,15 @@ export default function DashboardCreateJob({
           <button
             type="button"
             onClick={onBack}
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-stone-100"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to jobs
           </button>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900 dark:text-stone-100">
             {isEdit ? 'Edit Job' : 'Post New Job'}
           </h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             Matches the public job page layout — hero, about, responsibilities, and experience.
           </p>
         </div>
@@ -772,7 +772,7 @@ export default function DashboardCreateJob({
       </div>
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
-        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
         {postingContext ? <EmployerPostingBanner context={postingContext} className="mb-6" /> : null}
         <FormAccordionSection
           title="Basic Information"
@@ -920,7 +920,7 @@ export default function DashboardCreateJob({
               </select>
               <p className="mt-1.5 text-xs font-normal text-neutral-500">
                 Leave amounts empty to show{' '}
-                <span className="font-medium text-neutral-700">Negotiable</span> on the job page.
+                <span className="font-medium text-neutral-700 dark:text-neutral-300">Negotiable</span> on the job page.
               </p>
             </div>
 
@@ -962,8 +962,8 @@ export default function DashboardCreateJob({
                 </div>
               </>
             ) : (
-              <div className="sm:col-span-2 rounded-none border border-dashed border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-normal text-neutral-600">
-                Budget will display as <span className="font-medium text-neutral-900">Negotiable</span>{' '}
+              <div className="sm:col-span-2 rounded-none border border-dashed border-neutral-200 bg-neutral-50 px-4 py-3 text-sm font-normal text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
+                Budget will display as <span className="font-medium text-neutral-900 dark:text-stone-100">Negotiable</span>{' '}
                 unless you choose fixed amount or a min–max range.
               </div>
             )}

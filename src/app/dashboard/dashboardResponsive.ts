@@ -40,7 +40,16 @@ export function dashboardPageButtonClass(active: boolean): string {
   }`;
 }
 
-export const DASHBOARD_STAT_VALUE = 'text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl';
+export const DASHBOARD_STAT_VALUE =
+  'text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl dark:text-stone-100';
+
+export function dashboardSubtabClass(active: boolean): string {
+  return `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
+    active
+      ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black dark:text-stone-100 dark:after:bg-stone-100'
+      : 'text-neutral-400 hover:text-neutral-900 dark:hover:text-stone-100'
+  }`;
+}
 
 export const DASHBOARD_MESSAGES_HEIGHT =
   'h-[min(560px,calc(100dvh-12rem))] lg:h-[650px]';

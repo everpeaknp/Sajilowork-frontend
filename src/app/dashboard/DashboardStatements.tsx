@@ -278,7 +278,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
   );
 
   return (
-    <div className={embedded ? 'animate-in fade-in duration-300 font-sans text-black' : DASHBOARD_PAGE_ROOT}>
+    <div className={embedded ? 'animate-in fade-in duration-300 font-sans text-black dark:text-stone-100' : DASHBOARD_PAGE_ROOT}>
       {!embedded ? (
         <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
           <h1 className={DASHBOARD_HEADING}>Statements</h1>
@@ -291,7 +291,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
       ) : null}
 
       <div className="mx-auto mb-8 grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
+        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:shadow-none">
           <div className="z-10 space-y-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               {direction === 'outgoing' ? 'Total Outgoing' : 'Net Income'}
@@ -312,7 +312,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-[#27AE60]/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
         </div>
 
-        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
+        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:shadow-none">
           <div className="z-10 space-y-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Withdrawn
@@ -330,7 +330,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-[#F2994A]/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
         </div>
 
-        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
+        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:shadow-none">
           <div className="z-10 space-y-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Pending Clearance
@@ -348,7 +348,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-[#2F80ED]/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
         </div>
 
-        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm">
+        <div className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-neutral-200/50 bg-white p-6 transition-all duration-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:shadow-none">
           <div className="z-10 space-y-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Available for Withdrawal
@@ -386,7 +386,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
         <div className="overflow-x-auto">
           <table className="w-full table-auto border-collapse text-left">
             <thead>
-              <tr className="border-b border-transparent text-sm font-medium text-neutral-800">
+              <tr className="border-b border-transparent text-sm font-medium text-neutral-800 dark:text-stone-100">
                 <th className="w-[14%] pb-6 pt-2 font-medium">Invoice ID</th>
                 <th className="w-[22%] pb-6 pt-2 font-medium">Title</th>
                 <th className="w-[14%] pb-6 pt-2 font-medium">Date</th>
@@ -396,7 +396,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                 <th className="w-[14%] pb-6 pt-2 pr-4 text-left font-medium">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100">
+            <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-sm font-normal text-neutral-400">
@@ -411,11 +411,11 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                 </tr>
               ) : (
                 currentStatements.map((st) => (
-                  <tr key={st.id} className="transition-colors hover:bg-neutral-50/30">
-                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-900">
+                  <tr key={st.id} className="transition-colors hover:bg-neutral-50/30 dark:hover:bg-neutral-800/50">
+                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-900 dark:text-stone-100">
                       {st.receiptId}
                     </td>
-                    <td className="break-words py-6 pr-4 align-middle text-sm font-medium text-neutral-900">
+                    <td className="break-words py-6 pr-4 align-middle text-sm font-medium text-neutral-900 dark:text-stone-100">
                       {st.title}
                     </td>
                     <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-500">
@@ -424,7 +424,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                     <td className="py-6 align-middle text-sm font-medium text-neutral-800">
                       {st.price}
                     </td>
-                    <td className="py-6 align-middle text-sm font-bold text-neutral-900">
+                    <td className="py-6 align-middle text-sm font-bold text-neutral-900 dark:text-stone-100">
                       {st.amount}
                     </td>
                     <td className="py-6 align-middle">
@@ -456,7 +456,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                 disabled={activePage === 1}
                 className={DASHBOARD_PAGINATION_ARROW}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -503,7 +503,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                 disabled={activePage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 

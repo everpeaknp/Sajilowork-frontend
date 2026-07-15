@@ -212,7 +212,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
       <div className={`${DASHBOARD_PAGE_ROOT} space-y-4`}>
         <Link
           href={getDashboardHref('project')}
-          className="inline-flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-black"
+          className="inline-flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-black dark:hover:text-stone-100"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Projects
@@ -227,7 +227,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
       <div className={`${DASHBOARD_PAGE_ROOT} space-y-4`}>
         <Link
           href={getDashboardHref('project')}
-          className="inline-flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-black"
+          className="inline-flex w-fit items-center gap-2 text-sm text-neutral-700 hover:text-black dark:hover:text-stone-100"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Projects
@@ -238,11 +238,11 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
   }
 
   const managementLinkClass =
-    'rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 transition-colors hover:bg-neutral-50';
+    'rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800';
 
   return (
     <div
-      className={`${discoverDmSans} discover-page -mx-4 -mt-2 overflow-x-clip rounded-xl bg-white sm:-mx-6 md:-mx-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal antialiased`}
+      className={`${discoverDmSans} discover-page -mx-4 -mt-2 overflow-x-clip rounded-xl bg-white sm:-mx-6 md:-mx-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal antialiased dark:bg-neutral-900`}
     >
       <SingleProjectPage
         project={{
@@ -259,7 +259,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
             <div className="space-y-3">
               <Link
                 href={getDashboardHref('project')}
-                className="inline-flex w-fit items-center gap-2 text-sm font-normal text-neutral-700 transition-colors hover:text-black"
+                className="inline-flex w-fit items-center gap-2 text-sm font-normal text-neutral-700 transition-colors hover:text-black dark:hover:text-stone-100"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Projects
@@ -313,7 +313,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
                     type="button"
                     disabled={actionLoading}
                     onClick={() => void handleCancel()}
-                    className="rounded-lg border border-red-200 bg-white px-5 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+                    className="rounded-lg border border-red-200 bg-white px-5 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-900/50 dark:bg-neutral-900 dark:hover:bg-red-950/30"
                   >
                     Cancel project
                   </button>
@@ -326,7 +326,7 @@ export default function DashboardProjectDetail({ projectSlug }: DashboardProject
           </div>
         }
         managementSlot={
-          <div className="flex flex-col gap-4 border-t border-neutral-200 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-t border-neutral-200 pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between dark:border-neutral-800">
             <p className="text-sm text-neutral-500">Manage this project from your dashboard.</p>
             <div className="flex flex-wrap gap-3">
               {isCustomer && isOwner ? (

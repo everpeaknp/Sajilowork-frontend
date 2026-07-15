@@ -367,7 +367,7 @@ export default function DashboardProposalDetail({
       <div className="space-y-4">
         <Link
           href={sectionHref}
-          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-black"
+          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-stone-100"
         >
           <ArrowLeft className="h-4 w-4" />
           {detailCopy.listBackLabel}
@@ -382,7 +382,7 @@ export default function DashboardProposalDetail({
       <div className="space-y-4">
         <Link
           href={sectionHref}
-          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-black"
+          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-stone-100"
         >
           <ArrowLeft className="h-4 w-4" />
           {detailCopy.listBackLabel}
@@ -410,7 +410,7 @@ export default function DashboardProposalDetail({
       <div className="flex flex-wrap items-center gap-3">
         <Link
           href={sectionHref}
-          className="inline-flex items-center gap-2 text-sm font-normal text-neutral-700 hover:text-black"
+          className="inline-flex items-center gap-2 text-sm font-normal text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-stone-100"
         >
           <ArrowLeft className="h-4 w-4" />
           {detailCopy.sectionLabel}
@@ -418,7 +418,7 @@ export default function DashboardProposalDetail({
         <span className="text-neutral-300">/</span>
         <Link
           href={listingMiddleHref}
-          className="text-sm font-normal text-neutral-700 hover:text-black"
+          className="text-sm font-normal text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-stone-100"
         >
           {taskTitle}
         </Link>
@@ -467,7 +467,7 @@ export default function DashboardProposalDetail({
                 type="button"
                 disabled={actionLoading}
                 onClick={() => setShowRejectModal(true)}
-                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-normal text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-normal text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-900/50 dark:bg-neutral-900 dark:hover:bg-red-950/30"
               >
                 Reject
               </button>
@@ -487,9 +487,9 @@ export default function DashboardProposalDetail({
       />
 
       {bid.rejection_reason ? (
-        <section className="rounded-xl border border-red-100 bg-white p-6 sm:p-8">
-          <h3 className="mb-2 text-lg font-normal text-black">Rejection reason</h3>
-          <p className="break-words text-sm leading-relaxed text-neutral-800 [overflow-wrap:anywhere]">
+        <section className="rounded-xl border border-red-100 bg-white p-6 sm:p-8 dark:border-red-900/40 dark:bg-neutral-900">
+          <h3 className="mb-2 text-lg font-normal text-black dark:text-stone-100">Rejection reason</h3>
+          <p className="break-words text-sm leading-relaxed text-neutral-800 [overflow-wrap:anywhere] dark:text-neutral-300">
             {bid.rejection_reason}
           </p>
         </section>
@@ -499,13 +499,13 @@ export default function DashboardProposalDetail({
         <button
           type="button"
           onClick={() => router.push(sectionHref)}
-          className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
         >
           {detailCopy.listBackLabel}
         </button>
         <Link
           href={getPublicListingHref(listingKind, projectSlug)}
-          className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50"
+          className="rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm text-neutral-800 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
         >
           View public {getListingLabel(listingKind).toLowerCase()} page
         </Link>
@@ -519,18 +519,18 @@ export default function DashboardProposalDetail({
             onClick={() => setShowInsufficientWalletModal(false)}
             className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
           />
-          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl sm:p-8">
+          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl sm:p-8 dark:border-neutral-800 dark:bg-neutral-900">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-normal text-black">Insufficient wallet balance</h3>
+              <h3 className="text-lg font-normal text-black dark:text-stone-100">Insufficient wallet balance</h3>
               <button
                 type="button"
                 onClick={() => setShowInsufficientWalletModal(false)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-50 hover:text-black"
+                className="rounded p-1 text-neutral-400 hover:bg-neutral-50 hover:text-black dark:hover:bg-neutral-800 dark:hover:text-stone-100"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="text-sm leading-relaxed text-neutral-700">
+            <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-400">
               You need at least {formatNPR(requiredHoldAmount)} in your wallet to accept this offer
               (includes fees). Available:{' '}
               {formatNPR(walletAvailableBalance ?? 0)}.
@@ -539,7 +539,7 @@ export default function DashboardProposalDetail({
               <button
                 type="button"
                 onClick={() => setShowInsufficientWalletModal(false)}
-                className="rounded-lg bg-neutral-100 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200"
+                className="rounded-lg bg-neutral-100 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
               >
                 Cancel
               </button>
@@ -563,21 +563,21 @@ export default function DashboardProposalDetail({
             onClick={() => setShowRejectModal(false)}
             className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"
           />
-          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl sm:p-8">
+          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl sm:p-8 dark:border-neutral-800 dark:bg-neutral-900">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-normal text-black">Reject proposal</h3>
+              <h3 className="text-lg font-normal text-black dark:text-stone-100">Reject proposal</h3>
               <button
                 type="button"
                 onClick={() => setShowRejectModal(false)}
-                className="rounded p-1 text-neutral-400 hover:bg-neutral-50 hover:text-black"
+                className="rounded p-1 text-neutral-400 hover:bg-neutral-50 hover:text-black dark:hover:bg-neutral-800 dark:hover:text-stone-100"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <p className="mb-4 text-sm text-neutral-600">
+            <p className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
               Provide a rejection reason. The freelancer will be notified.
             </p>
-            <label className="mb-2 block text-sm text-neutral-700" htmlFor="rejection-reason">
+            <label className="mb-2 block text-sm text-neutral-700 dark:text-neutral-300" htmlFor="rejection-reason">
               Rejection reason
             </label>
             <textarea
@@ -586,14 +586,14 @@ export default function DashboardProposalDetail({
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Explain why you are rejecting this proposal…"
-              className="w-full resize-y rounded-lg border border-neutral-200 px-4 py-3 text-sm text-black outline-none focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/20"
+              className="w-full resize-y rounded-lg border border-neutral-200 px-4 py-3 text-sm text-black outline-none focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
             />
-            <p className="mt-1 text-xs text-neutral-500">Minimum 10 characters</p>
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">Minimum 10 characters</p>
             <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowRejectModal(false)}
-                className="rounded-lg bg-neutral-100 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200"
+                className="rounded-lg bg-neutral-100 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
               >
                 Cancel
               </button>

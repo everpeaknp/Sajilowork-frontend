@@ -14,8 +14,9 @@ import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, Plus, Search, X } from 'lucide-react';
 
 export const listingFieldClass =
-  'w-full rounded-none border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400';
-export const listingLabelClass = 'mb-2 block text-sm font-normal text-neutral-800';
+  'w-full rounded-none border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:focus:border-neutral-500';
+export const listingLabelClass =
+  'mb-2 block text-sm font-normal text-neutral-800 dark:text-neutral-300';
 export const listingSelectClass = `${listingFieldClass} appearance-none bg-[length:12px] bg-[right_1rem_center] bg-no-repeat pr-10`;
 
 export function normalizeListingLabel(value: string): string {
@@ -243,11 +244,13 @@ export function SearchableSelectField({
             return !prev;
           });
         }}
-        className={`${listingFieldClass} flex min-h-[46px] w-full items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:text-neutral-400`}
+        className={`${listingFieldClass} flex min-h-[46px] w-full items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:text-neutral-400 dark:disabled:bg-neutral-900 dark:disabled:text-neutral-500`}
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <span className={value ? 'text-black' : 'text-neutral-400'}>{displayValue}</span>
+        <span className={value ? 'text-black dark:text-stone-100' : 'text-neutral-400 dark:text-neutral-400'}>
+          {displayValue}
+        </span>
         <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg] text-neutral-400" aria-hidden />
       </button>
       {open && typeof document !== 'undefined'
@@ -256,9 +259,9 @@ export function SearchableSelectField({
               ref={panelRef}
               role="listbox"
               style={panelStyle}
-              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg"
+              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
             >
-              <div className="border-b border-neutral-100 p-2">
+              <div className="border-b border-neutral-100 p-2 dark:border-neutral-800">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                   <input
@@ -266,14 +269,14 @@ export function SearchableSelectField({
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                    className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                     onClick={(event) => event.stopPropagation()}
                   />
                 </div>
               </div>
               <div className="max-h-44 overflow-y-auto">
                 {filteredOptions.length === 0 ? (
-                  <p className="px-4 py-3 text-sm font-normal text-neutral-500">
+                  <p className="px-4 py-3 text-sm font-normal text-neutral-500 dark:text-neutral-400">
                     {searchQuery.trim() ? emptySearchLabel : emptyListLabel}
                   </p>
                 ) : (
@@ -286,8 +289,10 @@ export function SearchableSelectField({
                         role="option"
                         aria-selected={selected}
                         onClick={() => selectOption(option)}
-                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-normal hover:bg-neutral-50 ${
-                          selected ? 'bg-neutral-50 text-[#1D3E35]' : 'text-neutral-800'
+                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-normal hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                          selected
+                            ? 'bg-neutral-50 text-[#1D3E35] dark:bg-neutral-800 dark:text-stone-100'
+                            : 'text-neutral-800 dark:text-stone-100'
                         }`}
                       >
                         {selected ? <Check className="h-4 w-4 shrink-0" /> : <span className="w-4" />}
@@ -298,8 +303,10 @@ export function SearchableSelectField({
                 )}
               </div>
               {allowCustom ? (
-                <div className="border-t border-neutral-100 bg-neutral-50 p-3">
-                  <p className="mb-2 text-xs font-normal text-neutral-500">{customSectionTitle}</p>
+                <div className="border-t border-neutral-100 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900">
+                  <p className="mb-2 text-xs font-normal text-neutral-500 dark:text-neutral-400">
+                    {customSectionTitle}
+                  </p>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -310,7 +317,7 @@ export function SearchableSelectField({
                       }}
                       onKeyDown={handleCustomKeyDown}
                       placeholder={customPlaceholder}
-                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                       onClick={(event) => event.stopPropagation()}
                     />
                     <button
@@ -526,12 +533,12 @@ export function MultiSelectField({
         aria-haspopup="listbox"
       >
         {value.length === 0 ? (
-          <span className="text-neutral-400">{placeholder}</span>
+          <span className="text-neutral-400 dark:text-neutral-400">{placeholder}</span>
         ) : (
           value.map((item) => (
             <span
               key={item}
-              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800"
+              className="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-800 dark:bg-neutral-800 dark:text-stone-100"
             >
               {item}
               <span
@@ -544,7 +551,7 @@ export function MultiSelectField({
                     remove(item, event as unknown as MouseEvent);
                   }
                 }}
-                className="text-neutral-500 hover:text-neutral-800"
+                className="text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-stone-100"
                 aria-label={`Remove ${item}`}
               >
                 <X className="h-3 w-3" />
@@ -560,10 +567,10 @@ export function MultiSelectField({
               role="listbox"
               aria-multiselectable
               style={panelStyle}
-              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg"
+              className="flex max-h-72 flex-col overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
             >
               {searchable ? (
-                <div className="border-b border-neutral-100 p-2">
+                <div className="border-b border-neutral-100 p-2 dark:border-neutral-800">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                     <input
@@ -571,7 +578,7 @@ export function MultiSelectField({
                       value={searchQuery}
                       onChange={(event) => setSearchQuery(event.target.value)}
                       placeholder={searchPlaceholder}
-                      className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      className="w-full border border-neutral-200 py-2 pl-9 pr-3 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                       onClick={(event) => event.stopPropagation()}
                     />
                   </div>
@@ -579,7 +586,7 @@ export function MultiSelectField({
               ) : null}
               <div className="max-h-44 overflow-y-auto">
                 {filteredOptions.length === 0 ? (
-                  <p className="px-4 py-3 text-sm font-normal text-neutral-500">
+                  <p className="px-4 py-3 text-sm font-normal text-neutral-500 dark:text-neutral-400">
                     {searchQuery.trim() ? emptySearchLabel : emptyListLabel}
                   </p>
                 ) : (
@@ -588,13 +595,13 @@ export function MultiSelectField({
                     return (
                       <label
                         key={option}
-                        className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50"
+                        className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-normal text-neutral-800 hover:bg-neutral-50 dark:text-stone-100 dark:hover:bg-neutral-800"
                       >
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggle(option)}
-                          className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35]"
+                          className="h-4 w-4 rounded-none border-neutral-300 accent-[#1D3E35] dark:border-neutral-600"
                         />
                         {option}
                       </label>
@@ -603,8 +610,10 @@ export function MultiSelectField({
                 )}
               </div>
               {allowCustom ? (
-                <div className="border-t border-neutral-100 bg-neutral-50 p-3">
-                  <p className="mb-2 text-xs font-normal text-neutral-500">{customSectionTitle}</p>
+                <div className="border-t border-neutral-100 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900">
+                  <p className="mb-2 text-xs font-normal text-neutral-500 dark:text-neutral-400">
+                    {customSectionTitle}
+                  </p>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -615,7 +624,7 @@ export function MultiSelectField({
                       }}
                       onKeyDown={handleCustomKeyDown}
                       placeholder={customPlaceholder}
-                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20"
+                      className="min-w-0 flex-1 border border-neutral-200 bg-white px-3 py-2 text-sm font-normal text-neutral-800 outline-none focus:border-[#1D3E35] focus:ring-1 focus:ring-[#1D3E35]/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                       onClick={(event) => event.stopPropagation()}
                     />
                     <button

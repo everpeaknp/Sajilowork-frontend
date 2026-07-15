@@ -35,6 +35,7 @@ import {
   DASHBOARD_SUBTABS_ROW,
   DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 type ProposalFilter = 'pending' | 'accepted' | 'cancelled';
@@ -447,15 +448,11 @@ export default function DashboardProposals({
     `cursor-pointer rounded-full px-4 py-2 text-sm font-normal transition-all outline-none ${
       activeTypeFilter === filter
         ? 'bg-black text-white'
-        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black'
+        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black dark:bg-neutral-800 dark:text-stone-300 dark:hover:bg-neutral-700 dark:hover:text-stone-100'
     }`;
 
   const filterTabClass = (filter: ProposalFilter) =>
-    `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
-      activeFilter === filter
-        ? 'font-medium text-black after:absolute after:bottom-0 after:left-0 after:h-[2.5px] after:w-full after:bg-black'
-        : 'text-neutral-400 hover:text-neutral-900'
-    }`;
+    dashboardSubtabClass(activeFilter === filter);
 
   const pageNumbers = useMemo(() => {
     const pages: number[] = [];
@@ -513,7 +510,7 @@ export default function DashboardProposals({
           </div>
         ) : null}
 
-        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid">
+        <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid dark:border-neutral-800 dark:text-stone-100">
           <div className="col-span-12 md:col-span-5">Name</div>
           <div className="col-span-6 md:col-span-2">Type</div>
           <div className="col-span-6 md:col-span-2">Status</div>
@@ -542,10 +539,10 @@ export default function DashboardProposals({
                   <div className="flex items-center gap-4">
                     <ProposalListAvatar row={row} variant="employer" />
                     <div className="min-w-0 flex-1 space-y-1.5 font-sans">
-                      <h4 className="text-[15px] font-medium leading-snug tracking-tight text-black">
+                      <h4 className="text-[15px] font-medium leading-snug tracking-tight text-black dark:text-stone-100">
                         {row.projectTitle}
                       </h4>
-                      <p className="text-sm font-medium text-black">
+                      <p className="text-sm font-medium text-black dark:text-stone-100">
                         {row.amountLabel}
                         <span className="ml-1.5 text-xs font-normal text-neutral-500">{row.rateType}</span>
                       </p>
@@ -610,10 +607,10 @@ export default function DashboardProposals({
                   <div className="flex items-center gap-4">
                     <ProposalListAvatar row={row} variant="freelancer" />
                     <div className="min-w-0 flex-1 space-y-1.5 font-sans">
-                      <h4 className="text-[15px] font-medium leading-snug tracking-tight text-black">
+                      <h4 className="text-[15px] font-medium leading-snug tracking-tight text-black dark:text-stone-100">
                         {row.projectTitle}
                       </h4>
-                      <p className="text-sm font-medium text-black">
+                      <p className="text-sm font-medium text-black dark:text-stone-100">
                         {row.amountLabel}
                         <span className="ml-1.5 text-xs font-normal text-neutral-500">{row.rateType}</span>
                       </p>
@@ -684,7 +681,7 @@ export default function DashboardProposals({
                 disabled={currentPage === 1}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -706,7 +703,7 @@ export default function DashboardProposals({
                 disabled={currentPage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 

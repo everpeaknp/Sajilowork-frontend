@@ -352,14 +352,14 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{countLabel}</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{totals.count}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.count}</p>
           <p className="mt-1 text-xs text-neutral-500">{countHint}</p>
         </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5">
+        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{valueLabel}</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900">{formatNPR(totals.totalValue)}</p>
+          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{formatNPR(totals.totalValue)}</p>
           <p className="mt-1 text-xs text-neutral-500">{valueHint}</p>
         </div>
       </div>
@@ -390,7 +390,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
       />
 
       <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-8`}>
-        <div className="hidden grid-cols-12 gap-3 border-b border-neutral-100 pb-4 text-[13px] font-medium text-neutral-800 select-none md:grid">
+        <div className="hidden grid-cols-12 gap-3 border-b border-neutral-100 pb-4 text-[13px] font-medium text-neutral-800 select-none md:grid dark:border-neutral-800 dark:text-stone-100">
           <div className="col-span-4">Title</div>
           <div className="col-span-2">Date / #</div>
           <div className="col-span-1">Type</div>
@@ -449,7 +449,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
                         counterpartyName={counterpartyName}
                       />
                       <div className="min-w-0">
-                        <p className="truncate text-[15px] font-medium text-black">
+                        <p className="truncate text-[15px] font-medium text-black dark:text-stone-100">
                           {bid.task_title || 'Listing'}
                         </p>
                         <p className="mt-0.5 truncate text-xs text-neutral-600">
@@ -538,7 +538,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
                 disabled={currentPage === 1}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronLeft className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
@@ -560,7 +560,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
                 disabled={currentPage === totalPages}
                 className={DASHBOARD_PAGINATION_ARROW_PLAIN}
               >
-                <ChevronRight className="h-5 w-5 text-black" strokeWidth={1.5} />
+                <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
               </button>
             </div>
 

@@ -260,8 +260,8 @@ export default function PostTaskForm({
     <div
       className={
         embedded
-          ? 'animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8 lg:-mx-10 lg:-my-10 lg:p-10'
-          : 'min-h-screen select-none bg-[#f0efec] px-4 py-6 font-sans text-black sm:px-6 md:px-8 md:py-8'
+          ? 'animate-in fade-in -mx-4 -my-6 min-h-screen select-none bg-[#f0efec] p-4 font-sans text-black duration-300 sm:-mx-6 sm:p-6 md:-mx-8 md:p-8 lg:-mx-10 lg:-my-10 lg:p-10 dark:bg-neutral-950 dark:text-stone-100'
+          : 'min-h-screen select-none bg-[#f0efec] px-4 py-6 font-sans text-black sm:px-6 md:px-8 md:py-8 dark:bg-neutral-950 dark:text-stone-100'
       }
     >
       <div className="mx-auto mb-8 flex max-w-5xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
@@ -269,15 +269,15 @@ export default function PostTaskForm({
           <button
             type="button"
             onClick={onBack}
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-stone-100"
           >
             <ChevronLeft className="h-4 w-4" />
             {backLabel}
           </button>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900 dark:text-stone-100">
             {title}
           </h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">{description}</p>
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">{description}</p>
         </div>
 
         <button
@@ -301,7 +301,7 @@ export default function PostTaskForm({
       </div>
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
-        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
           {postingContext ? (
             <EmployerPostingBanner context={postingContext} className="mb-6" />
           ) : null}

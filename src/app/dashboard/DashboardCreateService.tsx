@@ -302,7 +302,7 @@ function PackageCheckbox({
       type="button"
       onClick={onChange}
       className={`mx-auto flex h-5 w-5 items-center justify-center rounded-none border transition-colors ${
-        checked ? 'border-[#1D3E35] bg-[#1D3E35] text-white' : 'border-neutral-300 bg-white text-transparent'
+        checked ? 'border-[#1D3E35] bg-[#1D3E35] text-white' : 'border-neutral-300 bg-white text-transparent dark:border-neutral-700 dark:bg-neutral-900'
       }`}
       aria-pressed={checked}
     >
@@ -312,10 +312,10 @@ function PackageCheckbox({
 }
 
 const packageCellInputClass =
-  'mx-auto w-full max-w-[140px] rounded-none border border-neutral-200 bg-white px-2 py-1.5 text-center text-sm font-normal text-neutral-800 outline-none transition-colors focus:border-neutral-400';
+  'mx-auto w-full max-w-[140px] rounded-none border border-neutral-200 bg-white px-2 py-1.5 text-center text-sm font-normal text-neutral-800 outline-none transition-colors focus:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100';
 
 const packageHeaderInputClass =
-  'w-full rounded-none border border-neutral-200 bg-white px-2 py-1.5 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400';
+  'w-full rounded-none border border-neutral-200 bg-white px-2 py-1.5 text-sm font-normal text-black outline-none transition-colors focus:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100';
 
 function PackagesEditor({
   config,
@@ -368,7 +368,7 @@ function PackagesEditor({
         <table className="w-full min-w-[720px] border-collapse text-sm font-normal">
           <thead>
             <tr>
-              <th className="w-[26%] pb-4 text-left font-normal text-neutral-800">Features</th>
+              <th className="w-[26%] pb-4 text-left font-normal text-neutral-800 dark:text-stone-100">Features</th>
               {safeConfig.tiers.map((tier) => (
                 <th key={tier.id} className="min-w-[180px] pb-4 text-left align-top font-normal">
                   <div className="space-y-2 pr-2">
@@ -395,7 +395,7 @@ function PackagesEditor({
                       onChange={(e) => updateTier(tier.id, { description: e.target.value })}
                       placeholder="Tier description"
                       rows={3}
-                      className={`${packageHeaderInputClass} min-h-[72px] resize-y text-xs font-light leading-relaxed text-neutral-600`}
+                      className={`${packageHeaderInputClass} min-h-[72px] resize-y text-xs font-light leading-relaxed text-neutral-600 dark:text-neutral-400`}
                     />
                   </div>
                 </th>
@@ -404,7 +404,7 @@ function PackagesEditor({
           </thead>
           <tbody>
             {safeConfig.rows.map((row) => (
-              <tr key={row.id} className="border-t border-neutral-100">
+              <tr key={row.id} className="border-t border-neutral-100 dark:border-neutral-800">
                 <td className="py-3 pr-3 align-middle">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <input
@@ -416,7 +416,7 @@ function PackagesEditor({
                     <select
                       value={row.type}
                       onChange={(e) => updateRow(row.id, { type: e.target.value as PackageRowType })}
-                      className="rounded-none border border-neutral-200 bg-white px-2 py-1.5 text-xs font-normal text-neutral-700 outline-none focus:border-neutral-400"
+                      className="rounded-none border border-neutral-200 bg-white px-2 py-1.5 text-xs font-normal text-neutral-700 outline-none focus:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                     >
                       <option value="checkbox">Checkbox</option>
                       <option value="text">Text</option>
@@ -462,7 +462,7 @@ function PackagesEditor({
         <button
           type="button"
           onClick={() => onChange(addPackageTier(safeConfig))}
-          className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+          className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
         >
           <Plus className="h-4 w-4" />
           Add tier
@@ -470,7 +470,7 @@ function PackagesEditor({
         <button
           type="button"
           onClick={() => onChange(addPackageRow(safeConfig))}
-          className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+          className="inline-flex items-center gap-2 rounded-none border border-neutral-200 bg-white px-4 py-2 text-sm font-normal text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
         >
           <Plus className="h-4 w-4" />
           Add feature row
@@ -592,15 +592,15 @@ export default function DashboardCreateService({
           <button
             type="button"
             onClick={onBack}
-            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-normal text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-stone-100"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to services
           </button>
-          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900">
+          <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900 dark:text-stone-100">
             {isEdit ? 'Edit Service' : 'Add Services'}
           </h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             Lorem ipsum dolor sit amet, consectetur.
           </p>
         </div>
@@ -616,7 +616,7 @@ export default function DashboardCreateService({
       </div>
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-5xl">
-        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200/60 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
         <FormAccordionSection
           title="Basic Information"
           icon={Sparkles}
@@ -650,7 +650,7 @@ export default function DashboardCreateService({
                 allowCustom
                 onPersistCustom={onPersistCustomCategory}
               />
-              <p className="mt-1.5 text-xs font-normal text-neutral-500">
+              <p className="mt-1.5 text-xs font-normal text-neutral-500 dark:text-neutral-400">
                 Search the list or add a custom category only when it is not already available.
               </p>
             </div>
@@ -690,7 +690,7 @@ export default function DashboardCreateService({
             customPlaceholder="Type a custom skill"
             onPersistCustom={onPersistCustomSkill}
           />
-          <p className="mt-1.5 text-xs font-normal text-neutral-500">
+          <p className="mt-1.5 text-xs font-normal text-neutral-500 dark:text-neutral-400">
             Search the list or add a custom skill only when it is not already available.
           </p>
         </FormAccordionSection>
@@ -759,7 +759,7 @@ export default function DashboardCreateService({
           />
           <div className="flex flex-wrap gap-3">
             {galleryItems.map((item, index) => (
-              <div key={item.id} className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200">
+              <div key={item.id} className="relative h-24 w-24 shrink-0 overflow-hidden border border-neutral-200 dark:border-neutral-800">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.preview} alt="" className="h-full w-full object-cover" />
                 {index === 0 ? (
@@ -780,13 +780,13 @@ export default function DashboardCreateService({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8]"
+              className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-none border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8] dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
             >
               <ImageIcon className="h-5 w-5 text-neutral-400" />
               Upload
             </button>
           </div>
-          <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500">
+          <p className="max-w-xl text-xs font-normal leading-relaxed text-neutral-500 dark:text-neutral-400">
             Upload multiple images — the first image is used as the main cover. Max file size is 1MB each.
             Minimum dimension: 330x300. Suitable files are .jpg and .png.
           </p>
