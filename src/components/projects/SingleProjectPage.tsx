@@ -116,15 +116,12 @@ export default function SingleProjectPage({
   }, [onSubmitProposal]);
 
   return (
-    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
+    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 dark:bg-neutral-950 dark:text-stone-100 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
       <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
         {topSlot ? <div className="mb-4 sm:mb-5">{topSlot}</div> : null}
 
-        <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="mb-4 sm:mb-5">
           <TaskStatusTimeline status={project.status || 'open'} />
-          {!hideShareActions && !isOverlay ? (
-            <ProjectShareSaveActions project={project} />
-          ) : null}
         </div>
 
         <ProjectProfileHero project={project} />
@@ -161,7 +158,7 @@ export default function SingleProjectPage({
 
             <TaskCancellationPolicy listingLabel="project" />
 
-            <div className="mt-12 border-t border-neutral-200 pt-10">
+            <div className="mt-12 border-t border-neutral-200 pt-10 dark:border-neutral-800">
               <TaskReviewsSection
                 task={projectToReviewTask(project)}
                 listingKind="project"
@@ -174,8 +171,8 @@ export default function SingleProjectPage({
             project={project}
             onSubmitProposal={handleSubmitProposalClick}
             onContactBuyer={onContactBuyer}
-            belowBuyer={
-              isOverlay && !hideShareActions ? (
+            shareSave={
+              !hideShareActions ? (
                 <ProjectShareSaveActions
                   project={project}
                   className="justify-center sm:justify-center"
@@ -189,7 +186,7 @@ export default function SingleProjectPage({
 
         {!hideDirectoryFooter ? (
           <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <p className="text-sm font-normal text-neutral-500">
+            <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
               {footerHint ??
                 (isOverlay
                   ? 'Browse more projects on the project map.'
@@ -207,7 +204,7 @@ export default function SingleProjectPage({
               ) : null}
               <Link
                 href={backLink?.href ?? '/projects'}
-                className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80 dark:text-stone-200"
               >
                 {backLink?.label ?? 'Back to all projects'}
                 <ArrowUpRight className="h-4 w-4" />

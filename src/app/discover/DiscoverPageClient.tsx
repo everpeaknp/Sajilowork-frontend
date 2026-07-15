@@ -35,7 +35,7 @@ export default function DiscoverPageClient({
 
   return (
     <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-brand-emerald selection:text-white md:pb-0`}
+      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-brand-emerald selection:text-white md:pb-0 dark:bg-neutral-950`}
     >
       <Navbar />
       <main className="pb-2 md:pb-0">
@@ -62,7 +62,7 @@ export default function DiscoverPageClient({
         <Partners className="!py-10 sm:!py-12" />
         <Newsletter className="!py-14 sm:!py-16" />
       </main>
-      <Footer outerClassName="bg-[#FAF6F0]" />
+      <Footer outerClassName="bg-[#FAF6F0] dark:bg-neutral-950" />
     </div>
   );
 }

@@ -57,12 +57,12 @@ export default function TaskOffersQuestionsTabs({
     `flex-1 min-w-0 rounded-full px-4 py-2.5 text-sm font-semibold transition-all sm:px-8 sm:py-3 sm:text-base ${
       activeTab === tab
         ? 'bg-[#52C47F] text-white shadow-md'
-        : 'bg-transparent text-neutral-600 hover:bg-[#52C47F]/10 hover:text-[#218F56]'
+        : 'bg-transparent text-neutral-600 hover:bg-[#52C47F]/10 hover:text-[#218F56] dark:text-neutral-400 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300'
     }`;
 
   return (
-    <section className="mt-12 border-t border-neutral-200 pt-10">
-      <div className="mb-6 flex w-full max-w-full rounded-full bg-[#EBF9F1] p-1">
+    <section className="mt-12 border-t border-neutral-200 pt-10 dark:border-neutral-800">
+      <div className="mb-6 flex w-full max-w-full rounded-full bg-[#EBF9F1] p-1 dark:bg-emerald-950/40">
         <button type="button" onClick={() => setActiveTab('offers')} className={tabButtonClass('offers')}>
           Offers
           <span className={activeTab === 'offers' ? 'ml-1.5 opacity-80' : 'ml-1.5 opacity-50'}>

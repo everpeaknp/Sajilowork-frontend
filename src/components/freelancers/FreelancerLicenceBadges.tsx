@@ -28,22 +28,22 @@ export default function FreelancerLicenceBadges({ badges }: FreelancerLicenceBad
 
   return (
     <div className="mt-10 w-full max-w-4xl">
-      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Licence badges
       </h3>
 
       <div className="flex flex-col gap-8">
         {verifiedLicences.map((badge) => (
           <div key={badge.id} className="flex items-start gap-4 sm:gap-5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-100 bg-[#EAF6F0]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-100 bg-[#EAF6F0] dark:border-neutral-700 dark:bg-emerald-950/50">
               {badgeIcon(badge.badge_type)}
             </div>
             <div className="min-w-0">
-              <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg">
+              <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg dark:text-stone-100">
                 {badge.name}
               </h4>
               {badge.description?.trim() ? (
-                <p className="mt-2 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm">
+                <p className="mt-2 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm dark:text-neutral-300">
                   {badge.description.trim()}
                 </p>
               ) : null}

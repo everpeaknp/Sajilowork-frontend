@@ -75,19 +75,19 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
     <div className="w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`flex flex-col gap-2 rounded-lg border bg-white p-2 shadow-sm transition-all duration-300 sm:flex-row sm:items-center ${
-            isFocused ? 'border-black ring-1 ring-black/5' : 'border-black'
+          className={`flex flex-col gap-2 rounded-lg border bg-white p-2 shadow-sm transition-all duration-300 sm:flex-row sm:items-center dark:border-neutral-600 dark:bg-neutral-900 ${
+            isFocused ? 'border-black ring-1 ring-black/5 dark:border-neutral-400 dark:ring-white/10' : 'border-black dark:border-neutral-600'
           } relative z-30 w-full`}
         >
           <div className="flex min-w-0 flex-1 items-center">
-            <div className="shrink-0 pl-3 pr-2 text-black sm:pl-4 sm:pr-3">
+            <div className="shrink-0 pl-3 pr-2 text-black sm:pl-4 sm:pr-3 dark:text-stone-200">
               <SearchIcon className="h-5 w-5 stroke-[2]" />
             </div>
 
             <input
               id="market-search"
               type="text"
-              className={`${discoverBody} w-full min-w-0 flex-1 border-none bg-transparent py-2.5 text-base font-medium text-black outline-none placeholder:text-black focus:ring-0 sm:py-2 md:text-lg`}
+              className={`${discoverBody} w-full min-w-0 flex-1 border-none bg-transparent py-2.5 text-base font-medium text-black outline-none placeholder:text-neutral-400 focus:ring-0 sm:py-2 md:text-lg dark:text-stone-100 dark:placeholder:text-neutral-500`}
               placeholder="What do you need done?"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -98,7 +98,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
 
           <motion.button
             type="submit"
-            className={`${discoverMedium} flex w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-black bg-[#193e32] px-5 py-3 text-white transition-all duration-200 hover:bg-neutral-900 sm:w-auto sm:py-2.5 md:px-8 md:py-3`}
+            className={`${discoverMedium} flex w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg border border-black bg-[#193e32] px-5 py-3 text-white transition-all duration-200 hover:bg-neutral-900 sm:w-auto sm:py-2.5 md:px-8 md:py-3 dark:border-emerald-800 dark:bg-brand-emerald dark:hover:bg-emerald-400 dark:hover:text-neutral-950`}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
           >
@@ -109,7 +109,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
         <AnimatePresence>
           {isFocused && suggestions.length > 0 && (
             <motion.div
-              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-xl shadow-brand-dark/10"
+              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-xl shadow-brand-dark/10 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/40"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -123,7 +123,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
                   <button
                     key={item}
                     type="button"
-                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-neutral-700 transition-colors hover:bg-neutral-50`}
+                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800`}
                     onMouseDown={() => performSearch(item)}
                   >
                     <SearchIcon className="h-4 w-4 stroke-[1.5] text-brand-emerald" />
@@ -137,7 +137,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
       </form>
 
       <div className={`${discoverBody} mt-4 flex flex-wrap items-center gap-x-1 gap-y-1 text-xs`}>
-        <span className={`${discoverMedium} mr-1.5 text-xs leading-relaxed text-neutral-500`}>
+        <span className={`${discoverMedium} mr-1.5 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400`}>
           Popular:
         </span>
         <div className="flex flex-wrap items-center">
@@ -146,10 +146,10 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
               <button
                 type="button"
                 onClick={() => handleTagClick(tag)}
-                className={`${discoverMedium} cursor-pointer text-xs transition-all duration-200 hover:text-black ${
+                className={`${discoverMedium} cursor-pointer text-xs transition-all duration-200 hover:text-black dark:hover:text-white ${
                   query.toLowerCase() === tag.toLowerCase()
-                    ? 'text-black underline underline-offset-2'
-                    : 'text-neutral-600'
+                    ? 'text-black underline underline-offset-2 dark:text-stone-100'
+                    : 'text-neutral-600 dark:text-neutral-400'
                 }`}
               >
                 {tag}
@@ -167,17 +167,17 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
 
 export default function Hero({ onSearchSubmit }: HeroProps) {
   return (
-    <section className="relative flex flex-col items-center justify-start overflow-hidden bg-gradient-to-b from-[#f8fcf9] to-white px-4 pt-10 pb-20 sm:px-6 sm:pt-12 sm:pb-28 lg:min-h-[calc(80dvh-4rem)] lg:px-12">
+    <section className="relative flex flex-col items-center justify-start overflow-hidden bg-gradient-to-b from-[#f8fcf9] to-white px-4 pt-10 pb-20 sm:px-6 sm:pt-12 sm:pb-28 lg:min-h-[calc(80dvh-4rem)] lg:px-12 dark:from-neutral-950 dark:to-neutral-950">
       {/* Decorative clean geometric background elements */}
-      <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-emerald/5 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-emerald/5 blur-3xl dark:bg-brand-emerald/10" aria-hidden />
       <div
-        className="pointer-events-none absolute bottom-0 right-0 h-[520px] w-[520px] translate-x-1/4 translate-y-1/4 rounded-full bg-amber-100/20 blur-[120px] mix-blend-soft-light opacity-50"
+        className="pointer-events-none absolute bottom-0 right-0 h-[520px] w-[520px] translate-x-1/4 translate-y-1/4 rounded-full bg-amber-100/20 blur-[120px] mix-blend-soft-light opacity-50 dark:bg-amber-900/20 dark:opacity-40"
         aria-hidden
       />
       
       <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center text-center">
         <motion.h1
-          className={`${discoverHeadline} mb-6 text-[2.25rem] leading-[1.1] text-brand-dark sm:text-5xl md:text-6xl lg:text-7xl`}
+          className={`${discoverHeadline} mb-6 text-[2.25rem] leading-[1.1] text-brand-dark sm:text-5xl md:text-6xl lg:text-7xl dark:text-stone-100`}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -188,7 +188,7 @@ export default function Hero({ onSearchSubmit }: HeroProps) {
         </motion.h1>
 
         <motion.p
-          className={`${discoverBody} mb-10 max-w-2xl text-base font-medium leading-relaxed text-neutral-500 sm:text-lg md:text-xl`}
+          className={`${discoverBody} mb-10 max-w-2xl text-base font-medium leading-relaxed text-neutral-500 sm:text-lg md:text-xl dark:text-neutral-400`}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -207,24 +207,24 @@ export default function Hero({ onSearchSubmit }: HeroProps) {
         </motion.div>
 
         <motion.div 
-          className="mt-16 flex items-center gap-8 border-t border-neutral-100 pt-8"
+          className="mt-16 flex items-center gap-8 border-t border-neutral-100 pt-8 dark:border-neutral-800"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <p className={`${discoverHeadline} text-2xl text-brand-dark sm:text-3xl`}>4.9/5</p>
-            <p className={`${discoverBody} text-xs text-neutral-500 sm:text-sm`}>Average Client Rating</p>
+            <p className={`${discoverHeadline} text-2xl text-brand-dark sm:text-3xl dark:text-stone-100`}>4.9/5</p>
+            <p className={`${discoverBody} text-xs text-neutral-500 sm:text-sm dark:text-neutral-400`}>Average Client Rating</p>
           </div>
-          <div className="h-12 w-px bg-neutral-200"></div>
+          <div className="h-12 w-px bg-neutral-200 dark:bg-neutral-700"></div>
           <div className="flex flex-col items-center gap-2 text-center">
-            <p className={`${discoverHeadline} text-2xl text-brand-dark sm:text-3xl`}>12K+</p>
-            <p className={`${discoverBody} text-xs text-neutral-500 sm:text-sm`}>Tasks Completed</p>
+            <p className={`${discoverHeadline} text-2xl text-brand-dark sm:text-3xl dark:text-stone-100`}>12K+</p>
+            <p className={`${discoverBody} text-xs text-neutral-500 sm:text-sm dark:text-neutral-400`}>Tasks Completed</p>
           </div>
-          <div className="h-12 w-px bg-neutral-200 hidden sm:block"></div>
+          <div className="h-12 w-px bg-neutral-200 hidden sm:block dark:bg-neutral-700"></div>
           <div className="hidden sm:flex flex-col items-center gap-2 text-center">
-            <p className={`${discoverHeadline} text-2xl text-brand-dark sm:text-3xl`}>100%</p>
-            <p className={`${discoverBody} text-xs text-neutral-500 sm:text-sm`}>Verified Professionals</p>
+            <p className={`${discoverHeadline} text-2xl text-brand-dark sm:text-3xl dark:text-stone-100`}>100%</p>
+            <p className={`${discoverBody} text-xs text-neutral-500 sm:text-sm dark:text-neutral-400`}>Verified Professionals</p>
           </div>
         </motion.div>
       </div>

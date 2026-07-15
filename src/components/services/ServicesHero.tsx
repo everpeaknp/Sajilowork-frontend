@@ -141,18 +141,18 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
     <div className="relative z-20 w-full max-w-3xl">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`relative z-30 flex w-full flex-col items-stretch rounded-xl border bg-white p-1.5 shadow-md transition-all duration-300 sm:flex-row sm:items-center ${
+          className={`relative z-30 flex w-full flex-col items-stretch rounded-xl border bg-white p-1.5 shadow-md transition-all duration-300 sm:flex-row sm:items-center dark:border-neutral-700 dark:bg-neutral-950 ${
             isFocused ? 'border-brand-emerald ring-2 ring-brand-emerald/10' : 'border-neutral-200/40'
           }`}
         >
-          <div className="flex min-w-0 flex-1 items-center border-b border-neutral-100 py-2 sm:border-b-0 sm:py-0">
+          <div className="flex min-w-0 flex-1 items-center border-b border-neutral-100 py-2 sm:border-b-0 sm:py-0 dark:border-neutral-800">
             <div className="pl-3 pr-2 text-neutral-400">
               <SearchIcon className="h-5 w-5 stroke-[2]" />
             </div>
             <input
               id="services-search"
               type="text"
-              className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2 text-sm text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base`}
+              className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2 text-sm text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base dark:text-stone-100 dark:placeholder:text-neutral-500`}
               placeholder="Search services by title, skill, or seller"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -161,13 +161,13 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
             />
           </div>
 
-          <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 sm:block" />
+          <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 sm:block dark:bg-neutral-700" />
 
-          <div ref={dropdownRef} className="relative flex items-center border-b border-neutral-100 py-2 sm:border-b-0 sm:border-none sm:py-0">
+          <div ref={dropdownRef} className="relative flex items-center border-b border-neutral-100 py-2 sm:border-b-0 sm:border-none sm:py-0 dark:border-neutral-800">
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`${discoverBody} flex w-full cursor-pointer select-none items-center justify-between px-3 py-2 text-left text-sm text-neutral-500 hover:text-neutral-800 sm:w-[180px]`}
+              className={`${discoverBody} flex w-full cursor-pointer select-none items-center justify-between px-3 py-2 text-left text-sm text-neutral-500 hover:text-neutral-800 sm:w-[180px] dark:text-neutral-400 dark:hover:text-stone-100`}
             >
               <span className="truncate">{category}</span>
               <svg
@@ -182,7 +182,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute left-0 right-0 top-[110%] z-[200] mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-100 bg-white py-1.5 shadow-xl sm:right-auto sm:w-[260px]">
+              <div className="absolute left-0 right-0 top-[110%] z-[200] mt-1 max-h-64 overflow-y-auto rounded-xl border border-neutral-100 bg-white py-1.5 shadow-xl sm:right-auto sm:w-[260px] dark:border-neutral-700 dark:bg-neutral-900">
                 {categories.map((catOption) => (
                   <button
                     key={catOption.id}
@@ -193,8 +193,8 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
                     }}
                     className={`${discoverBody} w-full cursor-pointer px-4 py-2.5 text-left text-sm transition-colors duration-150 ${
                       category === catOption.name
-                        ? 'bg-brand-emerald/10 font-medium text-neutral-800'
-                        : 'text-neutral-600 hover:bg-neutral-50'
+                        ? 'bg-brand-emerald/10 font-medium text-neutral-800 dark:text-stone-100'
+                        : 'text-neutral-600 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800'
                     }`}
                   >
                     {catOption.name}
@@ -217,7 +217,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
         <AnimatePresence>
           {isFocused && suggestions.length > 0 && (
             <motion.div
-              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg"
+              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -233,7 +233,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
                   <button
                     key={item}
                     type="button"
-                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50`}
+                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800`}
                     onMouseDown={() => performSearch(item)}
                   >
                     <SearchIcon className="h-4 w-4 stroke-[1.5] text-brand-emerald" />
@@ -257,10 +257,10 @@ interface ServicesHeroProps {
 export default function ServicesHero({ className = '', onSearchSubmit }: ServicesHeroProps) {
   return (
     <section
-      className={`relative z-30 select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}
+      className={`relative z-30 select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[200px] w-full items-stretch overflow-visible rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+        <div className="relative flex min-h-[200px] w-full items-stretch overflow-visible rounded-2xl bg-[#1a3c34] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px] dark:bg-[#0f2924] dark:shadow-none">
           <MarketplaceHeroBreadcrumbs serpKey="services" sectionPath="/services" variant="dark" />
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl sm:rounded-[24px]">
             <div className="absolute bottom-0 left-0 top-0 hidden select-none sm:block">

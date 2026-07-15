@@ -103,14 +103,14 @@ export default function FreelancersContent({
   };
 
   return (
-    <div id="freelancer-page-container" className="relative animate-in fade-in text-black">
+    <div id="freelancer-page-container" className="relative animate-in fade-in text-black dark:text-stone-100">
       <AnimatePresence>
         {notification ? (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="sticky top-4 z-50 mx-auto mb-6 flex max-w-xl items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-xs font-normal text-emerald-800 shadow-sm"
+            className="sticky top-4 z-50 mx-auto mb-6 flex max-w-xl items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-xs font-normal text-emerald-800 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-200"
           >
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500" />
@@ -119,7 +119,7 @@ export default function FreelancersContent({
             <button
               type="button"
               onClick={() => setNotification(null)}
-              className="cursor-pointer rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100"
+              className="cursor-pointer rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
             >
               <X className="h-3.5 w-3.5" />
             </button>

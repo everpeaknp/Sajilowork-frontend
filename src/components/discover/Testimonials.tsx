@@ -75,13 +75,13 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
   return (
     <section
       id="testimonials-section"
-      className={`relative z-[1] flex select-none flex-col items-center justify-center bg-[#fdfdfc] px-4 py-20 sm:py-28 ${className}`}
+      className={`relative z-[1] flex select-none flex-col items-center justify-center bg-[#fdfdfc] px-4 py-20 sm:py-28 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-12 text-center sm:mb-16">
           <motion.h2
             id="testimonials-title"
-            className={`${discoverHeadline} mb-4 text-3xl text-brand-dark sm:text-4xl lg:text-[44px]`}
+            className={`${discoverHeadline} mb-4 text-3xl text-brand-dark sm:text-4xl lg:text-[44px] dark:text-stone-100`}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -91,7 +91,7 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
           </motion.h2>
           <motion.p
             id="testimonials-subtitle"
-            className={`${discoverBody} mx-auto max-w-xl text-sm font-medium text-neutral-500 sm:text-base`}
+            className={`${discoverBody} mx-auto max-w-xl text-sm font-medium text-neutral-500 sm:text-base dark:text-neutral-400`}
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -104,11 +104,11 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
         <div className="relative isolate w-full overflow-x-hidden overflow-y-visible">
           {/* Gradient masks to hide off-screen cards at the edges */}
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-20 w-24 bg-gradient-to-r from-[#fdfdfc] from-35% via-[#fdfdfc]/90 to-transparent sm:w-40"
+            className="pointer-events-none absolute inset-y-0 left-0 z-20 w-24 bg-gradient-to-r from-[#fdfdfc] from-35% via-[#fdfdfc]/90 to-transparent sm:w-40 dark:from-neutral-950 dark:via-neutral-950/90"
             aria-hidden
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-20 w-24 bg-gradient-to-l from-[#fdfdfc] from-35% via-[#fdfdfc]/90 to-transparent sm:w-40"
+            className="pointer-events-none absolute inset-y-0 right-0 z-20 w-24 bg-gradient-to-l from-[#fdfdfc] from-35% via-[#fdfdfc]/90 to-transparent sm:w-40 dark:from-neutral-950 dark:via-neutral-950/90"
             aria-hidden
           />
 
@@ -126,7 +126,7 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
             {loopingTestimonials.map((item, idx) => (
               <div
                 key={`${item.id}-${idx}`}
-                className="relative z-0 flex w-[300px] shrink-0 flex-col justify-between rounded-[2rem] bg-white p-8 ring-1 ring-black/5 sm:w-[380px]"
+                className="relative z-0 flex w-[300px] shrink-0 flex-col justify-between rounded-[2rem] bg-white p-8 ring-1 ring-black/5 sm:w-[380px] dark:bg-neutral-900 dark:ring-white/10"
               >
                 <div>
                   <div className="mb-6 flex items-center gap-1">
@@ -136,23 +136,23 @@ export default function Testimonials({ className = '' }: TestimonialsProps) {
                       </svg>
                     ))}
                   </div>
-                  <p className={`${discoverBody} text-[15px] leading-relaxed text-brand-dark sm:text-base`}>
+                  <p className={`${discoverBody} text-[15px] leading-relaxed text-brand-dark sm:text-base dark:text-stone-200`}>
                     "{item.quote}"
                   </p>
                 </div>
 
-                <div className="mt-8 flex items-center gap-4 border-t border-neutral-100 pt-6">
+                <div className="mt-8 flex items-center gap-4 border-t border-neutral-100 pt-6 dark:border-neutral-800">
                   <img
                     src={item.avatar}
                     alt={item.author}
-                    className="h-12 w-12 rounded-full object-cover ring-2 ring-neutral-100"
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-neutral-100 dark:ring-neutral-700"
                     referrerPolicy="no-referrer"
                   />
                   <div>
-                    <h4 className={`${discoverHeadline} text-base text-brand-dark`}>
+                    <h4 className={`${discoverHeadline} text-base text-brand-dark dark:text-stone-100`}>
                       {item.author}
                     </h4>
-                    <p className={`${discoverBody} text-sm text-neutral-500`}>
+                    <p className={`${discoverBody} text-sm text-neutral-500 dark:text-neutral-400`}>
                       {item.role}
                     </p>
                   </div>

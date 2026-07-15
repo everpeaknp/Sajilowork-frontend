@@ -623,7 +623,7 @@ export async function fetchMyListingTasks(kind: ListingKind): Promise<Task[]> {
 
 /** Tasks where the current user is the assigned tasker, filtered by listing kind. */
 export async function fetchAssignedListingTasks(kind: ListingKind): Promise<Task[]> {
-  const response = await taskService.getAssignedTasks();
+  const response = await taskService.getAssignedTasks({ listing_kind: kind });
   if (!response.success || !response.data) {
     throw new Error(response.message || 'Failed to load assigned projects');
   }

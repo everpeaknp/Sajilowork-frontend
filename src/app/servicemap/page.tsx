@@ -333,13 +333,13 @@ function ServicemapPageContent() {
   const postServiceHref = getDashboardCreateHref('services');
 
   return (
-    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
+    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface dark:bg-neutral-950 md:pb-0">
       <Navbar />
 
       <main ref={mainRef} className="flex flex-1 overflow-hidden">
         {isSidebarVisible && (
           <div
-            className={`relative z-10 hidden shrink-0 flex-col border-r border-outline-variant bg-white shadow-sm lg:flex ${
+            className={`relative z-10 hidden shrink-0 flex-col border-r border-outline-variant bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950 lg:flex ${
               isCompactSidebar ? 'w-20' : ''
             }`}
             style={{ width: isCompactSidebar ? '80px' : `${sidebarWidth}px` }}
@@ -404,13 +404,13 @@ function ServicemapPageContent() {
                       })
                     ) : (
                       <div className="flex h-full flex-col items-center justify-center p-8 text-center">
-                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-dim">
+                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-dim dark:bg-neutral-800">
                           <SlidersHorizontal className="h-8 w-8 text-on-surface-variant" />
                         </div>
-                        <h3 className="mb-2 text-lg font-bold text-on-surface">
+                        <h3 className="mb-2 text-lg font-bold text-on-surface dark:text-stone-100">
                           {serviceTasks.length > 0 ? 'No services match your filters' : 'No services available'}
                         </h3>
-                        <p className="mb-4 font-sans text-sm font-normal leading-5 text-on-surface-variant">
+                        <p className="mb-4 font-sans text-sm font-normal leading-5 text-on-surface-variant dark:text-neutral-400">
                           {serviceTasks.length > 0
                             ? 'Try adjusting search, category, price, or location filters.'
                             : 'There are currently no services listed. Be the first to add a service!'}
@@ -520,13 +520,13 @@ function ServicemapPageContent() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center px-2 py-10 text-center">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-dim">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-dim dark:bg-neutral-800">
                     <SlidersHorizontal className="h-7 w-7 text-on-surface-variant" />
                   </div>
-                  <h3 className="mb-2 text-base font-bold text-on-surface">
+                  <h3 className="mb-2 text-base font-bold text-on-surface dark:text-stone-100">
                     {serviceTasks.length > 0 ? 'No services match your filters' : 'No services available'}
                   </h3>
-                  <p className="mb-4 text-sm text-on-surface-variant">
+                  <p className="mb-4 text-sm text-on-surface-variant dark:text-neutral-400">
                     {serviceTasks.length > 0 ? 'Try adjusting search or service filters.' : 'Be the first to add a service!'}
                   </p>
                   <a
@@ -548,12 +548,12 @@ function ServicemapPageContent() {
                     sheetSnap === 'list' ? 'hidden lg:flex' : 'flex'
                   }`}
                 >
-                  <div className="pointer-events-auto max-w-sm rounded-2xl border border-outline-variant bg-white p-6 text-center shadow-xl">
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-dim">
+                  <div className="pointer-events-auto max-w-sm rounded-2xl border border-outline-variant bg-white p-6 text-center shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-dim dark:bg-neutral-800">
                       <MapPin className="h-6 w-6 text-on-surface-variant" />
                     </div>
-                    <h3 className="mb-1 text-base font-bold text-on-surface">Map pins unavailable</h3>
-                    <p className="text-sm text-on-surface-variant">
+                    <h3 className="mb-1 text-base font-bold text-on-surface dark:text-stone-100">Map pins unavailable</h3>
+                    <p className="text-sm text-on-surface-variant dark:text-neutral-400">
                       These services don&apos;t have saved map coordinates yet. Browse the list below or
                       open a service for full details.
                     </p>
@@ -577,7 +577,7 @@ export default function ServicemapPage() {
   return (
     <Suspense
       fallback={
-        <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
+        <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface dark:bg-neutral-950 md:pb-0">
           <Navbar />
           <main className="flex flex-1 overflow-hidden">
             <TaskMapSkeleton />

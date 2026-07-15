@@ -56,10 +56,10 @@ export default function EmployerProjectsList({
 
   return (
     <div className="space-y-4" id="employer-projects-section">
-      <h3 className="select-none text-xl font-normal tracking-tight text-black">Projects</h3>
+      <h3 className="select-none text-xl font-normal tracking-tight text-black dark:text-stone-100">Projects</h3>
 
       {projects.length === 0 ? (
-        <p className="text-sm text-neutral-500">No open projects posted yet.</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">No open projects posted yet.</p>
       ) : null}
 
       <div className="space-y-3">
@@ -73,17 +73,17 @@ export default function EmployerProjectsList({
             }}
             role="button"
             tabIndex={0}
-            className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-gray-300 hover:shadow-sm sm:p-5"
+            className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-gray-300 hover:shadow-sm sm:p-5 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700 dark:hover:shadow-none"
           >
             <div className="flex min-w-0 items-center gap-4">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
                 {renderEmployerBrandLogo(proj.logoColor, employerName, logoUrl, logoText)}
               </div>
               <div className="min-w-0">
-                <h4 className="truncate text-sm font-semibold text-neutral-900 sm:text-base">
+                <h4 className="truncate text-sm font-semibold text-neutral-900 sm:text-base dark:text-stone-100">
                   {proj.title}
                 </h4>
-                <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
+                <p className="mt-1 text-xs text-neutral-500 sm:text-sm dark:text-neutral-400">
                   {proj.budget} · {proj.duration} · {proj.locationType}
                 </p>
               </div>
@@ -91,7 +91,7 @@ export default function EmployerProjectsList({
             <button
               type="button"
               onClick={(e) => handleSparkToggle(proj.id, proj.title, e)}
-              className="shrink-0 cursor-pointer rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-50 hover:text-amber-500"
+              className="shrink-0 cursor-pointer rounded-full p-2 text-neutral-400 transition-colors hover:bg-neutral-50 hover:text-amber-500 dark:hover:bg-neutral-800"
               aria-label={proj.isSparked ? 'Unsave project' : 'Save project'}
             >
               <Star

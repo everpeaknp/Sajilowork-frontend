@@ -367,7 +367,7 @@ export default function ProjectList({
           className={`${discoverMedium} flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[14.5px] transition-all ${
             isCurrent
               ? 'bg-[#52C47F] font-semibold text-white'
-              : 'text-neutral-600 hover:bg-neutral-100'
+              : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
           }`}
         >
           {p}
@@ -416,12 +416,12 @@ export default function ProjectList({
           key={item.value}
           type="button"
           onClick={() => onSelect(item.value)}
-          className={`${discoverBody} flex w-full cursor-pointer items-center py-2 text-left text-[15px] text-neutral-600 transition-all hover:text-black`}
+          className={`${discoverBody} flex w-full cursor-pointer items-center py-2 text-left text-[15px] text-neutral-600 transition-all hover:text-black dark:text-neutral-400 dark:hover:text-stone-100`}
         >
           <span
             className={`mr-3 flex h-4.5 w-4.5 shrink-0 items-center justify-center border transition-all ${
               square ? 'rounded-[4px]' : 'rounded-full'
-            } ${selected === item.value ? 'border-[#52C47F] bg-[#eefaf2]' : 'border-neutral-300 bg-white'}`}
+            } ${selected === item.value ? 'border-[#52C47F] bg-[#eefaf2] dark:bg-emerald-950/50' : 'border-neutral-300 bg-white dark:border-neutral-600 dark:bg-neutral-900'}`}
           >
             {selected === item.value &&
               (square ? (
@@ -430,7 +430,7 @@ export default function ProjectList({
                 <span className="h-2 w-2 rounded-full bg-[#52C47F]" />
               ))}
           </span>
-          <span className={selected === item.value ? 'font-semibold text-neutral-900' : 'text-neutral-600'}>
+          <span className={selected === item.value ? 'font-semibold text-neutral-900 dark:text-stone-100' : 'text-neutral-600 dark:text-neutral-400'}>
             {item.label}
           </span>
         </button>
@@ -454,8 +454,8 @@ export default function ProjectList({
               onClick={() => setSelectedSkill(skill.value)}
               className={`${discoverMedium} cursor-pointer rounded-full border px-3 py-1.5 text-sm transition-all ${
                 selectedSkill === skill.value
-                  ? 'border-[#fff1ec] bg-[#fff1ec] font-semibold text-[#d48c71]'
-                  : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300'
+                  ? 'border-[#fff1ec] bg-[#fff1ec] font-semibold text-[#d48c71] dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200'
+                  : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:border-neutral-600'
               }`}
             >
               {skill.label}
@@ -472,7 +472,7 @@ export default function ProjectList({
   return (
     <section
       id="custom-project-board-grid"
-      className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12"
+      className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12 dark:border-neutral-800 dark:bg-neutral-950"
     >
       <div className="mx-auto w-full max-w-none">
         <AnimatePresence>
@@ -492,9 +492,9 @@ export default function ProjectList({
         </AnimatePresence>
 
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
-          <div className="rounded-[16px] bg-white px-5 pb-5 pt-0 lg:col-span-1">
+          <div className="rounded-[16px] bg-white px-5 pb-5 pt-0 lg:col-span-1 dark:bg-neutral-900 dark:border dark:border-neutral-800">
             {hasActiveFilters && (
-              <div className="mb-2 flex min-h-[40px] items-center justify-end border-b border-neutral-100 pb-2">
+              <div className="mb-2 flex min-h-[40px] items-center justify-end border-b border-neutral-100 pb-2 dark:border-neutral-800">
                 <button
                   type="button"
                   onClick={resetAllFilters}
@@ -508,12 +508,12 @@ export default function ProjectList({
             {accordionSections.map((section, index) => (
               <div
                 key={section.key}
-                className={`${index === 0 ? 'pt-0 pb-4' : 'border-b border-neutral-300 pb-5 pt-5'} ${index === accordionSections.length - 1 ? 'border-b-0 pb-0' : ''}`}
+                className={`${index === 0 ? 'pt-0 pb-4' : 'border-b border-neutral-300 pb-5 pt-5 dark:border-neutral-700'} ${index === accordionSections.length - 1 ? 'border-b-0 pb-0' : ''}`}
               >
                 <button
                   type="button"
                   onClick={() => toggleAccordion(section.key)}
-                  className={`${discoverHeadline} flex min-h-[40px] w-full items-center justify-between py-1 text-[18px] font-semibold tracking-wide text-neutral-900 transition-colors hover:text-[#52C47F] ${index === 0 ? 'mb-0 border-b border-neutral-300 pb-4' : ''}`}
+                  className={`${discoverHeadline} flex min-h-[40px] w-full items-center justify-between py-1 text-[18px] font-semibold tracking-wide text-neutral-900 transition-colors hover:text-[#52C47F] dark:text-stone-100 ${index === 0 ? 'mb-0 border-b border-neutral-300 pb-4 dark:border-neutral-700' : ''}`}
                 >
                   <span>{section.label}</span>
                   <ChevronDown
@@ -540,8 +540,8 @@ export default function ProjectList({
 
           <div className="space-y-5 lg:col-span-3">
             <div className="mb-5 flex min-h-[40px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className={`${discoverBody} text-sm font-medium text-neutral-800 sm:text-base`}>
-                <span className={`${discoverMedium} font-bold text-neutral-900`}>{totalProjects}</span>{' '}
+              <p className={`${discoverBody} text-sm font-medium text-neutral-800 sm:text-base dark:text-neutral-300`}>
+                <span className={`${discoverMedium} font-bold text-neutral-900 dark:text-stone-100`}>{totalProjects}</span>{' '}
                 projects available
               </p>
 
@@ -561,7 +561,7 @@ export default function ProjectList({
                 <button
                   type="button"
                   onClick={() => setSortDropdownOpen((prev) => !prev)}
-                  className={`${discoverMedium} flex cursor-pointer items-center gap-1 bg-white text-sm font-semibold text-neutral-800 transition-all hover:text-black focus:outline-none`}
+                  className={`${discoverMedium} flex cursor-pointer items-center gap-1 bg-white text-sm font-semibold text-neutral-800 transition-all hover:text-black focus:outline-none dark:bg-transparent dark:text-stone-100 dark:hover:text-white`}
                 >
                   <span>{SORT_OPTIONS.find((o) => o.value === sortBy)?.label}</span>
                   <ChevronDown className="h-3.5 w-3.5 text-neutral-500" />
@@ -573,7 +573,7 @@ export default function ProjectList({
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 3 }}
-                      className="absolute right-0 top-6 z-30 mt-1 w-44 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+                      className="absolute right-0 top-6 z-30 mt-1 w-44 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
                     >
                       {SORT_OPTIONS.map((opt) => (
                         <button
@@ -583,10 +583,10 @@ export default function ProjectList({
                             setSortBy(opt.value);
                             setSortDropdownOpen(false);
                           }}
-                          className={`${discoverMedium} flex w-full items-center justify-between px-3.5 py-1.5 text-left text-xs transition-colors hover:bg-[#eefaf2]/50 ${
+                          className={`${discoverMedium} flex w-full items-center justify-between px-3.5 py-1.5 text-left text-xs transition-colors hover:bg-[#eefaf2]/50 dark:hover:bg-neutral-800 ${
                             sortBy === opt.value
-                              ? 'bg-[#eefaf2]/20 font-bold text-[#52C47F]'
-                              : 'text-neutral-700'
+                              ? 'bg-[#eefaf2]/20 font-bold text-[#52C47F] dark:bg-emerald-950/40'
+                              : 'text-neutral-700 dark:text-neutral-300'
                           }`}
                         >
                           <span>{opt.label}</span>
@@ -601,10 +601,10 @@ export default function ProjectList({
             </div>
 
             {hasActiveSearch ? (
-              <div className="mb-4 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-                <p className={`${discoverBody} text-sm text-neutral-600`}>
+              <div className="mb-4 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800 dark:bg-neutral-900">
+                <p className={`${discoverBody} text-sm text-neutral-600 dark:text-neutral-400`}>
                   Showing project matches for{' '}
-                  <span className={`${discoverMedium} text-[#1D3E35]`}>&quot;{activeSearchLabel}&quot;</span>
+                  <span className={`${discoverMedium} text-[#1D3E35] dark:text-stone-100`}>&quot;{activeSearchLabel}&quot;</span>
                 </p>
                 <button
                   type="button"
@@ -622,12 +622,12 @@ export default function ProjectList({
             {loadingProjects ? (
               <ListSkeleton count={4} cardType="project" label="Loading projects" />
             ) : paginatedProjectsList.length === 0 ? (
-              <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
-                <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
-                <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35]`}>
+              <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center dark:border-neutral-700 dark:bg-neutral-900">
+                <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300 dark:text-neutral-600" />
+                <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35] dark:text-stone-100`}>
                   No matching listings found
                 </span>
-                <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500`}>
+                <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500 dark:text-neutral-400`}>
                   {hasActiveSearch
                     ? 'No projects match your search. Try different keywords or clear the search.'
                     : 'There are no available opportunities matching your category and filtered specifications.'}
@@ -682,7 +682,7 @@ export default function ProjectList({
                               router.push(projectHref);
                             }
                           }}
-                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
+                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:border-neutral-700 dark:hover:shadow-none"
                         >
                         <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
                           {employerHref ? (
@@ -706,14 +706,14 @@ export default function ProjectList({
                           <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
                             <div className="flex items-start justify-between gap-2">
                               <h3
-                                className={`${discoverBody} block line-clamp-2 text-base !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F] sm:truncate sm:text-[18.5px]`}
+                                className={`${discoverBody} block line-clamp-2 text-base !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F] sm:truncate sm:text-[18.5px] dark:text-stone-100`}
                               >
                                 {project.title}
                               </h3>
                             </div>
 
                             <div
-                              className={`${discoverBody} mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-neutral-700 sm:gap-x-0 sm:text-[13px]`}
+                              className={`${discoverBody} mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-neutral-700 sm:gap-x-0 sm:text-[13px] dark:text-neutral-400`}
                             >
                               <span className="flex items-center gap-1.5">
                                 <MapPin className="h-4 w-4 stroke-[1.6] text-neutral-500" />
@@ -732,7 +732,7 @@ export default function ProjectList({
                             </div>
 
                             <p
-                              className={`${discoverBody} mb-3 mt-3 line-clamp-2 max-w-[620px] text-[13.5px] font-normal leading-relaxed text-black`}
+                              className={`${discoverBody} mb-3 mt-3 line-clamp-2 max-w-[620px] text-[13.5px] font-normal leading-relaxed text-black dark:text-neutral-300`}
                             >
                               {project.description}
                             </p>
@@ -746,7 +746,7 @@ export default function ProjectList({
                                     e.stopPropagation();
                                     setSelectedSkill(skill);
                                   }}
-                                  className={`${discoverBody} cursor-pointer rounded-full bg-[#ffede8] px-4 py-1.5 text-[14px] font-normal text-black transition-colors hover:bg-[#ffdcd0]`}
+                                  className={`${discoverBody} cursor-pointer rounded-full bg-[#ffede8] px-4 py-1.5 text-[14px] font-normal text-black transition-colors hover:bg-[#ffdcd0] dark:bg-neutral-800 dark:text-stone-200 dark:hover:bg-neutral-700`}
                                 >
                                   {skill}
                                 </button>
@@ -755,19 +755,19 @@ export default function ProjectList({
                           </div>
                         </div>
 
-                        <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-4 sm:pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0">
+                        <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-4 sm:pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0 dark:border-neutral-800 lg:dark:border-neutral-700">
                           <div className="flex h-full w-full min-w-0 flex-col items-stretch justify-between gap-4 sm:items-end lg:min-w-[260px]">
                             <div className="w-full text-left sm:text-right">
-                              <span className={`${discoverBody} block text-lg font-normal leading-none tracking-tight text-black sm:text-[21px]`}>
+                              <span className={`${discoverBody} block text-lg font-normal leading-none tracking-tight text-black sm:text-[21px] dark:text-stone-100`}>
                                 {project.budgetLabel}
                               </span>
-                              <span className={`${discoverBody} mt-1.5 block text-[13px] font-normal text-neutral-700`}>
+                              <span className={`${discoverBody} mt-1.5 block text-[13px] font-normal text-neutral-700 dark:text-neutral-400`}>
                                 {project.type} Rate
                               </span>
                             </div>
 
                             <span
-                              className={`${discoverBody} group/btn relative flex h-auto w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-8 py-2.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white lg:min-w-[250px]`}
+                              className={`${discoverBody} group/btn relative flex h-auto w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-8 py-2.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white lg:min-w-[250px] dark:bg-emerald-950/60 dark:text-emerald-300`}
                             >
                               <span
                                 aria-hidden
@@ -795,7 +795,7 @@ export default function ProjectList({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
                     title="Previous Page"
                   >
                     <ChevronLeft className="h-4.5 w-4.5" />
@@ -805,7 +805,7 @@ export default function ProjectList({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
                     title="Next Page"
                   >
                     <ChevronRight className="h-4.5 w-4.5" />

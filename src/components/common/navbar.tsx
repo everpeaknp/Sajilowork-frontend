@@ -27,6 +27,7 @@ import UserAvatar from '@/components/common/UserAvatar';
 import SiteBrand from '@/components/common/SiteBrand';
 import RouteListingBreadcrumbs from '@/components/seo/RouteListingBreadcrumbs';
 import AccountRoleMode from '@/components/common/AccountRoleMode';
+import ThemeMenuToggle from '@/components/common/ThemeMenuToggle';
 import { useSiteSettings } from '@/providers';
 import { isConfirmModalTarget } from '@/app/dashboard/DeleteConfirmModal';
 import type { Conversation, Notification as NotificationType, PaginatedResponse } from '@/types';
@@ -37,7 +38,7 @@ import {
   landingHeadlineSm,
 } from '@/components/LangingHome/landingTypography';
 
-const navPanelTitleClass = `${landingHeadlineSm} text-sm text-gray-900`;
+const navPanelTitleClass = `${landingHeadlineSm} text-sm text-gray-900 dark:text-stone-100`;
 
 function extractList<T>(data: PaginatedResponse<T> | T[] | null | undefined): T[] {
   if (!data) return [];
@@ -107,7 +108,7 @@ function getNotificationHref(notification: NotificationType): string {
 }
 
 const mobileDropdownPanelClass =
-  'fixed left-2 right-2 top-[calc(3.5rem+0.375rem)] z-[10000] max-h-[min(72dvh,28rem)] overflow-hidden rounded-2xl bg-white p-4 shadow-xl animate-in fade-in slide-in-from-top-3 duration-200 sm:left-3 sm:right-3 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72 md:shadow-none';
+  'fixed left-2 right-2 top-[calc(3.5rem+0.375rem)] z-[10000] max-h-[min(72dvh,28rem)] overflow-hidden rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xl animate-in fade-in slide-in-from-top-3 duration-200 sm:left-3 sm:right-3 md:absolute md:inset-auto md:right-0 md:top-full md:mt-3 md:w-80 md:max-h-72 md:shadow-none dark:border-neutral-700 dark:bg-neutral-900';
 
 function MobileDropdownBackdrop({ onClose }: { onClose: () => void }) {
   return (
@@ -224,7 +225,7 @@ export default function Navbar() {
   const fetchMyTasksCount = useCallback(async () => {
     try {
       setTasksLoading(true);
-      const response = await taskService.getMyTasks();
+      const response = await taskService.getMyTasks({ listing_kind: 'task' });
       if (response.success && response.data) {
         setMyTasksCount(response.data.count ?? response.data.results?.length ?? 0);
       }
@@ -385,8 +386,13 @@ export default function Navbar() {
     cn(
       landingBody,
       'text-sm font-semibold tracking-tight transition cursor-pointer',
-      active ? 'text-brand-emerald' : 'text-neutral-600 hover:text-brand-emerald'
+      active
+        ? 'text-brand-emerald'
+        : 'text-neutral-600 hover:text-brand-emerald dark:text-neutral-300 dark:hover:text-brand-emerald',
     );
+
+  const navIconBtnClass =
+    'relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer min-[360px]:p-2 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-brand-emerald';
 
   const formatTimeAgo = (dateString?: string) => {
     if (!dateString) return 'Just now';
@@ -404,9 +410,12 @@ export default function Navbar() {
   const profileMenuItems = (
     <>
       <div className="px-3 py-3">
-        <p className={`${landingHeadlineSm} text-sm text-gray-900`}>
+        <p className={`${landingHeadlineSm} text-sm text-gray-900 dark:text-stone-100`}>
           {user?.first_name} {user?.last_name}
         </p>
+      </div>
+
+      <div className="border-t border-neutral-100 dark:border-neutral-800">
         <AccountRoleMode
           variant="navbar"
           navigateToDashboard
@@ -414,14 +423,18 @@ export default function Navbar() {
         />
       </div>
 
-      <div className="py-1">
+      <div className="border-t border-neutral-100 dark:border-neutral-800">
+        <ThemeMenuToggle />
+      </div>
+
+      <div className="border-t border-neutral-100 py-1 dark:border-neutral-800">
         <button
           type="button"
           onClick={() => {
             setProfileMenuOpen(false);
             handleBrowseTasksClick();
           }}
-          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 md:hidden"
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 md:hidden dark:text-stone-300 dark:hover:bg-neutral-800"
         >
           <ClipboardList className="h-4 w-4 text-gray-400" />
           <span>Browse tasks</span>
@@ -433,7 +446,7 @@ export default function Navbar() {
             setProfileMenuOpen(false);
             handleMyTasksClick();
           }}
-          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 md:hidden"
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 md:hidden dark:text-stone-300 dark:hover:bg-neutral-800"
         >
           <Briefcase className="h-4 w-4 text-gray-400" />
           <span>My tasks</span>
@@ -445,7 +458,7 @@ export default function Navbar() {
             setProfileMenuOpen(false);
             router.push('/dashboard/settings');
           }}
-          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-stone-300 dark:hover:bg-neutral-800"
         >
           <Settings className="h-4 w-4 text-gray-400" />
           <span>Settings</span>
@@ -457,7 +470,7 @@ export default function Navbar() {
             setProfileMenuOpen(false);
             void handleLogout();
           }}
-          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50"
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
         >
           <LogOut className="h-4 w-4" />
           <span>Sign out</span>
@@ -468,7 +481,7 @@ export default function Navbar() {
 
   return (
     <>
-    <header className={`sticky top-0 z-[9999] isolate w-full min-w-0 overflow-x-clip bg-white ${landingBody} antialiased`}>
+    <header className={`sticky top-0 z-[9999] isolate w-full min-w-0 overflow-x-clip border-b border-transparent bg-[color-mix(in_srgb,var(--elevated)_95%,transparent)] backdrop-blur-md dark:border-neutral-800/80 ${landingBody} antialiased`}>
       <div className="mx-auto flex h-14 min-h-14 max-w-7xl items-center justify-between gap-1 px-2.5 sm:h-16 sm:gap-3 sm:px-4 md:px-6 lg:px-8">
         {/* Left section: Logo & Primary Links */}
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-8 md:flex-none">
@@ -539,20 +552,20 @@ export default function Navbar() {
             <>
               <Link
                 href="/signin"
-                className={`${landingBody} hidden sm:hidden min-h-9 items-center rounded-full px-3 text-xs font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 hover:text-brand-emerald min-[380px]:flex sm:text-sm`}
+                className={`${landingBody} hidden sm:hidden min-h-9 items-center rounded-full px-3 text-xs font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 hover:text-brand-emerald min-[380px]:flex sm:text-sm dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-brand-emerald`}
               >
                 Sign in
               </Link>
               <div className="hidden items-center gap-3 sm:flex">
               <Link
                 href="/signin"
-                className={`${landingBody} text-sm font-semibold tracking-tight text-neutral-600 transition hover:text-brand-emerald`}
+                className={`${landingBody} text-sm font-semibold tracking-tight text-neutral-600 transition hover:text-brand-emerald dark:text-neutral-300 dark:hover:text-brand-emerald`}
               >
                 Sign in
               </Link>
               <Link
                 href="/signup"
-                className={`${landingBody} rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald`}
+                className={`${landingBody} rounded-full bg-brand-dark px-4 py-2 text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald dark:bg-brand-emerald dark:text-neutral-950 dark:hover:bg-emerald-400`}
               >
                 Sign up
               </Link>
@@ -561,7 +574,7 @@ export default function Navbar() {
           ) : isAuthenticated ? (
             <>
               {/* Help button */}
-              <div className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald`}>
+              <div className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald dark:text-neutral-300 dark:hover:text-brand-emerald`}>
                 <HelpCircle className="h-4.5 w-4.5" />
                 <span>Help</span>
               </div>
@@ -578,7 +591,7 @@ export default function Navbar() {
                     setMessagesOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer min-[360px]:p-2"
+                  className={navIconBtnClass}
                   aria-label="Notifications"
                 >
                   <Bell className="h-5 w-5 sm:h-5 sm:w-5" />
@@ -608,7 +621,7 @@ export default function Navbar() {
                         )}
                         <button
                           onClick={() => setNotificationsOpen(false)}
-                          className="p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+                          className="cursor-pointer rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-neutral-800 dark:hover:text-stone-200"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -616,23 +629,25 @@ export default function Navbar() {
                     </div>
                     <div className="max-h-[min(55dvh,18rem)] space-y-3 overflow-y-auto overscroll-contain pr-1 md:max-h-72">
                       {notificationsLoading ? (
-                        <div className="text-center py-4 text-sm text-gray-500">Loading...</div>
+                        <div className="py-4 text-center text-sm text-gray-500 dark:text-neutral-400">Loading...</div>
                       ) : notifications.length === 0 ? (
-                        <div className="text-center py-4 text-sm text-gray-500">No notifications</div>
+                        <div className="py-4 text-center text-sm text-gray-500 dark:text-neutral-400">No notifications</div>
                       ) : (
                         notifications.map((n) => (
                           <div
                             key={n.id}
                             onClick={() => handleNotificationClick(n)}
-                            className={`p-2.5 rounded-lg transition-colors cursor-pointer text-left ${
-                              !n.is_read ? 'bg-brand-emerald/10' : 'hover:bg-gray-50'
+                            className={`cursor-pointer rounded-lg p-2.5 text-left transition-colors ${
+                              !n.is_read
+                                ? 'bg-brand-emerald/10'
+                                : 'hover:bg-gray-50 dark:hover:bg-neutral-800'
                             }`}
                           >
-                            <div className="flex justify-between items-start gap-2">
-                              <span className="text-xs font-semibold text-gray-900">{n.title}</span>
-                              <span className="shrink-0 text-[10px] text-gray-500">{formatTimeAgo(n.created_at)}</span>
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="text-xs font-semibold text-gray-900 dark:text-stone-100">{n.title}</span>
+                              <span className="shrink-0 text-[10px] text-gray-500 dark:text-neutral-400">{formatTimeAgo(n.created_at)}</span>
                             </div>
-                            <p className="text-xs text-gray-600 mt-1 leading-snug line-clamp-3">
+                            <p className="mt-1 line-clamp-3 text-xs leading-snug text-gray-600 dark:text-neutral-400">
                               {normalizeNotificationCurrency(n.message)}
                             </p>
                           </div>
@@ -653,7 +668,7 @@ export default function Navbar() {
                     setNotificationsOpen(false);
                     setProfileMenuOpen(false);
                   }}
-                  className="relative rounded-full p-1.5 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald focus:outline-none cursor-pointer min-[360px]:p-2"
+                  className={navIconBtnClass}
                   aria-label="Messages"
                 >
                   <MessageSquare className="h-5 w-5" />
@@ -673,16 +688,16 @@ export default function Navbar() {
                       <h4 className={navPanelTitleClass}>Recent Chats</h4>
                       <button
                         onClick={() => setMessagesOpen(false)}
-                        className="p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+                        className="cursor-pointer rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-neutral-800 dark:hover:text-stone-200"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                     <div className="max-h-[min(55dvh,18rem)] space-y-3 overflow-y-auto overscroll-contain pr-1 md:max-h-72">
                       {conversationsLoading ? (
-                        <div className="text-center py-4 text-sm text-gray-500">Loading...</div>
+                        <div className="py-4 text-center text-sm text-gray-500 dark:text-neutral-400">Loading...</div>
                       ) : conversations.length === 0 ? (
-                        <div className="text-center py-4 text-sm text-gray-500">No messages yet</div>
+                        <div className="py-4 text-center text-sm text-gray-500 dark:text-neutral-400">No messages yet</div>
                       ) : (
                         <>
                           {conversations.map((conv) => {
@@ -699,8 +714,10 @@ export default function Navbar() {
                               <div
                                 key={convId}
                                 onClick={() => openConversation(convId)}
-                                className={`flex items-start space-x-3 p-2 rounded-xl min-h-[4.5rem] transition-colors cursor-pointer text-left ${
-                                  hasUnread ? 'bg-brand-emerald/10' : 'hover:bg-gray-50'
+                                className={`flex min-h-[4.5rem] cursor-pointer items-start space-x-3 rounded-xl p-2 text-left transition-colors ${
+                                  hasUnread
+                                    ? 'bg-brand-emerald/10'
+                                    : 'hover:bg-gray-50 dark:hover:bg-neutral-800'
                                 }`}
                               >
                                 <UserAvatar
@@ -715,14 +732,14 @@ export default function Navbar() {
                                   }
                                   className="shrink-0"
                                 />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between items-baseline gap-2">
-                                    <span className="text-xs font-bold text-gray-900 truncate">
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-baseline justify-between gap-2">
+                                    <span className="truncate text-xs font-bold text-gray-900 dark:text-stone-100">
                                       {name}
                                     </span>
-                                    <span className="text-[9px] text-gray-400 shrink-0">{time}</span>
+                                    <span className="shrink-0 text-[9px] text-gray-400 dark:text-neutral-500">{time}</span>
                                   </div>
-                                  <p className="text-xs text-gray-500 truncate mt-0.5">{preview}</p>
+                                  <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-neutral-400">{preview}</p>
                                 </div>
                               </div>
                             );
@@ -732,7 +749,7 @@ export default function Navbar() {
                               setMessagesOpen(false);
                               router.push(DASHBOARD_MESSAGES_PATH);
                             }}
-                            className="w-full text-center text-xs font-bold text-brand-emerald hover:underline pt-2 cursor-pointer"
+                            className="w-full cursor-pointer pt-2 text-center text-xs font-bold text-brand-emerald hover:underline"
                           >
                             View all messages
                           </button>
@@ -776,14 +793,14 @@ export default function Navbar() {
                         <button
                           type="button"
                           onClick={() => setProfileMenuOpen(false)}
-                          className="cursor-pointer rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                          className="cursor-pointer rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-neutral-800 dark:hover:text-stone-200"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
                       {profileMenuItems}
                     </div>
-                    <div className="absolute right-0 z-[10000] mt-3 hidden w-64 rounded-2xl bg-white p-2 animate-in fade-in slide-in-from-top-3 duration-200 md:block">
+                    <div className="absolute right-0 z-[10000] mt-3 hidden w-64 rounded-2xl border border-neutral-200/80 bg-white p-2 animate-in fade-in slide-in-from-top-3 duration-200 md:block dark:border-neutral-700 dark:bg-neutral-900">
                       {profileMenuItems}
                     </div>
                   </>
@@ -792,6 +809,13 @@ export default function Navbar() {
             </>
           ) : (
             <div className="hidden h-10 w-36 sm:block" aria-hidden="true" />
+          )}
+
+          {/* Utilities: theme (guests) + hamburger */}
+          {showSignedOutCtas && (
+            <div className="hidden sm:block">
+              <ThemeMenuToggle variant="inline" />
+            </div>
           )}
 
           {/* Hamburger: tasker dashboard sidebar, or guest sign-in menu */}
@@ -815,7 +839,7 @@ export default function Navbar() {
                   setProfileMenuOpen(false);
                 }
               }}
-              className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald cursor-pointer md:hidden"
+              className="cursor-pointer rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-brand-emerald md:hidden dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-brand-emerald"
               aria-label={
                 isTaskerDashboard && taskerDashboardNav?.mobileOpen
                   ? 'Close dashboard menu'
@@ -850,7 +874,7 @@ export default function Navbar() {
       {/* Guest mobile menu only (signed-in users use icon shortcuts in the bar) */}
       {mobileMenuOpen && showSignedOutCtas && (
         <nav
-          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden sm:px-4"
+          className="max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-t border-gray-100 bg-white px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden sm:px-4 dark:border-neutral-800 dark:bg-neutral-950"
           aria-label="Mobile navigation"
         >
           <div className="space-y-1">
@@ -859,8 +883,8 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 landingBody,
-                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
-                isBrowseTasksActive ? 'text-brand-emerald' : 'text-neutral-600',
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50 dark:hover:bg-neutral-900',
+                isBrowseTasksActive ? 'text-brand-emerald' : 'text-neutral-600 dark:text-neutral-300',
               )}
             >
               Browse tasks
@@ -870,8 +894,8 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 landingBody,
-                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
-                isJobsActive ? 'text-brand-emerald' : 'text-neutral-600',
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50 dark:hover:bg-neutral-900',
+                isJobsActive ? 'text-brand-emerald' : 'text-neutral-600 dark:text-neutral-300',
               )}
             >
               Jobs
@@ -881,8 +905,8 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 landingBody,
-                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
-                isProjectsActive ? 'text-brand-emerald' : 'text-neutral-600',
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50 dark:hover:bg-neutral-900',
+                isProjectsActive ? 'text-brand-emerald' : 'text-neutral-600 dark:text-neutral-300',
               )}
             >
               Projects
@@ -892,26 +916,30 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className={cn(
                 landingBody,
-                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50',
-                isServicesActive ? 'text-brand-emerald' : 'text-neutral-600',
+                'block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight transition hover:bg-gray-50 dark:hover:bg-neutral-900',
+                isServicesActive ? 'text-brand-emerald' : 'text-neutral-600 dark:text-neutral-300',
               )}
             >
               Services
             </Link>
 
-            <div className="my-2 h-px bg-gray-100" />
+            <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
+
+            <ThemeMenuToggle />
+
+            <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
 
             <Link
               href="/signin"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50`}
+              className={`${landingBody} block w-full min-h-11 rounded-xl px-4 py-3 text-left text-sm font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 dark:text-neutral-300 dark:hover:bg-neutral-900`}
             >
               Sign in
             </Link>
             <Link
               href="/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className={`${landingBody} block w-full min-h-11 rounded-xl bg-brand-dark px-4 py-3 text-center text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald`}
+              className={`${landingBody} block w-full min-h-11 rounded-xl bg-brand-dark px-4 py-3 text-center text-sm font-semibold tracking-tight text-white transition hover:bg-brand-emerald dark:bg-brand-emerald dark:text-neutral-950 dark:hover:bg-emerald-400`}
             >
               Sign up
             </Link>

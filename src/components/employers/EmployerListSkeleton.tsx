@@ -1,14 +1,14 @@
 import { cn } from '@/lib/utils';
 
 function Bone({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded bg-neutral-200', className)} aria-hidden />;
+  return <div className={cn('animate-pulse rounded bg-neutral-200 dark:bg-neutral-800', className)} aria-hidden />;
 }
 
 export function EmployerCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'flex min-h-[200px] animate-pulse flex-col rounded-2xl border border-gray-200 bg-white p-6',
+        'flex min-h-[200px] animate-pulse flex-col rounded-2xl border border-gray-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900',
         className,
       )}
       aria-hidden

@@ -171,7 +171,7 @@ export default function TrendingServices({ className = '', initialServices }: Tr
                     <Link
                       key={`${service.id}-${idx}`}
                       href={getServiceDetailPath(service)}
-                      className="group flex h-[360px] w-[min(82vw,250px)] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:h-[385px] sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)]"
+                      className="group flex h-[360px] w-[min(82vw,250px)] flex-shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md sm:h-[385px] sm:w-[calc((100%-24px)/2)] md:w-[calc((100%-2*24px)/3)] lg:h-[417px] lg:w-[calc((100%-3*24px)/4)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-none dark:hover:shadow-none"
                     >
                       <div className="relative h-[200px] w-full flex-shrink-0 overflow-hidden bg-neutral-100 lg:h-[215px]">
                         <OptimizedImage

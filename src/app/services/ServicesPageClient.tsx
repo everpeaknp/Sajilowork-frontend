@@ -32,7 +32,7 @@ export default function ServicesPageClient({
 
   return (
     <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-[#1161fe] selection:text-white md:pb-0`}
+      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-clip bg-white pb-4 selection:bg-[#1161fe] selection:text-white md:pb-0 dark:bg-neutral-950 dark:selection:bg-brand-emerald`}
     >
       <Navbar />
       <main className="pb-2 md:pb-0">

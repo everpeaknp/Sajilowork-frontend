@@ -15,6 +15,7 @@ import {
   ZoomOut,
   Navigation,
 } from 'lucide-react';
+import { useTheme } from '@/providers/ThemeProvider';
 
 interface OfficeLocation {
   id: string;
@@ -37,6 +38,7 @@ const OFFICE_LOCATIONS: OfficeLocation[] = [
 ];
 
 export default function ContactContent() {
+  const { theme } = useTheme();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -48,6 +50,7 @@ export default function ContactContent() {
   const [showPopup, setShowPopup] = useState(true);
   const [zoom, setZoom] = useState(15);
   const [mapStyle, setMapStyle] = useState<'streets' | 'satellite' | 'terrain'>('streets');
+  const mapUseDarkFilter = theme === 'dark' && mapStyle === 'streets';
 
   const activeOffice =
     OFFICE_LOCATIONS.find((loc) => loc.id === selectedLocationId) ?? OFFICE_LOCATIONS[0];
@@ -163,39 +166,39 @@ export default function ContactContent() {
           </div>
 
             <motion.div
-              className="relative z-20 order-3 mt-6 w-full rounded-3xl border border-neutral-100 bg-white p-6 text-left shadow-xl sm:rounded-[2rem] sm:p-8 lg:absolute lg:right-32 lg:top-24 lg:order-none lg:mt-0 lg:max-w-[480px] lg:-translate-y-[6%] lg:p-8 xl:right-44 2xl:right-52"
+              className="relative z-20 order-3 mt-6 w-full rounded-3xl border border-neutral-100 bg-white p-6 text-left shadow-xl dark:border-neutral-800 dark:bg-neutral-900 sm:rounded-[2rem] sm:p-8 lg:absolute lg:right-32 lg:top-24 lg:order-none lg:mt-0 lg:max-w-[480px] lg:-translate-y-[6%] lg:p-8 xl:right-44 2xl:right-52"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-                <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black">
+                <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black dark:text-stone-100">
                   Tell us about yourself
                 </h3>
-                <p className="mb-6 text-sm font-normal leading-relaxed text-neutral-900 sm:mb-7 sm:text-base">
+                <p className="mb-6 text-sm font-normal leading-relaxed text-neutral-900 dark:text-neutral-400 sm:mb-7 sm:text-base">
                   Whether you have questions or you would just like to say hello, contact us.
                 </p>
 
                 <AnimatePresence>
                   {submitted ? (
                     <motion.div
-                      className="mb-5 flex items-start gap-3.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4"
+                      className="mb-5 flex items-start gap-3.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/60 dark:bg-emerald-950/40"
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                     >
-                      <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                      <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <div>
-                        <h4 className="text-sm font-normal text-emerald-900">
+                        <h4 className="text-sm font-normal text-emerald-900 dark:text-emerald-100">
                           Message sent successfully!
                         </h4>
-                        <p className="mt-0.5 text-xs font-normal text-emerald-800">
+                        <p className="mt-0.5 text-xs font-normal text-emerald-800 dark:text-emerald-300/90">
                           Our team will connect back shortly.
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => setSubmitted(false)}
-                        className="ml-auto cursor-pointer text-xs font-normal text-emerald-800 underline transition-colors hover:text-emerald-900"
+                        className="ml-auto cursor-pointer text-xs font-normal text-emerald-800 underline transition-colors hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100"
                       >
                         Dismiss
                       </button>
@@ -208,7 +211,7 @@ export default function ContactContent() {
                     <div>
                       <label
                         htmlFor="form-name"
-                        className="mb-1.5 block text-xs font-normal text-black sm:text-sm"
+                        className="mb-1.5 block text-xs font-normal text-black dark:text-stone-100 sm:text-sm"
                       >
                         Name
                       </label>
@@ -226,18 +229,18 @@ export default function ContactContent() {
                         placeholder="Name"
                         className={`w-full rounded-lg border ${
                           fieldErrors.name
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                            : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20'
-                        } bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2`}
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20 dark:border-red-700'
+                            : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20 dark:border-neutral-700'
+                        } bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2 dark:bg-neutral-800 dark:text-stone-100 dark:placeholder-neutral-500`}
                       />
                       {fieldErrors.name && (
-                        <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.name}</p>
                       )}
                     </div>
                     <div>
                       <label
                         htmlFor="form-email"
-                        className="mb-1.5 block text-xs font-normal text-black sm:text-sm"
+                        className="mb-1.5 block text-xs font-normal text-black dark:text-stone-100 sm:text-sm"
                       >
                         Email
                       </label>
@@ -255,12 +258,12 @@ export default function ContactContent() {
                         placeholder="Enter Email"
                         className={`w-full rounded-lg border ${
                           fieldErrors.email
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                            : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20'
-                        } bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2`}
+                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20 dark:border-red-700'
+                            : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20 dark:border-neutral-700'
+                        } bg-white px-3.5 py-2.5 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2 dark:bg-neutral-800 dark:text-stone-100 dark:placeholder-neutral-500`}
                       />
                       {fieldErrors.email && (
-                        <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</p>
                       )}
                     </div>
                   </div>
@@ -268,7 +271,7 @@ export default function ContactContent() {
                   <div>
                     <label
                       htmlFor="form-message"
-                      className="mb-1.5 block text-xs font-normal text-black sm:text-sm"
+                      className="mb-1.5 block text-xs font-normal text-black dark:text-stone-100 sm:text-sm"
                     >
                       Message
                     </label>
@@ -286,12 +289,12 @@ export default function ContactContent() {
                       placeholder="How can we help?"
                       className={`min-h-[120px] w-full resize-y rounded-lg border ${
                         fieldErrors.message
-                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                          : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20'
-                      } bg-white px-3.5 py-3 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2 sm:min-h-[140px]`}
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20 dark:border-red-700'
+                          : 'border-neutral-200 focus:border-brand-emerald focus:ring-brand-emerald/20 dark:border-neutral-700'
+                      } bg-white px-3.5 py-3 text-sm font-normal text-black placeholder-neutral-400 transition-all focus:outline-none focus:ring-2 dark:bg-neutral-800 dark:text-stone-100 dark:placeholder-neutral-500 sm:min-h-[140px]`}
                     />
                     {fieldErrors.message && (
-                      <p className="mt-1 text-xs text-red-600">{fieldErrors.message}</p>
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.message}</p>
                     )}
                   </div>
 
@@ -307,18 +310,18 @@ export default function ContactContent() {
             </motion.div>
 
           <div className="relative z-10 order-2 max-w-lg px-4 pb-0 pt-6 sm:px-6 sm:ml-14 md:px-10 lg:order-none lg:ml-24 lg:max-w-md lg:px-10 lg:pr-[min(520px,46%)] xl:ml-32 xl:px-12">
-            <h3 className="mb-3 font-sans text-2xl font-normal tracking-tight text-black">Keep in touch with us</h3>
-            <p className="mb-8 max-w-sm text-sm font-normal leading-relaxed text-neutral-900">
+            <h3 className="mb-3 font-sans text-2xl font-normal tracking-tight text-black dark:text-stone-100">Keep in touch with us</h3>
+            <p className="mb-8 max-w-sm text-sm font-normal leading-relaxed text-neutral-900 dark:text-neutral-400">
               Reach our Kathmandu team for support with posting tasks, payments, disputes, and
               account questions. Check the{' '}
-              <Link href="/faq" className="font-normal text-black underline underline-offset-2 hover:text-neutral-700">
+              <Link href="/faq" className="font-normal text-black underline underline-offset-2 hover:text-neutral-700 dark:text-stone-100 dark:hover:text-neutral-300">
                 FAQ
               </Link>{' '}
               for quick answers first.
             </p>
 
             <div className="mb-7 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-normal text-black">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-normal text-black dark:bg-neutral-800 dark:text-stone-100">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-brand-emerald" />
                 Kathmandu Main Office
               </span>
@@ -326,13 +329,13 @@ export default function ContactContent() {
 
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                   <MapPin className="h-5 w-5 stroke-[1.8]" />
                 </div>
                 <div>
-                  <h4 className="mb-1 font-sans text-sm font-normal leading-none text-black">
+                  <h4 className="mb-1 font-sans text-sm font-normal leading-none text-black dark:text-stone-100">
                     Address{' '}
-                    <span className="text-[11px] font-normal text-neutral-600">
+                    <span className="text-[11px] font-normal text-neutral-600 dark:text-neutral-400">
                       ({activeOffice.region})
                     </span>
                   </h4>
@@ -342,7 +345,7 @@ export default function ContactContent() {
                       initial={{ opacity: 0, y: 3 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="text-xs font-normal leading-relaxed text-black sm:text-sm"
+                      className="text-xs font-normal leading-relaxed text-black dark:text-neutral-300 sm:text-sm"
                     >
                       {activeOffice.address}
                     </motion.p>
@@ -351,11 +354,11 @@ export default function ContactContent() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                   <Phone className="h-5 w-5 stroke-[1.8]" />
                 </div>
                 <div>
-                  <h4 className="mb-1 font-sans text-sm font-normal leading-none text-black">
+                  <h4 className="mb-1 font-sans text-sm font-normal leading-none text-black dark:text-stone-100">
                     Phone
                   </h4>
                   <AnimatePresence mode="wait">
@@ -364,7 +367,7 @@ export default function ContactContent() {
                       initial={{ opacity: 0, y: 3 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="text-xs font-normal text-black sm:text-sm"
+                      className="text-xs font-normal text-black dark:text-neutral-300 sm:text-sm"
                     >
                       {activeOffice.phone}
                     </motion.p>
@@ -373,11 +376,11 @@ export default function ContactContent() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                   <Mail className="h-5 w-5 stroke-[1.8]" />
                 </div>
                 <div>
-                  <h4 className="mb-1 font-sans text-sm font-normal leading-none text-black">
+                  <h4 className="mb-1 font-sans text-sm font-normal leading-none text-black dark:text-stone-100">
                     Email
                   </h4>
                   <AnimatePresence mode="wait">
@@ -387,7 +390,7 @@ export default function ContactContent() {
                       initial={{ opacity: 0, y: 3 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="text-xs font-normal text-black underline underline-offset-2 hover:text-neutral-700 sm:text-sm"
+                      className="text-xs font-normal text-black underline underline-offset-2 hover:text-neutral-700 dark:text-neutral-300 dark:hover:text-stone-100 sm:text-sm"
                     >
                       {activeOffice.email}
                     </motion.a>
@@ -400,14 +403,16 @@ export default function ContactContent() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[1600px] border-t border-neutral-100 bg-white px-4 pb-10 pt-6 sm:px-6 sm:pt-8 md:px-10 lg:px-12 lg:pb-14 lg:pt-8 xl:px-16">
+        <div className="relative z-10 mx-auto w-full max-w-[1600px] border-t border-neutral-100 bg-white px-4 pb-10 pt-6 dark:border-neutral-800 dark:bg-neutral-950 sm:px-6 sm:pt-8 md:px-10 lg:px-12 lg:pb-14 lg:pt-8 xl:px-16">
           <div className="relative flex min-h-[400px] flex-col items-stretch lg:min-h-[460px]">
-            <div className="relative flex h-full min-h-[400px] w-full flex-col overflow-hidden rounded-2xl border border-neutral-200 shadow-sm lg:min-h-[460px]">
+            <div className="relative flex h-full min-h-[400px] w-full flex-col overflow-hidden rounded-2xl border border-neutral-200 shadow-sm dark:border-neutral-800 lg:min-h-[460px]">
               <iframe
                 src={getEmbedUrl()}
                 width="100%"
                 height="100%"
-                className="absolute inset-0 z-0 h-full w-full border-0 bg-neutral-100"
+                className={`absolute inset-0 z-0 h-full w-full border-0 bg-neutral-100 dark:bg-neutral-900 ${
+                  mapUseDarkFilter ? 'contrast-[0.9] hue-rotate-180 invert' : ''
+                }`}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -415,14 +420,14 @@ export default function ContactContent() {
               />
 
               <div className="absolute right-3 top-3 z-10 flex flex-col items-end gap-2 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-1 rounded-lg border border-neutral-200/60 bg-white/95 px-1.5 py-1.5 shadow-md backdrop-blur-md">
+                <div className="flex items-center gap-1 rounded-lg border border-neutral-200/60 bg-white/95 px-1.5 py-1.5 shadow-md backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
                   <button
                     type="button"
                     onClick={() => setMapStyle('streets')}
                     className={`cursor-pointer rounded px-2.5 py-1 text-[10px] font-normal transition-all ${
                       mapStyle === 'streets'
-                        ? 'bg-brand-dark text-white'
-                        : 'text-neutral-500 hover:bg-neutral-100 hover:text-black'
+                        ? 'bg-brand-dark text-white dark:bg-stone-100 dark:text-neutral-950'
+                        : 'text-neutral-500 hover:bg-neutral-100 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-stone-100'
                     }`}
                   >
                     Streets
@@ -432,8 +437,8 @@ export default function ContactContent() {
                     onClick={() => setMapStyle('satellite')}
                     className={`cursor-pointer rounded px-2.5 py-1 text-[10px] font-normal transition-all ${
                       mapStyle === 'satellite'
-                        ? 'bg-brand-dark text-white'
-                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-black'
+                        ? 'bg-brand-dark text-white dark:bg-stone-100 dark:text-neutral-950'
+                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-stone-100'
                     }`}
                   >
                     Satellite
@@ -443,60 +448,60 @@ export default function ContactContent() {
                     onClick={() => setMapStyle('terrain')}
                     className={`cursor-pointer rounded px-2.5 py-1 text-[10px] font-normal transition-all ${
                       mapStyle === 'terrain'
-                        ? 'bg-brand-dark text-white'
-                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-black'
+                        ? 'bg-brand-dark text-white dark:bg-stone-100 dark:text-neutral-950'
+                        : 'text-neutral-600 hover:bg-neutral-100 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-stone-100'
                     }`}
                   >
                     Terrain
                   </button>
                 </div>
 
-                <div className="flex flex-col overflow-hidden rounded-lg border border-neutral-200/60 bg-white/95 shadow-md backdrop-blur-md">
+                <div className="flex flex-col overflow-hidden rounded-lg border border-neutral-200/60 bg-white/95 shadow-md backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
                   <button
                     type="button"
                     onClick={handleZoomIn}
-                    className="flex h-8 w-8 cursor-pointer items-center justify-center border-b border-neutral-200 transition-colors hover:bg-neutral-100"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center border-b border-neutral-200 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
                     title="Zoom in"
                   >
-                    <ZoomIn className="h-4 w-4 text-neutral-600" />
+                    <ZoomIn className="h-4 w-4 text-neutral-600 dark:text-neutral-300" />
                   </button>
                   <button
                     type="button"
                     onClick={handleZoomOut}
-                    className="flex h-8 w-8 cursor-pointer items-center justify-center border-b border-neutral-200 transition-colors hover:bg-neutral-100"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center border-b border-neutral-200 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
                     title="Zoom out"
                   >
-                    <ZoomOut className="h-4 w-4 text-neutral-600" />
+                    <ZoomOut className="h-4 w-4 text-neutral-600 dark:text-neutral-300" />
                   </button>
                   <button
                     type="button"
                     onClick={handleResetMap}
-                    className="flex h-8 w-8 cursor-pointer items-center justify-center transition-all hover:bg-neutral-100"
+                    className="flex h-8 w-8 cursor-pointer items-center justify-center transition-all hover:bg-neutral-100 dark:hover:bg-neutral-800"
                     title="Reset map"
                   >
-                    <RotateCcw className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-700" />
+                    <RotateCcw className="h-3.5 w-3.5 text-neutral-400 hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-200" />
                   </button>
                 </div>
               </div>
 
               {showPopup ? (
-                <div className="absolute bottom-3 left-3 right-3 z-10 rounded-xl border border-neutral-200/50 bg-white/95 p-4 shadow-lg backdrop-blur-md">
+                <div className="absolute bottom-3 left-3 right-3 z-10 rounded-xl border border-neutral-200/50 bg-white/95 p-4 shadow-lg backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-2.5">
-                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-brand-emerald">
+                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-brand-emerald dark:bg-neutral-800">
                         <Navigation className="h-4 w-4 animate-bounce" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-normal leading-snug text-black">
+                        <h4 className="text-xs font-normal leading-snug text-black dark:text-stone-100">
                           {activeOffice.name}
                         </h4>
-                        <p className="mt-1 text-[11px] font-normal leading-relaxed text-neutral-900">
+                        <p className="mt-1 text-[11px] font-normal leading-relaxed text-neutral-900 dark:text-neutral-400">
                           {activeOffice.address}
                         </p>
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px]">
-                          <span className="font-normal text-black">{activeOffice.phone}</span>
-                          <span className="hidden h-1.5 w-1.5 rounded-full bg-neutral-300 sm:inline" />
-                          <span className="font-normal text-black">{activeOffice.email}</span>
+                          <span className="font-normal text-black dark:text-stone-100">{activeOffice.phone}</span>
+                          <span className="hidden h-1.5 w-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600 sm:inline" />
+                          <span className="font-normal text-black dark:text-stone-100">{activeOffice.email}</span>
                         </div>
                       </div>
                     </div>
@@ -504,7 +509,7 @@ export default function ContactContent() {
                     <button
                       type="button"
                       onClick={() => setShowPopup(false)}
-                      className="cursor-pointer p-1 text-lg font-normal leading-none text-neutral-400 transition-colors hover:text-black"
+                      className="cursor-pointer p-1 text-lg font-normal leading-none text-neutral-400 transition-colors hover:text-black dark:hover:text-stone-100"
                       title="Hide card"
                     >
                       &times;
@@ -515,7 +520,7 @@ export default function ContactContent() {
                 <button
                   type="button"
                   onClick={() => setShowPopup(true)}
-                  className="absolute bottom-3 right-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-[11px] font-normal text-white shadow-md transition-colors hover:bg-neutral-800"
+                  className="absolute bottom-3 right-3 z-10 flex cursor-pointer items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-[11px] font-normal text-white shadow-md transition-colors hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-950 dark:hover:bg-white"
                 >
                   <MapPin className="h-3.5 w-3.5 text-brand-emerald" />
                   Show details

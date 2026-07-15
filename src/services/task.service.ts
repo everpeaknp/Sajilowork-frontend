@@ -21,12 +21,14 @@ import {
 
 export const taskService = {
   /**
-   * Get all tasks with filters
+   * Get marketplace tasks only (excludes projects/jobs/services unless listing_kind overridden).
    */
   async getTasks(
     params?: Record<string, string | number>
   ): Promise<ApiResponse<PaginatedResponse<Task>>> {
-    return apiClient.get<PaginatedResponse<Task>>('/tasks/', { params });
+    return apiClient.get<PaginatedResponse<Task>>('/tasks/', {
+      params: { listing_kind: 'task', ...params },
+    });
   },
 
   /**
@@ -129,16 +131,20 @@ export const taskService = {
   ): Promise<ApiResponse<PaginatedResponse<Task>>> {
     const query = typeof params === 'string' ? { status: params } : params;
     return apiClient.get<PaginatedResponse<Task>>('/tasks/my_tasks/', {
-      params: query,
+      params: { listing_kind: 'task', ...query },
     });
   },
 
   /**
-   * Get tasks assigned to user
+   * Get tasks assigned to the current user.
+   * Defaults to marketplace tasks; pass listing_kind for project/job/service.
    */
-  async getAssignedTasks(status?: string): Promise<ApiResponse<PaginatedResponse<Task>>> {
+  async getAssignedTasks(
+    params?: string | { status?: string; listing_kind?: string },
+  ): Promise<ApiResponse<PaginatedResponse<Task>>> {
+    const query = typeof params === 'string' ? { status: params } : params;
     return apiClient.get<PaginatedResponse<Task>>('/tasks/assigned_tasks/', {
-      params: { status }
+      params: { listing_kind: 'task', ...query },
     });
   },
 
@@ -305,7 +311,7 @@ export const taskService = {
    */
   async searchTasks(query: string, filters?: SearchFilters): Promise<ApiResponse<PaginatedResponse<Task>>> {
     return apiClient.get<PaginatedResponse<Task>>('/tasks/', {
-      params: { search: query, ...filters }
+      params: { search: query, listing_kind: 'task', ...filters },
     });
   },
 

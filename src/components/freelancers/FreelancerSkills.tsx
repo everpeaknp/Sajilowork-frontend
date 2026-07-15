@@ -20,7 +20,7 @@ export default function FreelancerSkills({ freelancer, skills }: FreelancerSkill
 
   return (
     <div className="mt-10 w-full">
-      <h3 className="mb-5 text-lg font-normal leading-tight tracking-tight text-black sm:text-xl">
+      <h3 className="mb-5 text-lg font-normal leading-tight tracking-tight text-black sm:text-xl dark:text-stone-100">
         My Skills
       </h3>
 
@@ -28,7 +28,7 @@ export default function FreelancerSkills({ freelancer, skills }: FreelancerSkill
         {skillItems.map((skill) => (
           <span
             key={skill}
-            className="rounded-full bg-[#ffede8] px-5 py-2.5 text-sm font-normal tracking-tight text-black"
+            className="rounded-full bg-[#ffede8] px-5 py-2.5 text-sm font-normal tracking-tight text-black dark:bg-neutral-800 dark:text-stone-200"
           >
             {skill}
           </span>

@@ -19,11 +19,11 @@ interface PartnersProps {
 export default function Partners({ className = '' }: PartnersProps) {
   return (
     <section
-      className={`w-full select-none bg-white py-10 sm:py-14 ${className}`}
+      className={`w-full select-none bg-white py-10 sm:py-14 dark:bg-neutral-950 ${className}`}
     >
       <div className="flex w-full flex-col items-center px-6 sm:px-8 lg:px-12 xl:px-16">
         <h3
-          className={`${discoverBody} mb-8 text-center text-sm tracking-normal text-neutral-500 sm:mb-10 sm:text-base`}
+          className={`${discoverBody} mb-8 text-center text-sm tracking-normal text-neutral-500 sm:mb-10 sm:text-base dark:text-neutral-400`}
         >
           Built for teams across Nepal
         </h3>
@@ -33,7 +33,7 @@ export default function Partners({ className = '' }: PartnersProps) {
         {PARTNER_NAMES.map((name) => (
           <div
             key={name}
-            className="flex h-12 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 text-center text-xs font-semibold uppercase tracking-wide text-neutral-500 sm:text-sm"
+            className="flex h-12 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 px-3 text-center text-xs font-semibold uppercase tracking-wide text-neutral-500 sm:text-sm dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
           >
             {name}
           </div>

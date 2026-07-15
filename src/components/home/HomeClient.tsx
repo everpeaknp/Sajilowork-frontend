@@ -79,7 +79,7 @@ export default function HomeClient({
         <Partners className="!py-10 sm:!py-12" />
         <Newsletter className="!py-14 sm:!py-16" />
       </main>
-      <Footer outerClassName="bg-[#FAF6F0]" />
+      <Footer outerClassName="bg-[#FAF6F0] dark:bg-neutral-950" />
     </div>
   );
 }

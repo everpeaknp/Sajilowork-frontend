@@ -29,9 +29,9 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
       ]}
       contentClassName="max-w-4xl"
     >
-      <article className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+      <article className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         {post.image ? (
-          <div className="relative aspect-[21/9] max-h-[420px] overflow-hidden bg-surface-container">
+          <div className="relative aspect-[21/9] max-h-[420px] overflow-hidden bg-surface-container dark:bg-neutral-800">
             <OptimizedImage
               src={post.image}
               alt={post.title}
@@ -44,25 +44,25 @@ export default function BlogPostClient({ post }: BlogPostClientProps) {
         ) : null}
         <div className="p-8 md:p-12">
           <div className="mb-4 flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-brand-light-bg px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-emerald">
+            <span className="rounded-full bg-brand-light-bg px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-emerald dark:bg-neutral-800">
               {post.category}
             </span>
             {publishedLabel ? (
               <time
                 dateTime={post.published_at}
-                className="text-sm font-medium text-muted-foreground"
+                className="text-sm font-medium text-muted-foreground dark:text-neutral-400"
               >
                 {publishedLabel}
               </time>
             ) : null}
           </div>
           <h1
-            className={`${landingHeadline} mb-8 text-3xl leading-tight text-brand-dark md:text-4xl`}
+            className={`${landingHeadline} mb-8 text-3xl leading-tight text-brand-dark dark:text-stone-100 md:text-4xl`}
           >
             {post.title}
           </h1>
           {post.excerpt ? (
-            <p className="mb-10 border-l-4 border-brand-emerald pl-4 text-lg font-medium leading-relaxed text-muted-foreground">
+            <p className="mb-10 border-l-4 border-brand-emerald pl-4 text-lg font-medium leading-relaxed text-muted-foreground dark:text-neutral-400">
               {post.excerpt}
             </p>
           ) : null}
@@ -82,13 +82,13 @@ export function BlogPostNotFound() {
       backLabel="All articles"
       contentClassName="max-w-4xl"
     >
-      <div className="rounded-2xl border border-border bg-surface px-6 py-14 text-center shadow-sm">
-        <p className="font-body text-base font-medium text-muted-foreground">
+      <div className="rounded-2xl border border-border bg-surface px-6 py-14 text-center shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+        <p className="font-body text-base font-medium text-muted-foreground dark:text-neutral-400">
           Article not found
         </p>
         <Link
           href="/blog"
-          className="mt-6 inline-block text-sm font-semibold text-brand-emerald transition-colors hover:text-brand-dark"
+          className="mt-6 inline-block text-sm font-semibold text-brand-emerald transition-colors hover:text-brand-dark dark:hover:text-stone-100"
         >
           Browse all articles
         </Link>

@@ -66,11 +66,11 @@ export default function ServiceMapCard({
       }
       className={cn(
         'group relative flex min-w-0 w-full cursor-pointer flex-col overflow-hidden',
-        'rounded-[20px] border border-neutral-200/40 bg-[#fbf2ed] p-4 shadow-sm',
+        'rounded-[20px] border border-neutral-200/40 bg-[#fbf2ed] p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none',
         'transition-all duration-300 sm:rounded-[24px] sm:p-5',
         isActive
           ? 'border-[#52C47F]/50 ring-2 ring-[#52C47F]/25 shadow-[0_4px_14px_rgba(82,196,127,0.12)]'
-          : 'hover:border-neutral-300/60 hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.995]',
+          : 'hover:border-neutral-300/60 hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.995] dark:hover:border-neutral-700',
         className,
       )}
     >
@@ -81,7 +81,7 @@ export default function ServiceMapCard({
           <h3
             className={cn(
               discoverBody,
-              'min-h-[2.5rem] flex-1 min-w-0 text-base font-normal leading-snug text-black line-clamp-2 break-words [overflow-wrap:anywhere] transition-colors group-hover:text-[#52C47F] sm:text-[17px]',
+              'min-h-[2.5rem] flex-1 min-w-0 text-base font-normal leading-snug text-black line-clamp-2 break-words [overflow-wrap:anywhere] transition-colors group-hover:text-[#52C47F] sm:text-[17px] dark:text-stone-100',
             )}
           >
             {service.title}

@@ -139,43 +139,31 @@ export default function SingleTaskPage({
         ? undefined
         : null;
 
-  const sidebarBelowPoster =
-    isOverlay || showMoreOptions ? (
-      <>
-        {showMoreOptions ? (
-          <TaskMoreOptions
-            embedded
-            reportOnly={isOverlay}
-            canRaiseDispute={canRaiseDispute}
-            onPostSimilar={onPostSimilar!}
-            onSetUpAlerts={onSetUpAlerts!}
-            onRaiseDispute={onRaiseDispute!}
-            onReport={onReport!}
-          />
-        ) : null}
-        {isOverlay ? (
-          <>
-            {showMoreOptions ? (
-              <div className="mt-6 border-t border-neutral-200 pt-6" aria-hidden />
-            ) : null}
-            <TaskShareSaveActions
-              task={task}
-              onBookmarkChange={() => onTaskUpdated?.()}
-              className="justify-center sm:justify-center"
-            />
-          </>
-        ) : null}
-      </>
-    ) : null;
+  const sidebarBelowPoster = showMoreOptions ? (
+    <TaskMoreOptions
+      embedded
+      reportOnly={isOverlay}
+      canRaiseDispute={canRaiseDispute}
+      onPostSimilar={onPostSimilar!}
+      onSetUpAlerts={onSetUpAlerts!}
+      onRaiseDispute={onRaiseDispute!}
+      onReport={onReport!}
+    />
+  ) : null;
+
+  const sidebarShareSave = (
+    <TaskShareSaveActions
+      task={task}
+      onBookmarkChange={() => onTaskUpdated?.()}
+      className="justify-center sm:justify-center"
+    />
+  );
 
   return (
-    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
+    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 dark:bg-neutral-950 dark:text-stone-100 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_p]:font-normal [&_span]:font-normal [&_button]:font-normal [&_label]:font-normal">
       <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
-        <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="mb-4 sm:mb-5">
           <TaskStatusTimeline status={task.status || 'open'} />
-          {!isOverlay ? (
-            <TaskShareSaveActions task={task} onBookmarkChange={() => onTaskUpdated?.()} />
-          ) : null}
         </div>
 
         <ProjectProfileHero project={project} />
@@ -217,7 +205,7 @@ export default function SingleTaskPage({
 
             <TaskCancellationPolicy />
 
-            <div className="mt-12 border-t border-neutral-200 pt-10">
+            <div className="mt-12 border-t border-neutral-200 pt-10 dark:border-neutral-800">
               <TaskReviewsSection task={task} onReviewSubmitted={onTaskUpdated} />
             </div>
 
@@ -232,11 +220,12 @@ export default function SingleTaskPage({
             onMakeOffer={handleMakeOfferClick}
             primaryAction={resolvedSidebarPrimaryAction}
             belowPoster={sidebarBelowPoster}
+            shareSave={sidebarShareSave}
           />
         </div>
 
         <div className="mt-10 flex flex-col gap-4 sm:mt-14 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <p className="text-sm font-normal text-neutral-500">
+          <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
             {footerHint ??
               (isOverlay
                 ? 'Browse more tasks on the task map.'
@@ -254,7 +243,7 @@ export default function SingleTaskPage({
             ) : null}
             <Link
               href={backLink?.href ?? TASK_BROWSE_PATH}
-              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80 dark:text-stone-200"
             >
               {backLink?.label ?? 'Back to all tasks'}
               <ArrowUpRight className="h-4 w-4" />

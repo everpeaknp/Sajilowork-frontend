@@ -27,7 +27,7 @@ export default function Newsletter({ className = '' }: NewsletterProps) {
 
   return (
     <section
-      className={`relative select-none overflow-hidden border-t border-neutral-100 bg-[#faf6f0] px-4 py-14 sm:px-8 sm:py-16 lg:px-12 ${className}`}
+      className={`relative select-none overflow-hidden border-t border-neutral-100 bg-[#faf6f0] px-4 py-14 sm:px-8 sm:py-16 lg:px-12 dark:border-neutral-800 dark:bg-neutral-950 ${className}`}
     >
       <div className="pointer-events-none absolute left-12 top-10 hidden -rotate-12 text-neutral-200/40 md:block">
         <Search className="h-12 w-12 stroke-[1]" aria-hidden />
@@ -56,13 +56,13 @@ export default function Newsletter({ className = '' }: NewsletterProps) {
 
       <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center justify-center text-center">
         <h2
-          className={`${discoverHeadline} mb-2.5 text-2xl tracking-tight text-[#131118] sm:text-3xl md:text-4xl`}
+          className={`${discoverHeadline} mb-2.5 text-2xl tracking-tight text-[#131118] sm:text-3xl md:text-4xl dark:text-stone-100`}
         >
           Subscribe our Newsletter &
         </h2>
 
         <p
-          className={`${discoverBody} mb-8 max-w-xl text-[13px] leading-relaxed text-neutral-500 sm:text-sm md:text-base`}
+          className={`${discoverBody} mb-8 max-w-xl text-[13px] leading-relaxed text-neutral-500 sm:text-sm md:text-base dark:text-neutral-400`}
         >
           Lorem ipsum dolor sit amet, consectetur adipiscing
         </p>
@@ -70,7 +70,7 @@ export default function Newsletter({ className = '' }: NewsletterProps) {
         <div className="w-full max-w-2xl">
           <form
             onSubmit={handleSubmit}
-            className="relative flex flex-col items-center gap-2 rounded-xl border border-neutral-100/80 bg-white p-2 shadow-[0_15px_30px_rgba(0,0,0,0.03)] sm:flex-row sm:rounded-2xl"
+            className="relative flex flex-col items-center gap-2 rounded-xl border border-neutral-100/80 bg-white p-2 shadow-[0_15px_30px_rgba(0,0,0,0.03)] sm:flex-row sm:rounded-2xl dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-none"
           >
             <input
               type="email"
@@ -78,12 +78,12 @@ export default function Newsletter({ className = '' }: NewsletterProps) {
               placeholder="Your Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`${discoverBody} w-full flex-1 bg-transparent px-4 py-3 text-sm text-[#131118] outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 sm:py-4`}
+              className={`${discoverBody} w-full flex-1 bg-transparent px-4 py-3 text-sm text-[#131118] outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 sm:py-4 dark:text-stone-100 dark:placeholder:text-neutral-500`}
             />
 
             <button
               type="submit"
-              className={`${discoverMedium} w-full flex-shrink-0 cursor-pointer rounded-lg bg-[#1a3c34] px-8 py-3.5 text-sm tracking-wide text-white transition-all duration-200 hover:bg-[#15302a] active:scale-[0.98] sm:w-auto sm:py-4`}
+              className={`${discoverMedium} w-full flex-shrink-0 cursor-pointer rounded-lg bg-[#1a3c34] px-8 py-3.5 text-sm tracking-wide text-white transition-all duration-200 hover:bg-[#15302a] active:scale-[0.98] sm:w-auto sm:py-4 dark:bg-brand-emerald dark:hover:bg-emerald-400 dark:hover:text-neutral-950`}
             >
               {subscribed ? 'Subscribed!' : 'Subscribe'}
             </button>

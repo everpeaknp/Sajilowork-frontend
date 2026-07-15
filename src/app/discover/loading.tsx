@@ -5,7 +5,7 @@ import { Hero } from '@/components/discover';
 
 export default function DiscoverLoading() {
   return (
-    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0">
+    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0 dark:bg-neutral-950">
       <Navbar />
       <main className="pb-2 md:pb-0">
         <Hero />
@@ -14,7 +14,7 @@ export default function DiscoverLoading() {
           <MarketplaceServiceCarouselSkeleton count={4} />
         </div>
       </main>
-      <Footer outerClassName="bg-[#FAF6F0]" />
+      <Footer outerClassName="bg-[#FAF6F0] dark:bg-neutral-950" />
     </div>
   );
 }

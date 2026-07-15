@@ -132,14 +132,8 @@ export default function SingleServicePage({
   );
 
   return (
-    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
+    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 dark:bg-neutral-950 dark:text-stone-100 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
       <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
-        {!isOverlay ? (
-          <div className="mb-4 flex justify-end sm:mb-5">
-            <ServiceShareSaveActions service={service} />
-          </div>
-        ) : null}
-
         <ServiceDetailHero service={service} />
 
         <div className="mt-8 grid grid-cols-1 items-start gap-8 sm:mt-10 lg:grid-cols-12 lg:gap-12">
@@ -171,14 +165,12 @@ export default function SingleServicePage({
                 />
               </div>
               <ServiceSellerCard service={service} onContact={handleContactSeller} />
-              {isOverlay ? (
-                <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
-                  <ServiceShareSaveActions
-                    service={service}
-                    className="justify-center sm:justify-center"
-                  />
-                </div>
-              ) : null}
+              <div className="px-1">
+                <ServiceShareSaveActions
+                  service={service}
+                  className="justify-center sm:justify-center"
+                />
+              </div>
             </div>
           </aside>
         </div>
@@ -202,7 +194,7 @@ export default function SingleServicePage({
             ) : null}
             <Link
               href={backLink?.href ?? '/services'}
-              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80 dark:text-stone-200"
             >
               {backLink?.label ?? 'Back to all services'}
               <ArrowUpRight className="h-4 w-4" />

@@ -145,11 +145,11 @@ export default function TaskCard({
       }
       className={cn(
         'group relative flex min-w-0 w-full cursor-pointer flex-col overflow-hidden',
-        'rounded-[20px] border border-neutral-200/40 bg-[#fbf2ed] p-4 shadow-sm',
+        'rounded-[20px] border border-neutral-200/40 bg-[#fbf2ed] p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900',
         'transition-all duration-300 sm:rounded-[24px] sm:p-5',
         isActive
           ? 'border-[#52C47F]/50 ring-2 ring-[#52C47F]/25 shadow-[0_4px_14px_rgba(82,196,127,0.12)]'
-          : 'hover:border-neutral-300/60 hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.995]',
+          : 'hover:border-neutral-300/60 hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:scale-[0.995] dark:hover:border-neutral-700',
         className,
       )}
     >
@@ -161,7 +161,7 @@ export default function TaskCard({
           <h3
             className={cn(
               discoverBody,
-              'min-h-[2.75rem] flex-1 min-w-0 text-base font-normal leading-snug text-black line-clamp-2 break-words [overflow-wrap:anywhere] transition-colors group-hover:text-[#52C47F] sm:min-h-[3.125rem] sm:text-[17px]',
+              'min-h-[2.75rem] flex-1 min-w-0 text-base font-normal leading-snug text-black line-clamp-2 break-words [overflow-wrap:anywhere] transition-colors group-hover:text-[#52C47F] dark:text-stone-100 sm:min-h-[3.125rem] sm:text-[17px]',
             )}
           >
             {title}
@@ -175,7 +175,7 @@ export default function TaskCard({
 
         {/* Location, date, time */}
         <div className="mb-4 flex min-w-0 flex-col gap-2 sm:gap-2.5">
-          <div className="flex min-h-[20px] min-w-0 items-center justify-between gap-3 text-neutral-700">
+          <div className="flex min-h-[20px] min-w-0 items-center justify-between gap-3 text-neutral-700 dark:text-neutral-300">
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <MapPin className="h-4 w-4 shrink-0 stroke-[1.6] text-neutral-500" aria-hidden />
               <span className={cn(discoverBody, 'truncate text-sm leading-5')}>{location}</span>
@@ -189,11 +189,11 @@ export default function TaskCard({
               {distanceLabel ?? (distanceLoading ? '…' : '')}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-neutral-700">
+          <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300">
             <Calendar className="h-4 w-4 shrink-0 stroke-[1.6] text-neutral-500" aria-hidden />
             <span className={cn(discoverBody, 'text-sm leading-5')}>{dateLabel}</span>
           </div>
-          <div className="flex items-center gap-2 text-neutral-700">
+          <div className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300">
             <Clock className="h-4 w-4 shrink-0 stroke-[1.6] text-neutral-500" aria-hidden />
             <span className={cn(discoverBody, 'text-sm leading-5')}>{timeLabel}</span>
           </div>
@@ -203,7 +203,7 @@ export default function TaskCard({
         <div className="mt-auto flex items-center justify-between gap-3 overflow-visible pt-2 pr-0.5 pb-0.5 min-w-0">
           <div className="flex min-w-0 flex-col gap-0.5">
             {showOffersOnly ? (
-              <span className={cn(discoverMedium, 'text-sm font-semibold leading-5 text-neutral-700 sm:text-[15px]')}>
+              <span className={cn(discoverMedium, 'text-sm font-semibold leading-5 text-neutral-700 dark:text-neutral-300 sm:text-[15px]')}>
                 {offerLabel(offerCount)}
               </span>
             ) : (

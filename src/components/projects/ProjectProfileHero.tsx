@@ -40,8 +40,8 @@ export default function ProjectProfileHero({ project }: ProjectProfileHeroProps)
   );
 
   return (
-    <div className="relative flex min-h-[150px] w-full items-stretch overflow-hidden rounded-[20px] border border-neutral-200/20 bg-[#fbf2ed] shadow-sm sm:min-h-[165px] md:min-h-[175px] lg:min-h-[190px]">
-      <div className="pointer-events-none absolute -left-12 -top-8 z-0 h-28 w-28 select-none rounded-full bg-[#fcd074]/80 sm:-left-14 sm:-top-9 sm:h-36 sm:w-36" />
+    <div className="relative flex min-h-[150px] w-full items-stretch overflow-hidden rounded-[20px] border border-neutral-200/20 bg-[#fbf2ed] shadow-sm sm:min-h-[165px] md:min-h-[175px] lg:min-h-[190px] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+      <div className="pointer-events-none absolute -left-12 -top-8 z-0 h-28 w-28 select-none rounded-full bg-[#fcd074]/80 sm:-left-14 sm:-top-9 sm:h-36 sm:w-36 dark:bg-amber-700/30" />
 
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.2] mix-blend-overlay">
         <svg
@@ -74,7 +74,7 @@ export default function ProjectProfileHero({ project }: ProjectProfileHeroProps)
 
         <div className="min-w-0 flex-1 lg:pr-[min(42%,280px)]">
           <motion.h1
-            className="max-w-2xl text-lg font-normal leading-snug tracking-tight text-black sm:text-2xl md:text-[28px] lg:text-[34px]"
+            className="max-w-2xl text-lg font-normal leading-snug tracking-tight text-black sm:text-2xl md:text-[28px] lg:text-[34px] dark:text-stone-100"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -94,7 +94,7 @@ export default function ProjectProfileHero({ project }: ProjectProfileHeroProps)
           )}
 
           <motion.div
-            className="mt-3 flex flex-col gap-2 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:text-sm md:gap-x-6"
+            className="mt-3 flex flex-col gap-2 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:text-sm md:gap-x-6 dark:text-stone-200"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.12 }}

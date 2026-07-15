@@ -69,8 +69,8 @@ const NEARBY_RADIUS_OPTIONS = [
 function filterOptionClass(selected: boolean): string {
   return `w-full rounded-lg px-3 py-2.5 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-brand-emerald/30 ${
     selected
-      ? 'bg-brand-light-bg font-semibold text-brand-emerald'
-      : 'text-brand-dark hover:bg-brand-light-bg/70'
+      ? 'bg-brand-light-bg font-semibold text-brand-emerald dark:bg-neutral-800'
+      : 'text-brand-dark hover:bg-brand-light-bg/70 dark:text-stone-200 dark:hover:bg-neutral-800/50'
   }`;
 }
 
@@ -153,13 +153,13 @@ export default function ServiceMapFilterBar({
   };
 
   return (
-    <div className="relative z-20 shrink-0 border-b border-outline-variant bg-white px-3 py-3 sm:px-4">
+    <div className="relative z-20 shrink-0 border-b border-outline-variant bg-white px-3 py-3 sm:px-4 dark:border-neutral-800 dark:bg-neutral-950">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-dim lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-dim dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 lg:hidden"
             aria-label={isSidebarVisible ? 'Hide service list' : 'Show service list'}
           >
             <Menu className="h-5 w-5" />
@@ -172,7 +172,7 @@ export default function ServiceMapFilterBar({
               value={searchDraft}
               onChange={(e) => setSearchDraft(e.target.value)}
               placeholder="Search services, sellers, skills…"
-              className={`${landingBody} h-10 w-full rounded-lg border border-outline-variant bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald/30`}
+              className={`${landingBody} h-10 w-full rounded-lg border border-outline-variant bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald/30 dark:border-neutral-800 dark:bg-neutral-800 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-800`}
             />
           </div>
 
@@ -180,7 +180,7 @@ export default function ServiceMapFilterBar({
             <button
               type="button"
               onClick={onToggleCompact}
-              className="hidden h-10 items-center gap-1.5 rounded-lg border border-outline-variant px-3 text-sm text-on-surface-variant hover:bg-surface-dim lg:inline-flex"
+              className="hidden h-10 items-center gap-1.5 rounded-lg border border-outline-variant px-3 text-sm text-on-surface-variant hover:bg-surface-dim dark:border-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 lg:inline-flex"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {isCompactSidebar ? 'Expand list' : 'Compact list'}
@@ -189,8 +189,8 @@ export default function ServiceMapFilterBar({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className={`${landingBody} text-sm text-neutral-600`}>
-            <span className={`${landingHeadlineSm} font-semibold text-neutral-900`}>{serviceCount}</span>{' '}
+          <p className={`${landingBody} text-sm text-neutral-600 dark:text-neutral-400`}>
+            <span className={`${landingHeadlineSm} font-semibold text-neutral-900 dark:text-stone-100`}>{serviceCount}</span>{' '}
             {serviceCount === 1 ? 'service' : 'services'} on map
           </p>
 
@@ -226,9 +226,9 @@ export default function ServiceMapFilterBar({
       </FilterDropdownPanel>
 
       <FilterDropdownPanel open={openPanel === 'location'} onClose={closePanel} anchorRef={locationRef} title="Service location">
-        <label className="mb-2 block text-xs font-medium text-neutral-500">City or area</label>
-        <input value={draftLocation} onChange={(e) => setDraftLocation(e.target.value)} placeholder="e.g. Kathmandu, Pokhara, Remote" className="mb-4 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none focus:border-brand-emerald" />
-        <label className="mb-2 block text-xs font-medium text-neutral-500">Show services near me</label>
+        <label className="mb-2 block text-xs font-medium text-neutral-500 dark:text-neutral-400">City or area</label>
+        <input value={draftLocation} onChange={(e) => setDraftLocation(e.target.value)} placeholder="e.g. Kathmandu, Pokhara, Remote" className="mb-4 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm outline-none focus:border-brand-emerald dark:border-neutral-700 dark:bg-neutral-800 dark:text-stone-100 dark:placeholder:text-neutral-500" />
+        <label className="mb-2 block text-xs font-medium text-neutral-500 dark:text-neutral-400">Show services near me</label>
         <div className="space-y-1">
           {NEARBY_RADIUS_OPTIONS.map((opt) => (
             <button key={opt.value} type="button" onClick={() => setDraftDistance(opt.value)} className={filterOptionClass(draftDistance === opt.value)}>
@@ -251,7 +251,7 @@ export default function ServiceMapFilterBar({
       </FilterDropdownPanel>
 
       <FilterDropdownPanel open={openPanel === 'service'} onClose={closePanel} anchorRef={serviceRef} align="right" desktopClassName="sm:w-[320px]" title="Delivery & seller level">
-        <p className="mb-2 text-xs font-medium text-neutral-500">Delivery time</p>
+        <p className="mb-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Delivery time</p>
         <div className="mb-4 space-y-1">
           {DELIVERY_OPTIONS.map((opt) => (
             <button key={opt.value} type="button" onClick={() => setDraftDelivery(opt.value)} className={filterOptionClass(draftDelivery === opt.value)}>
@@ -259,7 +259,7 @@ export default function ServiceMapFilterBar({
             </button>
           ))}
         </div>
-        <p className="mb-2 text-xs font-medium text-neutral-500">Seller level</p>
+        <p className="mb-2 text-xs font-medium text-neutral-500 dark:text-neutral-400">Seller level</p>
         <div className="space-y-1">
           {LEVEL_OPTIONS.map((level) => (
             <button key={level} type="button" onClick={() => setDraftLevel(level)} className={filterOptionClass(draftLevel === level)}>
@@ -293,7 +293,9 @@ function FilterChip({ label, active, onClick, icon }: { label: string; active?: 
       type="button"
       onClick={onClick}
       className={`inline-flex max-w-[11rem] items-center gap-1 truncate rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
-        active ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald' : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-dim'
+        active
+          ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald'
+          : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-dim dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800'
       }`}
     >
       {icon}

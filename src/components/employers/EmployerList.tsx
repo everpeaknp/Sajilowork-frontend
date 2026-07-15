@@ -193,7 +193,7 @@ export default function EmployerList({
           type="button"
           onClick={() => handlePageChange(p as number)}
           className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-[15px] font-medium transition-all ${
-            isCurrent ? 'bg-[#45a874] font-medium text-white' : 'text-neutral-700 hover:bg-neutral-50'
+            isCurrent ? 'bg-[#45a874] font-medium text-white' : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800'
           }`}
         >
           {p}
@@ -203,7 +203,7 @@ export default function EmployerList({
   };
 
   return (
-    <section className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12">
+    <section className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12 dark:border-neutral-800 dark:bg-neutral-950">
       <div className="w-full max-w-none">
         <div
           ref={filterRowRef}
@@ -240,7 +240,7 @@ export default function EmployerList({
               <button
                 type="button"
                 onClick={resetFilters}
-                className={`${discoverMedium} ml-2 block cursor-pointer py-2 text-xs font-bold text-neutral-400 transition-colors hover:text-black`}
+                className={`${discoverMedium} ml-2 block cursor-pointer py-2 text-xs font-bold text-neutral-400 transition-colors hover:text-black dark:hover:text-stone-100`}
               >
                 Reset
               </button>
@@ -253,7 +253,7 @@ export default function EmployerList({
               <button
                 type="button"
                 onClick={() => handleDropdownToggle('sort')}
-                className={`${discoverMedium} flex cursor-pointer items-center gap-1 text-[13px] text-neutral-800 transition-all hover:text-black focus:outline-none`}
+                className={`${discoverMedium} flex cursor-pointer items-center gap-1 text-[13px] text-neutral-800 transition-all hover:text-black focus:outline-none dark:text-stone-100 dark:hover:text-white`}
               >
                 <span>{SORT_OPTIONS.find((o) => o.value === sortBy)?.label}</span>
                 <ChevronDown className="h-4 w-4 text-neutral-500" />
@@ -264,7 +264,7 @@ export default function EmployerList({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 3 }}
-                    className="absolute right-0 z-30 mt-1.5 w-48 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
+                    className="absolute right-0 z-30 mt-1.5 w-48 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
                   >
                     {SORT_OPTIONS.map((opt) => (
                       <button
@@ -274,8 +274,8 @@ export default function EmployerList({
                           setSortBy(opt.value);
                           setOpenDropdown(null);
                         }}
-                        className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 ${
-                          sortBy === opt.value ? 'font-semibold text-[#45a874]' : 'text-neutral-700'
+                        className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                          sortBy === opt.value ? 'font-semibold text-[#45a874]' : 'text-neutral-700 dark:text-neutral-300'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -295,10 +295,10 @@ export default function EmployerList({
             <EmployerListSkeleton count={8} />
           </>
         ) : filteredEmployers.length === 0 ? (
-          <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
-            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
-            <span className={`${discoverHeadline} mb-1 block text-lg text-[#193e32]`}>No matching employers</span>
-            <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500`}>
+          <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center dark:border-neutral-700 dark:bg-neutral-900">
+            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300 dark:text-neutral-600" />
+            <span className={`${discoverHeadline} mb-1 block text-lg text-[#193e32] dark:text-stone-100`}>No matching employers</span>
+            <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500 dark:text-neutral-400`}>
               There are no companies matching your category, team size, or search filters.
             </p>
             <button
@@ -325,14 +325,14 @@ export default function EmployerList({
                   >
                     <Link
                       href={getEmployerProfilePath(emp)}
-                      className="group relative flex min-h-[200px] cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+                      className="group relative flex min-h-[200px] cursor-pointer flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-300 hover:border-gray-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700 dark:hover:shadow-none"
                     >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full">
                           {renderEmployerBrandLogo(emp.logoColor, emp.name, emp.logoUrl, emp.logoText)}
                         </div>
-                        <span className={`${discoverMedium} truncate text-[15px] font-semibold text-neutral-900`}>
+                        <span className={`${discoverMedium} truncate text-[15px] font-semibold text-neutral-900 dark:text-stone-100`}>
                           {emp.name}
                         </span>
                       </div>
@@ -351,13 +351,13 @@ export default function EmployerList({
 
                     <div className={`${discoverBody} mt-6 flex items-center gap-1.5 text-[14px]`}>
                       <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400" />
-                      <span className="font-medium text-neutral-900">{emp.rating.toFixed(1)}</span>
+                      <span className="font-medium text-neutral-900 dark:text-stone-100">{emp.rating.toFixed(1)}</span>
                       <span className="text-neutral-400">({emp.reviewCount} reviews)</span>
                     </div>
 
-                    <div className={`${discoverBody} mt-5 flex items-center text-[14px] text-neutral-500`}>
+                    <div className={`${discoverBody} mt-5 flex items-center text-[14px] text-neutral-500 dark:text-neutral-400`}>
                       <span>{emp.location}</span>
-                      <span className="mx-3 h-3.5 w-px bg-neutral-300" aria-hidden />
+                      <span className="mx-3 h-3.5 w-px bg-neutral-300 dark:bg-neutral-700" aria-hidden />
                       <span className="font-medium text-[#2563eb]">Open {emp.openJobs} Jobs</span>
                     </div>
                     </Link>
@@ -375,7 +375,7 @@ export default function EmployerList({
                 type="button"
                 onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
                 disabled={currentPage === 1}
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 title="Previous Page"
               >
                 <ChevronLeft className="h-4.5 w-4.5" />
@@ -385,13 +385,13 @@ export default function EmployerList({
                 type="button"
                 onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30"
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 title="Next Page"
               >
                 <ChevronRight className="h-4.5 w-4.5" />
               </button>
             </div>
-            <div className={`${discoverBody} mt-4.5 text-[14.5px] font-normal tracking-wide text-zinc-500`}>
+            <div className={`${discoverBody} mt-4.5 text-[14.5px] font-normal tracking-wide text-zinc-500 dark:text-neutral-400`}>
               {startIdx} – {endIdx} of {totalItems} employers available
             </div>
           </div>
@@ -424,12 +424,12 @@ function FilterDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`${discoverMedium} flex cursor-pointer items-center gap-2 rounded-lg border bg-white px-4.5 py-2.5 text-[14.5px] transition-all hover:bg-neutral-50 ${
-          active ? 'border-black font-bold text-black' : 'border-black/30 text-black'
+        className={`${discoverMedium} flex cursor-pointer items-center gap-2 rounded-lg border bg-white px-4.5 py-2.5 text-[14.5px] transition-all hover:bg-neutral-50 dark:bg-neutral-900 dark:hover:bg-neutral-800 ${
+          active ? 'border-black font-bold text-black dark:border-stone-100 dark:text-stone-100' : 'border-black/30 text-black dark:border-neutral-600 dark:text-stone-100'
         }`}
       >
         <span>{label}</span>
-        <ChevronDown className="h-4 w-4 text-black" />
+        <ChevronDown className="h-4 w-4 text-black dark:text-stone-100" />
       </button>
       <AnimatePresence>
         {open ? (
@@ -437,15 +437,15 @@ function FilterDropdown({
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 3 }}
-            className="absolute left-0 z-30 mt-1.5 w-56 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
+            className="absolute left-0 z-30 mt-1.5 w-56 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
           >
             {options.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
                 onClick={() => onSelect(opt.value)}
-                className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 ${
-                  selected === opt.value ? 'font-semibold text-emerald-600' : 'text-neutral-700'
+                className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                  selected === opt.value ? 'font-semibold text-emerald-600' : 'text-neutral-700 dark:text-neutral-300'
                 }`}
               >
                 <span>{opt.label}</span>

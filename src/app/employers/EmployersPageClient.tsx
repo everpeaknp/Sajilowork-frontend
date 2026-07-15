@@ -16,7 +16,7 @@ export default function EmployersPageClient({
 }: EmployersPageClientProps) {
   return (
     <div
-      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white selection:bg-[#1161fe] selection:text-white`}
+      className={`${discoverPageRoot} ${discoverPageTypo} mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white selection:bg-[#1161fe] selection:text-white dark:bg-neutral-950 dark:selection:bg-brand-emerald`}
     >
       <Navbar />
       <main className="pb-2 md:pb-0">

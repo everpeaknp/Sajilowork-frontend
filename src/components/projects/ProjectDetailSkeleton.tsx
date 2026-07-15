@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 function Bone({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded bg-neutral-200', className)} aria-hidden />;
+  return <div className={cn('animate-pulse rounded bg-neutral-200 dark:bg-neutral-800', className)} aria-hidden />;
 }
 
 export default function ProjectDetailSkeleton({
@@ -11,7 +11,7 @@ export default function ProjectDetailSkeleton({
 }) {
   return (
     <div
-      className="select-none bg-white pb-8 pt-6 sm:pb-12 sm:pt-8"
+      className="select-none bg-white pb-8 pt-6 sm:pb-12 sm:pt-8 dark:bg-neutral-950"
       aria-busy="true"
       aria-label={ariaLabel}
     >
@@ -68,25 +68,25 @@ export default function ProjectDetailSkeleton({
             </div>
 
             <div className="space-y-4">
-              <div className="flex gap-4 border-b border-neutral-200 pb-3">
+              <div className="flex gap-4 border-b border-neutral-200 pb-3 dark:border-neutral-800">
                 <Bone className="h-5 w-24" />
                 <Bone className="h-5 w-28" />
               </div>
               <Bone className="h-32 w-full rounded-2xl" />
             </div>
 
-            <div className="space-y-4 border-t border-neutral-200 pt-10">
+            <div className="space-y-4 border-t border-neutral-200 pt-10 dark:border-neutral-800">
               <Bone className="h-6 w-40" />
               <Bone className="h-4 w-full max-w-xl" />
               <Bone className="h-4 w-28" />
             </div>
 
-            <div className="space-y-6 border-t border-neutral-200 pt-10">
+            <div className="space-y-6 border-t border-neutral-200 pt-10 dark:border-neutral-800">
               <div className="space-y-2">
                 <Bone className="h-6 w-44" />
                 <Bone className="h-3.5 w-72 max-w-full" />
               </div>
-              <div className="grid grid-cols-1 gap-6 rounded-2xl bg-neutral-50/60 p-6 md:grid-cols-12">
+              <div className="grid grid-cols-1 gap-6 rounded-2xl bg-neutral-50/60 p-6 md:grid-cols-12 dark:bg-neutral-900/60">
                 <div className="space-y-3 text-center md:col-span-4">
                   <Bone className="mx-auto h-12 w-20" />
                   <Bone className="mx-auto h-4 w-24" />
@@ -103,8 +103,8 @@ export default function ProjectDetailSkeleton({
           </div>
 
           <aside className="lg:col-span-4">
-            <div className="animate-pulse rounded-2xl border border-neutral-200 p-6">
-              <div className="flex items-center gap-3 border-b border-neutral-100 pb-5">
+            <div className="animate-pulse rounded-2xl border border-neutral-200 p-6 dark:border-neutral-800">
+              <div className="flex items-center gap-3 border-b border-neutral-100 pb-5 dark:border-neutral-800">
                 <Bone className="h-14 w-14 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Bone className="h-4 w-32" />

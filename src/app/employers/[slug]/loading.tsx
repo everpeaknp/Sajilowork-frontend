@@ -4,7 +4,7 @@ import EmployerDetailSkeleton from '@/components/employers/EmployerDetailSkeleto
 
 export default function EmployerSlugLoading() {
   return (
-    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0">
+    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0 dark:bg-neutral-950">
       <Navbar />
       <main className="w-full max-w-none px-0 py-0">
         <EmployerDetailSkeleton />

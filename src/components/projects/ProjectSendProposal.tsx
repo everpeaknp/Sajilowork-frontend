@@ -145,15 +145,15 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
   };
 
   const inputClassName =
-    'w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/20';
+    'w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/20 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500';
 
   if (isOwner) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Send Your Proposal
         </h2>
-        <p className="text-sm font-normal text-neutral-600">
+        <p className="text-sm font-normal text-neutral-600 dark:text-neutral-400">
           {offersOpen
             ? 'You posted this project. Freelancers submit proposals here — review them in the list above or under Dashboard → My Proposals.'
             : getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids)}
@@ -164,11 +164,11 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
 
   if (!offersOpen) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Send Your Proposal
         </h2>
-        <p className="text-sm font-normal text-neutral-600">
+        <p className="text-sm font-normal text-neutral-600 dark:text-neutral-400">
           {getListingClosedOfferMessage(project.status, 'project', project.isOpenForBids)}
         </p>
       </section>
@@ -177,11 +177,11 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
 
   if (checkingBid) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Send Your Proposal
         </h2>
-        <div className="flex items-center gap-2 text-sm text-neutral-500">
+        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           Checking your proposal status…
         </div>
@@ -191,19 +191,19 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
 
   if (existingBid) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Send Your Proposal
         </h2>
-        <div className="rounded-lg border border-[#52C47F]/25 bg-[#ebf8f2] p-5 sm:p-6">
+        <div className="rounded-lg border border-[#52C47F]/25 bg-[#ebf8f2] p-5 sm:p-6 dark:border-emerald-800/40 dark:bg-emerald-950/40">
           <div className="flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#52C47F]" />
             <div className="min-w-0">
-              <p className="text-base font-normal text-[#1D3E35]">Proposal submitted</p>
-              <p className="mt-1.5 text-sm font-normal text-neutral-600">
+              <p className="text-base font-normal text-[#1D3E35] dark:text-emerald-200">Proposal submitted</p>
+              <p className="mt-1.5 text-sm font-normal text-neutral-600 dark:text-neutral-400">
                 You offered {formatNPR(Number(existingBid.amount) || 0)} on{' '}
                 {formatSubmittedDate(existingBid.created_at)}. Status:{' '}
-                <span className="capitalize text-neutral-800">{existingBid.status}</span>.
+                <span className="capitalize text-neutral-800 dark:text-stone-200">{existingBid.status}</span>.
               </p>
               <Link
                 href="/dashboard/proposals"
@@ -220,17 +220,17 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
   }
 
   return (
-    <section className="border-t border-neutral-200 pt-10">
-      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+    <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Send Your Proposal
       </h2>
 
       {!user ? (
-        <p className="mb-4 text-sm font-normal text-neutral-600">
+        <p className="mb-4 text-sm font-normal text-neutral-600 dark:text-neutral-400">
           <button
             type="button"
             onClick={() => router.push('/signin')}
-            className="font-normal text-black underline underline-offset-2 hover:opacity-80"
+            className="font-normal text-black underline underline-offset-2 hover:opacity-80 dark:text-stone-100"
           >
             Sign in
           </button>{' '}
@@ -240,7 +240,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
 
       <form onSubmit={(event) => void handleSubmit(event)} className="space-y-6">
         <div>
-          <label htmlFor="offer-amount" className="mb-2 block text-sm font-normal text-black">
+          <label htmlFor="offer-amount" className="mb-2 block text-sm font-normal text-black dark:text-stone-100">
             Your offer amount
           </label>
           <input
@@ -259,7 +259,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
         </div>
 
         <div>
-          <label htmlFor="proposal" className="mb-2 block text-sm font-normal text-black">
+          <label htmlFor="proposal" className="mb-2 block text-sm font-normal text-black dark:text-stone-100">
             Proposal
           </label>
           <textarea
@@ -270,7 +270,7 @@ export default function ProjectSendProposal({ project, onSubmitted }: ProjectSen
             placeholder="Describe your experience and approach for this project..."
             className={`${inputClassName} min-h-[180px] resize-y`}
           />
-          <p className="mt-1.5 text-xs font-normal text-neutral-500">
+          <p className="mt-1.5 text-xs font-normal text-neutral-500 dark:text-neutral-400">
             {proposal.trim().length} / {MIN_PROPOSAL_LENGTH} minimum characters
           </p>
         </div>

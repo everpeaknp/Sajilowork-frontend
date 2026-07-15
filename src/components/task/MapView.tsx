@@ -14,8 +14,7 @@ import {
 } from '@/lib/userGeolocation';
 import { toast } from 'sonner';
 import { Task } from './types';
-
-type MapLayerId = 'default' | 'dark' | 'satellite' | 'terrain';
+import { useThemeSyncedMapLayer, type MapLayerId } from '@/hooks/useThemeSyncedMapLayer';
 
 const MAP_LAYERS: Record<
   MapLayerId,
@@ -121,13 +120,6 @@ function flyToUserLocation(map: L.Map, center: [number, number]) {
   } catch {
     map.setView(center, MARKER_FOCUS_ZOOM);
   }
-}
-
-function getInitialMapLayer(): MapLayerId {
-  if (typeof window === 'undefined') return 'default';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'default';
 }
 
 const USER_LOCATION_ICON = L.divIcon({
@@ -268,7 +260,7 @@ function MapToolbar({
   return (
     <div className="absolute bottom-[7.5rem] right-4 z-[1000] flex flex-col items-end gap-2 pointer-events-none lg:bottom-5">
       {toolbarOpen && layersOpen && (
-        <div className="pointer-events-auto flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-white shadow-lg">
+        <div className="pointer-events-auto flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
           {(Object.keys(MAP_LAYERS) as MapLayerId[]).map((id) => (
             <button
               key={id}
@@ -289,7 +281,7 @@ function MapToolbar({
         </div>
       )}
 
-      <div className="pointer-events-auto flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-white shadow-lg">
+      <div className="pointer-events-auto flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
         {toolbarOpen ? (
           <>
             <button
@@ -543,7 +535,7 @@ export default function MapView({
   const focusTaskIdRef = useRef(focusTaskId);
   focusTaskIdRef.current = focusTaskId;
   const [isClient, setIsClient] = useState(false);
-  const [mapLayer, setMapLayer] = useState<MapLayerId>(getInitialMapLayer);
+  const { mapLayer, setMapLayer } = useThemeSyncedMapLayer();
   const [tilesReady, setTilesReady] = useState(false);
   const activeTileFilter = MAP_LAYERS[mapLayer].tileFilter;
 
@@ -631,6 +623,9 @@ export default function MapView({
         }
         .leaflet-tile {
           filter: ${activeTileFilter ?? 'none'};
+        }
+        .leaflet-container {
+          background: ${mapLayer === 'dark' ? '#0b0b0b' : mapLayer === 'satellite' ? '#111' : '#e4e4e7'};
         }
       `}</style>
     </div>

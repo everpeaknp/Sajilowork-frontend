@@ -10,11 +10,11 @@ export default function TaskCancellationPolicy({ listingLabel = 'task' }: TaskCa
   const label = listingLabel === 'project' ? 'project' : 'task';
 
   return (
-    <section className="mt-12 border-t border-neutral-200 pt-10">
-      <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl">
+    <section className="mt-12 border-t border-neutral-200 pt-10 dark:border-neutral-800">
+      <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Cancellation policy
       </h2>
-      <p className="max-w-3xl text-sm font-normal leading-relaxed text-neutral-600 sm:text-[15px]">
+      <p className="max-w-3xl text-sm font-normal leading-relaxed text-neutral-600 sm:text-[15px] dark:text-neutral-400">
         If you are responsible for cancelling this {label}, a Cancellation Fee will be deducted from
         your next payment payout(s).
       </p>

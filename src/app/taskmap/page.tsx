@@ -429,13 +429,13 @@ function TaskmapPageContent() {
   }, [focusedTaskId, detailTaskId, mappedTasks]);
 
   return (
-    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
+    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface dark:bg-neutral-950 md:pb-0">
       <Navbar />
       
       <main ref={mainRef} className="flex-1 flex overflow-hidden">
         {isSidebarVisible && (
           <div 
-            className={`hidden lg:flex border-r border-outline-variant bg-white flex-col z-10 shadow-sm relative shrink-0 ${
+            className={`hidden lg:flex border-r border-outline-variant bg-white dark:border-neutral-800 dark:bg-neutral-950 flex-col z-10 shadow-sm relative shrink-0 ${
               isCompactSidebar ? 'w-20' : ''
             }`}
             style={{ width: isCompactSidebar ? '80px' : `${sidebarWidth}px` }}
@@ -494,10 +494,10 @@ function TaskmapPageContent() {
                       })
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                        <div className="w-16 h-16 bg-surface-dim rounded-full flex items-center justify-center mb-4">
+                        <div className="w-16 h-16 bg-surface-dim dark:bg-neutral-800 rounded-full flex items-center justify-center mb-4">
                           <SlidersHorizontal className="w-8 h-8 text-on-surface-variant" />
                         </div>
-                        <h3 className="text-lg font-bold text-on-surface mb-2">
+                        <h3 className="text-lg font-bold text-on-surface dark:text-stone-100 mb-2">
                           {taskList.length > 0 ? 'No tasks match your filters' : 'No tasks available'}
                         </h3>
                         <p className="text-on-surface-variant font-sans text-[14px] font-normal leading-[20px] mb-4">
@@ -623,10 +623,10 @@ function TaskmapPageContent() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center px-2 py-10 text-center">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-dim">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-dim dark:bg-neutral-800">
                     <SlidersHorizontal className="h-7 w-7 text-on-surface-variant" />
                   </div>
-                  <h3 className="mb-2 text-base font-bold text-on-surface">
+                  <h3 className="mb-2 text-base font-bold text-on-surface dark:text-stone-100">
                     {taskList.length > 0
                       ? 'No tasks match your filters'
                       : 'No tasks available'}
@@ -655,11 +655,11 @@ function TaskmapPageContent() {
                     sheetSnap === 'list' ? 'hidden lg:flex' : 'flex'
                   }`}
                 >
-                  <div className="pointer-events-auto max-w-sm rounded-2xl border border-outline-variant bg-white p-6 text-center shadow-xl">
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-dim">
+                  <div className="pointer-events-auto max-w-sm rounded-2xl border border-outline-variant bg-white p-6 text-center shadow-xl dark:border-neutral-800 dark:bg-neutral-900">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-dim dark:bg-neutral-800">
                       <MapPin className="h-6 w-6 text-on-surface-variant" />
                     </div>
-                    <h3 className="mb-1 text-base font-bold text-on-surface">
+                    <h3 className="mb-1 text-base font-bold text-on-surface dark:text-stone-100">
                       Map pins unavailable
                     </h3>
                     <p className="text-sm text-on-surface-variant">
@@ -692,7 +692,7 @@ export default function TaskmapPage() {
   return (
     <Suspense
       fallback={
-        <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
+        <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface dark:bg-neutral-950 md:pb-0">
           <Navbar />
           <main className="flex flex-1 overflow-hidden">
             <TaskMapSkeleton />

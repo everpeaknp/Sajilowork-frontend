@@ -365,7 +365,7 @@ export default function AvailableServices({
   return (
     <section
       id="available-services-grid"
-      className={`w-full select-none bg-white px-4 pb-12 pt-0 sm:px-6 sm:pb-14 sm:pt-2 md:px-8 lg:px-12 ${className}`}
+      className={`w-full select-none bg-white px-4 pb-12 pt-0 sm:px-6 sm:pb-14 sm:pt-2 md:px-8 lg:px-12 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto w-full max-w-full">
         <div className="flex flex-col gap-10 lg:flex-row">
@@ -413,7 +413,7 @@ export default function AvailableServices({
                           onChange={() => setDeliveryTime(opt.value)}
                           className="h-[18px] w-[18px] flex-shrink-0 cursor-pointer rounded-full border border-neutral-300 accent-black"
                         />
-                        <span className="text-[16px] leading-tight text-neutral-700 transition-colors group-hover:text-black">
+                        <span className="text-[16px] leading-tight text-neutral-700 transition-colors group-hover:text-black dark:text-neutral-300 dark:group-hover:text-stone-100">
                           {opt.label}
                         </span>
                       </div>
@@ -440,7 +440,7 @@ export default function AvailableServices({
                   />
                   <div className="mt-2 flex items-center justify-between text-sm text-neutral-500">
                     <span>Min: {formatNPR(BUDGET_MIN)}</span>
-                    <span className={`${discoverMedium} text-[15px] text-black`}>
+                    <span className={`${discoverMedium} text-[15px] text-black dark:text-stone-100`}>
                       Under: {formatNPR(maxBudget)}
                     </span>
                     <span>Max: {formatNPR(BUDGET_MAX)}</span>
@@ -505,8 +505,8 @@ export default function AvailableServices({
                 <HeaderSkeleton variant="browse" showMapLink={false} className="w-full" />
               ) : (
                 <>
-                  <span className={`${discoverBody} text-sm font-normal text-[#131118] sm:text-base md:text-lg`}>
-                    <span className="font-semibold text-black">{filteredServices.length}</span> services
+                  <span className={`${discoverBody} text-sm font-normal text-[#131118] sm:text-base md:text-lg dark:text-stone-100`}>
+                    <span className="font-semibold text-black dark:text-stone-100">{filteredServices.length}</span> services
                     available
                   </span>
 
@@ -516,14 +516,14 @@ export default function AvailableServices({
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className={`${discoverMedium} cursor-pointer appearance-none border-0 bg-transparent py-2 pl-1 pr-6 text-[#131118] focus:outline-none`}
+                        className={`${discoverMedium} cursor-pointer appearance-none border-0 bg-transparent py-2 pl-1 pr-6 text-[#131118] focus:outline-none dark:text-stone-100 dark:[color-scheme:dark]`}
                       >
                         <option value="best-seller">Best Seller</option>
                         <option value="price-asc">Price: Low to High</option>
                         <option value="price-desc">Price: High to Low</option>
                         <option value="reviews">Most Reviewed</option>
                       </select>
-                      <ChevronDown className="pointer-events-none absolute right-0.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-800" />
+                      <ChevronDown className="pointer-events-none absolute right-0.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-800 dark:text-neutral-300" />
                     </div>
                   </div>
                 </>
@@ -531,10 +531,10 @@ export default function AvailableServices({
             </div>
 
             {hasActiveSearch ? (
-              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-                <p className={`${discoverBody} text-sm text-neutral-600`}>
+              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800 dark:bg-neutral-900/60">
+                <p className={`${discoverBody} text-sm text-neutral-600 dark:text-neutral-400`}>
                   Showing service matches for{' '}
-                  <span className={`${discoverMedium} text-[#1a3c34]`}>&quot;{activeSearchLabel}&quot;</span>
+                  <span className={`${discoverMedium} text-[#1a3c34] dark:text-emerald-300`}>&quot;{activeSearchLabel}&quot;</span>
                 </p>
                 <button
                   type="button"
@@ -552,16 +552,16 @@ export default function AvailableServices({
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full rounded-none border border-dashed border-neutral-300 bg-neutral-50/50 py-20 text-center"
+                className="w-full rounded-none border border-dashed border-neutral-300 bg-neutral-50/50 py-20 text-center dark:border-neutral-700 dark:bg-neutral-900/40"
               >
                 <SlidersHorizontal
-                  className="mx-auto mb-4 h-12 w-12 text-neutral-300"
+                  className="mx-auto mb-4 h-12 w-12 text-neutral-300 dark:text-neutral-600"
                   strokeWidth={1.5}
                 />
-                <h3 className={`${discoverHeadline} mb-1 text-lg text-[#131118]`}>
+                <h3 className={`${discoverHeadline} mb-1 text-lg text-[#131118] dark:text-stone-100`}>
                   No services match your filters
                 </h3>
-                <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-sm text-neutral-500`}>
+                <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-sm text-neutral-500 dark:text-neutral-400`}>
                   {hasActiveSearch
                     ? 'No services match your search. Try different keywords or clear the search.'
                     : 'Try clearing some criteria or sliders to discover more options available in our marketplace.'}
@@ -569,7 +569,7 @@ export default function AvailableServices({
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className={`${discoverMedium} cursor-pointer rounded-none bg-black px-6 py-2.5 text-sm text-white transition-colors hover:bg-neutral-800`}
+                  className={`${discoverMedium} cursor-pointer rounded-none bg-black px-6 py-2.5 text-sm text-white transition-colors hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-950 dark:hover:bg-white`}
                 >
                   Reset Active Filters
                 </button>
@@ -593,7 +593,7 @@ export default function AvailableServices({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.25 }}
-                        className="flex flex-col justify-between overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md"
+                        className="flex flex-col justify-between overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:border-neutral-700 dark:hover:shadow-none"
                       >
                         <Link
                           href={getServiceDetailPath(card)}
@@ -613,14 +613,14 @@ export default function AvailableServices({
                               <button
                                 type="button"
                                 onClick={(e) => handleCardPrevSlide(card.id, card.images!.length, e)}
-                                className="absolute left-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-800 opacity-0 shadow transition-opacity group-hover:opacity-100"
+                                className="absolute left-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-800 opacity-0 shadow transition-opacity group-hover:opacity-100 dark:bg-neutral-900 dark:text-stone-100"
                               >
                                 <ArrowLeft className="h-3.5 w-3.5" />
                               </button>
                               <button
                                 type="button"
                                 onClick={(e) => handleCardNextSlide(card.id, card.images!.length, e)}
-                                className="absolute right-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-800 opacity-0 shadow transition-opacity group-hover:opacity-100"
+                                className="absolute right-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-neutral-800 opacity-0 shadow transition-opacity group-hover:opacity-100 dark:bg-neutral-900 dark:text-stone-100"
                               >
                                 <ArrowRight className="h-3.5 w-3.5" />
                               </button>
@@ -640,7 +640,7 @@ export default function AvailableServices({
                           <button
                             type="button"
                             onClick={(e) => void toggleFavorite(card, e)}
-                            className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow transition-all hover:scale-105 active:scale-95"
+                            className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow transition-all hover:scale-105 active:scale-95 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                             aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                           >
                             <Heart
@@ -660,19 +660,19 @@ export default function AvailableServices({
                             <h3 className={`${discoverBody} mb-2.5 line-clamp-2 text-sm font-normal leading-snug sm:text-[15px]`}>
                               <Link
                                 href={getServiceDetailPath(card)}
-                                className="text-[#131118] transition-colors hover:text-emerald-600"
+                                className="text-[#131118] transition-colors hover:text-emerald-600 dark:text-stone-100 dark:hover:text-emerald-400"
                               >
                                 {card.title}
                               </Link>
                             </h3>
                             <div className="mt-1 flex items-center gap-1 text-[13px] text-neutral-400">
                               <Star className="h-3.5 w-3.5 fill-[#fbbf24] text-[#fbbf24]" />
-                              <span className="font-normal text-neutral-800">{card.rating}</span>
+                              <span className="font-normal text-neutral-800 dark:text-stone-200">{card.rating}</span>
                               <span className="text-neutral-500">{card.reviews} reviews</span>
                             </div>
                           </div>
 
-                          <div className="mt-5 flex items-center justify-between border-t border-neutral-300 pt-4">
+                          <div className="mt-5 flex items-center justify-between border-t border-neutral-300 pt-4 dark:border-neutral-700">
                             <ServiceAuthorLink
                               service={card}
                               className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-80"
@@ -718,7 +718,7 @@ export default function AvailableServices({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={activePage === 1}
-                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition-all hover:border-neutral-400 hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-40 sm:h-[50px] sm:w-[50px]"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-400 transition-all hover:border-neutral-400 hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-40 sm:h-[50px] sm:w-[50px] dark:border-neutral-700 dark:hover:border-neutral-500 dark:hover:text-stone-200"
                     title="Previous Page"
                     aria-label="Previous page"
                   >
@@ -735,7 +735,7 @@ export default function AvailableServices({
                           className={`flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
                             activePage === page
                               ? 'bg-[#52B788] font-semibold text-white shadow-sm'
-                              : 'font-normal text-neutral-800 hover:text-[#52B788]'
+                              : 'font-normal text-neutral-800 hover:text-[#52B788] dark:text-stone-200'
                           }`}
                         >
                           {page}
@@ -751,7 +751,7 @@ export default function AvailableServices({
                             className={`flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
                               activePage === page
                                 ? 'bg-[#52B788] font-semibold text-white shadow-sm'
-                                : 'font-normal text-neutral-800 hover:text-[#52B788]'
+                                : 'font-normal text-neutral-800 hover:text-[#52B788] dark:text-stone-200'
                             }`}
                           >
                             {page}
@@ -766,7 +766,7 @@ export default function AvailableServices({
                           className={`flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full text-[15px] transition-all duration-200 ${
                             activePage === totalPages
                               ? 'bg-[#52B788] font-semibold text-white shadow-sm'
-                              : 'font-normal text-neutral-800 hover:text-[#52B788]'
+                              : 'font-normal text-neutral-800 hover:text-[#52B788] dark:text-stone-200'
                           }`}
                         >
                           {totalPages}
@@ -779,7 +779,7 @@ export default function AvailableServices({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={activePage === totalPages}
-                    className="flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full border border-black text-black transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-10 w-10 shrink-0 sm:h-[50px] sm:w-[50px] cursor-pointer items-center justify-center rounded-full border border-black text-black transition-all hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-stone-200 dark:text-stone-100 dark:hover:bg-neutral-800"
                     title="Next Page"
                     aria-label="Next page"
                   >
@@ -815,11 +815,11 @@ function FilterAccordion({
   bordered?: boolean;
 }) {
   return (
-    <div className={bordered ? 'border-b border-neutral-100 pb-5' : 'pb-5'}>
+    <div className={bordered ? 'border-b border-neutral-100 pb-5 dark:border-neutral-800' : 'pb-5'}>
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full cursor-pointer items-center justify-between py-1 text-left text-[#131118]"
+        className="flex w-full cursor-pointer items-center justify-between py-1 text-left text-[#131118] dark:text-stone-100"
       >
         <span className={`${discoverHeadline} text-[18px] font-semibold tracking-wide`}>{title}</span>
         {open ? (
@@ -866,7 +866,7 @@ function CheckboxList({
               onChange={() => onToggle(item)}
               className="h-[18px] w-[18px] flex-shrink-0 cursor-pointer rounded border border-neutral-300 accent-black"
             />
-            <span className="text-[16px] leading-tight text-neutral-700 transition-colors group-hover:text-black">
+            <span className="text-[16px] leading-tight text-neutral-700 transition-colors group-hover:text-black dark:text-neutral-300 dark:group-hover:text-stone-100">
               {item}
             </span>
           </label>

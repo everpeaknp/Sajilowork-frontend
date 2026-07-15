@@ -123,7 +123,7 @@ export default function MyTasksPage() {
     setError(null);
     try {
       const [postedRes, assignedRes] = await Promise.all([
-        taskService.getMyTasks(),
+        taskService.getMyTasks({ listing_kind: 'task' }),
         taskService.getAssignedTasks(),
       ]);
       const posted = postedRes.success ? extractTaskList(postedRes.data) : [];
@@ -343,10 +343,10 @@ export default function MyTasksPage() {
     if (filteredTasks.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-dim">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-dim dark:bg-neutral-800">
             <SlidersHorizontal className="h-8 w-8 text-on-surface-variant" />
           </div>
-          <h3 className="mb-2 text-lg font-bold text-on-surface">
+          <h3 className="mb-2 text-lg font-bold text-on-surface dark:text-stone-100">
             {activeStatus === 'all' && !hasActiveFilters(searchFilters) && 'No tasks yet'}
             {(activeStatus !== 'all' || hasActiveFilters(searchFilters)) &&
               (activeStatus !== 'all'
@@ -382,13 +382,13 @@ export default function MyTasksPage() {
   };
 
   return (
-    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface md:pb-0">
+    <div className="mobile-bottom-nav-offset flex h-screen flex-col bg-surface dark:bg-neutral-950 md:pb-0">
       <Navbar />
 
       <main ref={mainRef} className="flex flex-1 overflow-hidden">
         {isSidebarVisible ? (
           <div
-            className={`relative z-10 hidden shrink-0 flex-col border-r border-outline-variant bg-white shadow-sm lg:flex ${
+            className={`relative z-10 hidden shrink-0 flex-col border-r border-outline-variant bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950 lg:flex ${
               isCompactSidebar ? 'w-20' : ''
             }`}
             style={{ width: isCompactSidebar ? '80px' : `${sidebarWidth}px` }}
@@ -513,8 +513,8 @@ export default function MyTasksPage() {
                   sheetSnap === 'list' ? 'hidden lg:flex' : 'flex'
                 }`}
               >
-                <div className="pointer-events-auto max-w-sm rounded-2xl border border-outline-variant bg-white/95 px-6 py-5 text-center shadow-lg backdrop-blur">
-                  <h3 className="mb-1 text-base font-bold text-on-surface">Map pins unavailable</h3>
+                <div className="pointer-events-auto max-w-sm rounded-2xl border border-outline-variant bg-white/95 px-6 py-5 text-center shadow-lg backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/95">
+                  <h3 className="mb-1 text-base font-bold text-on-surface dark:text-stone-100">Map pins unavailable</h3>
                   <p className="text-sm text-on-surface-variant">
                     These tasks don&apos;t have saved coordinates yet. Open a task from the list to
                     view details.

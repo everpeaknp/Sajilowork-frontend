@@ -17,7 +17,7 @@ export const landingBody = "font-body";
 
 /** Muted body / captions */
 export const landingBodyMuted =
-  "font-body text-[#6a719a] font-medium";
+  "font-body text-[#6a719a] font-medium dark:text-neutral-400";
 
 /** Root wrapper for marketing pages (home, discover) */
 export const landingPageRoot =

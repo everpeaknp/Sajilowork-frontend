@@ -433,8 +433,8 @@ export default function TaskDetails({
 
   const shellClassName =
     variant === 'page'
-      ? 'relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-white'
-      : 'absolute inset-0 z-[50] flex max-w-[100vw] flex-col overflow-x-hidden overflow-y-auto bg-white';
+      ? 'relative flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950'
+      : 'absolute inset-0 z-[50] flex max-w-[100vw] flex-col overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950';
 
   if (!viewTask && loadingDetailTask) {
     return (
@@ -467,7 +467,7 @@ export default function TaskDetails({
       <button
           type="button"
         onClick={onClose}
-          className="absolute right-3 top-3 z-[60] rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 sm:right-4 sm:top-4"
+          className="absolute right-3 top-3 z-[60] rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800 sm:right-4 sm:top-4"
         title="Close"
         aria-label="Close task details"
       >

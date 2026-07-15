@@ -19,7 +19,7 @@ interface JobProfileHeroProps {
 }
 
 function MetaDivider() {
-  return <span className="mx-2.5 hidden h-3.5 w-px bg-neutral-300 sm:inline-block" aria-hidden />;
+  return <span className="mx-2.5 hidden h-3.5 w-px bg-neutral-300 sm:inline-block dark:bg-neutral-700" aria-hidden />;
 }
 
 export default function JobProfileHero({ job, onApply, isOwner = false, editHref }: JobProfileHeroProps) {
@@ -48,9 +48,9 @@ export default function JobProfileHero({ job, onApply, isOwner = false, editHref
 
   return (
     <section className="w-full">
-      <div className="relative overflow-hidden rounded-[20px] border border-neutral-200/30 bg-[#f4f3ee] shadow-sm">
-        <div className="pointer-events-none absolute -left-10 -top-10 z-0 h-32 w-32 select-none rounded-full bg-[#fcd074]/90 sm:-left-12 sm:-top-12 sm:h-40 sm:w-40" />
-        <div className="pointer-events-none absolute -bottom-16 -right-10 z-0 h-44 w-44 select-none rounded-full bg-[#ffb89a]/55 sm:-bottom-20 sm:-right-14 sm:h-56 sm:w-56" />
+      <div className="relative overflow-hidden rounded-[20px] border border-neutral-200/30 bg-[#f4f3ee] shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+        <div className="pointer-events-none absolute -left-10 -top-10 z-0 h-32 w-32 select-none rounded-full bg-[#fcd074]/90 sm:-left-12 sm:-top-12 sm:h-40 sm:w-40 dark:bg-amber-700/30" />
+        <div className="pointer-events-none absolute -bottom-16 -right-10 z-0 h-44 w-44 select-none rounded-full bg-[#ffb89a]/55 sm:-bottom-20 sm:-right-14 sm:h-56 sm:w-56 dark:bg-orange-900/25" />
 
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.18]">
           <svg
@@ -84,7 +84,7 @@ export default function JobProfileHero({ job, onApply, isOwner = false, editHref
 
             <div className="min-w-0 flex-1">
               <motion.h1
-                className="text-lg font-normal leading-snug tracking-tight text-black sm:text-2xl md:text-[28px]"
+                className="text-lg font-normal leading-snug tracking-tight text-black sm:text-2xl md:text-[28px] dark:text-stone-100"
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45 }}
@@ -103,7 +103,7 @@ export default function JobProfileHero({ job, onApply, isOwner = false, editHref
                 <p className="mt-1 text-sm font-normal text-[#45a874]">{job.companyName}</p>
               )}
 
-              <div className="mt-3 flex flex-col gap-1 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:text-sm">
+              <div className="mt-3 flex flex-col gap-1 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:text-sm dark:text-stone-200">
                 <span>
                   {job.budgetLabel} {job.type}
                 </span>

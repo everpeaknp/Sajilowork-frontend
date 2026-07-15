@@ -90,13 +90,13 @@ export default function PopularServices({ className = '', initialServices }: Pop
 
   return (
     <section
-      className={`overflow-hidden bg-[#fdfdfc] px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
+      className={`overflow-hidden bg-[#fdfdfc] px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-10 flex flex-col gap-6 sm:mb-12">
           <div className="min-w-0">
             <motion.h2
-              className={`${discoverHeadline} mb-2 text-3xl leading-tight text-brand-dark sm:text-4xl lg:text-[44px]`}
+              className={`${discoverHeadline} mb-2 text-3xl leading-tight text-brand-dark sm:text-4xl lg:text-[44px] dark:text-stone-100`}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -105,7 +105,7 @@ export default function PopularServices({ className = '', initialServices }: Pop
               Popular Services
             </motion.h2>
             <motion.p
-              className={`${discoverBody} max-w-2xl text-sm text-neutral-500 sm:text-base`}
+              className={`${discoverBody} max-w-2xl text-sm text-neutral-500 sm:text-base dark:text-neutral-400`}
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -134,7 +134,7 @@ export default function PopularServices({ className = '', initialServices }: Pop
                     className={`${discoverBody} cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 ${
                       isActive
                         ? 'bg-brand-emerald text-white shadow-md shadow-brand-emerald/20'
-                        : 'bg-white text-neutral-600 ring-1 ring-neutral-200 hover:bg-neutral-50 hover:text-brand-dark'
+                        : 'bg-white text-neutral-600 ring-1 ring-neutral-200 hover:bg-neutral-50 hover:text-brand-dark dark:bg-neutral-900 dark:text-neutral-300 dark:ring-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-stone-100'
                     }`}
                   >
                     {cat}
@@ -171,7 +171,7 @@ export default function PopularServices({ className = '', initialServices }: Pop
                   >
                     <Link
                       href={getServiceDetailPath(service)}
-                      className="group flex h-full min-h-[192px] w-full flex-col overflow-hidden rounded-xl border border-neutral-200/70 bg-white transition-all duration-300 hover:border-neutral-300 md:flex-row"
+                      className="group flex h-full min-h-[192px] w-full flex-col overflow-hidden rounded-xl border border-neutral-200/70 bg-white transition-all duration-300 hover:border-neutral-300 md:flex-row dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
                     >
                       <div className="relative h-[192px] w-full shrink-0 overflow-hidden bg-neutral-100 md:w-[190px]">
                         <OptimizedImage
@@ -188,12 +188,12 @@ export default function PopularServices({ className = '', initialServices }: Pop
                         <button
                           type="button"
                           onClick={(e) => toggleFavorite(service.id, e)}
-                          className="absolute right-4 top-4 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/60 bg-white text-black transition-colors hover:bg-neutral-50"
+                          className="absolute right-4 top-4 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/60 bg-white text-black transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
                           aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                         >
                           <Heart
                             className={`h-4 w-4 transition-transform active:scale-95 ${
-                              isFav ? 'fill-black text-black' : 'text-black'
+                              isFav ? 'fill-black text-black dark:fill-stone-100 dark:text-stone-100' : 'text-black dark:text-stone-200'
                             }`}
                             strokeWidth={2}
                           />
@@ -207,14 +207,14 @@ export default function PopularServices({ className = '', initialServices }: Pop
                           </span>
 
                           <h3
-                            className={`${discoverHeadline} mb-3 line-clamp-2 min-h-[3.25rem] text-lg leading-snug text-brand-dark transition-colors group-hover:text-brand-emerald`}
+                            className={`${discoverHeadline} mb-3 line-clamp-2 min-h-[3.25rem] text-lg leading-snug text-brand-dark transition-colors group-hover:text-brand-emerald dark:text-stone-100`}
                           >
                             {service.title}
                           </h3>
 
                           <div className="mt-auto flex items-center gap-1.5 text-sm text-neutral-500">
                             <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400" />
-                            <span className="font-semibold text-brand-dark">
+                            <span className="font-semibold text-brand-dark dark:text-stone-100">
                               {service.rating > 0 ? service.rating.toFixed(2) : '—'}
                             </span>
                             <span className="text-neutral-400">({service.reviews} reviews)</span>
@@ -247,7 +247,7 @@ export default function PopularServices({ className = '', initialServices }: Pop
                               Starting at
                             </span>
                             <span
-                              className={`${discoverMedium} whitespace-nowrap text-lg tabular-nums text-brand-dark`}
+                              className={`${discoverMedium} whitespace-nowrap text-lg tabular-nums text-brand-dark dark:text-stone-100`}
                             >
                               {formatServiceStartingPrice(service)}
                             </span>

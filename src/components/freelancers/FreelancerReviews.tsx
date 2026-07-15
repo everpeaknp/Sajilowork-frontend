@@ -225,25 +225,25 @@ export default function FreelancerReviews({
   return (
     <div className="mt-10 space-y-6" id="freelancer-reviews-section">
       <div className="pb-2">
-        <h2 className="flex items-center gap-2 text-lg font-normal tracking-tight text-black sm:text-xl">
+        <h2 className="flex items-center gap-2 text-lg font-normal tracking-tight text-black sm:text-xl dark:text-stone-100">
           <Star className="h-5 w-5 fill-amber-400 text-amber-500" />
           <span>Reviews & Feedbacks</span>
         </h2>
-        <p className="mt-1 select-none text-xs font-normal text-neutral-500">
+        <p className="mt-1 select-none text-xs font-normal text-neutral-500 dark:text-neutral-400">
           Verified client outcomes and freelance work experience ratings.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 items-center gap-6 rounded-2xl bg-neutral-50/60 p-6 md:grid-cols-12">
+      <div className="grid grid-cols-1 items-center gap-6 rounded-2xl bg-neutral-50/60 p-6 md:grid-cols-12 dark:bg-neutral-900/60">
         <div className="space-y-2 pb-5 text-center md:col-span-4 md:pb-0 md:pr-4">
-          <div className="select-none font-sans text-4xl font-normal tracking-tight text-black sm:text-5xl">
+          <div className="select-none font-sans text-4xl font-normal tracking-tight text-black sm:text-5xl dark:text-stone-100">
             {calculatedAverage.toFixed(2)}
           </div>
           <div className="flex items-center justify-center gap-0.5 text-amber-500">
             {[1, 2, 3, 4, 5].map((star) => {
               const diff = calculatedAverage - star + 1;
               const fillValue =
-                diff >= 1 ? 'fill-amber-400' : diff > 0 ? 'fill-amber-400 opacity-50' : 'text-neutral-200 stroke-[1.5]';
+                diff >= 1 ? 'fill-amber-400' : diff > 0 ? 'fill-amber-400 opacity-50' : 'text-neutral-200 stroke-[1.5] dark:text-neutral-700';
               return <Star key={star} className={`h-4 w-4 ${fillValue}`} />;
             })}
           </div>
@@ -252,7 +252,7 @@ export default function FreelancerReviews({
           </p>
         </div>
 
-        <div className="select-none space-y-2 text-[11px] font-normal text-black md:col-span-8">
+        <div className="select-none space-y-2 text-[11px] font-normal text-black md:col-span-8 dark:text-stone-100">
           {([5, 4, 3, 2, 1] as const).map((stars) => (
             <div
               key={stars}
@@ -262,16 +262,16 @@ export default function FreelancerReviews({
               }}
               role="button"
               tabIndex={0}
-              className={`group flex cursor-pointer items-center gap-3 rounded-lg p-1 transition-colors hover:bg-[#FAF9F6] ${filterStar === stars ? 'bg-[#FAF9F6]' : ''}`}
+              className={`group flex cursor-pointer items-center gap-3 rounded-lg p-1 transition-colors hover:bg-[#FAF9F6] dark:hover:bg-neutral-800 ${filterStar === stars ? 'bg-[#FAF9F6] dark:bg-neutral-800' : ''}`}
             >
-              <span className="w-12 shrink-0 font-normal text-black">{stars} Stars</span>
-              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-neutral-200">
+              <span className="w-12 shrink-0 font-normal text-black dark:text-stone-100">{stars} Stars</span>
+              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
                 <div
                   className="h-full rounded-full bg-amber-400 transition-all duration-500"
                   style={{ width: `${getPercent(reviews.filter((r) => r.rating === stars).length)}%` }}
                 />
               </div>
-              <span className="w-10 text-right font-mono leading-none text-neutral-400 group-hover:text-black">
+              <span className="w-10 text-right font-mono leading-none text-neutral-400 group-hover:text-black dark:group-hover:text-stone-100">
                 {getPercent(reviews.filter((r) => r.rating === stars).length)}%
               </span>
             </div>
@@ -298,7 +298,7 @@ export default function FreelancerReviews({
         <div className="flex items-center gap-2 font-normal text-neutral-400">
           <Filter className="h-4 w-4 text-neutral-400" />
           <span>
-            Showing <span className="font-normal text-black">{filteredReviews.length}</span> ratings
+            Showing <span className="font-normal text-black dark:text-stone-100">{filteredReviews.length}</span> ratings
           </span>
         </div>
 
@@ -307,7 +307,7 @@ export default function FreelancerReviews({
           <select
             value={sortParam}
             onChange={(e) => setSortParam(e.target.value as SortParam)}
-            className="cursor-pointer rounded-lg bg-[#FAF9F6] px-2.5 py-1.5 text-xs font-normal text-black outline-none focus:ring-1 focus:ring-emerald-500 [&_option]:font-normal"
+            className="cursor-pointer rounded-lg bg-[#FAF9F6] px-2.5 py-1.5 text-xs font-normal text-black outline-none focus:ring-1 focus:ring-emerald-500 dark:bg-neutral-800 dark:text-stone-100 dark:[color-scheme:dark] [&_option]:font-normal"
           >
             <option value="newest">Most Recent</option>
             <option value="highest">Highest Rating</option>
@@ -318,7 +318,7 @@ export default function FreelancerReviews({
 
       <div className="space-y-6">
         {sortedReviews.length === 0 ? (
-          <div className="rounded-2xl bg-neutral-50 py-12 text-center text-xs font-normal text-neutral-400">
+          <div className="rounded-2xl bg-neutral-50 py-12 text-center text-xs font-normal text-neutral-400 dark:bg-neutral-900">
             No matching review ratings found here yet.
           </div>
         ) : (
@@ -338,7 +338,7 @@ export default function FreelancerReviews({
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className={`rounded-2xl p-5 transition-all duration-200 ${rev.isFlagged ? 'bg-red-50/50 opacity-60' : 'bg-white hover:shadow-sm'}`}
+                  className={`rounded-2xl p-5 transition-all duration-200 ${rev.isFlagged ? 'bg-red-50/50 opacity-60 dark:bg-red-950/30' : 'bg-white hover:shadow-sm dark:bg-neutral-900 dark:hover:shadow-none'}`}
                 >
                   <div className="flex flex-col justify-between gap-3 pb-3 sm:flex-row sm:items-center">
                     <div className="flex items-center gap-3">
@@ -348,7 +348,7 @@ export default function FreelancerReviews({
                         {initials}
                       </div>
                       <div className="select-none space-y-0.5 text-left">
-                        <h4 className="text-xs font-normal leading-tight text-black sm:text-sm">
+                        <h4 className="text-xs font-normal leading-tight text-black sm:text-sm dark:text-stone-100">
                           {rev.reviewerName}
                         </h4>
                         <p className="font-mono text-[10px] font-normal uppercase tracking-wider text-neutral-400">
@@ -362,7 +362,7 @@ export default function FreelancerReviews({
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`h-3.5 w-3.5 ${star <= rev.rating ? 'fill-amber-400' : 'text-neutral-200 stroke-[1.2]'}`}
+                            className={`h-3.5 w-3.5 ${star <= rev.rating ? 'fill-amber-400' : 'text-neutral-200 stroke-[1.2] dark:text-neutral-700'}`}
                           />
                         ))}
                       </div>
@@ -370,7 +370,7 @@ export default function FreelancerReviews({
                     </div>
                   </div>
 
-                  <p className="mt-4 whitespace-pre-line text-left text-xs font-normal leading-relaxed text-black">
+                  <p className="mt-4 whitespace-pre-line text-left text-xs font-normal leading-relaxed text-black dark:text-stone-300">
                     {rev.comment}
                   </p>
 
@@ -381,7 +381,7 @@ export default function FreelancerReviews({
                       <button
                         type="button"
                         onClick={() => handleVote(rev.id, 'like')}
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-all ${rev.userVoted === 'like' ? 'scale-105 bg-emerald-50 text-emerald-700' : 'cursor-pointer bg-neutral-50 text-neutral-500 hover:bg-neutral-100 hover:text-black'}`}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-all ${rev.userVoted === 'like' ? 'scale-105 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300' : 'cursor-pointer bg-neutral-50 text-neutral-500 hover:bg-neutral-100 hover:text-black dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-stone-100'}`}
                       >
                         <ThumbsUp className="h-3.5 w-3.5 stroke-[2]" />
                         <span className="font-mono">{rev.likes}</span>
@@ -390,7 +390,7 @@ export default function FreelancerReviews({
                       <button
                         type="button"
                         onClick={() => handleVote(rev.id, 'dislike')}
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-all ${rev.userVoted === 'dislike' ? 'scale-105 bg-rose-50 text-rose-700' : 'cursor-pointer bg-neutral-50 text-neutral-500 hover:bg-neutral-100 hover:text-black'}`}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition-all ${rev.userVoted === 'dislike' ? 'scale-105 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300' : 'cursor-pointer bg-neutral-50 text-neutral-500 hover:bg-neutral-100 hover:text-black dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-stone-100'}`}
                       >
                         <ThumbsDown className="h-3.5 w-3.5 stroke-[2]" />
                         <span className="font-mono">{rev.dislikes}</span>
@@ -400,7 +400,7 @@ export default function FreelancerReviews({
                     <button
                       type="button"
                       onClick={() => handleFlagReview(rev.id)}
-                      className={`inline-flex items-center gap-1 rounded-lg p-1.5 transition-colors hover:bg-neutral-100 hover:text-neutral-800 ${rev.isFlagged ? 'animate-pulse bg-red-50 text-red-600' : 'cursor-pointer text-neutral-400'}`}
+                      className={`inline-flex items-center gap-1 rounded-lg p-1.5 transition-colors hover:bg-neutral-100 hover:text-neutral-800 dark:hover:bg-neutral-800 dark:hover:text-stone-200 ${rev.isFlagged ? 'animate-pulse bg-red-50 text-red-600 dark:bg-red-950/40' : 'cursor-pointer text-neutral-400'}`}
                       title={rev.isFlagged ? 'Flagged for moderation' : 'Flag review for audit'}
                     >
                       <AlertTriangle className="h-3.5 w-3.5" />
@@ -420,7 +420,7 @@ export default function FreelancerReviews({
             <button
               type="button"
               onClick={() => setVisibleCount(sortedReviews.length)}
-              className="cursor-pointer rounded-xl bg-neutral-100 px-6 py-2.5 text-xs font-normal text-black transition-all hover:bg-neutral-200"
+              className="cursor-pointer rounded-xl bg-neutral-100 px-6 py-2.5 text-xs font-normal text-black transition-all hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-100 dark:hover:bg-neutral-700"
             >
               See more
             </button>
@@ -428,7 +428,7 @@ export default function FreelancerReviews({
             <button
               type="button"
               onClick={() => setVisibleCount(INITIAL_VISIBLE_REVIEWS)}
-              className="cursor-pointer rounded-xl bg-neutral-100 px-6 py-2.5 text-xs font-normal text-black transition-all hover:bg-neutral-200"
+              className="cursor-pointer rounded-xl bg-neutral-100 px-6 py-2.5 text-xs font-normal text-black transition-all hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-100 dark:hover:bg-neutral-700"
             >
               Show less
             </button>
@@ -438,17 +438,17 @@ export default function FreelancerReviews({
 
       <form onSubmit={handleAddReview} className="space-y-6 pt-6">
         <div className="space-y-2">
-          <h3 className="text-xl font-normal tracking-tight text-black">Add a Review</h3>
-          <p className="text-sm font-normal text-black">
+          <h3 className="text-xl font-normal tracking-tight text-black dark:text-stone-100">Add a Review</h3>
+          <p className="text-sm font-normal text-black dark:text-stone-100">
             {preferApiReviews
               ? 'Verified reviews are published after you complete work together on the platform.'
               : 'Your email address will not be published. Required fields are marked '}
-            {!preferApiReviews ? <span className="text-black">*</span> : null}
+            {!preferApiReviews ? <span className="text-black dark:text-stone-100">*</span> : null}
           </p>
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-normal text-black">Your rating of this freelancer</p>
+          <p className="text-sm font-normal text-black dark:text-stone-100">Your rating of this freelancer</p>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((starVal) => {
               const isLit = hoverRating !== null ? starVal <= hoverRating : starVal <= userRating;
@@ -463,7 +463,7 @@ export default function FreelancerReviews({
                   aria-label={`Rate ${starVal} stars`}
                 >
                   <Star
-                    className={`h-7 w-7 transition-colors ${isLit ? 'fill-amber-400 text-amber-400' : 'fill-none text-neutral-300'}`}
+                    className={`h-7 w-7 transition-colors ${isLit ? 'fill-amber-400 text-amber-400' : 'fill-none text-neutral-300 dark:text-neutral-600'}`}
                     strokeWidth={1.5}
                   />
                 </button>
@@ -473,7 +473,7 @@ export default function FreelancerReviews({
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="review-comment" className="block text-sm font-normal text-black">
+          <label htmlFor="review-comment" className="block text-sm font-normal text-black dark:text-stone-100">
             Comment
           </label>
           <textarea
@@ -483,32 +483,32 @@ export default function FreelancerReviews({
             value={reviewComment}
             onChange={(e) => setReviewComment(e.target.value)}
             placeholder="There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable."
-            className="w-full resize-y rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+            className="w-full resize-y rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500"
           />
         </div>
 
         {preferApiReviews ? (
           <>
             {!isAuthenticated ? (
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 Sign in to leave a verified review after completing work with {freelancer.name}.
               </p>
             ) : loadingEligible ? (
-              <p className="text-sm text-neutral-500">Checking eligible completed work…</p>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">Checking eligible completed work…</p>
             ) : eligibleTasks.length === 0 ? (
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400">
                 You can review {freelancer.name} once you have completed work together on the platform.
               </p>
             ) : eligibleTasks.length > 1 ? (
               <div className="space-y-2">
-                <label htmlFor="review-task" className="block text-sm font-normal text-black">
+                <label htmlFor="review-task" className="block text-sm font-normal text-black dark:text-stone-100">
                   Completed work
                 </label>
                 <select
                   id="review-task"
                   value={selectedTaskId}
                   onChange={(e) => setSelectedTaskId(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:[color-scheme:dark]"
                 >
                   {eligibleTasks.map((task) => (
                     <option key={task.taskId} value={task.taskId}>

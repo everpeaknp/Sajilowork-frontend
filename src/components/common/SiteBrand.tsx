@@ -42,7 +42,7 @@ function BrandName({ name, className }: { name: string; className?: string }) {
     return (
       <span className={className}>
         {match[1]}
-        <span className="text-brand-dark">{match[2]}</span>
+        <span className="text-brand-dark dark:text-stone-100">{match[2]}</span>
       </span>
     );
   }
@@ -80,7 +80,7 @@ export default function SiteBrand({
           aria-hidden
           width={layout.width}
           height={layout.height}
-          className={cn('shrink-0 object-contain object-left', layout.image, logoClassName)}
+          className={cn('shrink-0 object-contain object-left dark:brightness-110', layout.image, logoClassName)}
           priority
         />
       ) : showIconFallback ? (

@@ -24,6 +24,8 @@ interface TaskSidebarProps {
   primaryAction?: SidebarPrimaryAction | null;
   /** Rendered below the “About the poster” card (e.g. More options). */
   belowPoster?: ReactNode;
+  /** Share / Save row — rendered below About the poster without a card chrome. */
+  shareSave?: ReactNode;
 }
 
 export default function TaskSidebar({
@@ -32,6 +34,7 @@ export default function TaskSidebar({
   onMakeOffer,
   primaryAction,
   belowPoster,
+  shareSave,
 }: TaskSidebarProps) {
   const buyer = getProjectBuyerMeta(project);
   const profileSlug = getTaskPosterProfileSlug(task);
@@ -51,13 +54,17 @@ export default function TaskSidebar({
         />
       </div>
       <div className="min-w-0">
-        <p className="text-[17px] font-normal text-black hover:text-[#52C47F]">{posterName}</p>
-        <p className="mt-1 text-[15px] font-normal text-neutral-500">{project.category}</p>
+        <p className="text-[17px] font-normal text-black hover:text-[#52C47F] dark:text-stone-100">
+          {posterName}
+        </p>
+        <p className="mt-1 text-[15px] font-normal text-neutral-500 dark:text-neutral-400">
+          {project.category}
+        </p>
         {(buyer.rating > 0 || buyer.reviews > 0) && (
-          <div className="mt-2 flex items-center gap-1.5 text-[15px] font-normal text-black">
+          <div className="mt-2 flex items-center gap-1.5 text-[15px] font-normal text-black dark:text-stone-100">
             <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
             <span>{buyer.rating.toFixed(1)}</span>
-            <span className="text-neutral-500">({buyer.reviews} reviews)</span>
+            <span className="text-neutral-500 dark:text-neutral-400">({buyer.reviews} reviews)</span>
           </div>
         )}
       </div>
@@ -67,11 +74,13 @@ export default function TaskSidebar({
   return (
     <aside className="mx-auto w-full max-w-none sm:max-w-[20rem] lg:sticky lg:top-20 lg:col-span-4 lg:mx-0 lg:ml-auto lg:max-w-[19.5rem] lg:self-start">
       <div className="space-y-5">
-        <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
-          <p className="text-[26px] font-normal tracking-tight text-black sm:text-[28px]">
+        <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+          <p className="text-[26px] font-normal tracking-tight text-black sm:text-[28px] dark:text-stone-100">
             {project.budgetLabel}
           </p>
-          <p className="mt-1.5 text-[15px] font-normal text-neutral-500">{project.type} budget</p>
+          <p className="mt-1.5 text-[15px] font-normal text-neutral-500 dark:text-neutral-400">
+            {project.type} budget
+          </p>
 
           {primaryAction === null ? null : primaryAction ? (
             <button
@@ -99,8 +108,10 @@ export default function TaskSidebar({
           )}
         </div>
 
-        <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
-          <h3 className="mb-5 text-xl font-normal tracking-tight text-black">About the poster</h3>
+        <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+          <h3 className="mb-5 text-xl font-normal tracking-tight text-black dark:text-stone-100">
+            About the poster
+          </h3>
 
           {profileHref ? (
             <Link
@@ -113,15 +124,17 @@ export default function TaskSidebar({
             <div className="flex items-start gap-3.5">{posterProfile}</div>
           )}
 
-          <div className="mt-6 border-t border-neutral-200 pt-5">
+          <div className="mt-6 border-t border-neutral-200 pt-5 dark:border-neutral-800">
             <p className="text-xs font-normal text-neutral-400">Location</p>
-            <p className="mt-1.5 text-sm font-normal text-black">{buyer.buyerLocation}</p>
+            <p className="mt-1.5 text-sm font-normal text-black dark:text-stone-100">
+              {buyer.buyerLocation}
+            </p>
           </div>
 
           {profileHref ? (
             <Link
               href={profileHref}
-              className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-[#52C47F] bg-white px-6 py-3.5 text-[15px] font-normal text-[#52C47F] transition-colors hover:border-[#52C47F] hover:bg-[#52C47F] hover:text-white"
+              className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-[#52C47F] bg-white px-6 py-3.5 text-[15px] font-normal text-[#52C47F] transition-colors hover:border-[#52C47F] hover:bg-[#52C47F] hover:text-white dark:bg-neutral-900 dark:hover:bg-[#52C47F]"
             >
               View profile
               <ArrowUpRight className="h-4 w-4 stroke-[2.5]" />
@@ -130,10 +143,12 @@ export default function TaskSidebar({
         </div>
 
         {belowPoster ? (
-          <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
+          <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
             {belowPoster}
           </div>
         ) : null}
+
+        {shareSave ? <div className="px-1">{shareSave}</div> : null}
       </div>
     </aside>
   );

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Briefcase, Loader2, UserRound } from 'lucide-react';
 import DeleteConfirmModal from '@/app/dashboard/DeleteConfirmModal';
 import {
   DASHBOARD_ROLE_OPTIONS,
@@ -25,7 +25,13 @@ interface AccountRoleModeProps {
   onSwitched?: () => void;
   /** Navbar: open /dashboard when a role is selected (including the active role). */
   navigateToDashboard?: boolean;
+  className?: string;
 }
+
+const ROLE_ICONS: Record<DashboardSidebarRole, typeof Briefcase> = {
+  customer: Briefcase,
+  tasker: UserRound,
+};
 
 function RoleModeToggle({
   currentRole,
@@ -35,6 +41,7 @@ function RoleModeToggle({
   optionClassName,
   activeClassName,
   inactiveClassName,
+  showIcons = false,
 }: {
   currentRole: DashboardSidebarRole;
   switching: boolean;
@@ -43,6 +50,7 @@ function RoleModeToggle({
   optionClassName: string;
   activeClassName: string;
   inactiveClassName: string;
+  showIcons?: boolean;
 }) {
   return (
     <div
@@ -52,6 +60,7 @@ function RoleModeToggle({
     >
       {DASHBOARD_ROLE_OPTIONS.map((option) => {
         const isActive = option.value === currentRole;
+        const Icon = ROLE_ICONS[option.value];
         return (
           <button
             key={option.value}
@@ -64,6 +73,7 @@ function RoleModeToggle({
               isActive ? activeClassName : inactiveClassName,
             )}
           >
+            {showIcons ? <Icon className="h-3.5 w-3.5" strokeWidth={2.25} /> : null}
             {option.label}
           </button>
         );
@@ -76,6 +86,7 @@ export default function AccountRoleMode({
   variant = 'navbar',
   onSwitched,
   navigateToDashboard = false,
+  className,
 }: AccountRoleModeProps) {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
@@ -184,7 +195,7 @@ export default function AccountRoleMode({
   if (variant === 'sidebar') {
     return (
       <>
-        <div className="w-full">
+        <div className={cn('w-full', className)}>
           {switching ? (
             <span className="flex h-9 w-full items-center justify-center">
               <Loader2 className="h-4 w-4 animate-spin text-neutral-700" />
@@ -208,29 +219,26 @@ export default function AccountRoleMode({
 
   return (
     <>
-      <div className="mt-3 border-t border-gray-100 pt-3">
-        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+      <div className={cn('px-3 py-2', className)}>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
           Dashboard
         </p>
         {switching ? (
-          <div className="flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
-            <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+          <div className="flex h-9 items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800/80">
+            <Loader2 className="h-4 w-4 animate-spin text-neutral-500 dark:text-neutral-400" />
           </div>
         ) : (
           <RoleModeToggle
             currentRole={currentRole}
             switching={switching}
             onPickRole={requestRole}
-            optionClassName="rounded-md px-2 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50"
-            activeClassName="bg-[#52C47F] text-white"
-            inactiveClassName="text-gray-600 hover:bg-gray-100"
+            showIcons
+            containerClassName="rounded-xl border-0 bg-neutral-100 p-1 dark:bg-neutral-800/80"
+            optionClassName="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition disabled:opacity-50"
+            activeClassName="bg-white text-neutral-900 shadow-sm dark:bg-neutral-700 dark:text-white"
+            inactiveClassName="text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
           />
         )}
-        <p className="mt-1.5 text-[11px] text-gray-500">
-          {navigateToDashboard
-            ? `Tap a mode to open your ${getDashboardRoleLabel(currentRole)} dashboard`
-            : `Currently in ${getDashboardRoleLabel(currentRole)} mode`}
-        </p>
       </div>
       {roleConfirmModal}
     </>

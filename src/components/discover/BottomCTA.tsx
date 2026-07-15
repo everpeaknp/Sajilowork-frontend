@@ -9,7 +9,7 @@ import { MARKETPLACE_CTA_IMAGE } from '@/lib/placeholderImages';
 function QualityBadgeIcon() {
   return (
     <svg
-      className="h-10 w-10 text-[#193e32]"
+      className="h-10 w-10 text-[#193e32] dark:text-emerald-300"
       viewBox="0 0 40 40"
       fill="none"
       stroke="currentColor"
@@ -31,7 +31,7 @@ function QualityBadgeIcon() {
 function DollarBadgeIcon() {
   return (
     <svg
-      className="h-10 w-10 text-[#193e32]"
+      className="h-10 w-10 text-[#193e32] dark:text-emerald-300"
       viewBox="0 0 40 40"
       fill="none"
       stroke="currentColor"
@@ -48,7 +48,7 @@ function DollarBadgeIcon() {
 function SecureBadgeIcon() {
   return (
     <svg
-      className="h-10 w-10 text-[#193e32]"
+      className="h-10 w-10 text-[#193e32] dark:text-emerald-300"
       viewBox="0 0 40 40"
       fill="none"
       stroke="currentColor"
@@ -99,16 +99,16 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
 
   return (
     <section
-      className={`relative w-full overflow-hidden bg-white pb-6 pt-12 sm:pt-20 ${className}`}
+      className={`relative w-full overflow-hidden bg-white pb-6 pt-12 sm:pt-20 dark:bg-neutral-950 ${className}`}
     >
-      <div className="absolute inset-0 z-0 bg-neutral-50/50" />
+      <div className="absolute inset-0 z-0 bg-neutral-50/50 dark:bg-neutral-900/40" />
 
       <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-8 lg:grid-cols-2 lg:gap-16 lg:px-12 xl:px-16">
         
         {/* Text Content Left */}
         <div className="py-10 pr-0 sm:pr-4 lg:py-16">
           <motion.h2
-            className={`${discoverHeadline} mb-8 max-w-xl text-3xl leading-tight text-brand-dark sm:mb-12 sm:text-4xl md:text-5xl`}
+            className={`${discoverHeadline} mb-8 max-w-xl text-3xl leading-tight text-brand-dark sm:mb-12 sm:text-4xl md:text-5xl dark:text-stone-100`}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -136,12 +136,12 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
                   </div>
                   <div className="min-w-0 flex-1 pt-1">
                     <h3
-                      className={`${discoverHeadline} mb-2 text-[17px] text-brand-dark sm:text-[19px]`}
+                      className={`${discoverHeadline} mb-2 text-[17px] text-brand-dark sm:text-[19px] dark:text-stone-100`}
                     >
                       {item.title}
                     </h3>
                     <p
-                      className={`${discoverBody} text-[14px] leading-relaxed text-neutral-500`}
+                      className={`${discoverBody} text-[14px] leading-relaxed text-neutral-500 dark:text-neutral-400`}
                     >
                       {item.description}
                     </p>
@@ -164,7 +164,7 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
             <div className="absolute inset-0 bg-brand-dark/5" />
 
             <motion.div
-              className="absolute bottom-6 left-6 z-20 w-[min(300px,calc(100%-3rem))] rounded-2xl border border-white/20 bg-white/90 p-6 shadow-xl backdrop-blur-md sm:bottom-8 sm:left-8 sm:w-[320px] sm:p-8"
+              className="absolute bottom-6 left-6 z-20 w-[min(300px,calc(100%-3rem))] rounded-2xl border border-white/20 bg-white/90 p-6 shadow-xl backdrop-blur-md sm:bottom-8 sm:left-8 sm:w-[320px] sm:p-8 dark:border-neutral-700 dark:bg-neutral-900/95"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -183,7 +183,7 @@ export default function BottomCTA({ className = '' }: BottomCTAProps) {
                     <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-emerald text-white shadow-sm">
                       <Check className="h-3 w-3 stroke-[3]" />
                     </span>
-                    <span className={`${discoverMedium} text-[14px] text-brand-dark`}>
+                    <span className={`${discoverMedium} text-[14px] text-brand-dark dark:text-stone-100`}>
                       {text}
                     </span>
                   </motion.li>

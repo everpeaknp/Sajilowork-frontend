@@ -89,8 +89,10 @@ function ProfileAccordionItem({
 }: ProfileAccordionItemProps) {
   return (
     <div
-      className={`mb-3 overflow-hidden rounded-xl transition-all duration-300 ${
-        isOpen ? 'bg-white shadow-sm' : 'bg-neutral-50/50 hover:bg-white'
+      className={`mb-3 overflow-hidden rounded-xl border transition-all duration-300 ${
+        isOpen
+          ? 'border-neutral-200/80 bg-[var(--elevated)] shadow-sm dark:border-neutral-700 dark:shadow-none'
+          : 'border-transparent bg-neutral-50/50 hover:bg-[var(--elevated)] dark:bg-neutral-900/40'
       }`}
     >
       <button
@@ -101,19 +103,27 @@ function ProfileAccordionItem({
         <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
           <div
             className={`shrink-0 rounded-xl p-3 transition-colors ${
-              isOpen ? 'bg-[#52C47F] text-white' : 'bg-neutral-100 text-neutral-400'
+              isOpen
+                ? 'bg-[#52C47F] text-white'
+                : 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-400'
             }`}
           >
             <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base font-semibold text-neutral-900 sm:text-lg">{title}</h3>
-            <p className="line-clamp-2 text-sm text-neutral-500 sm:line-clamp-none">{description}</p>
+            <h3 className="text-base font-semibold text-neutral-900 sm:text-lg dark:text-stone-100">
+              {title}
+            </h3>
+            <p className="line-clamp-2 text-sm text-neutral-500 sm:line-clamp-none dark:text-neutral-400">
+              {description}
+            </p>
           </div>
         </div>
         <div
           className={`shrink-0 rounded-lg p-2 transition-transform duration-300 ${
-            isOpen ? 'rotate-180 bg-emerald-50 text-[#52C47F]' : 'bg-neutral-50 text-neutral-400'
+            isOpen
+              ? 'rotate-180 bg-emerald-50 text-[#52C47F] dark:bg-emerald-950/50'
+              : 'bg-neutral-50 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-400'
           }`}
         >
           <ChevronDown className="h-5 w-5" />
@@ -271,7 +281,7 @@ const SELECT_CHEVRON_STYLE = {
 } as const;
 
 const inputClass =
-  'w-full rounded-xl border-2 border-transparent bg-neutral-50/80 px-4 py-3.5 text-sm font-medium text-neutral-500 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25';
+  'w-full rounded-xl border-2 border-transparent bg-neutral-50/80 px-4 py-3.5 text-sm font-medium text-neutral-500 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-neutral-50 focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-neutral-300 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900 dark:focus:border-[#52C47F]';
 
 const selectClass = `${inputClass} cursor-pointer appearance-none text-neutral-800`;
 
@@ -1366,7 +1376,7 @@ export default function DashboardProfile() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Description"
                   rows={5}
-                  className="min-h-[160px] w-full rounded-xl border-2 border-transparent bg-neutral-50/80 p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25"
+                  className="min-h-[160px] w-full rounded-xl border-2 border-transparent bg-neutral-50/80 p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-neutral-50 focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-stone-200 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900"
                 />
               </div>
             </section>

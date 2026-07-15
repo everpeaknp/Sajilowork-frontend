@@ -188,7 +188,7 @@ export default function FilterDropdownPanel({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="fixed inset-x-0 bottom-0 z-[510] flex max-h-[min(88dvh,100dvh-4rem)] flex-col rounded-t-3xl border border-outline-variant bg-white shadow-[0_-12px_48px_rgba(0,0,0,0.18)] pb-[max(1rem,env(safe-area-inset-bottom))]"
+              className="fixed inset-x-0 bottom-0 z-[510] flex max-h-[min(88dvh,100dvh-4rem)] flex-col rounded-t-3xl border border-outline-variant bg-white shadow-[0_-12px_48px_rgba(0,0,0,0.18)] pb-[max(1rem,env(safe-area-inset-bottom))] dark:border-neutral-700 dark:bg-neutral-900"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex shrink-0 justify-center pt-3 pb-1" aria-hidden>
@@ -204,7 +204,7 @@ export default function FilterDropdownPanel({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
               transition={{ duration: 0.15 }}
-              className={`fixed z-[510] max-h-[min(80vh,calc(100vh-6rem))] w-[min(calc(100vw-1.5rem),100%)] cursor-default overflow-hidden rounded-2xl border border-outline-variant bg-white p-4 shadow-2xl sm:rounded-3xl md:p-6 ${desktopClassName}`}
+              className={`fixed z-[510] max-h-[min(80vh,calc(100vh-6rem))] w-[min(calc(100vw-1.5rem),100%)] cursor-default overflow-hidden rounded-2xl border border-outline-variant bg-white p-4 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900 sm:rounded-3xl md:p-6 ${desktopClassName}`}
               style={{
                 top: desktopPos.top,
                 ...(align === 'right' ? { right: desktopPos.right } : { left: desktopPos.left }),

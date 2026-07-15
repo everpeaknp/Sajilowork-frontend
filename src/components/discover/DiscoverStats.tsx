@@ -64,8 +64,7 @@ interface DiscoverStatsProps {
 export default function DiscoverStats({ className = '' }: DiscoverStatsProps) {
   return (
     <section
-      className={`bg-white px-4 pb-12 pt-4 sm:px-8 sm:pb-14 sm:pt-6 lg:px-12 xl:px-16 ${className}`}
-      style={{ backgroundColor: '#ffffff' }}
+      className={`bg-white px-4 pb-12 pt-4 sm:px-8 sm:pb-14 sm:pt-6 lg:px-12 xl:px-16 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-y-10 md:grid-cols-4 md:gap-y-0">
         {STATS.map((stat, idx) => (
@@ -78,11 +77,11 @@ export default function DiscoverStats({ className = '' }: DiscoverStatsProps) {
             transition={{ duration: 0.5, delay: idx * 0.08 }}
           >
             <p
-              className={`${discoverDmSans} text-2xl font-medium leading-none text-[#131118] sm:text-4xl lg:text-[42px]`}
+              className={`${discoverDmSans} text-2xl font-medium leading-none text-[#131118] sm:text-4xl lg:text-[42px] dark:text-stone-100`}
             >
               <Counter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
             </p>
-            <p className={`${discoverBody} mt-3 text-sm text-[#131118] sm:text-base`}>
+            <p className={`${discoverBody} mt-3 text-sm text-[#131118] sm:text-base dark:text-neutral-300`}>
               {stat.label}
             </p>
           </motion.div>

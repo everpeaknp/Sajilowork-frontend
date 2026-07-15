@@ -1,12 +1,12 @@
 import { cn } from '@/lib/utils';
 
 function Bone({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded bg-neutral-200', className)} aria-hidden />;
+  return <div className={cn('animate-pulse rounded bg-neutral-200 dark:bg-neutral-800', className)} aria-hidden />;
 }
 
 function ListingRowSkeleton() {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 dark:border-neutral-800 dark:bg-neutral-900">
       <div className="flex min-w-0 items-center gap-4">
         <Bone className="h-12 w-12 shrink-0 rounded-full" />
         <div className="min-w-0 flex-1 space-y-2">
@@ -33,7 +33,7 @@ export default function EmployerDetailSkeleton({
       <div className="w-full px-4 pt-4 sm:px-6 sm:pt-6 md:px-10 lg:px-12 xl:px-16">
         <div className="relative mx-auto flex w-full max-w-[1600px] flex-col lg:block lg:min-h-[28rem]">
           {/* Hero */}
-          <div className="relative z-0 order-1 w-full overflow-hidden rounded-3xl border border-[#F2ECE6] bg-[#FDF8F3] sm:rounded-[2rem]">
+          <div className="relative z-0 order-1 w-full overflow-hidden rounded-3xl border border-[#F2ECE6] bg-[#FDF8F3] sm:rounded-[2rem] dark:border-neutral-800 dark:bg-neutral-900">
             <div className="relative z-10 w-full px-4 py-6 sm:px-6 sm:py-7 lg:px-10 lg:py-8 xl:px-12">
               <div className="text-left sm:ml-10 lg:ml-16 lg:pr-[min(380px,36%)] xl:ml-24">
                 <div className="flex items-center gap-5 sm:gap-6 md:gap-8">
@@ -55,14 +55,14 @@ export default function EmployerDetailSkeleton({
 
           {/* Sidebar card */}
           <div className="relative z-20 order-3 mt-6 w-full lg:absolute lg:right-6 lg:top-20 lg:order-none lg:mt-0 lg:max-w-[380px] xl:right-12 2xl:right-20">
-            <div className="rounded-2xl border border-neutral-100 bg-white p-6 shadow-xl">
+            <div className="rounded-2xl border border-neutral-100 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
               <Bone className="mb-2 h-6 w-32" />
               <Bone className="mb-6 h-4 w-full max-w-xs" />
               <div className="space-y-0">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5 last:border-0"
+                    className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5 last:border-0 dark:border-neutral-800"
                   >
                     <Bone className="h-3.5 w-24" />
                     <Bone className="h-3.5 w-20" />
@@ -95,7 +95,7 @@ export default function EmployerDetailSkeleton({
 
               <div className="space-y-4">
                 <Bone className="h-6 w-28" />
-                <div className="grid grid-cols-1 gap-6 rounded-2xl bg-neutral-50/60 p-6 md:grid-cols-12">
+                <div className="grid grid-cols-1 gap-6 rounded-2xl bg-neutral-50/60 p-6 md:grid-cols-12 dark:bg-neutral-900/60">
                   <div className="space-y-3 text-center md:col-span-4">
                     <Bone className="mx-auto h-12 w-20" />
                     <Bone className="mx-auto h-4 w-24" />

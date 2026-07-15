@@ -219,7 +219,11 @@ export async function searchBrowseServiceTasks(
 }
 
 export async function searchBrowseTasks(params: BrowseSearchParams = {}): Promise<BrowseSearchResult<Task>> {
-  return searchBrowseListings('task', params);
+  const result = await searchBrowseListings('task', params);
+  return {
+    ...result,
+    items: result.items.filter((task) => getListingKind(task) === 'task'),
+  };
 }
 
 /** Debounced autocomplete for hero search boxes. */

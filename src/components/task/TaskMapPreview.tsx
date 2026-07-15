@@ -59,7 +59,7 @@ export default function TaskMapPreview({
         className={cn(
           discoverBody,
           'pointer-events-auto relative w-full min-w-0 max-w-[min(340px,calc(100vw-3rem))] overflow-hidden',
-          'rounded-[24px] border border-neutral-200/40 bg-[#fbf2ed] shadow-[0_8px_30px_rgba(0,0,0,0.12)]',
+          'rounded-[24px] border border-neutral-200/40 bg-[#fbf2ed] shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:border-neutral-800 dark:bg-neutral-900',
         )}
       >
         <HeroCardDecor size="large" accentPosition="top-right" />
@@ -67,7 +67,7 @@ export default function TaskMapPreview({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-white/60 hover:text-neutral-800"
+          className="absolute right-4 top-4 z-20 rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-white/60 hover:text-neutral-800 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -81,9 +81,9 @@ export default function TaskMapPreview({
               name={task.user.name}
               size="xl"
               verified={task.user.verified}
-              className="h-20 w-20 shrink-0 !rounded-2xl ring-2 ring-white/80 sm:h-24 sm:w-24"
+              className="h-20 w-20 shrink-0 !rounded-2xl ring-2 ring-white/80 sm:h-24 sm:w-24 dark:ring-neutral-700"
             />
-            <div className="flex min-h-[80px] min-w-0 flex-1 flex-col items-center justify-center rounded-[16px] border border-neutral-200/50 bg-white/70 p-2 backdrop-blur-[2px] sm:min-h-[96px]">
+            <div className="flex min-h-[80px] min-w-0 flex-1 flex-col items-center justify-center rounded-[16px] border border-neutral-200/50 bg-white/70 p-2 backdrop-blur-[2px] dark:border-neutral-700 dark:bg-neutral-800/70 sm:min-h-[96px]">
               <span
                 className={cn(
                   discoverMedium,
@@ -108,7 +108,7 @@ export default function TaskMapPreview({
               id="map-preview-title"
               className={cn(
                 discoverHeadline,
-                'line-clamp-3 break-words text-lg font-bold leading-tight text-black [overflow-wrap:anywhere] sm:text-xl',
+                'line-clamp-3 break-words text-lg font-bold leading-tight text-black [overflow-wrap:anywhere] dark:text-stone-100 sm:text-xl',
               )}
             >
               {task.title}
@@ -116,7 +116,7 @@ export default function TaskMapPreview({
             <div
               className={cn(
                 discoverBody,
-                'flex items-center justify-between gap-3 text-sm font-medium text-neutral-600',
+                'flex items-center justify-between gap-3 text-sm font-medium text-neutral-600 dark:text-neutral-400',
               )}
             >
               <span className="min-w-0 break-words [overflow-wrap:anywhere]">
@@ -130,7 +130,7 @@ export default function TaskMapPreview({
                 <span className="shrink-0 whitespace-nowrap text-right text-neutral-400">…</span>
               ) : null}
             </div>
-            <p className={cn(discoverBody, 'break-words text-sm text-neutral-600 [overflow-wrap:anywhere]')}>
+            <p className={cn(discoverBody, 'break-words text-sm text-neutral-600 [overflow-wrap:anywhere] dark:text-neutral-400')}>
               Posted by{' '}
               <span className={cn(discoverMedium, 'font-semibold text-[#52C47F]')}>{task.user.name}.</span>{' '}
               about {hoursSincePosted(task.postedDate)} hours ago

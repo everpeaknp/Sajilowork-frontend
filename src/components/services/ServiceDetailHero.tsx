@@ -16,8 +16,8 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
   const meta = getServiceMeta(service);
 
   return (
-    <div className="relative flex min-h-[150px] w-full items-stretch overflow-hidden rounded-[20px] border border-neutral-200/30 bg-[#f3f3f3] shadow-sm sm:min-h-[165px] md:min-h-[175px] lg:min-h-[190px]">
-      <div className="pointer-events-none absolute -left-10 -top-10 z-0 h-28 w-28 select-none rounded-full bg-[#fcd074]/90 sm:-left-12 sm:-top-12 sm:h-36 sm:w-36" />
+    <div className="relative flex min-h-[150px] w-full items-stretch overflow-hidden rounded-[20px] border border-neutral-200/30 bg-[#f3f3f3] shadow-sm sm:min-h-[165px] md:min-h-[175px] lg:min-h-[190px] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+      <div className="pointer-events-none absolute -left-10 -top-10 z-0 h-28 w-28 select-none rounded-full bg-[#fcd074]/90 sm:-left-12 sm:-top-12 sm:h-36 sm:w-36 dark:bg-amber-700/30" />
 
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.18] mix-blend-overlay">
         <svg
@@ -38,7 +38,7 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
       <div className="relative z-10 grid w-full grid-cols-1 items-center gap-4 px-4 py-5 sm:px-8 md:px-12 lg:grid-cols-12 lg:gap-4 lg:px-16 lg:py-6 xl:px-20">
         <div className="flex flex-col justify-center lg:col-span-7 lg:pr-4">
           <motion.h1
-            className="max-w-2xl text-lg font-normal leading-tight tracking-tight text-black sm:text-2xl md:text-[28px] lg:text-[34px]"
+            className="max-w-2xl text-lg font-normal leading-tight tracking-tight text-black sm:text-2xl md:text-[28px] lg:text-[34px] dark:text-stone-100"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -47,7 +47,7 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
           </motion.h1>
 
           <motion.div
-            className="mt-3 flex flex-col gap-2 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:text-sm md:gap-x-6"
+            className="mt-3 flex flex-col gap-2 text-xs font-normal text-black sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2 sm:text-sm md:gap-x-6 dark:text-stone-200"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.12 }}
@@ -59,7 +59,7 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
               <img
                 src={service.author.avatar}
                 alt={service.author.name}
-                className="h-7 w-7 rounded-full border border-white object-cover shadow-sm"
+                className="h-7 w-7 rounded-full border border-white object-cover shadow-sm dark:border-neutral-700"
                 referrerPolicy="no-referrer"
               />
               <span className="hover:text-[#52C47F]">{service.author.name}</span>
@@ -68,7 +68,7 @@ export default function ServiceDetailHero({ service }: ServiceDetailHeroProps) {
             <span className="inline-flex items-center gap-1.5">
               <Star className="h-4 w-4 fill-[#fbbf24] text-[#fbbf24]" />
               {service.rating.toFixed(2)}
-              <span className="text-neutral-600">{service.reviews} reviews</span>
+              <span className="text-neutral-600 dark:text-neutral-400">{service.reviews} reviews</span>
             </span>
 
             <span className="inline-flex items-center gap-1.5">

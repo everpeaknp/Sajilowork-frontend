@@ -164,22 +164,22 @@ export default function ServicePurchaseModal({
         embedded
           ? 'w-full'
           : presentation === 'page'
-            ? 'w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm'
-            : 'w-full max-w-md rounded-2xl bg-white shadow-xl'
+            ? 'w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none'
+            : 'w-full max-w-md rounded-2xl bg-white shadow-xl dark:bg-neutral-900'
       }
       role={presentation === 'modal' ? 'dialog' : undefined}
       aria-modal={presentation === 'modal' ? true : undefined}
       aria-labelledby="service-purchase-title"
     >
         {!embedded ? (
-          <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
-            <h2 id="service-purchase-title" className="text-lg font-medium text-black">
+          <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4 dark:border-neutral-800">
+            <h2 id="service-purchase-title" className="text-lg font-medium text-black dark:text-stone-100">
               Confirm purchase
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100"
+              className="rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -190,9 +190,9 @@ export default function ServicePurchaseModal({
         <div className={`space-y-4 ${embedded ? 'px-0 py-0' : 'px-5 py-5'}`}>
           {!embedded ? (
             <div>
-              <p className="text-sm text-neutral-500">{service.title}</p>
-              <p className="mt-1 text-base font-medium text-black">{selectedPackage.name} package</p>
-              <p className="mt-2 text-2xl font-medium tracking-tight text-black">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{service.title}</p>
+              <p className="mt-1 text-base font-medium text-black dark:text-stone-100">{selectedPackage.name} package</p>
+              <p className="mt-2 text-2xl font-medium tracking-tight text-black dark:text-stone-100">
                 {formatNPR(selectedPackage.price)}
               </p>
             </div>
@@ -273,7 +273,7 @@ export default function ServicePurchaseModal({
                   onChange={(e) => setNote(e.target.value)}
                   rows={noteExpanded ? 10 : embedded ? 6 : 4}
                   placeholder="Share any details the seller should know before starting…"
-                  className={`mt-2 w-full rounded-lg border border-neutral-200 px-3 py-2.5 text-sm leading-relaxed text-black outline-none transition-[min-height] ring-[#52C47F] focus:ring-1 ${
+                  className={`mt-2 w-full rounded-lg border border-neutral-200 px-3 py-2.5 text-sm leading-relaxed text-black outline-none transition-[min-height] ring-[#52C47F] focus:ring-1 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500 ${
                     noteExpanded ? 'min-h-[240px] resize-y' : embedded ? 'min-h-[140px] resize-none' : 'min-h-[100px] resize-none'
                   }`}
                 />
@@ -299,14 +299,14 @@ export default function ServicePurchaseModal({
         </div>
 
         <div
-          className={`flex gap-3 border-t border-neutral-100 ${embedded ? 'px-0 py-5' : 'px-5 py-4'}`}
+          className={`flex gap-3 border-t border-neutral-100 dark:border-neutral-800 ${embedded ? 'px-0 py-5' : 'px-5 py-4'}`}
         >
           {!embedded ? (
             <button
               type="button"
               onClick={onClose}
               disabled={purchasing}
-              className="flex-1 rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-neutral-200 px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
             >
               Cancel
             </button>

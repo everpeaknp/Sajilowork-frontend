@@ -16,8 +16,7 @@ import {
 } from '@/lib/userGeolocation';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-
-type MapLayerId = 'default' | 'dark' | 'satellite' | 'terrain';
+import { useThemeSyncedMapLayer, type MapLayerId } from '@/hooks/useThemeSyncedMapLayer';
 
 const MAP_LAYERS: Record<
   MapLayerId,
@@ -96,13 +95,6 @@ function flyToUserLocation(map: L.Map, center: [number, number]) {
   } catch {
     map.setView(center, MARKER_FOCUS_ZOOM);
   }
-}
-
-function getInitialMapLayer(): MapLayerId {
-  if (typeof window === 'undefined') return 'default';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'default';
 }
 
 const USER_LOCATION_ICON = L.divIcon({
@@ -386,7 +378,7 @@ export default function MapView({ tasks, onTaskSelect }: MapViewProps) {
   const userInteractedRef = useRef(false);
   const geoInitialized = useRef(false);
   const [isClient, setIsClient] = useState(false);
-  const [mapLayer, setMapLayer] = useState<MapLayerId>(getInitialMapLayer);
+  const { mapLayer, setMapLayer } = useThemeSyncedMapLayer();
   const [userCenter, setUserCenter] = useState<[number, number]>([
     KATHMANDU_CENTER.lat,
     KATHMANDU_CENTER.lng,
@@ -563,6 +555,9 @@ export default function MapView({ tasks, onTaskSelect }: MapViewProps) {
         }
         .leaflet-tile {
           filter: ${activeTileFilter ?? 'none'};
+        }
+        .leaflet-container {
+          background: ${mapLayer === 'dark' ? '#0b0b0b' : mapLayer === 'satellite' ? '#111' : '#e4e4e7'};
         }
       `}</style>
     </div>

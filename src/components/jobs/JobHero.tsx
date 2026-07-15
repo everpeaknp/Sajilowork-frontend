@@ -75,18 +75,18 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
     <div className="relative z-20 w-full max-w-[760px]">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`relative z-30 flex w-full flex-col items-stretch rounded-xl border bg-white p-1.5 shadow-md transition-all duration-300 md:flex-row md:items-center ${
-            isFocused ? 'border-neutral-300 ring-2 ring-[#1D3E35]/5' : 'border-neutral-200/40'
+          className={`relative z-30 flex w-full flex-col items-stretch rounded-xl border bg-white p-1.5 shadow-md transition-all duration-300 md:flex-row md:items-center dark:border-neutral-700 dark:bg-neutral-950 ${
+            isFocused ? 'border-neutral-300 ring-2 ring-[#1D3E35]/5 dark:border-neutral-600' : 'border-neutral-200/40'
           }`}
         >
-          <div className="flex min-w-0 flex-1 items-center py-1 md:min-w-[200px] md:py-0">
+          <div className="flex min-w-0 flex-1 items-center border-b border-neutral-100 py-1 md:min-w-[200px] md:border-b-0 md:py-0 dark:border-neutral-800">
             <div className="pl-3 pr-2 text-neutral-400">
               <SearchIcon className="h-5 w-5 stroke-[2]" />
             </div>
             <input
               id="job-search"
               type="text"
-              className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2.5 text-sm text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base`}
+              className={`${discoverBody} w-full flex-1 border-none bg-transparent py-2.5 text-sm text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base dark:text-stone-100 dark:placeholder:text-neutral-500`}
               placeholder="Search jobs by title, skill, or company"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -95,13 +95,13 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
             />
           </div>
 
-          <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 md:block" />
+          <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 md:block dark:bg-neutral-700" />
 
-          <div className="relative flex min-w-0 items-center border-t border-neutral-200 py-2 pr-2 pt-2 md:min-w-[180px] md:border-0 md:py-0 md:pt-0">
+          <div className="relative flex min-w-0 items-center border-t border-neutral-200 py-2 pr-2 pt-2 md:min-w-[180px] md:border-0 md:py-0 md:pt-0 dark:border-neutral-800">
             <select
               value={locationQuery}
               onChange={(e) => setLocationQuery(e.target.value)}
-              className={`${discoverBody} w-full cursor-pointer appearance-none border-none bg-transparent py-2 pl-3 pr-8 text-sm text-neutral-700 outline-none focus:ring-0 md:text-base`}
+              className={`${discoverBody} w-full cursor-pointer appearance-none border-none bg-transparent py-2 pl-3 pr-8 text-sm text-neutral-700 outline-none focus:ring-0 md:text-base dark:text-neutral-300 dark:[&>option]:bg-neutral-900`}
             >
               {LOCATION_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>
@@ -125,7 +125,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
         <AnimatePresence>
           {isFocused && suggestions.length > 0 && (
             <motion.div
-              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg"
+              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -141,7 +141,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
                   <button
                     key={item}
                     type="button"
-                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50`}
+                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800`}
                     onMouseDown={() => performSearch(item, locationQuery)}
                   >
                     <SearchIcon className="h-4 w-4 stroke-[1.5] text-[#52C47F]" />
@@ -164,16 +164,16 @@ interface JobHeroProps {
 
 export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps) {
   return (
-    <section className={`select-none bg-white px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8 lg:px-8 ${className}`}>
+    <section className={`select-none bg-white px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8 lg:px-8 dark:bg-neutral-950 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl bg-[#f6f5f0] sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl bg-[#f6f5f0] sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px] dark:bg-neutral-900">
           <MarketplaceHeroBreadcrumbs serpKey="jobs" sectionPath="/jobs" variant="light" />
 
           {/* Left wave — warm neutral instead of yellow */}
           <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 hidden select-none sm:block">
             <svg
               viewBox="0 0 120 400"
-              className="h-full w-[80px] text-[#e2ddd6] sm:w-[110px] md:w-[140px]"
+              className="h-full w-[80px] text-[#e2ddd6] sm:w-[110px] md:w-[140px] dark:text-neutral-800"
               fill="currentColor"
               preserveAspectRatio="none"
               aria-hidden
@@ -188,7 +188,7 @@ export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps
             {/* Left: Text */}
             <div className="flex flex-col justify-center pb-4 lg:col-span-8 lg:pb-10">
               <motion.h1
-                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-brand-dark sm:text-3xl md:text-[38px]`}
+                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-brand-dark sm:text-3xl md:text-[38px] dark:text-stone-100`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -197,7 +197,7 @@ export default function JobHero({ className = '', onSearchSubmit }: JobHeroProps
               </motion.h1>
 
               <motion.p
-                className={`${discoverBody} mb-5 max-w-lg text-sm leading-relaxed text-neutral-500 sm:mb-6`}
+                className={`${discoverBody} mb-5 max-w-lg text-sm leading-relaxed text-neutral-500 sm:mb-6 dark:text-neutral-400`}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}

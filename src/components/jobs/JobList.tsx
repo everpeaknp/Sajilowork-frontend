@@ -277,7 +277,7 @@ export default function JobList({
           type="button"
           onClick={() => setCurrentPage(p as number)}
           className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-sm font-medium transition-all sm:h-10 sm:w-10 sm:text-[15px] ${
-            isCurrent ? 'bg-[#45a874] font-medium text-white' : 'text-neutral-700 hover:bg-neutral-50'
+            isCurrent ? 'bg-[#45a874] font-medium text-white' : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-400 dark:hover:bg-neutral-800'
           }`}
         >
           {p}
@@ -292,7 +292,7 @@ export default function JobList({
   return (
     <section
       id="custom-job-board-grid"
-      className={`w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12 ${className}`}
+      className={`w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12 dark:border-neutral-800 dark:bg-neutral-950 ${className}`}
     >
       <div className="w-full max-w-none">
         <AnimatePresence>
@@ -373,15 +373,15 @@ export default function JobList({
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className={`${discoverMedium} ml-1 shrink-0 cursor-pointer py-2 text-xs font-bold text-neutral-400 transition-colors hover:text-black`}
+                  className={`${discoverMedium} ml-1 shrink-0 cursor-pointer py-2 text-xs font-bold text-neutral-400 transition-colors hover:text-black dark:hover:text-stone-100`}
                 >
                   Reset
                 </button>
               )}
             </div>
 
-            <p className={`${discoverBody} shrink-0 whitespace-nowrap text-sm font-medium text-neutral-800 sm:text-base`}>
-              <span className={`${discoverMedium} font-bold text-neutral-900`}>{totalJobs}</span> jobs available
+            <p className={`${discoverBody} shrink-0 whitespace-nowrap text-sm font-medium text-neutral-800 sm:text-base dark:text-neutral-300`}>
+              <span className={`${discoverMedium} font-bold text-neutral-900 dark:text-stone-100`}>{totalJobs}</span> jobs available
             </p>
           </div>
 
@@ -399,7 +399,7 @@ export default function JobList({
               <button
                 type="button"
                 onClick={() => handleDropdownToggle('sort')}
-                className={`${discoverMedium} flex cursor-pointer items-center gap-1 whitespace-nowrap text-[13px] text-neutral-800 transition-all hover:text-black focus:outline-none`}
+                className={`${discoverMedium} flex cursor-pointer items-center gap-1 whitespace-nowrap text-[13px] text-neutral-800 transition-all hover:text-black focus:outline-none dark:text-stone-100 dark:hover:text-white`}
               >
                 <span>{SORT_OPTIONS.find((o) => o.value === sortBy)?.label}</span>
                 <ChevronDown className="h-4 w-4 text-neutral-500" />
@@ -410,7 +410,7 @@ export default function JobList({
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 3 }}
-                    className="absolute right-0 top-full z-50 mt-1.5 w-48 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
+                    className="absolute right-0 top-full z-50 mt-1.5 w-48 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
                   >
                     {SORT_OPTIONS.map((opt) => (
                       <button
@@ -420,8 +420,8 @@ export default function JobList({
                           setSortBy(opt.value);
                           setOpenDropdown(null);
                         }}
-                        className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 ${
-                          sortBy === opt.value ? 'font-semibold text-[#45a874]' : 'text-neutral-700'
+                        className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                          sortBy === opt.value ? 'font-semibold text-[#45a874]' : 'text-neutral-700 dark:text-neutral-300'
                         }`}
                       >
                         <span>{opt.label}</span>
@@ -436,10 +436,10 @@ export default function JobList({
         </div>
 
         {hasActiveSearch ? (
-          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-            <p className={`${discoverBody} text-sm text-neutral-600`}>
+          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800 dark:bg-neutral-900">
+            <p className={`${discoverBody} text-sm text-neutral-600 dark:text-neutral-400`}>
               Showing job matches for{' '}
-              <span className={`${discoverMedium} text-[#1D3E35]`}>&quot;{activeSearchLabel}&quot;</span>
+              <span className={`${discoverMedium} text-[#1D3E35] dark:text-stone-100`}>&quot;{activeSearchLabel}&quot;</span>
             </p>
             <button
               type="button"
@@ -457,12 +457,12 @@ export default function JobList({
         {loadingJobs ? (
           <GridSkeleton count={8} cardType="job" className="relative z-0 mt-2" label="Loading jobs" />
         ) : paginatedJobsList.length === 0 ? (
-          <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center">
-            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
-            <span className={`${discoverHeadline} mb-1 block text-lg text-[#193e32]`}>
+          <div className="mt-2 w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-20 text-center dark:border-neutral-700 dark:bg-neutral-900">
+            <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300 dark:text-neutral-600" />
+            <span className={`${discoverHeadline} mb-1 block text-lg text-[#193e32] dark:text-stone-100`}>
               No matching listings
             </span>
-            <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500`}>
+            <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500 dark:text-neutral-400`}>
               {hasActiveSearch
                 ? 'No jobs match your search. Try different keywords or clear the search.'
                 : 'There are no available opportunities matching your category and level filters.'}
@@ -530,7 +530,7 @@ export default function JobList({
                           router.push(jobHref);
                         }
                       }}
-                      className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:min-h-[300px] sm:p-7"
+                      className="group relative flex min-h-[260px] cursor-pointer flex-col justify-between rounded-xl border border-neutral-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:min-h-[300px] sm:p-7 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:border-neutral-700 dark:hover:shadow-none"
                     >
                     <div>
                       <div className="flex items-center justify-between">
@@ -553,8 +553,8 @@ export default function JobList({
                           }}
                           className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 ${
                             isStarred
-                              ? 'border-amber-300 bg-amber-50 text-amber-500 shadow-sm'
-                              : 'border-[#45a874]/20 bg-white text-[#45a874] hover:bg-[#45a874]/5'
+                              ? 'border-amber-300 bg-amber-50 text-amber-500 shadow-sm dark:border-amber-700 dark:bg-amber-950/40'
+                              : 'border-[#45a874]/20 bg-white text-[#45a874] hover:bg-[#45a874]/5 dark:border-emerald-800 dark:bg-neutral-900 dark:hover:bg-emerald-950/40'
                           }`}
                           title={isStarred ? 'Starred bookmark' : 'Add bookmark'}
                         >
@@ -571,21 +571,21 @@ export default function JobList({
                           </svg>
                         </button>
                       </div>
-                      <h3 className={`${discoverBody} mb-4 mt-5 line-clamp-2 text-base font-normal leading-[1.35] tracking-tight text-black transition-colors group-hover:text-[#45a874] sm:mb-4.5 sm:mt-6 sm:text-[18px]`}>
+                      <h3 className={`${discoverBody} mb-4 mt-5 line-clamp-2 text-base font-normal leading-[1.35] tracking-tight text-black transition-colors group-hover:text-[#45a874] sm:mb-4.5 sm:mt-6 sm:text-[18px] dark:text-stone-100`}>
                         {job.title}
                       </h3>
-                      <div className={`${discoverBody} mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:mb-6 sm:flex-nowrap sm:gap-x-0 sm:text-[13px]`}>
+                      <div className={`${discoverBody} mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:mb-6 sm:flex-nowrap sm:gap-x-0 sm:text-[13px] dark:text-neutral-400`}>
                         <span>
                           {job.budgetLabel} {job.type}
                         </span>
-                        <span className="hidden text-neutral-300 sm:inline">|</span>
+                        <span className="hidden text-neutral-300 sm:inline dark:text-neutral-600">|</span>
                         <span>{job.duration}</span>
                       </div>
                     </div>
-                    <div className={`${discoverBody} mt-auto flex flex-wrap select-none items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:flex-nowrap sm:gap-x-0 sm:text-[13px]`}>
-                      <div className="mr-2 hidden h-3.5 w-px bg-black sm:block" />
+                    <div className={`${discoverBody} mt-auto flex flex-wrap select-none items-center gap-x-2 gap-y-1 text-xs font-normal text-black sm:flex-nowrap sm:gap-x-0 sm:text-[13px] dark:text-neutral-400`}>
+                      <div className="mr-2 hidden h-3.5 w-px bg-black sm:block dark:bg-neutral-600" />
                       <span>{job.experienceLevel}</span>
-                      <span className="text-neutral-300">|</span>
+                      <span className="text-neutral-300 dark:text-neutral-600">|</span>
                       <span>{locationLabel(job.location)}</span>
                     </div>
                     </div>
@@ -603,7 +603,7 @@ export default function JobList({
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 sm:h-10 sm:w-10"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 sm:h-10 sm:w-10 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 title="Previous Page"
               >
                 <ChevronLeft className="h-4.5 w-4.5" />
@@ -613,7 +613,7 @@ export default function JobList({
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 sm:h-10 sm:w-10"
+                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-200 text-neutral-700 transition-colors hover:border-gray-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-30 sm:h-10 sm:w-10 dark:border-neutral-700 dark:text-neutral-400 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 title="Next Page"
               >
                 <ChevronRight className="h-4.5 w-4.5" />
@@ -653,12 +653,14 @@ function FilterDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className={`${discoverMedium} flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-sm shadow-sm transition-all hover:bg-neutral-50 sm:gap-2 sm:px-4.5 sm:py-2.5 sm:text-[14px] ${
-          active ? 'border-brand-emerald font-semibold text-brand-emerald' : 'border-neutral-200 text-neutral-600'
+        className={`${discoverMedium} flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border bg-white px-3 py-2 text-sm shadow-sm transition-all hover:bg-neutral-50 sm:gap-2 sm:px-4.5 sm:py-2.5 sm:text-[14px] dark:bg-neutral-900 dark:hover:bg-neutral-800 ${
+          active
+            ? 'border-brand-emerald font-semibold text-brand-emerald'
+            : 'border-neutral-200 text-neutral-600 dark:border-neutral-700 dark:text-neutral-300'
         }`}
       >
         <span>{label}</span>
-        <ChevronDown className="h-4 w-4 text-black" />
+        <ChevronDown className="h-4 w-4 text-black dark:text-stone-100" />
       </button>
       <AnimatePresence>
         {open && (
@@ -666,15 +668,15 @@ function FilterDropdown({
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 3 }}
-            className="absolute left-0 top-full z-50 mt-1.5 w-56 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg"
+            className="absolute left-0 top-full z-50 mt-1.5 w-56 rounded-lg border border-gray-200/90 bg-white py-1.5 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
           >
             {options.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
                 onClick={() => onSelect(opt.value)}
-                className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 ${
-                  selected === opt.value ? 'font-semibold text-emerald-600' : 'text-neutral-700'
+                className={`${discoverMedium} flex w-full cursor-pointer items-center justify-between px-3.5 py-2 text-left text-xs transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                  selected === opt.value ? 'font-semibold text-emerald-600' : 'text-neutral-700 dark:text-neutral-300'
                 }`}
               >
                 <span>{opt.label}</span>

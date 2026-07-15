@@ -52,13 +52,13 @@ export default function ServiceFaq({ service }: ServiceFaqProps) {
   }, [service.faq]);
 
   return (
-    <section className="border-b border-neutral-200 pb-10 pt-10">
-      <h2 className="text-2xl font-normal tracking-tight text-black sm:text-[28px]">
+    <section className="border-b border-neutral-200 pb-10 pt-10 dark:border-neutral-800">
+      <h2 className="text-2xl font-normal tracking-tight text-black sm:text-[28px] dark:text-stone-100">
         Frequently Asked Questions
       </h2>
 
       {loading ? (
-        <p className="mt-6 text-sm text-neutral-500">Loading questions…</p>
+        <p className="mt-6 text-sm text-neutral-500 dark:text-neutral-400">Loading questions…</p>
       ) : (
         <div className="mt-6 space-y-5">
           {items.map((item, index) => {
@@ -69,7 +69,7 @@ export default function ServiceFaq({ service }: ServiceFaqProps) {
                 <div
                   className={
                     isOpen
-                      ? 'rounded-sm bg-[#EAF6F1] px-5 py-5 sm:px-6 sm:py-6'
+                      ? 'rounded-sm bg-[#EAF6F1] px-5 py-5 sm:px-6 sm:py-6 dark:bg-emerald-950/40'
                       : undefined
                   }
                 >
@@ -79,10 +79,10 @@ export default function ServiceFaq({ service }: ServiceFaqProps) {
                     className="flex w-full cursor-pointer items-start justify-between gap-4 text-left"
                     aria-expanded={isOpen}
                   >
-                    <span className="text-sm font-normal text-black sm:text-[15px]">
+                    <span className="text-sm font-normal text-black sm:text-[15px] dark:text-stone-100">
                       {item.question}
                     </span>
-                    <span className="mt-0.5 shrink-0 text-black">
+                    <span className="mt-0.5 shrink-0 text-black dark:text-stone-200">
                       {isOpen ? (
                         <Minus className="h-4 w-4" strokeWidth={2} />
                       ) : (
@@ -92,7 +92,7 @@ export default function ServiceFaq({ service }: ServiceFaqProps) {
                   </button>
 
                   {isOpen && (
-                    <p className="mt-4 max-w-3xl text-sm font-normal leading-[1.85] text-neutral-600 sm:text-[15px]">
+                    <p className="mt-4 max-w-3xl text-sm font-normal leading-[1.85] text-neutral-600 sm:text-[15px] dark:text-neutral-400">
                       {item.answer}
                     </p>
                   )}

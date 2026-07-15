@@ -144,17 +144,17 @@ export default function FilterBar({
 
   const filterTriggerClass = (active: boolean) =>
     `flex min-h-[44px] touch-manipulation cursor-pointer items-center gap-1.5 whitespace-nowrap ${landingBody} text-[13px] font-semibold transition-colors sm:min-h-0 sm:gap-2 ${
-      active ? 'text-brand-emerald' : 'text-black/70 hover:text-brand-emerald'
+      active ? 'text-brand-emerald' : 'text-black/70 hover:text-brand-emerald dark:text-stone-300 dark:hover:text-brand-emerald'
     }`;
 
   return (
-    <div className={`relative z-[200] bg-white ${landingBody}`}>
+    <div className={`relative z-[200] border-b border-transparent bg-white dark:border-neutral-800 dark:bg-neutral-950 ${landingBody}`}>
       <div className="flex min-w-0 flex-col gap-2.5 px-3 py-2.5 sm:px-6 sm:py-3 lg:flex-row lg:items-center lg:gap-6 lg:px-10">
         <div className="flex min-w-0 items-center gap-2 lg:shrink-0">
           <button
             type="button"
             onClick={onToggleCompact}
-            className="hidden shrink-0 rounded-lg p-2 transition-colors hover:bg-surface-dim lg:flex"
+            className="hidden shrink-0 rounded-lg p-2 transition-colors hover:bg-surface-dim dark:hover:bg-neutral-800 lg:flex"
             title={isCompactSidebar ? 'Show full sidebar' : 'Show compact sidebar'}
           >
             <Menu className="h-5 w-5 text-on-surface-variant" />
@@ -172,7 +172,7 @@ export default function FilterBar({
                   query: e.target.value || undefined,
                 })
               }
-              className="w-full rounded-full bg-[#f1f4f9] py-2 pl-10 pr-4 font-body text-[14px] outline-none transition-all placeholder:text-on-surface-variant/60 focus:bg-[#eef2f8]"
+              className="w-full rounded-full bg-[#f1f4f9] py-2 pl-10 pr-4 font-body text-[14px] outline-none transition-all placeholder:text-on-surface-variant/60 focus:bg-[#eef2f8] dark:bg-neutral-800 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-800"
             />
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function FilterBar({
                   className={`min-h-[44px] shrink-0 touch-manipulation whitespace-nowrap font-body text-[13px] font-semibold transition-colors sm:min-h-0 ${
                     statusTabs.active === filter.id
                       ? 'text-brand-emerald'
-                      : 'text-black/70 hover:text-brand-emerald'
+                      : 'text-black/70 hover:text-brand-emerald dark:text-stone-300 dark:hover:text-brand-emerald'
                   }`}
                 >
                   {filter.label}
@@ -249,7 +249,7 @@ export default function FilterBar({
                   placeholder="Search categories"
                   value={categorySearchQuery}
                   onChange={(e) => setCategorySearchQuery(e.target.value)}
-                  className="w-full rounded-full bg-[#f1f4f9] py-3 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60 focus:bg-[#eef2f8]"
+                  className="w-full rounded-full bg-[#f1f4f9] py-3 pl-12 pr-4 outline-none transition-all placeholder:text-on-surface-variant/60 focus:bg-[#eef2f8] dark:bg-neutral-800 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-800"
                 />
               </div>
               <div className="grid grid-cols-1 gap-y-3 px-1 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4">
@@ -329,7 +329,7 @@ export default function FilterBar({
                       setIsStatusOpen(false);
                     }}
                     className={`flex min-h-[48px] w-full items-center rounded-2xl px-4 py-3 text-left font-body text-[15px] font-semibold transition-all sm:px-5 sm:py-4 sm:text-[16px] ${
-                      !draftStatus ? 'bg-[#f1f4f9] text-brand-dark' : 'text-brand-dark hover:bg-[#f1f4f9]/50'
+                      !draftStatus ? 'bg-[#f1f4f9] text-brand-dark dark:bg-neutral-800 dark:text-stone-100' : 'text-brand-dark hover:bg-[#f1f4f9]/50 dark:text-stone-200 dark:hover:bg-neutral-800/50'
                     }`}
                   >
                     All Status
@@ -346,7 +346,7 @@ export default function FilterBar({
                           setIsStatusOpen(false);
                         }}
                         className={`flex min-h-[48px] w-full items-center rounded-2xl px-4 py-3 text-left font-body text-[15px] font-semibold transition-all sm:px-5 sm:py-4 sm:text-[16px] ${
-                          isSelected ? 'bg-[#f1f4f9] text-brand-dark' : 'text-brand-dark hover:bg-[#f1f4f9]/50'
+                          isSelected ? 'bg-[#f1f4f9] text-brand-dark dark:bg-neutral-800 dark:text-stone-100' : 'text-brand-dark hover:bg-[#f1f4f9]/50 dark:text-stone-200 dark:hover:bg-neutral-800/50'
                         }`}
                       >
                         {option.label}
@@ -387,11 +387,11 @@ export default function FilterBar({
             >
               <div className="space-y-6">
                 <div className="text-center">
-                  <span className={`${landingHeadlineSm} text-xl text-brand-dark sm:text-2xl`}>
+                  <span className={`${landingHeadlineSm} text-xl text-brand-dark dark:text-stone-100 sm:text-2xl`}>
                     {formatBudgetRange(draftBudgetMin, draftBudgetMax)}
                   </span>
                 </div>
-                <div className="relative h-2 rounded-full bg-[#f1f4f9]">
+                <div className="relative h-2 rounded-full bg-[#f1f4f9] dark:bg-neutral-800">
                   <div
                     className="absolute h-full rounded-full bg-brand-emerald"
                     style={{
@@ -463,11 +463,11 @@ export default function FilterBar({
                       type="button"
                       onClick={() => handleSortChange(option.id)}
                       className={`flex min-h-[48px] w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-body text-[15px] font-semibold transition-all sm:gap-4 sm:px-5 sm:py-4 sm:text-[16px] ${
-                        isSelected ? 'bg-[#f1f4f9] text-brand-dark' : 'text-brand-dark hover:bg-[#f1f4f9]/50'
+                        isSelected ? 'bg-[#f1f4f9] text-brand-dark dark:bg-neutral-800 dark:text-stone-100' : 'text-brand-dark hover:bg-[#f1f4f9]/50 dark:text-stone-200 dark:hover:bg-neutral-800/50'
                       }`}
                     >
                       <Icon
-                        className={`h-5 w-5 shrink-0 ${isSelected ? 'text-brand-dark' : 'text-on-surface-variant'}`}
+                        className={`h-5 w-5 shrink-0 ${isSelected ? 'text-brand-dark dark:text-stone-100' : 'text-on-surface-variant'}`}
                       />
                       {option.label}
                     </button>

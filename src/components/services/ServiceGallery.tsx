@@ -70,7 +70,7 @@ export default function ServiceGallery({ images, altPrefix = 'Service gallery' }
 
   return (
     <div className="space-y-4" id="service-gallery">
-      <div className="group relative aspect-[5/4] overflow-hidden border border-neutral-200/65 bg-neutral-100 shadow-inner sm:aspect-[4/3] md:aspect-auto md:min-h-[440px] lg:min-h-[520px]">
+      <div className="group relative aspect-[5/4] overflow-hidden border border-neutral-200/65 bg-neutral-100 shadow-inner sm:aspect-[4/3] md:aspect-auto md:min-h-[440px] lg:min-h-[520px] dark:border-neutral-800 dark:bg-neutral-900">
         <div className="absolute inset-0 select-none">
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.img
@@ -99,19 +99,19 @@ export default function ServiceGallery({ images, altPrefix = 'Service gallery' }
             <button
               type="button"
               onClick={handlePrev}
-              className="absolute left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50 active:scale-90 sm:h-11 sm:w-11"
+              className="absolute left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50 active:scale-90 sm:h-11 sm:w-11 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
               aria-label="Previous image"
             >
-              <ArrowLeft className="h-4 w-4 text-neutral-800 sm:h-5 sm:w-5" strokeWidth={2.5} />
+              <ArrowLeft className="h-4 w-4 text-neutral-800 sm:h-5 sm:w-5 dark:text-stone-100" strokeWidth={2.5} />
             </button>
 
             <button
               type="button"
               onClick={handleNext}
-              className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50 active:scale-90 sm:h-11 sm:w-11"
+              className="absolute right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50 active:scale-90 sm:h-11 sm:w-11 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800"
               aria-label="Next image"
             >
-              <ArrowRight className="h-4 w-4 text-neutral-800 sm:h-5 sm:w-5" strokeWidth={2.5} />
+              <ArrowRight className="h-4 w-4 text-neutral-800 sm:h-5 sm:w-5 dark:text-stone-100" strokeWidth={2.5} />
             </button>
           </>
         ) : null}

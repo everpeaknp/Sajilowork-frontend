@@ -1,13 +1,13 @@
 import { cn } from '@/lib/utils';
 
 function Bone({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded bg-neutral-200', className)} aria-hidden />;
+  return <div className={cn('animate-pulse rounded bg-neutral-200 dark:bg-neutral-800', className)} aria-hidden />;
 }
 
 export default function JobDetailSkeleton() {
   return (
     <div
-      className="select-none bg-white pb-8 pt-6 sm:pb-12 sm:pt-8"
+      className="select-none bg-white pb-8 pt-6 sm:pb-12 sm:pt-8 dark:bg-neutral-950"
       aria-busy="true"
       aria-label="Loading job"
     >

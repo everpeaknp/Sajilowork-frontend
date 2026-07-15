@@ -146,13 +146,13 @@ export default function JobMapFilterBar({
   };
 
   return (
-    <div ref={barRef} className="relative z-20 shrink-0 border-b border-outline-variant bg-white px-3 py-3 sm:px-4">
+    <div ref={barRef} className="relative z-20 shrink-0 border-b border-outline-variant bg-white px-3 py-3 dark:border-neutral-800 dark:bg-neutral-950 sm:px-4">
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-dim lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-dim dark:border-neutral-700 dark:hover:bg-neutral-800 lg:hidden"
             aria-label={isSidebarVisible ? 'Hide job list' : 'Show job list'}
           >
             <Menu className="h-5 w-5" />
@@ -165,7 +165,7 @@ export default function JobMapFilterBar({
               value={searchDraft}
               onChange={(e) => setSearchDraft(e.target.value)}
               placeholder="Search jobs, companies, skills…"
-              className={`${landingBody} h-10 w-full rounded-lg border border-outline-variant bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald/30`}
+              className={`${landingBody} h-10 w-full rounded-lg border border-outline-variant bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-emerald focus:ring-1 focus:ring-brand-emerald/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100`}
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function JobMapFilterBar({
             <button
               type="button"
               onClick={onToggleCompact}
-              className="hidden h-10 items-center gap-1.5 rounded-lg border border-outline-variant px-3 text-sm text-on-surface-variant hover:bg-surface-dim lg:inline-flex"
+              className="hidden h-10 items-center gap-1.5 rounded-lg border border-outline-variant px-3 text-sm text-on-surface-variant hover:bg-surface-dim dark:border-neutral-700 dark:hover:bg-neutral-800 lg:inline-flex"
             >
               <SlidersHorizontal className="h-4 w-4" />
               {isCompactSidebar ? 'Expand list' : 'Compact list'}
@@ -182,8 +182,8 @@ export default function JobMapFilterBar({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className={`${landingBody} text-sm text-neutral-600`}>
-            <span className={`${landingHeadlineSm} font-semibold text-neutral-900`}>{jobCount}</span>{' '}
+          <p className={`${landingBody} text-sm text-neutral-600 dark:text-neutral-400`}>
+            <span className={`${landingHeadlineSm} font-semibold text-neutral-900 dark:text-stone-100`}>{jobCount}</span>{' '}
             {jobCount === 1 ? 'job' : 'jobs'} on map
           </p>
 
@@ -429,7 +429,7 @@ function FilterChip({
       className={`inline-flex max-w-[11rem] items-center gap-1 truncate rounded-full border px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
         active
           ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald'
-          : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-dim'
+          : 'border-outline-variant bg-white text-on-surface-variant hover:bg-surface-dim dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800'
       }`}
     >
       {icon}

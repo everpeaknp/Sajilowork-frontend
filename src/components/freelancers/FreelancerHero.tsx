@@ -7,13 +7,13 @@ import { FREELANCER_HERO_PORTRAIT } from './freelancerData';
 
 export default function FreelancerHero() {
   return (
-    <section className="select-none bg-white px-4 pb-8 pt-8 sm:px-6 lg:px-8">
+    <section className="select-none bg-white px-4 pb-8 pt-8 sm:px-6 lg:px-8 dark:bg-neutral-950">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[180px] w-full items-stretch overflow-hidden rounded-[24px] bg-[#FEF0EA] shadow-sm sm:min-h-[220px] lg:min-h-[280px]">
+        <div className="relative flex min-h-[180px] w-full items-stretch overflow-hidden rounded-[24px] bg-[#FEF0EA] shadow-sm sm:min-h-[220px] lg:min-h-[280px] dark:bg-neutral-900 dark:shadow-none">
           <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 select-none">
             <svg
               viewBox="0 0 120 400"
-              className="h-full w-[100px] text-[#fcd074] sm:w-[135px] md:w-[170px] lg:w-[210px]"
+              className="h-full w-[100px] text-[#fcd074] sm:w-[135px] md:w-[170px] lg:w-[210px] dark:text-amber-700/40"
               fill="currentColor"
               preserveAspectRatio="none"
               aria-hidden
@@ -25,7 +25,7 @@ export default function FreelancerHero() {
           <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 select-none">
             <svg
               viewBox="0 0 120 400"
-              className="h-full w-[100px] text-[#F4B393] sm:w-[135px] md:w-[170px] lg:w-[210px]"
+              className="h-full w-[100px] text-[#F4B393] sm:w-[135px] md:w-[170px] lg:w-[210px] dark:text-orange-900/35"
               fill="currentColor"
               preserveAspectRatio="none"
               aria-hidden
@@ -53,7 +53,7 @@ export default function FreelancerHero() {
           <div className="relative z-10 grid w-full grid-cols-1 items-center gap-8 py-6 pl-12 pr-12 pt-6 sm:pl-24 sm:pr-24 md:pl-28 md:pr-28 lg:grid-cols-12 lg:pb-0 lg:pl-36 lg:pr-36 lg:pt-8">
             <div className="flex flex-col justify-center py-4 text-left lg:col-span-7">
               <motion.h1
-                className={`${discoverHeadline} mb-2 text-2xl font-normal leading-tight tracking-tight text-black sm:text-3xl md:text-[38px]`}
+                className={`${discoverHeadline} mb-2 text-2xl font-normal leading-tight tracking-tight text-black sm:text-3xl md:text-[38px] dark:text-stone-100`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -62,7 +62,7 @@ export default function FreelancerHero() {
               </motion.h1>
 
               <motion.p
-                className={`${discoverBody} max-w-xl text-xs leading-relaxed tracking-tight text-black/70 sm:text-sm md:text-base`}
+                className={`${discoverBody} max-w-xl text-xs leading-relaxed tracking-tight text-black/70 sm:text-sm md:text-base dark:text-neutral-300`}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}

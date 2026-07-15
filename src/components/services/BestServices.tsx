@@ -77,17 +77,17 @@ export default function BestServices({ className = '' }: BestServicesProps) {
 
   return (
     <section
-      className={`relative z-0 w-full select-none bg-white px-4 pb-4 pt-6 sm:px-6 sm:pb-6 sm:pt-8 md:px-8 lg:px-12 ${className}`}
+      className={`relative z-0 w-full select-none bg-white px-4 pb-4 pt-6 sm:px-6 sm:pb-6 sm:pt-8 md:px-8 lg:px-12 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto w-full max-w-full">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
-              className={`${discoverHeadline} mb-2 text-xl font-bold leading-tight tracking-tight text-[#131118] sm:text-2xl md:text-3xl`}
+              className={`${discoverHeadline} mb-2 text-xl font-bold leading-tight tracking-tight text-[#131118] sm:text-2xl md:text-3xl dark:text-stone-100`}
             >
               Best Services
             </h2>
-            <p className={`${discoverBody} text-xs font-normal text-[#5e586c] sm:text-sm md:text-base`}>
+            <p className={`${discoverBody} text-xs font-normal text-[#5e586c] sm:text-sm md:text-base dark:text-neutral-400`}>
               Most viewed and all-time top-selling services
             </p>
           </div>
@@ -105,7 +105,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
               type="button"
               onClick={handlePrev}
               disabled={loadingBestServices}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-white"
               title="Previous"
               aria-label="Previous services"
             >
@@ -133,7 +133,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
               type="button"
               onClick={handleNext}
               disabled={loadingBestServices}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-200/80 text-neutral-600 transition-colors hover:border-neutral-800 hover:text-black disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-white"
               title="Next"
               aria-label="Next services"
             >
@@ -167,7 +167,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
               return (
                 <div
                   key={card.id}
-                  className="group flex w-full flex-shrink-0 flex-col justify-between overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)]"
+                  className="group flex w-full flex-shrink-0 flex-col justify-between overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] xl:w-[calc(20%-19.2px)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:border-neutral-700 dark:hover:shadow-none"
                 >
                   <Link
                     href={getServiceDetailPath(card)}
@@ -188,7 +188,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                     <button
                       type="button"
                       onClick={(e) => void toggleFavorite(card, e)}
-                      className="absolute right-3.5 top-3.5 z-[1] flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow-md transition-all hover:scale-105 active:scale-95"
+                      className="absolute right-3.5 top-3.5 z-[1] flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-neutral-100/50 bg-white text-black shadow-md transition-all hover:scale-105 active:scale-95 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
                       aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                     >
                       <Heart
@@ -209,7 +209,7 @@ export default function BestServices({ className = '' }: BestServicesProps) {
                       <h3 className={`${discoverBody} mb-2.5 line-clamp-2 text-sm font-normal leading-snug sm:text-[15px]`}>
                         <Link
                           href={getServiceDetailPath(card)}
-                          className="text-[#131118] transition-colors hover:text-[#52C47F]"
+                          className="text-[#131118] transition-colors hover:text-[#52C47F] dark:text-stone-100 dark:hover:text-[#52C47F]"
                         >
                           {card.title}
                         </Link>

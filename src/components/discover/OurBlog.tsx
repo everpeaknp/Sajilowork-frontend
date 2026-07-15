@@ -61,12 +61,12 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
   return (
     <section
       id="blog-section"
-      className={`border-t border-neutral-100 bg-white px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 ${className}`}
+      className={`border-t border-neutral-100 bg-white px-4 py-16 sm:px-8 sm:py-24 lg:px-12 xl:px-16 dark:border-neutral-800 dark:bg-neutral-950 ${className}`}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-14">
           <motion.h2
-            className={`${discoverHeadline} text-3xl leading-tight text-brand-dark sm:text-4xl lg:text-[40px]`}
+            className={`${discoverHeadline} text-3xl leading-tight text-brand-dark sm:text-4xl lg:text-[40px] dark:text-stone-100`}
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -75,7 +75,7 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
             Insights & Guides
           </motion.h2>
           <motion.p
-            className={`${discoverBody} mt-3 text-base text-neutral-500`}
+            className={`${discoverBody} mt-3 text-base text-neutral-500 dark:text-neutral-400`}
             initial={{ opacity: 0, y: -5 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -97,7 +97,7 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
             >
               <Link
                 href={post.href ?? '/blog'}
-                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md hover:no-underline"
+                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-neutral-200 hover:shadow-md hover:no-underline dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:border-neutral-700 dark:hover:shadow-none"
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
                   <div className="absolute inset-0 bg-brand-dark/0 transition-colors duration-300 group-hover:bg-brand-dark/5 z-10"></div>
@@ -115,13 +115,13 @@ export default function OurBlog({ className = '' }: OurBlogProps) {
                   </span>
 
                   <h3
-                    className={`${discoverHeadline} mt-3 line-clamp-2 text-[17px] leading-snug text-brand-dark transition-colors duration-200 group-hover:text-brand-emerald`}
+                    className={`${discoverHeadline} mt-3 line-clamp-2 text-[17px] leading-snug text-brand-dark transition-colors duration-200 group-hover:text-brand-emerald dark:text-stone-100`}
                   >
                     {post.title}
                   </h3>
 
                   <p
-                    className={`${discoverBody} mt-3 line-clamp-2 text-sm leading-relaxed text-neutral-500`}
+                    className={`${discoverBody} mt-3 line-clamp-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400`}
                   >
                     {post.description}
                   </p>

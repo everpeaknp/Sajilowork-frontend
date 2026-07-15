@@ -54,7 +54,7 @@ export default function ServiceMapPreview({
         className={cn(
           discoverBody,
           'pointer-events-auto relative w-full min-w-0 max-w-[min(340px,calc(100vw-3rem))] overflow-hidden',
-          'rounded-[24px] border border-neutral-200/40 bg-[#fbf2ed] shadow-[0_8px_30px_rgba(0,0,0,0.12)]',
+          'rounded-[24px] border border-neutral-200/40 bg-[#fbf2ed] shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-none',
         )}
       >
         <HeroCardDecor size="large" accentPosition="top-right" />
@@ -62,7 +62,7 @@ export default function ServiceMapPreview({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-white/60 hover:text-neutral-800"
+          className="absolute right-4 top-4 z-20 rounded-full p-1.5 text-neutral-500 transition-colors hover:bg-white/60 hover:text-neutral-800 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -76,7 +76,7 @@ export default function ServiceMapPreview({
               name={service.author.name}
               size="lg"
             />
-            <div className="min-w-0 flex-1 rounded-[16px] border border-neutral-200/50 bg-white/70 px-3 py-2 backdrop-blur-[2px]">
+            <div className="min-w-0 flex-1 rounded-[16px] border border-neutral-200/50 bg-white/70 px-3 py-2 backdrop-blur-[2px] dark:border-neutral-700 dark:bg-neutral-950/70">
               <span className={cn(discoverMedium, 'text-[10px] font-bold uppercase tracking-widest text-neutral-500')}>
                 Starting at
               </span>
@@ -91,12 +91,12 @@ export default function ServiceMapPreview({
               id="service-map-preview-title"
               className={cn(
                 discoverHeadline,
-                'line-clamp-3 break-words text-lg font-bold leading-tight text-black [overflow-wrap:anywhere] sm:text-xl',
+                'line-clamp-3 break-words text-lg font-bold leading-tight text-black [overflow-wrap:anywhere] sm:text-xl dark:text-stone-100',
               )}
             >
               {service.title}
             </h4>
-            <div className={cn(discoverBody, 'flex items-center justify-between gap-3 text-sm font-medium text-neutral-600')}>
+            <div className={cn(discoverBody, 'flex items-center justify-between gap-3 text-sm font-medium text-neutral-600 dark:text-neutral-400')}>
               <span className="min-w-0 break-words [overflow-wrap:anywhere]">
                 {service.category} · {service.locationLabel || service.location}
               </span>
@@ -106,7 +106,7 @@ export default function ServiceMapPreview({
                 <span className="shrink-0 whitespace-nowrap text-right text-neutral-400">…</span>
               ) : null}
             </div>
-            <p className={cn(discoverBody, 'break-words text-sm text-neutral-600 [overflow-wrap:anywhere]')}>
+            <p className={cn(discoverBody, 'break-words text-sm text-neutral-600 [overflow-wrap:anywhere] dark:text-neutral-400')}>
               By{' '}
               <span className={cn(discoverMedium, 'font-semibold text-[#52C47F]')}>{service.author.name}</span>
             </p>

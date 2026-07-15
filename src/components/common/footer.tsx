@@ -71,7 +71,7 @@ type FooterProps = {
   outerClassName?: string;
 };
 
-export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
+export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950' }: FooterProps) {
   const { display_name: displayName, logo_url: logoUrl } = useSiteSettings();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     Discover: true,
@@ -82,8 +82,8 @@ export default function Footer({ outerClassName = 'bg-white' }: FooterProps) {
   };
 
   return (
-    <footer className={cn('min-w-0 overflow-x-clip border-t border-neutral-200', outerClassName)}>
-      <div className="bg-white text-brand-dark">
+    <footer className={cn('min-w-0 overflow-x-clip border-t border-neutral-200 dark:border-neutral-800', outerClassName)}>
+      <div className="bg-white text-brand-dark dark:bg-neutral-950 dark:text-stone-100">
         <div className="mx-auto max-w-7xl px-4 py-12 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-16 md:py-20 lg:px-8">
           <div className="mb-12 grid gap-10 sm:mb-16 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
             <div className="min-w-0 lg:col-span-2">

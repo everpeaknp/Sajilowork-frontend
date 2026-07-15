@@ -103,11 +103,13 @@ const AccordionItem = ({
         isDashboard
           ? `mb-3 rounded-xl border ${
               isOpen
-                ? 'border-[#52C47F]/40 bg-white shadow-sm'
-                : 'border-neutral-200/90 bg-neutral-50/50 hover:border-neutral-300 hover:bg-white'
+                ? 'border-[#52C47F]/40 bg-[var(--elevated)] shadow-sm dark:border-[#52C47F]/35 dark:shadow-none'
+                : 'border-neutral-200/90 bg-neutral-50/50 hover:border-neutral-300 hover:bg-[var(--elevated)] dark:border-neutral-700/80 dark:bg-neutral-900/50 dark:hover:border-neutral-600'
             }`
-          : `mb-4 rounded-3xl border border-gray-100 bg-white ${
-              isOpen ? 'border-emerald-100 shadow-xl shadow-brand-dark/5' : 'hover:border-emerald-200'
+          : `mb-4 rounded-3xl border border-gray-100 bg-white dark:border-neutral-800 dark:bg-neutral-900 ${
+              isOpen
+                ? 'border-emerald-100 shadow-xl shadow-brand-dark/5 dark:border-emerald-900/40 dark:shadow-none'
+                : 'hover:border-emerald-200 dark:hover:border-emerald-800/60'
             }`
       }`}
     >
@@ -120,8 +122,8 @@ const AccordionItem = ({
                   ? 'bg-[#52C47F] text-white'
                   : 'bg-brand-emerald text-white'
                 : isDashboard
-                  ? 'bg-neutral-100 text-neutral-400'
-                  : 'bg-surface-low text-gray-400'
+                  ? 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-400'
+                  : 'bg-surface-low text-gray-400 dark:bg-neutral-800 dark:text-neutral-400'
             }`}
           >
             <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -129,12 +131,20 @@ const AccordionItem = ({
           <div>
             <h3
               className={`text-base font-semibold sm:text-lg ${
-                isDashboard ? 'text-neutral-900' : 'font-bold text-brand-dark'
+                isDashboard
+                  ? 'text-neutral-900 dark:text-stone-100'
+                  : 'font-bold text-brand-dark dark:text-stone-100'
               }`}
             >
               {title}
             </h3>
-            <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+            <p
+              className={`text-sm ${
+                isDashboard
+                  ? 'text-neutral-500 dark:text-neutral-400'
+                  : 'font-medium text-gray-500 dark:text-neutral-400'
+              }`}
+            >
               {description}
             </p>
           </div>
@@ -143,11 +153,11 @@ const AccordionItem = ({
           className={`rounded-lg p-2 transition-transform duration-300 ${
             isOpen
               ? isDashboard
-                ? 'rotate-180 bg-emerald-50 text-[#52C47F]'
-                : 'rotate-180 bg-emerald-50 text-brand-emerald'
+                ? 'rotate-180 bg-emerald-50 text-[#52C47F] dark:bg-emerald-950/50 dark:text-[#52C47F]'
+                : 'rotate-180 bg-emerald-50 text-brand-emerald dark:bg-emerald-950/50'
               : isDashboard
-                ? 'bg-neutral-50 text-neutral-400'
-                : 'bg-gray-50 text-gray-400'
+                ? 'bg-neutral-50 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-400'
+                : 'bg-gray-50 text-gray-400 dark:bg-neutral-800 dark:text-neutral-400'
           }`}
         >
           <ChevronDown className="h-5 w-5" />
@@ -161,7 +171,13 @@ const AccordionItem = ({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           >
-            <div className={`border-t p-5 pt-0 sm:p-6 ${isDashboard ? 'border-neutral-100' : 'border-gray-50'}`}>
+            <div
+              className={`border-t p-5 pt-0 sm:p-6 ${
+                isDashboard
+                  ? 'border-neutral-100 dark:border-neutral-800'
+                  : 'border-gray-50 dark:border-neutral-800'
+              }`}
+            >
               {children}
             </div>
           </motion.div>
@@ -491,15 +507,15 @@ export default function Settings({
       <div
         className={`space-y-4 rounded-xl border p-5 md:p-6 ${
           isDashboard
-            ? 'border-neutral-200/90 bg-neutral-50/40'
-            : 'rounded-3xl border-outline-variant bg-white'
+            ? 'border-neutral-200/90 bg-neutral-50/40 dark:border-neutral-700/80 dark:bg-neutral-950/60'
+            : 'rounded-3xl border-outline-variant bg-white dark:border-neutral-800 dark:bg-neutral-900'
         }`}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p
               className={`tracking-tight ${
-                isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+                isDashboard ? 'text-[15px] font-semibold text-neutral-900 dark:text-stone-100' : 'font-black text-brand-dark dark:text-stone-100'
               }`}
             >
               {title}
@@ -829,27 +845,27 @@ export default function Settings({
   };
 
   const inputClass = isDashboard
-    ? 'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F]'
-    : 'w-full rounded-2xl border border-outline-variant bg-gray-50 p-4 font-semibold outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-emerald';
+    ? 'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F] dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-200 dark:placeholder:text-neutral-500'
+    : 'w-full rounded-2xl border border-outline-variant bg-gray-50 p-4 font-semibold outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-emerald dark:bg-neutral-900 dark:text-stone-100 dark:focus:bg-neutral-950';
 
   const inputDisabledClass = isDashboard
-    ? 'cursor-not-allowed bg-neutral-100 text-neutral-500 focus:ring-0'
-    : 'cursor-not-allowed bg-gray-100 text-gray-500 focus:ring-0';
+    ? 'cursor-not-allowed bg-neutral-100 text-neutral-500 focus:ring-0 dark:bg-neutral-900 dark:text-neutral-500'
+    : 'cursor-not-allowed bg-gray-100 text-gray-500 focus:ring-0 dark:bg-neutral-900 dark:text-neutral-500';
 
   const primaryButtonClass = isDashboard
     ? 'flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0'
     : 'rounded-2xl bg-brand-emerald px-8 py-3 font-bold text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50';
 
   const labelClass = isDashboard
-    ? 'block text-[15px] font-semibold leading-tight text-neutral-900'
-    : 'px-1 text-xs font-bold uppercase tracking-widest text-gray-400';
+    ? 'block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100'
+    : 'px-1 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-neutral-500';
 
   const selectClass = isDashboard
-    ? `${inputClass} cursor-pointer appearance-none bg-white`
-    : `${inputClass} cursor-pointer appearance-none bg-white`;
+    ? `${inputClass} cursor-pointer appearance-none`
+    : `${inputClass} cursor-pointer appearance-none`;
 
   const dashboardToggleClass = (enabled: boolean) =>
-    `relative h-6 w-12 rounded-full transition-colors ${enabled ? 'bg-[#52C47F]' : 'bg-neutral-200'}`;
+    `relative h-6 w-12 rounded-full transition-colors ${enabled ? 'bg-[#52C47F]' : 'bg-neutral-200 dark:bg-neutral-700'}`;
 
   const settingsSections = (
     <>
@@ -931,7 +947,7 @@ export default function Settings({
               <div>
                 <h4
                   className={`tracking-tight ${
-                    isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+                    isDashboard ? 'text-[15px] font-semibold text-neutral-900 dark:text-stone-100' : 'font-black text-brand-dark dark:text-stone-100'
                   }`}
                 >
                   Identity Trust Program
@@ -970,7 +986,7 @@ export default function Settings({
               <div className="space-y-1">
                 <p
                   className={`tracking-tight ${
-                    isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-black text-brand-dark'
+                    isDashboard ? 'text-[15px] font-semibold text-neutral-900 dark:text-stone-100' : 'font-black text-brand-dark dark:text-stone-100'
                   }`}
                 >
                   Personal details

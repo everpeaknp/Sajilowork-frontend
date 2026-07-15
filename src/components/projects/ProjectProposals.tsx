@@ -16,7 +16,7 @@ interface ProjectProposalsProps {
 }
 
 function MetaDivider() {
-  return <span className="h-3.5 w-px shrink-0 bg-neutral-300" aria-hidden />;
+  return <span className="h-3.5 w-px shrink-0 bg-neutral-300 dark:bg-neutral-700" aria-hidden />;
 }
 
 function formatBidDate(value?: string): string {
@@ -80,18 +80,18 @@ export default function ProjectProposals({ project, refreshKey = 0 }: ProjectPro
   }, [loadBids, refreshKey]);
 
   return (
-    <section className="border-t border-neutral-200 pt-10">
-      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+    <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Project Proposals ({bids.length})
       </h2>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm font-normal text-neutral-500">
+        <div className="flex items-center gap-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading proposals…
         </div>
       ) : bids.length === 0 ? (
-        <p className="text-sm font-normal text-neutral-500">
+        <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
           {offersOpen
             ? isOwner
               ? 'No proposals yet. Freelancers can submit from the form below.'
@@ -105,26 +105,26 @@ export default function ProjectProposals({ project, refreshKey = 0 }: ProjectPro
           {bids.map((bid) => (
             <article
               key={bid.id}
-              className="rounded-lg border border-neutral-200 bg-white px-5 py-5 sm:px-6 sm:py-6"
+              className="rounded-lg border border-neutral-200 bg-white px-5 py-5 sm:px-6 sm:py-6 dark:border-neutral-800 dark:bg-neutral-900"
             >
               <div className="flex items-start gap-4 sm:gap-5">
                 <div className="relative shrink-0">
                   <img
                     src={taskerAvatar(bid)}
                     alt={taskerDisplayName(bid)}
-                    className="h-16 w-16 rounded-full border border-neutral-100 bg-neutral-50 object-cover sm:h-[72px] sm:w-[72px]"
+                    className="h-16 w-16 rounded-full border border-neutral-100 bg-neutral-50 object-cover sm:h-[72px] sm:w-[72px] dark:border-neutral-700 dark:bg-neutral-800"
                     referrerPolicy="no-referrer"
                   />
-                  <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#52C47F]" />
+                  <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#52C47F] dark:border-neutral-900" />
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-base font-normal text-black sm:text-lg">
+                    <h3 className="text-base font-normal text-black sm:text-lg dark:text-stone-100">
                       {taskerDisplayName(bid)}
                     </h3>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-normal text-neutral-500">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
                       {bid.tasker?.average_rating != null ? (
                         <>
                           <span className="inline-flex items-center gap-1.5">
@@ -145,16 +145,16 @@ export default function ProjectProposals({ project, refreshKey = 0 }: ProjectPro
                       </span>
                     </div>
 
-                    <p className="mt-3 line-clamp-3 text-sm font-normal leading-normal text-black sm:text-[15px]">
+                    <p className="mt-3 line-clamp-3 text-sm font-normal leading-normal text-black sm:text-[15px] dark:text-stone-200">
                       {bid.proposal}
                     </p>
                   </div>
 
                   <div className="shrink-0 sm:text-right">
-                    <p className="text-lg font-normal text-black sm:text-xl">
+                    <p className="text-lg font-normal text-black sm:text-xl dark:text-stone-100">
                       {formatNPR(Number(bid.amount) || 0)}
                     </p>
-                    <p className="mt-1 text-sm font-normal capitalize text-neutral-500">
+                    <p className="mt-1 text-sm font-normal capitalize text-neutral-500 dark:text-neutral-400">
                       {project.type === 'Hourly' ? 'Hourly offer' : 'Fixed offer'}
                     </p>
                   </div>

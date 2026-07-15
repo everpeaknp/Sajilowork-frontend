@@ -37,13 +37,13 @@ export default function ProjectSchedule({ schedule }: ProjectScheduleProps) {
     cn(
       'flex items-center gap-1.5 rounded-none border px-3 py-2 text-xs font-medium sm:text-sm',
       active
-        ? 'border-neutral-900 bg-neutral-900 text-white'
-        : 'border-neutral-200 bg-neutral-50 text-neutral-400',
+        ? 'border-neutral-900 bg-neutral-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-neutral-900'
+        : 'border-neutral-200 bg-neutral-50 text-neutral-400 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-500',
     );
 
   return (
-    <section className="mt-12 border-t border-neutral-200 pt-10">
-      <h2 className="mb-4 text-base font-normal tracking-tight text-black sm:text-lg">
+    <section className="mt-12 border-t border-neutral-200 pt-10 dark:border-neutral-800">
+      <h2 className="mb-4 text-base font-normal tracking-tight text-black sm:text-lg dark:text-stone-100">
         When do you need this done?
       </h2>
 
@@ -66,7 +66,7 @@ export default function ProjectSchedule({ schedule }: ProjectScheduleProps) {
 
         {schedule.timeOfDayRequired ? (
           <div className="space-y-3">
-            <p className="text-sm font-normal text-neutral-800">I need a certain time of day</p>
+            <p className="text-sm font-normal text-neutral-800 dark:text-stone-200">I need a certain time of day</p>
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
               {TIME_SLOTS.map((slot) => {
                 const Icon = slot.icon;
@@ -77,14 +77,14 @@ export default function ProjectSchedule({ schedule }: ProjectScheduleProps) {
                     className={cn(
                       'flex flex-col items-center justify-center rounded-xl border px-2 py-2 sm:py-2.5',
                       isActive
-                        ? 'border-neutral-900 bg-neutral-50 text-neutral-900 shadow-sm'
-                        : 'border-neutral-200 bg-white text-neutral-400',
+                        ? 'border-neutral-900 bg-neutral-50 text-neutral-900 shadow-sm dark:border-stone-100 dark:bg-neutral-800 dark:text-stone-100 dark:shadow-none'
+                        : 'border-neutral-200 bg-white text-neutral-400 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-500',
                     )}
                   >
                     <Icon
                       className={cn(
                         'mb-1 h-4 w-4 sm:h-5 sm:w-5',
-                        isActive ? 'text-neutral-900' : 'text-neutral-300',
+                        isActive ? 'text-neutral-900 dark:text-stone-100' : 'text-neutral-300 dark:text-neutral-600',
                       )}
                     />
                     <span className="text-[11px] font-semibold sm:text-xs">{slot.label}</span>

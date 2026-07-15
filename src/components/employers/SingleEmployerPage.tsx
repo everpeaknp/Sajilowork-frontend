@@ -5,8 +5,6 @@ import {
   Star,
   MapPin,
   Calendar,
-  Phone,
-  Mail,
   ArrowUpRight,
   Layers,
   Users,
@@ -290,80 +288,60 @@ export default function SingleEmployerPage({
   const isIndividual = employer.accountType === 'individual';
   const aboutTitle = isIndividual ? 'About' : 'About';
   const aboutSubtitle = isIndividual
-    ? 'Profile details and how to reach this employer directly.'
-    : 'Company details and how to reach this employer directly.';
+    ? 'Profile details for this employer.'
+    : 'Company details for this employer.';
 
   const aboutMeCard = (
     <div
-      className={`relative flex h-full flex-col bg-white p-6 text-left sm:p-8 ${
+      className={`relative flex h-full flex-col bg-white p-6 text-left sm:p-8 dark:bg-neutral-900 ${
         embedded
-          ? 'rounded-2xl bg-neutral-50/80'
-          : 'border border-neutral-100 shadow-xl'
+          ? 'rounded-2xl bg-neutral-50/80 dark:bg-neutral-900'
+          : 'rounded-2xl border border-neutral-100 shadow-xl sm:rounded-3xl dark:border-neutral-800 dark:shadow-none'
       }`}
     >
-      <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black">{aboutTitle}</h3>
-      <p className="mb-5 text-sm font-normal leading-relaxed text-neutral-900 sm:mb-6 sm:text-base">
+      <h3 className="mb-1.5 font-sans text-xl font-normal tracking-tight text-black dark:text-stone-100">{aboutTitle}</h3>
+      <p className="mb-5 text-sm font-normal leading-relaxed text-neutral-900 sm:mb-6 sm:text-base dark:text-neutral-400">
         {aboutSubtitle}
       </p>
 
       <div className="select-none space-y-0.5 text-xs sm:text-sm">
-        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
+        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5 dark:border-neutral-800">
           <div className="flex items-center gap-2.5 font-normal text-neutral-500">
             <Layers className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
             <span>Account type</span>
           </div>
-          <span className="font-normal tracking-tight text-black">
+          <span className="font-normal tracking-tight text-black dark:text-stone-100">
             {isIndividual ? 'Individual' : 'Company'}
           </span>
         </div>
 
         {!isIndividual ? (
-          <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
+          <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5 dark:border-neutral-800">
             <div className="flex items-center gap-2.5 font-normal text-neutral-500">
               <Layers className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
               <span>Primary industry</span>
             </div>
-            <span className="font-normal tracking-tight text-black">{employer.industry}</span>
+            <span className="font-normal tracking-tight text-black dark:text-stone-100">{employer.industry}</span>
           </div>
         ) : null}
 
         {!isIndividual ? (
-          <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
+          <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5 dark:border-neutral-800">
             <div className="flex items-center gap-2.5 font-normal text-neutral-500">
               <Users className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
               <span>Company size</span>
             </div>
-            <span className="font-normal tracking-tight text-black">{employer.teamSize}</span>
+            <span className="font-normal tracking-tight text-black dark:text-stone-100">{employer.teamSize}</span>
           </div>
         ) : null}
 
-        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
+        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5 dark:border-neutral-800">
           <div className="flex items-center gap-2.5 font-normal text-neutral-500">
             <Calendar className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
             <span>Joined in</span>
           </div>
-          <span className="font-normal tracking-tight text-black">
+          <span className="font-normal tracking-tight text-black dark:text-stone-100">
             {formatMemberSince(employer.memberSince).replace(/^—$/, 'Not specified')}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
-          <div className="flex items-center gap-2.5 font-normal text-neutral-500">
-            <Phone className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
-            <span>Phone</span>
-          </div>
-          <span className="font-normal tracking-tight text-black">
-            {employer.contactPhone || '—'}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between border-b border-[#F4F4F4] py-3.5">
-          <div className="flex items-center gap-2.5 font-normal text-neutral-500">
-            <Mail className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
-            <span>Email</span>
-          </div>
-          <span className="max-w-[140px] truncate text-right font-normal tracking-tight text-black sm:max-w-none">
-            {employer.contactEmail || '—'}
           </span>
         </div>
 
@@ -372,7 +350,7 @@ export default function SingleEmployerPage({
             <MapPin className="h-4 w-4 text-neutral-400" strokeWidth={2.2} />
             <span>Location</span>
           </div>
-          <span className="font-normal tracking-tight text-black">{employer.location}</span>
+          <span className="font-normal tracking-tight text-black dark:text-stone-100">{employer.location}</span>
         </div>
       </div>
 
@@ -392,7 +370,7 @@ export default function SingleEmployerPage({
 
   return (
     <section
-      className={`animate-in fade-in w-full min-w-0 select-none text-black antialiased [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal ${
+      className={`animate-in fade-in w-full min-w-0 select-none text-black antialiased dark:bg-neutral-950 dark:text-stone-100 [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal ${
         embedded ? 'pb-6' : 'pb-16'
       }`}
       id="employer-profile-section"
@@ -410,8 +388,8 @@ export default function SingleEmployerPage({
           >
             <div
               id="single-employer-hero"
-              className={`relative z-0 w-full overflow-hidden rounded-3xl bg-[#FDF8F3] sm:rounded-[2rem] ${
-                embedded ? '' : 'border border-[#F2ECE6]'
+              className={`relative z-0 w-full overflow-hidden rounded-3xl bg-[#FDF8F3] sm:rounded-[2rem] dark:bg-neutral-900 ${
+                embedded ? '' : 'border border-[#F2ECE6] dark:border-neutral-800'
               } ${embedded ? 'order-none' : 'order-1'}`}
             >
               <OrganicYellowBlob />
@@ -434,17 +412,17 @@ export default function SingleEmployerPage({
                     {renderProfileLogo(employer.logoColor, employer.name, false, employer.logoUrl)}
 
                     <div className="min-w-0 flex-1 select-none">
-                      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-neutral-500">
+                      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                         {isIndividual ? 'Individual employer' : 'Company'}
                       </p>
-                      <h1 className="mb-1 font-sans text-2xl font-normal leading-tight tracking-tight text-black sm:text-3xl">
+                      <h1 className="mb-1 font-sans text-2xl font-normal leading-tight tracking-tight text-black sm:text-3xl dark:text-stone-100">
                         {employer.name}
                       </h1>
-                      <p className="mb-3 max-w-xl text-sm font-normal leading-snug text-black/70 sm:mb-4 sm:text-[15px]">
+                      <p className="mb-3 max-w-xl text-sm font-normal leading-snug text-black/70 sm:mb-4 sm:text-[15px] dark:text-neutral-300">
                         {employer.tagline}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-normal text-black sm:gap-x-6 sm:text-sm">
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-normal text-black sm:gap-x-6 sm:text-sm dark:text-stone-100">
                         <div className="flex items-center gap-1.5">
                           <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-500" />
                           <span>
@@ -452,11 +430,11 @@ export default function SingleEmployerPage({
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <MapPin className="h-4 w-4 shrink-0 text-neutral-700" strokeWidth={2.5} />
+                          <MapPin className="h-4 w-4 shrink-0 text-neutral-700 dark:text-neutral-400" strokeWidth={2.5} />
                           <span>{employer.location}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="h-4 w-4 shrink-0 text-neutral-700" strokeWidth={2.5} />
+                          <Calendar className="h-4 w-4 shrink-0 text-neutral-700 dark:text-neutral-400" strokeWidth={2.5} />
                           <span>{formatMemberSinceLabel(employer.memberSince)}</span>
                         </div>
                       </div>
@@ -487,7 +465,7 @@ export default function SingleEmployerPage({
               }
             >
               <div className="space-y-6">
-                <h2 className="text-lg font-normal tracking-tight text-black sm:text-xl">
+                <h2 className="text-lg font-normal tracking-tight text-black dark:text-stone-100 sm:text-xl">
                   {isIndividual ? 'About' : 'About company'}
                 </h2>
 
@@ -500,13 +478,13 @@ export default function SingleEmployerPage({
                       .map((paragraph, index) => (
                         <p
                           key={index}
-                          className="text-sm font-normal leading-relaxed text-black/80 sm:text-base"
+                          className="text-sm font-normal leading-relaxed text-black/80 sm:text-base dark:text-neutral-300"
                         >
                           {paragraph}
                         </p>
                       ))
                   ) : (
-                    <p className="text-sm font-normal leading-relaxed text-neutral-500 sm:text-base">
+                    <p className="text-sm font-normal leading-relaxed text-neutral-500 sm:text-base dark:text-neutral-400">
                       No company description provided yet.
                     </p>
                   )}
@@ -585,17 +563,17 @@ export default function SingleEmployerPage({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative z-20 w-full max-w-md space-y-5 rounded-3xl border border-neutral-200 bg-white p-6 shadow-2xl md:p-8"
+              className="relative z-20 w-full max-w-md space-y-5 rounded-3xl border border-neutral-200 bg-white p-6 shadow-2xl md:p-8 dark:border-neutral-700 dark:bg-neutral-900"
             >
-              <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-                <h3 className="flex items-center gap-2 text-base font-normal tracking-tight text-black">
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3 dark:border-neutral-800">
+                <h3 className="flex items-center gap-2 text-base font-normal tracking-tight text-black dark:text-stone-100">
                   <MessageSquare className="h-5 w-5 text-[#53B782]" />
                   <span>Contact {employer.name}</span>
                 </h3>
                 <button
                   type="button"
                   onClick={() => setShowContactModal(false)}
-                  className="cursor-pointer rounded p-1 px-2 text-xs font-normal text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black"
+                  className="cursor-pointer rounded p-1 px-2 text-xs font-normal text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-black dark:hover:bg-neutral-800 dark:hover:text-stone-100"
                 >
                   ✕
                 </button>
@@ -603,10 +581,10 @@ export default function SingleEmployerPage({
 
               {isSent ? (
                 <div className="space-y-3.5 py-8 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shadow-sm">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shadow-sm dark:bg-emerald-950/40">
                     <Check className="h-6 w-6 animate-bounce" strokeWidth={3} />
                   </div>
-                  <h4 className="text-sm font-normal tracking-tight text-black">Message Delivered!</h4>
+                  <h4 className="text-sm font-normal tracking-tight text-black dark:text-stone-100">Message Delivered!</h4>
                   <p className="text-xs font-normal leading-relaxed text-neutral-500">
                     Your inquiry has been successfully dispatched. {employer.name} will reach out to you within 2.5
                     hours.
@@ -616,7 +594,7 @@ export default function SingleEmployerPage({
                 <form onSubmit={handleSendMessage} className="space-y-4 text-xs font-normal text-neutral-500">
                   <p className="font-normal leading-relaxed text-neutral-500">
                     Send a customized project invitation or message to the team at{' '}
-                    <span className="font-normal text-black">{employer.name}</span>.
+                    <span className="font-normal text-black dark:text-stone-100">{employer.name}</span>.
                   </p>
 
                   <div className="space-y-1.5">
@@ -627,7 +605,7 @@ export default function SingleEmployerPage({
                       value={emailInput}
                       onChange={(e) => setEmailInput(e.target.value)}
                       placeholder="e.g. sender@example.com"
-                      className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-neutral-800 outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-neutral-800 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500"
                     />
                   </div>
 
@@ -639,7 +617,7 @@ export default function SingleEmployerPage({
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
                       placeholder="e.g. Design System Project Collaboration"
-                      className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-neutral-800 outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-neutral-800 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500"
                     />
                   </div>
 
@@ -651,7 +629,7 @@ export default function SingleEmployerPage({
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                       placeholder="Write your invitation message details here..."
-                      className="w-full resize-none rounded-xl border border-neutral-200 bg-white p-3 text-xs font-medium text-neutral-800 outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full resize-none rounded-xl border border-neutral-200 bg-white p-3 text-xs font-medium text-neutral-800 outline-none focus:ring-2 focus:ring-emerald-500 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500"
                     />
                   </div>
 
@@ -659,7 +637,7 @@ export default function SingleEmployerPage({
                     <button
                       type="button"
                       onClick={() => setShowContactModal(false)}
-                      className="flex-1 cursor-pointer rounded-xl bg-neutral-100 py-3 text-center font-normal text-black transition-all hover:bg-neutral-200"
+                      className="flex-1 cursor-pointer rounded-xl bg-neutral-100 py-3 text-center font-normal text-black transition-all hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-100 dark:hover:bg-neutral-700"
                     >
                       Cancel
                     </button>

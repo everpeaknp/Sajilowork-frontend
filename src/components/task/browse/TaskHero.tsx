@@ -74,8 +74,8 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
     <div className="relative z-20 w-full max-w-[560px]">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`relative z-30 flex w-full flex-col gap-2 rounded-[12px] border bg-white p-1.5 shadow-sm transition-all duration-300 sm:flex-row sm:items-center sm:gap-0 ${
-            isFocused ? 'border-neutral-300 ring-2 ring-[#52C47F]/10' : 'border-neutral-200/40'
+          className={`relative z-30 flex w-full flex-col gap-2 rounded-[12px] border bg-white p-1.5 shadow-sm transition-all duration-300 sm:flex-row sm:items-center sm:gap-0 dark:border-neutral-700 dark:bg-neutral-950 ${
+            isFocused ? 'border-neutral-300 ring-2 ring-[#52C47F]/10 dark:border-neutral-600' : 'border-neutral-200/40'
           }`}
         >
           <div className="flex min-w-0 flex-1 items-center py-1">
@@ -85,7 +85,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
             <input
               id="task-search"
               type="text"
-              className={`${discoverBody} w-full min-w-0 flex-1 border-none bg-transparent py-2 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-0`}
+              className={`${discoverBody} w-full min-w-0 flex-1 border-none bg-transparent py-2 text-[15px] text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-0 dark:text-stone-100 dark:placeholder:text-neutral-400`}
               placeholder="Search tasks by title, skill, or location"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -107,7 +107,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
         <AnimatePresence>
           {isFocused && suggestions.length > 0 && (
             <motion.div
-              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg"
+              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -123,7 +123,7 @@ function SearchBox({ onSearchSubmit }: SearchBoxProps) {
                   <button
                     key={item}
                     type="button"
-                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50`}
+                    className={`${discoverBody} flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800`}
                     onMouseDown={() => performSearch(item)}
                   >
                     <SearchIcon className="h-4 w-4 stroke-[1.5] text-[#52C47F]" />
@@ -146,11 +146,11 @@ interface TaskHeroProps {
 
 export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroProps) {
   return (
-    <section className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 ${className}`}>
+    <section className={`select-none bg-white px-4 pb-6 pt-6 sm:px-6 sm:pb-6 sm:pt-8 lg:px-8 dark:bg-neutral-950 ${className}`}>
       <div className="mx-auto w-full max-w-7xl">
-        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px]">
+        <div className="relative flex min-h-[200px] w-full items-stretch overflow-hidden rounded-2xl border border-neutral-200/40 bg-[#fbf2ed] shadow-sm sm:min-h-[240px] sm:rounded-[24px] lg:min-h-[280px] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
           <MarketplaceHeroBreadcrumbs serpKey="tasks" sectionPath="/task" variant="light" />
-          <div className="pointer-events-none absolute -left-16 -top-10 z-0 hidden h-44 w-44 select-none rounded-full bg-[#fcd074] sm:block sm:-left-20 sm:-top-12 sm:h-56 sm:w-56 lg:-left-24 lg:-top-16 lg:h-64 lg:w-64" />
+          <div className="pointer-events-none absolute -left-16 -top-10 z-0 hidden h-44 w-44 select-none rounded-full bg-[#fcd074] sm:block sm:-left-20 sm:-top-12 sm:h-56 sm:w-56 lg:-left-24 lg:-top-16 lg:h-64 lg:w-64 dark:bg-amber-700/30" />
 
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.22] mix-blend-overlay">
             <svg
@@ -176,7 +176,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
           <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-11 sm:gap-6 sm:pl-20 sm:pr-10 sm:pt-12 md:pl-24 md:pr-14 lg:grid-cols-12 lg:pb-0 lg:pl-32 lg:pr-14 lg:pt-14">
             <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-10">
               <motion.h1
-                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-black sm:text-3xl md:text-[38px]`}
+                className={`${discoverHeadline} mb-2 text-2xl font-bold leading-tight tracking-tight text-black sm:text-3xl md:text-[38px] dark:text-stone-100`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -185,7 +185,7 @@ export default function TaskHero({ className = '', onSearchSubmit }: TaskHeroPro
               </motion.h1>
 
               <motion.p
-                className={`${discoverBody} mb-5 max-w-xl text-xs font-normal leading-relaxed text-neutral-700 sm:mb-6 sm:text-sm md:text-base`}
+                className={`${discoverBody} mb-5 max-w-xl text-xs font-normal leading-relaxed text-neutral-700 sm:mb-6 sm:text-sm md:text-base dark:text-neutral-300`}
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}

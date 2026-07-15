@@ -41,18 +41,18 @@ const ITEMS_PER_PAGE = 12;
 
 function FreelancerCardSkeleton() {
   return (
-    <div className="flex animate-pulse flex-col items-stretch justify-between rounded-none border border-neutral-200/55 bg-white p-6">
+    <div className="flex animate-pulse flex-col items-stretch justify-between rounded-none border border-neutral-200/55 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
       <div className="flex flex-col items-center text-center">
-        <div className="mb-5 mt-1 h-[105px] w-[105px] rounded-full bg-neutral-100" />
-        <div className="h-4 w-28 rounded bg-neutral-100" />
-        <div className="mt-2 h-3 w-20 rounded bg-neutral-100" />
-        <div className="mt-2 h-3 w-24 rounded bg-neutral-100" />
+        <div className="mb-5 mt-1 h-[105px] w-[105px] rounded-full bg-neutral-100 dark:bg-neutral-800" />
+        <div className="h-4 w-28 rounded bg-neutral-100 dark:bg-neutral-800" />
+        <div className="mt-2 h-3 w-20 rounded bg-neutral-100 dark:bg-neutral-800" />
+        <div className="mt-2 h-3 w-24 rounded bg-neutral-100 dark:bg-neutral-800" />
         <div className="mt-4 flex gap-1.5">
-          <div className="h-7 w-14 rounded-full bg-neutral-100" />
-          <div className="h-7 w-14 rounded-full bg-neutral-100" />
+          <div className="h-7 w-14 rounded-full bg-neutral-100 dark:bg-neutral-800" />
+          <div className="h-7 w-14 rounded-full bg-neutral-100 dark:bg-neutral-800" />
         </div>
       </div>
-      <div className="mt-5 h-10 w-full rounded bg-neutral-100" />
+      <div className="mt-5 h-10 w-full rounded bg-neutral-100 dark:bg-neutral-800" />
     </div>
   );
 }
@@ -231,10 +231,10 @@ export default function FreelancerList({
       <button
         type="button"
         onClick={() => toggleDropdown(label)}
-        className={`flex items-center gap-2.5 rounded-none border px-4.5 py-2.5 text-sm font-normal tracking-tight text-black transition-all ${
+        className={`flex items-center gap-2.5 rounded-none border px-4.5 py-2.5 text-sm font-normal tracking-tight text-black transition-all dark:text-stone-100 ${
           value !== 'All'
-            ? 'border-emerald-500 bg-[#EAF6F0] text-black'
-            : 'border-neutral-200 bg-white hover:border-neutral-300'
+            ? 'border-emerald-500 bg-[#EAF6F0] text-black dark:bg-emerald-950/50'
+            : 'border-neutral-200 bg-white hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
         }`}
       >
         <span>
@@ -247,7 +247,7 @@ export default function FreelancerList({
         />
       </button>
       {activeDropdown === label && (
-        <div className="absolute left-0 z-40 mt-1.5 w-48 rounded-none border border-neutral-200 bg-white py-1.5 shadow-lg outline-none">
+        <div className="absolute left-0 z-40 mt-1.5 w-48 rounded-none border border-neutral-200 bg-white py-1.5 shadow-lg outline-none dark:border-neutral-700 dark:bg-neutral-900">
           {options.map((opt) => (
             <button
               key={opt}
@@ -257,8 +257,8 @@ export default function FreelancerList({
                 setCurrentPage(1);
                 setActiveDropdown(null);
               }}
-              className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm font-normal tracking-tight transition-colors hover:bg-neutral-50 ${
-                value === opt ? 'bg-emerald-50/40 text-black' : 'text-black'
+              className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm font-normal tracking-tight transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                value === opt ? 'bg-emerald-50/40 text-black dark:bg-emerald-950/40 dark:text-stone-100' : 'text-black dark:text-stone-100'
               }`}
             >
               <span>{opt}</span>
@@ -271,7 +271,7 @@ export default function FreelancerList({
   );
 
   return (
-    <section className="w-full select-none bg-white px-4 py-6 sm:px-6 md:px-8 lg:px-12">
+    <section className="w-full select-none bg-white px-4 py-6 sm:px-6 md:px-8 lg:px-12 dark:bg-neutral-950">
       <div className="w-full max-w-none">
         <div className="mb-8 mt-4 flex flex-col items-start justify-between gap-4 pb-6 md:flex-row md:items-center">
           <div className="flex flex-wrap gap-2.5" onClick={(e) => e.stopPropagation()}>
@@ -306,13 +306,13 @@ export default function FreelancerList({
               <button
                 type="button"
                 onClick={() => toggleDropdown('SortBy')}
-                className="flex cursor-pointer items-center gap-1.5 text-xs font-normal tracking-tight text-black"
+                className="flex cursor-pointer items-center gap-1.5 text-xs font-normal tracking-tight text-black dark:text-stone-100"
               >
                 <span>Sort by {sortBy}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
               </button>
               {activeDropdown === 'SortBy' && (
-                <div className="absolute right-0 z-40 mt-1.5 w-52 rounded-none border border-neutral-200 bg-white py-1.5 shadow-lg outline-none">
+                <div className="absolute right-0 z-40 mt-1.5 w-52 rounded-none border border-neutral-200 bg-white py-1.5 shadow-lg outline-none dark:border-neutral-700 dark:bg-neutral-900">
                   {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt}
@@ -322,8 +322,8 @@ export default function FreelancerList({
                         setCurrentPage(1);
                         setActiveDropdown(null);
                       }}
-                      className={`flex w-full items-center justify-between px-4 py-2 text-left text-xs font-normal tracking-tight transition-colors hover:bg-neutral-50 ${
-                        sortBy === opt ? 'bg-emerald-50/40 text-black' : 'text-black'
+                      className={`flex w-full items-center justify-between px-4 py-2 text-left text-xs font-normal tracking-tight transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                        sortBy === opt ? 'bg-emerald-50/40 text-black dark:bg-emerald-950/40 dark:text-stone-100' : 'text-black dark:text-stone-100'
                       }`}
                     >
                       <span>{opt}</span>
@@ -339,13 +339,13 @@ export default function FreelancerList({
         </div>
 
         {error ? (
-          <div className="rounded-[24px] border border-red-200/80 bg-red-50/70 p-12 text-center shadow-sm">
-            <h3 className="text-sm font-normal tracking-tight text-red-800">{error}</h3>
+          <div className="rounded-[24px] border border-red-200/80 bg-red-50/70 p-12 text-center shadow-sm dark:border-red-900/50 dark:bg-red-950/30">
+            <h3 className="text-sm font-normal tracking-tight text-red-800 dark:text-red-300">{error}</h3>
             {onRetry ? (
               <button
                 type="button"
                 onClick={onRetry}
-                className="mt-4 cursor-pointer rounded-none border border-red-200 bg-white px-4.5 py-2 text-xs font-normal tracking-tight text-red-700 transition-all hover:bg-red-50"
+                className="mt-4 cursor-pointer rounded-none border border-red-200 bg-white px-4.5 py-2 text-xs font-normal tracking-tight text-red-700 transition-all hover:bg-red-50 dark:border-red-800 dark:bg-neutral-900 dark:text-red-300 dark:hover:bg-red-950/40"
               >
                 Retry
               </button>
@@ -377,7 +377,7 @@ export default function FreelancerList({
                 <motion.div
                   key={fl.id}
                   layoutId={`fl-card-${fl.id}`}
-                  className="flex flex-col items-stretch justify-between rounded-none border border-neutral-200/55 bg-white p-6 text-black transition-all duration-300 hover:shadow-lg"
+                  className="flex flex-col items-stretch justify-between rounded-none border border-neutral-200/55 bg-white p-6 text-black transition-all duration-300 hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 dark:hover:shadow-none"
                   variants={{
                     hidden: { opacity: 0, y: 15 },
                     visible: { opacity: 1, y: 0 },
@@ -394,21 +394,21 @@ export default function FreelancerList({
                         className="h-[105px] w-[105px] select-none text-3xl"
                       />
                       {fl.availableNow && (
-                        <span className="absolute bottom-1 right-2.5 inline-block h-3.5 w-3.5 rounded-full border-2 border-white bg-[#52C47F] shadow-sm" />
+                        <span className="absolute bottom-1 right-2.5 inline-block h-3.5 w-3.5 rounded-full border-2 border-white bg-[#52C47F] shadow-sm dark:border-neutral-900" />
                       )}
                     </div>
 
-                    <h3 className="text-base font-normal leading-tight tracking-tight text-black">
+                    <h3 className="text-base font-normal leading-tight tracking-tight text-black dark:text-stone-100">
                       {fl.name}
                     </h3>
 
-                    <p className="mt-1 text-xs font-normal tracking-tight text-black/60">
+                    <p className="mt-1 text-xs font-normal tracking-tight text-black/60 dark:text-neutral-400">
                       {fl.role}
                     </p>
 
-                    <div className="mt-2 flex select-none items-center justify-center gap-1 text-xs font-normal text-black/60">
+                    <div className="mt-2 flex select-none items-center justify-center gap-1 text-xs font-normal text-black/60 dark:text-neutral-400">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      <span className="ml-0.5 text-black">
+                      <span className="ml-0.5 text-black dark:text-stone-100">
                         {formatFreelancerRating(fl.rating, fl.reviews)}
                       </span>
                       <span>({fl.reviews} reviews)</span>
@@ -418,7 +418,7 @@ export default function FreelancerList({
                       {fl.tags.slice(0, 3).map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full bg-[#ffede8] px-3.5 py-2 text-xs font-normal tracking-tight text-black"
+                          className="rounded-full bg-[#ffede8] px-3.5 py-2 text-xs font-normal tracking-tight text-black dark:bg-neutral-800 dark:text-stone-200"
                         >
                           {tag}
                         </span>
@@ -427,22 +427,22 @@ export default function FreelancerList({
                   </div>
 
                   <div>
-                    <div className="grid grid-cols-3 gap-0.5 select-none py-5 text-center text-[10px] font-normal uppercase tracking-tight text-black/50">
+                    <div className="grid grid-cols-3 gap-0.5 select-none py-5 text-center text-[10px] font-normal uppercase tracking-tight text-black/50 dark:text-neutral-500">
                       <div>
                         <span className="capitalize">Location</span>
-                        <div className="mt-1 text-[12px] font-normal normal-case tracking-tight text-black">
+                        <div className="mt-1 text-[12px] font-normal normal-case tracking-tight text-black dark:text-stone-100">
                           {fl.location}
                         </div>
                       </div>
                       <div>
                         <span className="capitalize">Rate</span>
-                        <div className="mt-1 text-[12px] font-normal normal-case tracking-tight text-black">
+                        <div className="mt-1 text-[12px] font-normal normal-case tracking-tight text-black dark:text-stone-100">
                           {formatNPR(fl.rate)}/hr
                         </div>
                       </div>
                       <div>
                         <span className="capitalize">Job Success</span>
-                        <div className="mt-1 text-[12px] font-normal normal-case tracking-tight text-black">
+                        <div className="mt-1 text-[12px] font-normal normal-case tracking-tight text-black dark:text-stone-100">
                           %{fl.jobSuccess}
                         </div>
                       </div>
@@ -450,7 +450,7 @@ export default function FreelancerList({
 
                     <Link
                       href={getFreelancerProfilePath(fl)}
-                      className="mt-5 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-none border border-neutral-200 bg-neutral-50 py-3.5 text-xs font-normal tracking-tight text-black transition-all hover:border-[#5bbb7b] hover:bg-[#5bbb7b] hover:text-white"
+                      className="mt-5 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-none border border-neutral-200 bg-neutral-50 py-3.5 text-xs font-normal tracking-tight text-black transition-all hover:border-[#5bbb7b] hover:bg-[#5bbb7b] hover:text-white dark:border-neutral-700 dark:bg-neutral-800 dark:text-stone-100"
                     >
                       <span>View Profile</span>
                       <ArrowUpRight className="h-3.5 w-3.5" />
@@ -461,24 +461,24 @@ export default function FreelancerList({
             </motion.div>
           ) : (
             <motion.div
-              className="rounded-[24px] border border-dashed border-neutral-200/80 bg-neutral-50/70 p-16 text-center shadow-sm"
+              className="rounded-[24px] border border-dashed border-neutral-200/80 bg-neutral-50/70 p-16 text-center shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 text-neutral-500">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
                 <Filter className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-normal tracking-tight text-black">
+              <h3 className="text-sm font-normal tracking-tight text-black dark:text-stone-100">
                 No freelancers match those search criteria
               </h3>
-              <p className="mx-auto mt-1 max-w-sm text-xs font-normal leading-relaxed tracking-tight text-black/60">
+              <p className="mx-auto mt-1 max-w-sm text-xs font-normal leading-relaxed tracking-tight text-black/60 dark:text-neutral-400">
                 Try clearing some parameters or filters like Skills/Location above to view other
                 talented professionals in the community.
               </p>
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="mt-4 cursor-pointer rounded-none border border-neutral-200 bg-neutral-50 px-4.5 py-2 text-xs font-normal tracking-tight text-black transition-all hover:bg-neutral-100"
+                className="mt-4 cursor-pointer rounded-none border border-neutral-200 bg-neutral-50 px-4.5 py-2 text-xs font-normal tracking-tight text-black transition-all hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-stone-100 dark:hover:bg-neutral-700"
               >
                 Clear all filters
               </button>
@@ -493,7 +493,7 @@ export default function FreelancerList({
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={normalizedCurrentPage === 1}
-                className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition-all hover:bg-neutral-50 hover:text-black ${
+                className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition-all hover:bg-neutral-50 hover:text-black dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-stone-100 ${
                   normalizedCurrentPage === 1 ? 'pointer-events-none opacity-35' : ''
                 }`}
                 title="Previous page"
@@ -507,7 +507,7 @@ export default function FreelancerList({
                     return (
                       <span
                         key={`ellipsis-${index}`}
-                        className="flex h-10 w-10 select-none items-center justify-center font-mono text-xs font-normal tracking-tight text-black/40"
+                        className="flex h-10 w-10 select-none items-center justify-center font-mono text-xs font-normal tracking-tight text-black/40 dark:text-neutral-500"
                       >
                         ...
                       </span>
@@ -523,7 +523,7 @@ export default function FreelancerList({
                       className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-xs font-normal tracking-tight transition-all ${
                         isCurrent
                           ? 'scale-105 bg-[#52C47F] text-white shadow-sm'
-                          : 'text-black/50 hover:text-black'
+                          : 'text-black/50 hover:text-black dark:text-neutral-400 dark:hover:text-stone-100'
                       }`}
                     >
                       {pg}
@@ -536,7 +536,7 @@ export default function FreelancerList({
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={normalizedCurrentPage === totalPages}
-                className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition-all hover:bg-neutral-50 hover:text-black ${
+                className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-500 transition-all hover:bg-neutral-50 hover:text-black dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-stone-100 ${
                   normalizedCurrentPage === totalPages ? 'pointer-events-none opacity-35' : ''
                 }`}
                 title="Next page"
@@ -545,7 +545,7 @@ export default function FreelancerList({
               </button>
             </div>
 
-            <p className="mt-4 text-center text-xs font-normal tracking-tight text-black/60">
+            <p className="mt-4 text-center text-xs font-normal tracking-tight text-black/60 dark:text-neutral-400">
               {currentStartNum} – {currentEndNum} of {filteredFreelancers.length}+ freelancers
               available
             </p>

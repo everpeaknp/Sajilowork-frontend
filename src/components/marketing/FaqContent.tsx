@@ -75,7 +75,7 @@ export default function FaqContent({ sharpBlack = false }: FaqContentProps) {
   }, []);
 
   if (loading) {
-    return <p className="text-sm text-neutral-500">Loading FAQ…</p>;
+    return <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading FAQ…</p>;
   }
 
   return (
@@ -83,27 +83,27 @@ export default function FaqContent({ sharpBlack = false }: FaqContentProps) {
       {items.map((item) => (
         <details
           key={item.q}
-          className="group rounded-2xl border border-gray-100 bg-brand-light-bg open:bg-white open:shadow-sm"
+          className="group rounded-2xl border border-gray-100 bg-brand-light-bg open:bg-white open:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:open:bg-neutral-900"
         >
           <summary
             className={`cursor-pointer list-none px-5 py-4 text-sm marker:content-none sm:text-base [&::-webkit-details-marker]:hidden ${
               sharpBlack
-                ? 'font-normal tracking-tight text-black'
-                : 'font-bold text-brand-dark'
+                ? 'font-normal tracking-tight text-black dark:text-stone-100'
+                : 'font-bold text-brand-dark dark:text-stone-100'
             }`}
           >
             <span className="flex items-center justify-between gap-3">
               {item.q}
               <span
-                className={`transition group-open:rotate-45 ${sharpBlack ? 'text-black' : 'text-brand-emerald'}`}
+                className={`transition group-open:rotate-45 ${sharpBlack ? 'text-black dark:text-stone-100' : 'text-brand-emerald'}`}
               >
                 +
               </span>
             </span>
           </summary>
           <div
-            className={`border-t border-gray-100 px-5 pb-4 pt-3 text-sm leading-relaxed sm:text-base ${
-              sharpBlack ? 'text-neutral-900' : 'text-[#6a719a]'
+            className={`border-t border-gray-100 px-5 pb-4 pt-3 text-sm leading-relaxed dark:border-neutral-800 sm:text-base ${
+              sharpBlack ? 'text-neutral-900 dark:text-neutral-400' : 'text-[#6a719a] dark:text-neutral-400'
             }`}
           >
             {item.a}

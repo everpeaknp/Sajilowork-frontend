@@ -149,20 +149,24 @@ export default function TaskBrowseFilterSidebar({
               placeholder="Search categories"
               value={categorySearchQuery}
               onChange={(e) => setCategorySearchQuery(e.target.value)}
-              className={`${discoverBody} w-full rounded-full bg-[#f1f4f9] py-2 pl-9 pr-3 text-sm outline-none placeholder:text-neutral-400 focus:bg-[#eef2f8]`}
+              className={`${discoverBody} w-full rounded-full bg-[#f1f4f9] py-2 pl-9 pr-3 text-sm outline-none placeholder:text-neutral-400 focus:bg-[#eef2f8] dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900`}
             />
           </div>
           <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
             <button
               type="button"
               onClick={() => onFilterChange({ ...filters, category: undefined })}
-              className={`${discoverBody} flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-[15px] transition-colors hover:bg-neutral-50 ${
-                !filters.category ? 'font-semibold text-neutral-900' : 'text-neutral-600'
+              className={`${discoverBody} flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                !filters.category
+                  ? 'font-semibold text-neutral-900 dark:text-stone-100'
+                  : 'text-neutral-600 dark:text-neutral-400'
               }`}
             >
               <span
                 className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border ${
-                  !filters.category ? 'border-[#52C47F] bg-[#eefaf2]' : 'border-neutral-300'
+                  !filters.category
+                    ? 'border-[#52C47F] bg-[#eefaf2] dark:bg-emerald-950/50'
+                    : 'border-neutral-300 dark:border-neutral-600'
                 }`}
               >
                 {!filters.category ? <span className="h-2 w-2 rounded-full bg-[#52C47F]" /> : null}
@@ -174,13 +178,17 @@ export default function TaskBrowseFilterSidebar({
                 key={cat}
                 type="button"
                 onClick={() => onFilterChange({ ...filters, category: cat })}
-                className={`${discoverBody} flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-[15px] transition-colors hover:bg-neutral-50 ${
-                  filters.category === cat ? 'font-semibold text-neutral-900' : 'text-neutral-600'
+                className={`${discoverBody} flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-left text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800 ${
+                  filters.category === cat
+                    ? 'font-semibold text-neutral-900 dark:text-stone-100'
+                    : 'text-neutral-600 dark:text-neutral-400'
                 }`}
               >
                 <span
                   className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border ${
-                    filters.category === cat ? 'border-[#52C47F] bg-[#eefaf2]' : 'border-neutral-300'
+                    filters.category === cat
+                      ? 'border-[#52C47F] bg-[#eefaf2] dark:bg-emerald-950/50'
+                      : 'border-neutral-300 dark:border-neutral-600'
                   }`}
                 >
                   {filters.category === cat ? (
@@ -212,7 +220,7 @@ export default function TaskBrowseFilterSidebar({
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
               To be done
             </p>
-            <div className="grid grid-cols-1 gap-2 rounded-2xl bg-[#f1f4f9] p-1">
+            <div className="grid grid-cols-1 gap-2 rounded-2xl bg-[#f1f4f9] p-1 dark:bg-neutral-950">
               {(['in_person', 'remote', 'flexible'] as const).map((type) => (
                 <button
                   key={type}
@@ -221,7 +229,7 @@ export default function TaskBrowseFilterSidebar({
                   className={`rounded-xl py-2.5 text-[13px] font-bold capitalize transition-all ${
                     draftWorkType === type
                       ? 'bg-[#113E30] text-white'
-                      : 'text-neutral-700 hover:bg-white/50'
+                      : 'text-neutral-700 hover:bg-white/50 dark:text-neutral-400 dark:hover:bg-neutral-800'
                   }`}
                 >
                   {type.replace('_', ' ')}
@@ -238,7 +246,7 @@ export default function TaskBrowseFilterSidebar({
               placeholder="e.g. Kathmandu, Lalitpur"
               value={draftLocation}
               onChange={(e) => setDraftLocation(e.target.value)}
-              className={`${discoverBody} w-full rounded-2xl bg-[#f1f4f9] px-4 py-3 text-sm font-semibold text-neutral-900 outline-none focus:bg-[#eef2f8]`}
+              className={`${discoverBody} w-full rounded-2xl bg-[#f1f4f9] px-4 py-3 text-sm font-semibold text-neutral-900 outline-none focus:bg-[#eef2f8] dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900`}
             />
           </div>
           <div>
@@ -246,7 +254,7 @@ export default function TaskBrowseFilterSidebar({
               <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
                 Distance
               </p>
-              <span className="text-sm font-bold text-neutral-900">
+              <span className="text-sm font-bold text-neutral-900 dark:text-stone-100">
                 {draftDistance >= 100 ? 'Any distance' : `${draftDistance} km`}
               </span>
             </div>
@@ -256,9 +264,9 @@ export default function TaskBrowseFilterSidebar({
               max="100"
               value={draftDistance}
               onChange={(e) => setDraftDistance(parseFloat(e.target.value))}
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[#f1f4f9] accent-[#52C47F]"
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-[#f1f4f9] accent-[#52C47F] dark:bg-neutral-800"
             />
-            <p className={`${discoverBody} mt-2 text-xs text-neutral-500`}>
+            <p className={`${discoverBody} mt-2 text-xs text-neutral-500 dark:text-neutral-400`}>
               Uses your browser location when applied (for distance and “closest” sort).
             </p>
           </div>
@@ -278,11 +286,11 @@ export default function TaskBrowseFilterSidebar({
       content: (
         <div className="space-y-4 pb-4 pt-2">
           <div className="text-center">
-            <span className={`${landingHeadlineSm} text-lg text-neutral-900`}>
+            <span className={`${landingHeadlineSm} text-lg text-neutral-900 dark:text-stone-100`}>
               {formatBudgetRange(draftBudgetMin, draftBudgetMax)}
             </span>
           </div>
-          <div className="relative mt-2 h-2 rounded-full bg-[#f1f4f9]">
+          <div className="relative mt-2 h-2 rounded-full bg-[#f1f4f9] dark:bg-neutral-800">
             <div
               className="absolute h-full rounded-full bg-[#52C47F]"
               style={{
@@ -330,13 +338,13 @@ export default function TaskBrowseFilterSidebar({
         <div className="space-y-4 pb-4 pt-2">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className={`${discoverBody} text-[15px] font-bold text-neutral-900`}>Open tasks only</p>
-              <p className={`${discoverBody} text-sm text-neutral-500`}>Show only open tasks</p>
+              <p className={`${discoverBody} text-[15px] font-bold text-neutral-900 dark:text-stone-100`}>Open tasks only</p>
+              <p className={`${discoverBody} text-sm text-neutral-500 dark:text-neutral-400`}>Show only open tasks</p>
             </div>
             <button
               type="button"
               onClick={() => setDraftStatus(draftStatus === 'open' ? undefined : 'open')}
-              className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'open' ? 'bg-[#52C47F]' : 'bg-neutral-200'}`}
+              className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'open' ? 'bg-[#52C47F]' : 'bg-neutral-200 dark:bg-neutral-700'}`}
             >
               <div
                 className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${draftStatus === 'open' ? 'left-7' : 'left-1'}`}
@@ -345,13 +353,13 @@ export default function TaskBrowseFilterSidebar({
           </div>
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className={`${discoverBody} text-[15px] font-bold text-neutral-900`}>Assigned tasks only</p>
-              <p className={`${discoverBody} text-sm text-neutral-500`}>Show only assigned tasks</p>
+              <p className={`${discoverBody} text-[15px] font-bold text-neutral-900 dark:text-stone-100`}>Assigned tasks only</p>
+              <p className={`${discoverBody} text-sm text-neutral-500 dark:text-neutral-400`}>Show only assigned tasks</p>
             </div>
             <button
               type="button"
               onClick={() => setDraftStatus(draftStatus === 'assigned' ? undefined : 'assigned')}
-              className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'assigned' ? 'bg-[#52C47F]' : 'bg-neutral-200'}`}
+              className={`relative h-6 w-12 shrink-0 rounded-full transition-all ${draftStatus === 'assigned' ? 'bg-[#52C47F]' : 'bg-neutral-200 dark:bg-neutral-700'}`}
             >
               <div
                 className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${draftStatus === 'assigned' ? 'left-7' : 'left-1'}`}
@@ -382,7 +390,9 @@ export default function TaskBrowseFilterSidebar({
                 type="button"
                 onClick={() => void handleSortChange(option.id)}
                 className={`${discoverBody} flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[15px] font-semibold transition-all ${
-                  isSelected ? 'bg-[#eefaf2] text-neutral-900' : 'text-neutral-700 hover:bg-neutral-50'
+                  isSelected
+                    ? 'bg-[#eefaf2] text-neutral-900 dark:bg-emerald-950/50 dark:text-stone-100'
+                    : 'text-neutral-700 hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800'
                 }`}
               >
                 <Icon
@@ -398,9 +408,9 @@ export default function TaskBrowseFilterSidebar({
   ];
 
   return (
-    <div className="rounded-[16px] bg-white px-5 pb-5 pt-0 lg:col-span-1">
+    <div className="rounded-[16px] bg-white px-5 pb-5 pt-0 lg:col-span-1 dark:bg-neutral-900 dark:border dark:border-neutral-800">
       {hasActiveFilters(filters) ? (
-        <div className="mb-2 flex min-h-[40px] items-center justify-end border-b border-neutral-100 pb-2">
+        <div className="mb-2 flex min-h-[40px] items-center justify-end border-b border-neutral-100 pb-2 dark:border-neutral-800">
           <button
             type="button"
             onClick={handleClearAll}
@@ -414,12 +424,12 @@ export default function TaskBrowseFilterSidebar({
       {sections.map((section, index) => (
         <div
           key={section.key}
-          className={`${index === 0 ? 'pt-0 pb-4' : 'border-b border-neutral-300 pb-5 pt-5'} ${index === sections.length - 1 ? 'border-b-0 pb-0' : ''}`}
+          className={`${index === 0 ? 'pt-0 pb-4' : 'border-b border-neutral-300 pb-5 pt-5 dark:border-neutral-700'} ${index === sections.length - 1 ? 'border-b-0 pb-0' : ''}`}
         >
           <button
             type="button"
             onClick={() => toggleAccordion(section.key)}
-            className={`${discoverHeadline} flex min-h-[40px] w-full items-center justify-between py-1 text-[18px] font-semibold tracking-wide text-neutral-900 transition-colors hover:text-[#52C47F] ${index === 0 ? 'mb-0 border-b border-neutral-300 pb-4' : ''}`}
+            className={`${discoverHeadline} flex min-h-[40px] w-full items-center justify-between py-1 text-[18px] font-semibold tracking-wide text-neutral-900 transition-colors hover:text-[#52C47F] dark:text-stone-100 ${index === 0 ? 'mb-0 border-b border-neutral-300 pb-4 dark:border-neutral-700' : ''}`}
           >
             <span>{section.label}</span>
             <ChevronDown

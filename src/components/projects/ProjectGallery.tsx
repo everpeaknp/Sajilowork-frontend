@@ -25,7 +25,7 @@ export default function ProjectGallery({ project }: ProjectGalleryProps) {
       className={
         hasDocuments
           ? 'mt-8'
-          : 'mt-12 border-t border-neutral-200 pt-10'
+          : 'mt-12 border-t border-neutral-200 pt-10 dark:border-neutral-800'
       }
       id="project-gallery"
     >

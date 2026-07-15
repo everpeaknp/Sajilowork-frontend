@@ -21,7 +21,7 @@ interface JobRelatedJobsProps {
 }
 
 function MetaDivider() {
-  return <span className="mx-2 text-neutral-300" aria-hidden>|</span>;
+  return <span className="mx-2 text-neutral-300 dark:text-neutral-600" aria-hidden>|</span>;
 }
 
 export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps) {
@@ -62,8 +62,8 @@ export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps
 
   return (
     <section className="mt-12 sm:mt-16">
-      <h2 className="text-base font-normal tracking-tight text-black sm:text-lg md:text-xl">Related Jobs</h2>
-      <p className="mt-1 text-sm font-light text-neutral-500">
+      <h2 className="text-base font-normal tracking-tight text-black sm:text-lg md:text-xl dark:text-stone-100">Related Jobs</h2>
+      <p className="mt-1 text-sm font-light text-neutral-500 dark:text-neutral-400">
         {getJobsLiveSubtitle(related.length > 0 ? related.length + 1 : 1)}
       </p>
 
@@ -77,7 +77,7 @@ export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps
             <li key={relatedJob.id}>
               <Link
                 href={getJobDetailPath(relatedJob)}
-                className="group block rounded-xl border border-gray-200 bg-white p-4 transition-colors hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] sm:p-5"
+                className="group block rounded-xl border border-gray-200 bg-white p-4 transition-colors hover:border-gray-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] sm:p-5 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700 dark:hover:shadow-none"
               >
                 <div className="flex items-start gap-4">
                   <div className="relative shrink-0">
@@ -97,7 +97,7 @@ export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="line-clamp-2 text-sm font-normal leading-snug text-black transition-colors group-hover:text-[#45a874] sm:text-[15px]">
+                      <p className="line-clamp-2 text-sm font-normal leading-snug text-black transition-colors group-hover:text-[#45a874] sm:text-[15px] dark:text-stone-100">
                         {relatedJob.title}
                       </p>
                       <button
@@ -105,8 +105,8 @@ export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps
                         onClick={(e) => void toggleStar(relatedJob, e)}
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors ${
                           isStarred
-                            ? 'border-amber-300 bg-amber-50 text-amber-500'
-                            : 'border-[#45a874]/25 bg-white text-[#45a874] hover:bg-[#45a874]/5'
+                            ? 'border-amber-300 bg-amber-50 text-amber-500 dark:border-amber-700 dark:bg-amber-950/40'
+                            : 'border-[#45a874]/25 bg-white text-[#45a874] hover:bg-[#45a874]/5 dark:bg-neutral-900 dark:hover:bg-emerald-950/40'
                         }`}
                         aria-label={isStarred ? 'Remove bookmark' : 'Bookmark job'}
                       >
@@ -126,7 +126,7 @@ export default function JobRelatedJobs({ job, relatedJobs }: JobRelatedJobsProps
 
                     <p className="mt-1.5 text-sm font-normal text-[#45a874]">{relatedJob.companyName}</p>
 
-                    <div className="mt-2 flex flex-wrap items-center text-xs font-light text-neutral-500 sm:text-[13px]">
+                    <div className="mt-2 flex flex-wrap items-center text-xs font-light text-neutral-500 sm:text-[13px] dark:text-neutral-400">
                       <span>
                         {relatedJob.budgetLabel} {relatedJob.type}
                       </span>

@@ -42,7 +42,7 @@ export default function SingleFreelancerPage({
   }, []);
   if (!isProfileConfigured) {
     return (
-      <div className="select-none bg-white pb-12 pt-8 font-normal text-black">
+      <div className="select-none bg-white pb-12 pt-8 font-normal text-black dark:bg-neutral-950 dark:text-stone-100">
         <FreelancerProfileEmptyState
           name={freelancer.name}
           username={freelancer.username}
@@ -53,7 +53,7 @@ export default function SingleFreelancerPage({
   }
 
   return (
-    <div className="select-none bg-white pb-12 pt-8 font-normal text-black">
+    <div className="select-none bg-white pb-12 pt-8 font-normal text-black dark:bg-neutral-950 dark:text-stone-100">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <FreelancerProfileHero freelancer={freelancer} />
       </div>
@@ -67,13 +67,13 @@ export default function SingleFreelancerPage({
       />
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-100 pt-8">
-          <p className="text-sm font-normal text-neutral-500">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-neutral-100 pt-8 dark:border-neutral-800">
+          <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
             Browse more talent on the full freelancer directory.
           </p>
           <Link
             href="/freelancers"
-            className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80 dark:text-stone-100"
           >
             Back to all freelancers
             <ArrowUpRight className="h-4 w-4" />

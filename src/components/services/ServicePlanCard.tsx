@@ -20,16 +20,16 @@ function PackagePanel({
 }) {
   return (
     <>
-      <p className="text-[28px] font-normal tracking-tight text-black">
+      <p className="text-[28px] font-normal tracking-tight text-black dark:text-stone-100">
         {formatNPR(pkg.price)}
       </p>
 
-      <h3 className="mt-3 text-lg font-normal text-black">{pkg.title}</h3>
-      <p className="mt-2 min-h-[3.25rem] text-sm font-normal leading-relaxed text-neutral-500">
+      <h3 className="mt-3 text-lg font-normal text-black dark:text-stone-100">{pkg.title}</h3>
+      <p className="mt-2 min-h-[3.25rem] text-sm font-normal leading-relaxed text-neutral-500 dark:text-neutral-400">
         {pkg.description}
       </p>
 
-      <ul className="mt-5 space-y-3 border-b border-neutral-200 pb-5 text-sm font-normal text-neutral-700">
+      <ul className="mt-5 space-y-3 border-b border-neutral-200 pb-5 text-sm font-normal text-neutral-700 dark:border-neutral-800 dark:text-neutral-300">
         <li className="flex items-center gap-2.5">
           <Hourglass className="h-4 w-4 shrink-0 text-neutral-400" />
           {pkg.deliveryDays} Days Delivery
@@ -69,8 +69,8 @@ export default function ServicePlanCard({
   if (!packages.length) return null;
 
   return (
-    <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
-      <div className="flex items-center gap-6 border-b border-neutral-200 pb-4">
+    <div className="rounded-xl border border-neutral-200/80 bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+      <div className="flex items-center gap-6 border-b border-neutral-200 pb-4 dark:border-neutral-800">
         {packages.map((pkg) => (
           <button
             key={pkg.id}
@@ -78,8 +78,8 @@ export default function ServicePlanCard({
             onClick={() => onSelectPackage(pkg.id)}
             className={`cursor-pointer pb-1 text-sm font-normal transition-colors ${
               selectedPackageId === pkg.id
-                ? 'border-b-2 border-black text-black'
-                : 'text-neutral-400 hover:text-neutral-700'
+                ? 'border-b-2 border-black text-black dark:border-stone-100 dark:text-stone-100'
+                : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
             }`}
           >
             {pkg.name}

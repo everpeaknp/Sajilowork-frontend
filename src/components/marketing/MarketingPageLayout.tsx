@@ -27,7 +27,7 @@ export default function MarketingPageLayout({
   hideHero = false,
 }: MarketingPageLayoutProps) {
   return (
-    <div className="mobile-bottom-nav-offset flex min-h-screen flex-col overflow-x-hidden bg-white">
+    <div className="mobile-bottom-nav-offset flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-neutral-950">
       <Navbar />
       <main className="flex-1">
         {hideHero && backHref ? (
@@ -37,7 +37,7 @@ export default function MarketingPageLayout({
             ) : null}
             <Link
               href={backHref}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-dark transition-colors hover:text-brand-emerald"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-dark transition-colors hover:text-brand-emerald dark:text-stone-100 dark:hover:text-brand-emerald"
             >
               <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
               {backLabel}

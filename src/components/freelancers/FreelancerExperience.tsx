@@ -25,7 +25,7 @@ export default function FreelancerExperience({ freelancer, items }: FreelancerEx
 
   return (
     <div className="mt-10 w-full max-w-4xl">
-      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Work & Experience
       </h3>
 
@@ -40,7 +40,7 @@ export default function FreelancerExperience({ freelancer, items }: FreelancerEx
             transition={{ duration: 0.5, delay: idx * 0.15 }}
           >
             <div className="relative flex w-10 shrink-0 flex-col items-center self-stretch">
-              <div className="relative z-10 flex h-10 w-10 shrink-0 select-none items-center justify-center rounded-full border border-neutral-100 bg-[#EAF6F0] text-xs font-normal text-[#52C47F] shadow-sm">
+              <div className="relative z-10 flex h-10 w-10 shrink-0 select-none items-center justify-center rounded-full border border-neutral-100 bg-[#EAF6F0] text-xs font-normal text-[#52C47F] shadow-sm dark:border-neutral-700 dark:bg-emerald-950/50">
                 {item.badgeLetter}
               </div>
               {idx < experienceItems.length - 1 && (
@@ -51,11 +51,11 @@ export default function FreelancerExperience({ freelancer, items }: FreelancerEx
             <div
               className={`flex flex-col items-start pt-0.5 ${idx < experienceItems.length - 1 ? 'pb-10' : ''}`}
             >
-              <div className="mb-3 select-none rounded-full bg-[#FEF1EC] px-5 py-2 text-sm font-normal text-black">
+              <div className="mb-3 select-none rounded-full bg-[#FEF1EC] px-5 py-2 text-sm font-normal text-black dark:bg-neutral-800 dark:text-stone-200">
                 {item.years}
               </div>
 
-              <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg">
+              <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg dark:text-stone-100">
                 {item.role}
               </h4>
 
@@ -63,7 +63,7 @@ export default function FreelancerExperience({ freelancer, items }: FreelancerEx
                 {item.company}
               </p>
 
-              <p className="mt-4 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm">
+              <p className="mt-4 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm dark:text-neutral-300">
                 {item.description}
               </p>
             </div>
@@ -71,7 +71,7 @@ export default function FreelancerExperience({ freelancer, items }: FreelancerEx
         ))}
       </div>
 
-      <div className="mt-14 w-full border-t border-neutral-200" />
+      <div className="mt-14 w-full border-t border-neutral-200 dark:border-neutral-800" />
     </div>
   );
 }

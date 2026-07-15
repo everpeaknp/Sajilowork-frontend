@@ -22,8 +22,8 @@ export default function BlogIndexClient({ posts }: BlogIndexClientProps) {
       contentClassName="max-w-7xl"
     >
       {posts.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-brand-light-bg px-6 py-14 text-center">
-          <p className="font-body text-base font-medium text-muted-foreground">
+        <div className="rounded-2xl border border-border bg-brand-light-bg px-6 py-14 text-center dark:border-neutral-800 dark:bg-neutral-900">
+          <p className="font-body text-base font-medium text-muted-foreground dark:text-neutral-400">
             No articles published yet. Check back soon for tips and guides.
           </p>
         </div>

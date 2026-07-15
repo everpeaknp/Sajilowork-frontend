@@ -108,7 +108,7 @@ export default function TaskBrowseMobileSheet({
       aria-hidden={hidden}
     >
       <motion.div
-        className="pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[22px] border-t border-outline-variant/70 bg-white shadow-[0_-10px_48px_rgba(0,13,69,0.14)]"
+        className="pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[22px] border-t border-outline-variant/70 bg-white shadow-[0_-10px_48px_rgba(0,13,69,0.14)] dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-[0_-10px_48px_rgba(0,0,0,0.45)]"
         style={{ height: sheetHeight, y }}
         drag="y"
         dragControls={dragControls}
@@ -123,20 +123,20 @@ export default function TaskBrowseMobileSheet({
           onPointerDown={(event) => dragControls.start(event)}
         >
           <div className="flex justify-center pt-2.5 pb-1">
-            <div className="h-1 w-9 rounded-full bg-outline-variant/90" />
+            <div className="h-1 w-9 rounded-full bg-outline-variant/90 dark:bg-neutral-700" />
           </div>
 
           <p className="px-4 pb-2 text-center text-xs font-semibold text-on-surface-variant">
             {taskCount} {taskCount === 1 ? countLabel : `${countLabel}s`} · swipe up for list
           </p>
 
-          <div className="mx-4 mb-2 flex rounded-full bg-[#f1f4f9] p-1">
+          <div className="mx-4 mb-2 flex rounded-full bg-[#f1f4f9] p-1 dark:bg-neutral-800">
             <button
               type="button"
               onClick={() => onSnapChange('map')}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-bold transition-all ${
                 snap === 'map'
-                  ? 'bg-white text-brand-dark shadow-sm'
+                  ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
                   : 'text-on-surface-variant'
               }`}
             >
@@ -148,7 +148,7 @@ export default function TaskBrowseMobileSheet({
               onClick={() => onSnapChange('list')}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 text-sm font-bold transition-all ${
                 snap === 'list'
-                  ? 'bg-white text-brand-dark shadow-sm'
+                  ? 'bg-white text-brand-dark shadow-sm dark:bg-neutral-900 dark:text-stone-100'
                   : 'text-on-surface-variant'
               }`}
             >

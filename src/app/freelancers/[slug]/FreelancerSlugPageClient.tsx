@@ -72,7 +72,7 @@ export default function FreelancerSlugPageClient({
 
   return (
     <div
-      className={`${discoverDmSans} discover-page subpixel-antialiased mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white font-normal text-black selection:bg-[#1161fe] selection:text-white [&_a]:font-normal [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal tracking-tight`}
+      className={`${discoverDmSans} discover-page subpixel-antialiased mobile-bottom-nav-offset min-h-screen overflow-x-hidden bg-white font-normal text-black selection:bg-[#1161fe] selection:text-white dark:bg-neutral-950 dark:text-stone-100 dark:selection:bg-brand-emerald [&_a]:font-normal [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_h4]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal tracking-tight`}
     >
       <Navbar />
       <main className="w-full max-w-none px-0 py-0">
@@ -82,7 +82,7 @@ export default function FreelancerSlugPageClient({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="sticky top-4 z-50 mx-auto mb-6 flex max-w-xl items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-xs font-normal text-emerald-800 shadow-sm"
+              className="sticky top-4 z-50 mx-auto mb-6 flex max-w-xl items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-xs font-normal text-emerald-800 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-200"
             >
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500" />
@@ -91,7 +91,7 @@ export default function FreelancerSlugPageClient({
               <button
                 type="button"
                 onClick={() => setNotification(null)}
-                className="cursor-pointer rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100"
+                className="cursor-pointer rounded p-1 text-emerald-600 transition-colors hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

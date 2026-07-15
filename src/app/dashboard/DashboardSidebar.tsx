@@ -169,7 +169,7 @@ export default function DashboardSidebar({
     } ${
       isActive
         ? 'bg-[#222222] font-semibold text-white shadow-sm'
-        : 'text-black hover:bg-neutral-50'
+        : 'text-black hover:bg-neutral-50 dark:text-stone-200 dark:hover:bg-neutral-900'
     }`;
 
   const renderSimpleNavItem = (
@@ -193,7 +193,7 @@ export default function DashboardSidebar({
         {icon ?? (
           <Icon
             className={`h-[22px] w-[22px] shrink-0 transition-transform ${SIDEBAR_MOTION} ${
-              isActive ? 'text-[#52C47F]' : 'text-black'
+              isActive ? 'text-[#52C47F]' : 'text-black dark:text-stone-300'
             }`}
             strokeWidth={1.8}
           />
@@ -219,7 +219,7 @@ export default function DashboardSidebar({
       <div
         key={item.id}
         className={`group flex w-full min-w-0 items-center rounded-lg transition-[background-color,box-shadow,padding] ${SIDEBAR_MOTION} ${
-          isActive ? 'bg-[#222222] shadow-sm' : 'hover:bg-neutral-50'
+          isActive ? 'bg-[#222222] shadow-sm' : 'hover:bg-neutral-50 dark:hover:bg-neutral-900'
         }`}
       >
         <Link
@@ -229,12 +229,12 @@ export default function DashboardSidebar({
             onClose?.();
           }}
           className={`flex min-w-0 flex-1 cursor-pointer items-center gap-[18px] rounded-lg px-4 py-3.5 text-[15px] font-medium transition-[padding,background-color,color,gap] ${SIDEBAR_MOTION} ${
-            isActive ? 'font-semibold text-white' : 'text-black'
+            isActive ? 'font-semibold text-white' : 'text-black dark:text-stone-200'
           }`}
         >
           <Icon
             className={`h-[22px] w-[22px] shrink-0 transition-transform ${SIDEBAR_MOTION} ${
-              isActive ? 'text-[#52C47F]' : 'text-black'
+              isActive ? 'text-[#52C47F]' : 'text-black dark:text-stone-300'
             }`}
             strokeWidth={1.8}
           />
@@ -251,7 +251,7 @@ export default function DashboardSidebar({
           className={`mr-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors ${SIDEBAR_MOTION} ${
             isActive
               ? 'text-white/80 hover:bg-white/10 hover:text-[#52C47F]'
-              : 'text-neutral-500 hover:bg-neutral-100 hover:text-black'
+              : 'text-neutral-500 hover:bg-neutral-100 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
           }`}
         >
           <Plus className="h-4 w-4" strokeWidth={2.25} />
@@ -261,19 +261,19 @@ export default function DashboardSidebar({
   };
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-hidden bg-white">
+    <aside className="flex h-full w-full flex-col overflow-hidden bg-white dark:bg-neutral-950">
       <div
-        className={`hidden shrink-0 items-center border-b border-neutral-100 py-2 transition-[padding] lg:flex ${SIDEBAR_MOTION} ${
+        className={`hidden shrink-0 items-center border-b border-neutral-100 py-2 transition-[padding] lg:flex dark:border-neutral-800 ${SIDEBAR_MOTION} ${
           collapsed ? 'justify-center px-2' : 'justify-between px-3'
         }`}
       >
         {!collapsed ? (
-          <span className="px-1 text-sm font-semibold tracking-wide text-neutral-800">Menu</span>
+          <span className="px-1 text-sm font-semibold tracking-wide text-neutral-800 dark:text-stone-200">Menu</span>
         ) : null}
         <button
           type="button"
           onClick={onToggleCollapse}
-          className={`relative inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-black ${SIDEBAR_MOTION}`}
+          className={`relative inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-black dark:text-neutral-300 dark:hover:bg-neutral-900 dark:hover:text-white ${SIDEBAR_MOTION}`}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -301,7 +301,7 @@ export default function DashboardSidebar({
       </div>
 
       <div
-        className={`shrink-0 space-y-1 border-t border-neutral-100 transition-[padding] ${SIDEBAR_MOTION} ${
+        className={`shrink-0 space-y-1 border-t border-neutral-100 transition-[padding] dark:border-neutral-800 ${SIDEBAR_MOTION} ${
           collapsed ? 'px-1.5 py-2' : 'px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]'
         }`}
       >
@@ -310,7 +310,7 @@ export default function DashboardSidebar({
             className={`group flex w-full min-w-0 items-center rounded-lg transition-[background-color,box-shadow] ${SIDEBAR_MOTION} ${
               activeTab === 'profile' || activeTab === 'settings'
                 ? 'bg-[#222222] shadow-sm'
-                : 'hover:bg-neutral-50'
+                : 'hover:bg-neutral-50 dark:hover:bg-neutral-900'
             }`}
           >
             <Link
@@ -327,7 +327,7 @@ export default function DashboardSidebar({
                   ? 'font-semibold text-white'
                   : activeTab === 'settings'
                     ? 'text-white/80'
-                    : 'text-black'
+                    : 'text-black dark:text-stone-200'
               }`}
             >
               <UserAvatar
@@ -357,7 +357,7 @@ export default function DashboardSidebar({
                   ? activeTab === 'settings'
                     ? 'text-[#52C47F] hover:bg-white/10'
                     : 'text-white/80 hover:bg-white/10 hover:text-[#52C47F]'
-                  : 'text-neutral-500 hover:bg-neutral-100 hover:text-black'
+                  : 'text-neutral-500 hover:bg-neutral-100 hover:text-black dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
               }`}
             >
               <Settings className="h-[22px] w-[22px]" strokeWidth={1.8} />

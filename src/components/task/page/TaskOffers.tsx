@@ -28,7 +28,7 @@ interface TaskOffersProps {
 }
 
 function MetaDivider() {
-  return <span className="h-3.5 w-px shrink-0 bg-neutral-300" aria-hidden />;
+  return <span className="h-3.5 w-px shrink-0 bg-neutral-300 dark:bg-neutral-700" aria-hidden />;
 }
 
 function formatBidDate(value?: string): string {
@@ -176,24 +176,24 @@ export default function TaskOffers({
   }, [bids.length, onCountChange]);
 
   return (
-    <section className={embedded ? '' : 'border-t border-neutral-200 pt-10'}>
+    <section className={embedded ? '' : 'border-t border-neutral-200 pt-10 dark:border-neutral-800'}>
       {!embedded ? (
-        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Offers ({bids.length})
         </h2>
       ) : null}
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm font-normal text-neutral-500">
+        <div className="flex items-center gap-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading offers…
         </div>
       ) : !user && hiddenOfferCount > 0 ? (
-        <div className="rounded-lg border border-neutral-200 bg-neutral-50/80 px-5 py-8 text-center">
-          <p className="text-base font-normal text-black">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50/80 px-5 py-8 text-center dark:border-neutral-800 dark:bg-neutral-900/80">
+          <p className="text-base font-normal text-black dark:text-stone-100">
             {hiddenOfferCount} offer{hiddenOfferCount === 1 ? '' : 's'} on this task
           </p>
-          <p className="mt-2 text-sm font-normal text-neutral-500">
+          <p className="mt-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
             Sign in to view proposals and submit your own offer.
           </p>
           <button
@@ -205,7 +205,7 @@ export default function TaskOffers({
           </button>
         </div>
       ) : bids.length === 0 ? (
-        <p className="text-sm font-normal text-neutral-500">
+        <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
           {offersOpen
             ? isOwner
               ? 'No offers yet. Taskers can submit from the form below.'
@@ -219,26 +219,26 @@ export default function TaskOffers({
           {bids.map((bid) => (
             <article
               key={bid.id}
-              className="rounded-lg border border-neutral-200 bg-white px-5 py-5 sm:px-6 sm:py-6"
+              className="rounded-lg border border-neutral-200 bg-white px-5 py-5 sm:px-6 sm:py-6 dark:border-neutral-800 dark:bg-neutral-900"
             >
               <div className="flex items-start gap-4 sm:gap-5">
                 <div className="relative shrink-0">
                   <img
                     src={taskerAvatar(bid)}
                     alt={taskerDisplayName(bid)}
-                    className="h-16 w-16 rounded-full border border-neutral-100 bg-neutral-50 object-cover sm:h-[72px] sm:w-[72px]"
+                    className="h-16 w-16 rounded-full border border-neutral-100 bg-neutral-50 object-cover sm:h-[72px] sm:w-[72px] dark:border-neutral-700 dark:bg-neutral-800"
                     referrerPolicy="no-referrer"
                   />
-                  <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#52C47F]" />
+                  <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#52C47F] dark:border-neutral-900" />
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-base font-normal text-black sm:text-lg">
+                    <h3 className="text-base font-normal text-black sm:text-lg dark:text-stone-100">
                       {taskerDisplayName(bid)}
                     </h3>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-normal text-neutral-500">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
                       {bid.tasker?.average_rating != null ? (
                         <>
                           <span className="inline-flex items-center gap-1.5">
@@ -259,7 +259,7 @@ export default function TaskOffers({
                       </span>
                     </div>
 
-                    <p className="mt-3 whitespace-pre-wrap break-words text-sm font-normal leading-normal text-black sm:text-[15px] [overflow-wrap:anywhere]">
+                    <p className="mt-3 whitespace-pre-wrap break-words text-sm font-normal leading-normal text-black sm:text-[15px] [overflow-wrap:anywhere] dark:text-stone-200">
                       {bid.proposal}
                     </p>
 
@@ -269,14 +269,14 @@ export default function TaskOffers({
                         !loadingWalletBalance &&
                         walletAvailableBalance !== null &&
                         !canAcceptOfferWithWallet(bid) ? (
-                          <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-normal text-amber-900">
+                          <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-normal text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-200">
                             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                             <p>
                               You need at least {formatNPR(bid.amount)} in your wallet to accept
                               this offer. Available: {formatNPR(walletAvailableBalance)}.{' '}
                               <Link
                                 href="/tasker-dashboard/methods"
-                                className="font-semibold underline hover:text-amber-950"
+                                className="font-semibold underline hover:text-amber-950 dark:hover:text-amber-100"
                               >
                                 Add funds to wallet
                               </Link>
@@ -301,7 +301,7 @@ export default function TaskOffers({
                     ) : null}
 
                     {isOwner && bid.status === 'pending' && hasAcceptedOffer ? (
-                      <p className="mt-4 text-sm font-normal text-neutral-500">
+                      <p className="mt-4 text-sm font-normal text-neutral-500 dark:text-neutral-400">
                         Another offer has already been accepted for this task.
                       </p>
                     ) : null}
@@ -317,7 +317,7 @@ export default function TaskOffers({
                           }
                           router.push(dashboardMessageBidHref(bid.id, taskerId));
                         }}
-                        className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-md border border-[#52C47F] bg-white px-5 py-2.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#52C47F] hover:text-white"
+                        className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-md border border-[#52C47F] bg-white px-5 py-2.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#52C47F] hover:text-white dark:bg-neutral-900 dark:hover:bg-[#52C47F]"
                       >
                         Message tasker
                       </button>
@@ -325,10 +325,10 @@ export default function TaskOffers({
                   </div>
 
                   <div className="shrink-0 sm:text-right">
-                    <p className="text-lg font-normal text-black sm:text-xl">
+                    <p className="text-lg font-normal text-black sm:text-xl dark:text-stone-100">
                       {formatNPR(Number(bid.amount) || 0)}
                     </p>
-                    <p className="mt-1 text-sm font-normal capitalize text-neutral-500">
+                    <p className="mt-1 text-sm font-normal capitalize text-neutral-500 dark:text-neutral-400">
                       {project.type === 'Hourly' ? 'Hourly offer' : 'Fixed offer'}
                     </p>
                   </div>

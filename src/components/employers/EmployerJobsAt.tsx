@@ -63,15 +63,15 @@ export default function EmployerJobsAt({
   return (
     <div className="space-y-4" id="employer-jobs-section">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h3 className="select-none text-xl font-normal tracking-tight text-black">Jobs at {employerName}</h3>
-        <p className="text-sm text-neutral-500">
+        <h3 className="select-none text-xl font-normal tracking-tight text-black dark:text-stone-100">Jobs at {employerName}</h3>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           {liveCount} open {liveCount === 1 ? 'job' : 'jobs'}
           {todayCount > 0 ? ` · ${todayCount} added today` : ''}
         </p>
       </div>
 
       {jobs.length === 0 ? (
-        <p className="text-sm text-neutral-500">No open jobs posted yet.</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">No open jobs posted yet.</p>
       ) : null}
 
       <div className="space-y-3">
@@ -84,17 +84,17 @@ export default function EmployerJobsAt({
             }}
             role="button"
             tabIndex={0}
-            className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-gray-300 hover:shadow-sm sm:p-5"
+            className="group flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:border-gray-300 hover:shadow-sm sm:p-5 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700 dark:hover:shadow-none"
           >
             <div className="flex min-w-0 items-center gap-4">
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full">
                 {renderEmployerBrandLogo(job.logoColor, employerName, logoUrl, logoText)}
               </div>
               <div className="min-w-0">
-                <h4 className="truncate text-sm font-semibold text-neutral-900 sm:text-base">
+                <h4 className="truncate text-sm font-semibold text-neutral-900 sm:text-base dark:text-stone-100">
                   {job.title}
                 </h4>
-                <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
+                <p className="mt-1 text-xs text-neutral-500 sm:text-sm dark:text-neutral-400">
                   {job.budget} · {job.duration} · {job.locationType}
                 </p>
               </div>

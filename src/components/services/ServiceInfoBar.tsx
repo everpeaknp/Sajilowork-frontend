@@ -19,12 +19,12 @@ function InfoItem({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#fbf2ed] text-neutral-700">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#fbf2ed] text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
         {icon}
       </div>
       <div>
-        <p className="text-sm font-normal text-black">{label}</p>
-        <p className="text-sm font-normal text-neutral-500">{value}</p>
+        <p className="text-sm font-normal text-black dark:text-stone-100">{label}</p>
+        <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">{value}</p>
       </div>
     </div>
   );

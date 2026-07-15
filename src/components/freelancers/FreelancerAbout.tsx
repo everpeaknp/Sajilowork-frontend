@@ -49,7 +49,7 @@ interface SidebarRow {
 
 function MetricIconWrap({ children }: { children: ReactNode }) {
   return (
-    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FAF0E3]">
+    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FAF0E3] dark:bg-neutral-800">
       {children}
     </div>
   );
@@ -308,25 +308,25 @@ export default function FreelancerAbout({
 
   return (
     <section
-      className={`select-none bg-white ${
+      className={`select-none bg-white dark:bg-neutral-950 ${
         embedded
           ? 'px-4 pb-6 sm:px-6 lg:px-8'
-          : 'border-b border-neutral-100 px-4 pb-16 sm:px-6 lg:px-8'
+          : 'border-b border-neutral-100 px-4 pb-16 sm:px-6 lg:px-8 dark:border-neutral-800'
       }`}
     >
       <div className={`mx-auto w-full ${embedded ? '' : 'max-w-7xl'}`}>
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
           <div className={`flex flex-col pt-2 ${embedded ? 'lg:col-span-12' : 'lg:col-span-8'}`}>
             {visibleMetrics.length > 0 ? (
-              <div className="mb-8 grid grid-cols-2 gap-x-4 gap-y-8 border-b border-neutral-100 pb-10 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
+              <div className="mb-8 grid grid-cols-2 gap-x-4 gap-y-8 border-b border-neutral-100 pb-10 sm:grid-cols-2 md:grid-cols-4 md:gap-6 dark:border-neutral-800">
                 {visibleMetrics.map((metric) => (
                   <div key={metric.label} className="flex min-w-0 items-center gap-3">
                     <MetricIconWrap>{metric.icon}</MetricIconWrap>
                     <div className="flex min-w-0 flex-col">
-                      <span className="text-xs font-normal leading-tight text-black sm:text-sm">
+                      <span className="text-xs font-normal leading-tight text-black sm:text-sm dark:text-neutral-400">
                         {metric.label}
                       </span>
-                      <span className="mt-1 text-sm font-normal leading-tight text-black">
+                      <span className="mt-1 text-sm font-normal leading-tight text-black dark:text-stone-100">
                         {metric.value}
                       </span>
                     </div>
@@ -337,11 +337,11 @@ export default function FreelancerAbout({
 
             {descriptionParagraphs.length > 0 ? (
               <>
-                <h3 className="mb-5 text-lg font-normal leading-tight tracking-tight text-black sm:text-xl">
+                <h3 className="mb-5 text-lg font-normal leading-tight tracking-tight text-black sm:text-xl dark:text-stone-100">
                   Description
                 </h3>
 
-                <div className="space-y-6 text-xs font-normal leading-relaxed text-black sm:text-sm">
+                <div className="space-y-6 text-xs font-normal leading-relaxed text-black sm:text-sm dark:text-neutral-300">
                   {descriptionParagraphs.map((paragraph) => (
                     <p key={paragraph.slice(0, 24)}>{paragraph}</p>
                   ))}
@@ -373,21 +373,21 @@ export default function FreelancerAbout({
             <div
               className={`w-full max-w-[21rem] p-6 sm:max-w-[22rem] md:p-8 ${
                 embedded
-                  ? 'rounded-2xl bg-neutral-50/80'
-                  : 'rounded-none border border-neutral-200/65 bg-white shadow-sm transition-all duration-300 hover:shadow-sm'
+                  ? 'rounded-2xl bg-neutral-50/80 dark:bg-neutral-900'
+                  : 'rounded-none border border-neutral-200/65 bg-white shadow-sm transition-all duration-300 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none'
               }`}
             >
               {showHourlyRate ? (
-                <div className="flex items-baseline border-b border-neutral-100 pb-6">
-                  <span className="text-3xl font-normal tracking-tight text-black sm:text-4xl">
+                <div className="flex items-baseline border-b border-neutral-100 pb-6 dark:border-neutral-800">
+                  <span className="text-3xl font-normal tracking-tight text-black sm:text-4xl dark:text-stone-100">
                     {formatNPR(freelancer.rate)}
                   </span>
-                  <span className="ml-1.5 text-sm font-normal lowercase text-neutral-500">/per hour</span>
+                  <span className="ml-1.5 text-sm font-normal lowercase text-neutral-500 dark:text-neutral-400">/per hour</span>
                 </div>
               ) : null}
 
               {sidebarRows.length > 0 ? (
-                <div className={`flex flex-col divide-y divide-neutral-100 py-2.5 font-sans ${showHourlyRate ? '' : 'pt-0'}`}>
+                <div className={`flex flex-col divide-y divide-neutral-100 py-2.5 font-sans dark:divide-neutral-800 ${showHourlyRate ? '' : 'pt-0'}`}>
                   {sidebarRows.map((row) => (
                     <DetailRow key={row.label} label={row.label} value={row.value} icon={row.icon} />
                   ))}
@@ -420,7 +420,7 @@ export default function FreelancerAbout({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-lg rounded-none border border-neutral-100 bg-white p-6 shadow-xl md:p-8"
+              className="relative w-full max-w-lg rounded-none border border-neutral-100 bg-white p-6 shadow-xl md:p-8 dark:border-neutral-700 dark:bg-neutral-900"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -429,17 +429,17 @@ export default function FreelancerAbout({
                   setShowContactModal(false);
                   setMessageSent(false);
                 }}
-                className="absolute right-5 top-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-none border border-neutral-200 bg-neutral-50 text-neutral-500 transition-colors hover:bg-neutral-100"
+                className="absolute right-5 top-5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-none border border-neutral-200 bg-neutral-50 text-neutral-500 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
               >
                 <X className="h-4 w-4" />
               </button>
 
               {messageSent ? (
                 <div className="flex flex-col items-center py-8 text-center">
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-none border border-emerald-100 bg-emerald-50 text-emerald-500">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-none border border-emerald-100 bg-emerald-50 text-emerald-500 dark:border-emerald-900/50 dark:bg-emerald-950/40">
                     <CheckCircle2 className="h-6 w-6 animate-bounce" />
                   </div>
-                  <h4 className="text-lg font-normal text-black">Message sent successfully!</h4>
+                  <h4 className="text-lg font-normal text-black dark:text-stone-100">Message sent successfully!</h4>
                   <p className="mx-auto mt-1 max-w-xs text-xs font-normal leading-relaxed text-neutral-400">
                     {freelancer.name} receives your message directly. Expect a response back inside your
                     Inbox tab shortly.
@@ -460,7 +460,7 @@ export default function FreelancerAbout({
                       />
                     </div>
                     <div>
-                      <h4 className="text-sm font-normal text-black">
+                      <h4 className="text-sm font-normal text-black dark:text-stone-100">
                         Contact {freelancer.name}
                       </h4>
                       <p className="mt-0.5 text-[11px] font-normal text-neutral-400">
@@ -469,7 +469,7 @@ export default function FreelancerAbout({
                     </div>
                   </div>
 
-                  <label className="mb-2 block text-xs font-normal text-black">
+                  <label className="mb-2 block text-xs font-normal text-black dark:text-stone-100">
                     Write your inquiry, project description or direct message:
                   </label>
                   <textarea
@@ -477,14 +477,14 @@ export default function FreelancerAbout({
                     value={contactMessage}
                     onChange={(e) => setContactMessage(e.target.value)}
                     placeholder="Describe your design specifications, web details or task scope..."
-                    className="min-h-[120px] w-full resize-none rounded-none border border-neutral-200 bg-neutral-50/50 p-4 text-xs font-normal text-black outline-none transition-all focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/40"
+                    className="min-h-[120px] w-full resize-none rounded-none border border-neutral-200 bg-neutral-50/50 p-4 text-xs font-normal text-black outline-none transition-all focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/40 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500"
                   />
 
                   <div className="mt-5 flex items-center justify-end gap-3.5">
                     <button
                       type="button"
                       onClick={() => setShowContactModal(false)}
-                      className="cursor-pointer rounded-none border border-neutral-200 px-4 py-2.5 text-xs font-normal text-neutral-500 transition-colors hover:bg-neutral-50"
+                      className="cursor-pointer rounded-none border border-neutral-200 px-4 py-2.5 text-xs font-normal text-neutral-500 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
                     >
                       Cancel
                     </button>
@@ -520,9 +520,9 @@ function DetailRow({
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center gap-3">
         {icon}
-        <span className="text-sm font-normal text-black">{label}</span>
+        <span className="text-sm font-normal text-black dark:text-stone-100">{label}</span>
       </div>
-      <span className="text-sm font-normal text-black">{value}</span>
+      <span className="text-sm font-normal text-black dark:text-stone-100">{value}</span>
     </div>
   );
 }

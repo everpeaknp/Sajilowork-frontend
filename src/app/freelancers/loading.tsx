@@ -5,7 +5,7 @@ import { FreelancerHero } from '@/components/freelancers';
 
 export default function FreelancersLoading() {
   return (
-    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0">
+    <div className="mobile-bottom-nav-offset min-h-screen bg-white pb-4 md:pb-0 dark:bg-neutral-950">
       <Navbar />
       <main className="pb-2 md:pb-0">
         <FreelancerHero />

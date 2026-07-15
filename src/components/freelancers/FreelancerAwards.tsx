@@ -25,7 +25,7 @@ export default function FreelancerAwards({ freelancer, items }: FreelancerAwards
 
   return (
     <div className="mt-10 w-full max-w-4xl">
-      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Awards and Certificates
       </h3>
 
@@ -39,11 +39,11 @@ export default function FreelancerAwards({ freelancer, items }: FreelancerAwards
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: idx * 0.15 }}
           >
-            <div className="mb-3 select-none rounded-full bg-[#FEF1EC] px-5 py-2 text-sm font-normal text-black">
+            <div className="mb-3 select-none rounded-full bg-[#FEF1EC] px-5 py-2 text-sm font-normal text-black dark:bg-neutral-800 dark:text-stone-200">
               {item.years}
             </div>
 
-            <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg">
+            <h4 className="text-base font-normal leading-snug tracking-tight text-black sm:text-lg dark:text-stone-100">
               {item.title}
             </h4>
 
@@ -51,14 +51,14 @@ export default function FreelancerAwards({ freelancer, items }: FreelancerAwards
               {item.authority}
             </p>
 
-            <p className="mt-4 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm">
+            <p className="mt-4 max-w-3xl text-xs font-normal leading-relaxed text-black sm:text-sm dark:text-neutral-300">
               {item.description}
             </p>
           </motion.div>
         ))}
       </div>
 
-      <div className="mt-14 w-full border-t border-neutral-200" />
+      <div className="mt-14 w-full border-t border-neutral-200 dark:border-neutral-800" />
     </div>
   );
 }

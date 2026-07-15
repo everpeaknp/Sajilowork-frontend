@@ -212,15 +212,15 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
   };
 
   const inputClassName =
-    'w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/20';
+    'w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm font-normal text-black outline-none transition-colors placeholder:text-neutral-400 focus:border-[#52C47F] focus:ring-1 focus:ring-[#52C47F]/20 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500';
 
   if (isOwner) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-4 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Manage This Job
         </h2>
-        <p className="text-sm font-normal text-neutral-600">
+        <p className="text-sm font-normal text-neutral-600 dark:text-neutral-400">
           You posted this job. Update the listing or review applications from your dashboard.
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -233,7 +233,7 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
           </Link>
           <Link
             href="/dashboard/proposals"
-            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 px-6 py-3 text-sm font-normal text-neutral-800 transition-colors hover:bg-neutral-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 px-6 py-3 text-sm font-normal text-neutral-800 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:text-stone-200 dark:hover:bg-neutral-800"
           >
             View received applications
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -245,11 +245,11 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
 
   if (checkingBid) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Apply For This Job
         </h2>
-        <div className="flex items-center gap-2 text-sm text-neutral-500">
+        <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           Checking your application status…
         </div>
@@ -259,19 +259,19 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
 
   if (existingBid) {
     return (
-      <section className="border-t border-neutral-200 pt-10">
-        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+        <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
           Apply For This Job
         </h2>
-        <div className="rounded-lg border border-[#52C47F]/25 bg-[#ebf8f2] p-5 sm:p-6">
+        <div className="rounded-lg border border-[#52C47F]/25 bg-[#ebf8f2] p-5 sm:p-6 dark:border-emerald-800/40 dark:bg-emerald-950/40">
           <div className="flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#52C47F]" />
             <div className="min-w-0">
-              <p className="text-base font-normal text-[#1D3E35]">Application submitted</p>
-              <p className="mt-1.5 text-sm font-normal text-neutral-600">
+              <p className="text-base font-normal text-[#1D3E35] dark:text-emerald-200">Application submitted</p>
+              <p className="mt-1.5 text-sm font-normal text-neutral-600 dark:text-neutral-400">
                 You applied with {formatNPR(Number(existingBid.amount) || 0)} on{' '}
                 {formatSubmittedDate(existingBid.created_at)}. Status:{' '}
-                <span className="capitalize text-neutral-800">{existingBid.status}</span>.
+                <span className="capitalize text-neutral-800 dark:text-stone-200">{existingBid.status}</span>.
               </p>
               {existingBid.attachments && existingBid.attachments.length > 0 ? (
                 <ul className="mt-3 space-y-1.5 text-sm">
@@ -305,17 +305,17 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
   }
 
   return (
-    <section className="border-t border-neutral-200 pt-10">
-      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl">
+    <section className="border-t border-neutral-200 pt-10 dark:border-neutral-800">
+      <h2 className="mb-6 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Apply For This Job
       </h2>
 
       {!user ? (
-        <p className="mb-4 text-sm font-normal text-neutral-600">
+        <p className="mb-4 text-sm font-normal text-neutral-600 dark:text-neutral-400">
           <button
             type="button"
             onClick={() => router.push('/signin')}
-            className="font-normal text-black underline underline-offset-2 hover:opacity-80"
+            className="font-normal text-black underline underline-offset-2 hover:opacity-80 dark:text-stone-100"
           >
             Sign in
           </button>{' '}
@@ -325,7 +325,7 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
 
       <form onSubmit={(event) => void handleSubmit(event)} className="space-y-6">
         <div>
-          <label htmlFor="job-offer-amount" className="mb-2 block text-sm font-normal text-black">
+          <label htmlFor="job-offer-amount" className="mb-2 block text-sm font-normal text-black dark:text-stone-100">
             Expected salary or rate
           </label>
           <input
@@ -342,7 +342,7 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
         </div>
 
         <div>
-          <label htmlFor="job-application" className="mb-2 block text-sm font-normal text-black">
+          <label htmlFor="job-application" className="mb-2 block text-sm font-normal text-black dark:text-stone-100">
             Cover letter
           </label>
           <textarea
@@ -353,23 +353,23 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
             placeholder="Introduce yourself and explain why you are a strong fit for this role..."
             className={`${inputClassName} min-h-[180px] resize-y`}
           />
-          <p className="mt-1.5 text-xs font-normal text-neutral-500">
+          <p className="mt-1.5 text-xs font-normal text-neutral-500 dark:text-neutral-400">
             {proposal.trim().length} / {MIN_PROPOSAL_LENGTH} minimum characters
           </p>
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-normal text-black">
+          <label className="mb-2 block text-sm font-normal text-black dark:text-stone-100">
             Upload CV <span className="text-red-500">*</span>
           </label>
-          <p className="mb-3 text-xs font-normal text-neutral-500">
+          <p className="mb-3 text-xs font-normal text-neutral-500 dark:text-neutral-400">
             PDF or Word document, max 10 MB.
           </p>
 
           {!cvFile ? (
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 px-4 py-5 transition-colors hover:border-[#52C47F]/40 hover:bg-[#52C47F]/[0.03]">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 px-4 py-5 transition-colors hover:border-[#52C47F]/40 hover:bg-[#52C47F]/[0.03] dark:border-neutral-700 dark:hover:border-emerald-700/50 dark:hover:bg-emerald-950/20">
               <Paperclip className="h-5 w-5 text-neutral-400" />
-              <span className="text-sm font-normal text-neutral-600">
+              <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">
                 {isUploadingCv ? 'Uploading CV…' : 'Choose CV file'}
               </span>
               <input
@@ -382,12 +382,12 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
               />
             </label>
           ) : (
-            <div className="flex items-center justify-between rounded-lg border border-neutral-200 bg-white p-3">
+            <div className="flex items-center justify-between rounded-lg border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
               <div className="flex min-w-0 items-center gap-3">
                 <FileText className="h-5 w-5 shrink-0 text-neutral-500" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-normal text-black">{cvFile.name}</p>
-                  <p className="text-xs font-normal text-neutral-500">
+                  <p className="truncate text-sm font-normal text-black dark:text-stone-100">{cvFile.name}</p>
+                  <p className="text-xs font-normal text-neutral-500 dark:text-neutral-400">
                     {formatFileSize(cvFile.size)}
                     {isUploadingCv ? ' · Uploading…' : cvUrl ? ' · Ready' : ''}
                   </p>
@@ -397,7 +397,7 @@ export default function JobSendApplication({ job, onSubmitted }: JobSendApplicat
                 type="button"
                 onClick={removeCv}
                 disabled={isUploadingCv || submitting}
-                className="shrink-0 rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-800 disabled:opacity-50"
+                className="shrink-0 rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-800 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-stone-200"
                 aria-label="Remove CV"
               >
                 <X className="h-4 w-4" />

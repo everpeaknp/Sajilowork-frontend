@@ -59,7 +59,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
     <div className="relative z-20 w-full max-w-[760px]">
       <form onSubmit={handleSubmit} className="relative">
         <div
-          className={`relative z-30 flex w-full flex-col items-stretch rounded-xl border bg-white p-1.5 shadow-md transition-all duration-300 md:flex-row md:items-center ${
+          className={`relative z-30 flex w-full flex-col items-stretch rounded-xl border bg-white p-1.5 shadow-md transition-all duration-300 md:flex-row md:items-center dark:border-neutral-700 dark:bg-neutral-950 ${
             isFocused ? 'border-neutral-300 ring-2 ring-[#1D3E35]/5' : 'border-neutral-200/40'
           }`}
         >
@@ -70,7 +70,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
             <input
               id="freelancer-market-search"
               type="text"
-              className="w-full flex-1 border-none bg-transparent py-2.5 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base"
+              className="w-full flex-1 border-none bg-transparent py-2.5 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:ring-0 md:text-base dark:text-stone-100 dark:placeholder:text-neutral-500"
               placeholder="What are you looking for?"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -79,13 +79,13 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
             />
           </div>
 
-          <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 md:block" />
+          <div className="mx-2 hidden h-8 w-px self-center bg-neutral-200 md:block dark:bg-neutral-700" />
 
           <div className="relative flex min-w-[180px] items-center py-2 pr-2 md:py-0">
             <select
               value={locationQuery}
               onChange={(e) => setLocationQuery(e.target.value)}
-              className="w-full cursor-pointer appearance-none border-none bg-transparent px-3 py-2 pr-8 text-sm font-normal text-neutral-700 outline-none focus:ring-0 md:text-base"
+              className="w-full cursor-pointer appearance-none border-none bg-transparent px-3 py-2 pr-8 text-sm font-normal text-neutral-700 outline-none focus:ring-0 md:text-base dark:text-neutral-300 dark:[color-scheme:dark]"
             >
               {FREELANCER_LOCATION_OPTIONS.map((opt) => (
                 <option key={opt.value || 'all'} value={opt.value}>
@@ -109,7 +109,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
         <AnimatePresence>
           {isFocused && suggestions.length > 0 ? (
             <motion.div
-              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg"
+              className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
@@ -123,7 +123,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
                   <button
                     key={item}
                     type="button"
-                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-neutral-700 transition-colors hover:bg-neutral-50"
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-neutral-700 transition-colors hover:bg-neutral-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
                     onMouseDown={() => performSearch(item, locationQuery)}
                   >
                     <SearchIcon className="h-4 w-4 stroke-[1.5] text-[#52C47F]" />
@@ -137,7 +137,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
       </form>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs opacity-90">
-        <span className="mr-1 text-xs font-normal leading-relaxed text-neutral-500">
+        <span className="mr-1 text-xs font-normal leading-relaxed text-neutral-500 dark:text-neutral-400">
           Popular Searches:
         </span>
         <div className="flex flex-wrap items-center gap-x-1.5">
@@ -146,7 +146,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
               <button
                 type="button"
                 onClick={() => handleTagClick(tag)}
-                className="cursor-pointer text-xs font-medium text-neutral-600 underline underline-offset-2 transition-all duration-200 hover:text-black"
+                className="cursor-pointer text-xs font-medium text-neutral-600 underline underline-offset-2 transition-all duration-200 hover:text-black dark:text-neutral-400 dark:hover:text-stone-100"
               >
                 {tag}
               </button>
@@ -161,14 +161,14 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
       <AnimatePresence>
         {hasSearched ? (
           <motion.div
-            className="relative z-20 mt-5 flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-3.5 text-[#1D3E35]"
+            className="relative z-20 mt-5 flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-3.5 text-[#1D3E35] dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
           >
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1D3E35]/10 text-[#1D3E35]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1D3E35]/10 text-[#1D3E35] dark:bg-emerald-950/50 dark:text-emerald-300">
                 <Sparkles className="h-4 w-4 animate-pulse" />
               </div>
               <p className="text-xs font-normal sm:text-sm">
@@ -184,7 +184,7 @@ export default function FreelancerSearchBox({ onSearchSubmit }: FreelancerSearch
                 setLocationQuery('');
                 onSearchSubmit?.('', '');
               }}
-              className="cursor-pointer text-xs font-medium text-neutral-500 underline transition-colors hover:text-black"
+              className="cursor-pointer text-xs font-medium text-neutral-500 underline transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-stone-100"
             >
               Clear filter
             </button>

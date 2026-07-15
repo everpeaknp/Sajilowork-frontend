@@ -22,7 +22,7 @@ export default function TaskFeed() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await taskService.getTasks({ page_size: 24 });
+        const res = await taskService.getTasks({ page_size: 24, listing_kind: 'task' });
         if (cancelled || !res.success) return;
         const mapped = mapTasksFromResponse(res.data);
         if (mapped.length > 0) setTasks(mapped);

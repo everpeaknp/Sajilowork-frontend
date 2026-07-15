@@ -13,7 +13,7 @@ import DashboardLoadingFallback from './DashboardLoadingFallback';
 
 const DashboardSidebar = dynamic(() => import('./DashboardSidebar'), {
   loading: () => (
-    <div className="fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] w-[17.5rem] bg-white sm:top-16 sm:h-[calc(100dvh-4rem-env(safe-area-inset-bottom,0px))] lg:h-[calc(100dvh-4rem)]" />
+    <div className="fixed top-14 left-0 z-50 h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] w-[17.5rem] bg-white sm:top-16 sm:h-[calc(100dvh-4rem-env(safe-area-inset-bottom,0px))] lg:h-[calc(100dvh-4rem)] dark:bg-neutral-950" />
   ),
   ssr: false,
 });
@@ -93,11 +93,11 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="mobile-bottom-nav-offset min-h-[100dvh] overflow-x-clip bg-[#f0efec] font-body md:pb-0">
+    <div className="mobile-bottom-nav-offset min-h-[100dvh] overflow-x-clip bg-[#f0efec] font-body md:pb-0 dark:bg-neutral-950">
       <Navbar />
 
       <nav
-        className={`fixed top-14 left-0 w-[17.5rem] overflow-hidden bg-white shadow-xl transition-[width,transform,height,z-index] duration-300 ease-in-out sm:top-16 lg:z-40 lg:h-[calc(100dvh-4rem)] lg:translate-x-0 lg:shadow-none ${
+        className={`fixed top-14 left-0 w-[17.5rem] overflow-hidden bg-white shadow-xl transition-[width,transform,height,z-index] duration-300 ease-in-out sm:top-16 lg:z-40 lg:h-[calc(100dvh-4rem)] lg:translate-x-0 lg:shadow-none dark:bg-neutral-950 dark:shadow-black/40 ${
           mobileOpen
             ? 'z-[10010] h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-4rem-env(safe-area-inset-bottom,0px))]'
             : 'z-50 h-[calc(100dvh-3.5rem-3.75rem-env(safe-area-inset-bottom,0px))] sm:h-[calc(100dvh-4rem-3.75rem-env(safe-area-inset-bottom,0px))] md:h-[calc(100dvh-4rem)] -translate-x-full lg:translate-x-0'
@@ -125,7 +125,7 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       ) : null}
 
       <main
-        className={`min-w-0 overflow-x-clip bg-[#f0efec] transition-[padding-left] duration-300 ease-in-out ${
+        className={`min-w-0 overflow-x-clip bg-[#f0efec] transition-[padding-left] duration-300 ease-in-out dark:bg-neutral-950 ${
           sidebarCollapsed ? 'lg:pl-[4.75rem]' : 'lg:pl-[17.5rem]'
         }`}
       >
@@ -134,12 +134,12 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-50"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-200 text-neutral-700 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900"
               aria-label="Open dashboard menu"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <span className="text-sm font-medium text-neutral-800">Dashboard menu</span>
+            <span className="text-sm font-medium text-neutral-800 dark:text-stone-200">Dashboard menu</span>
           </div>
           {children}
         </div>

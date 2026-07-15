@@ -40,12 +40,12 @@ export default function ProjectDetails({ projectSlug, onClose }: ProjectDetailsP
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 16 }}
       transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-      className="absolute inset-0 z-[50] flex max-w-[100vw] flex-col overflow-x-hidden overflow-y-auto bg-white"
+      className="absolute inset-0 z-[50] flex max-w-[100vw] flex-col overflow-x-hidden overflow-y-auto bg-white dark:bg-neutral-950"
     >
       <button
         type="button"
         onClick={onClose}
-        className="absolute right-3 top-3 z-[60] rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 sm:right-4 sm:top-4"
+        className="absolute right-3 top-3 z-[60] rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 sm:right-4 sm:top-4 dark:hover:bg-neutral-800"
         title="Close"
         aria-label="Close project details"
       >

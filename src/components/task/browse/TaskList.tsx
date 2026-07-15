@@ -221,7 +221,7 @@ export default function TaskList({
           className={`${discoverMedium} flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-[14.5px] transition-all ${
             isCurrent
               ? 'bg-[#52C47F] font-semibold text-white'
-              : 'text-neutral-600 hover:bg-neutral-100'
+              : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
           }`}
         >
           {p}
@@ -245,7 +245,7 @@ export default function TaskList({
   return (
     <section
       id="custom-task-board-grid"
-      className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12"
+      className="w-full select-none border-b border-gray-100 bg-white px-4 pb-12 pt-0 sm:px-6 sm:pt-2 md:px-8 lg:px-12 dark:border-neutral-800 dark:bg-neutral-950"
     >
       <div className="mx-auto w-full max-w-none">
         <AnimatePresence>
@@ -275,8 +275,8 @@ export default function TaskList({
 
           <div className="space-y-5 lg:col-span-3">
             <div className="mb-5 flex min-h-[40px] flex-wrap items-center justify-between gap-3">
-              <p className={`${discoverBody} text-base font-medium text-neutral-800`}>
-                <span className={`${discoverMedium} font-bold text-neutral-900`}>{totalTasks}</span>{' '}
+              <p className={`${discoverBody} text-base font-medium text-neutral-800 dark:text-neutral-300`}>
+                <span className={`${discoverMedium} font-bold text-neutral-900 dark:text-stone-100`}>{totalTasks}</span>{' '}
                 tasks available
               </p>
 
@@ -290,10 +290,10 @@ export default function TaskList({
             </div>
 
             {hasHeroSearch ? (
-              <div className="mb-4 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-                <p className={`${discoverBody} text-sm text-neutral-600`}>
+              <div className="mb-4 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800 dark:bg-neutral-900">
+                <p className={`${discoverBody} text-sm text-neutral-600 dark:text-neutral-400`}>
                   Showing task matches for{' '}
-                  <span className={`${discoverMedium} text-[#1D3E35]`}>&quot;{activeSearchLabel}&quot;</span>
+                  <span className={`${discoverMedium} text-[#1D3E35] dark:text-stone-100`}>&quot;{activeSearchLabel}&quot;</span>
                 </p>
                 <button
                   type="button"
@@ -312,12 +312,12 @@ export default function TaskList({
             {loadingTasks ? (
               <ListSkeleton count={4} cardType="task" label="Loading tasks" />
             ) : paginatedTasks.length === 0 ? (
-              <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center">
-                <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300" />
-                <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35]`}>
+              <div className="w-full rounded-2xl border border-dashed border-gray-200 bg-white px-4 py-16 text-center dark:border-neutral-700 dark:bg-neutral-900">
+                <AlertCircle className="mx-auto mb-3 h-10 w-10 text-neutral-300 dark:text-neutral-600" />
+                <span className={`${discoverHeadline} mb-1 block text-lg font-bold text-[#1D3E35] dark:text-stone-100`}>
                   No matching tasks found
                 </span>
-                <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500`}>
+                <p className={`${discoverBody} mx-auto mb-6 max-w-sm text-xs text-neutral-500 dark:text-neutral-400`}>
                   {hasHeroSearch || hasActiveFilters(filters)
                     ? 'No tasks match your search or filters. Try adjusting them or clear all.'
                     : 'There are no available tasks right now.'}
@@ -373,7 +373,7 @@ export default function TaskList({
                               router.push(taskHref);
                             }
                           }}
-                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch"
+                          className="group relative box-border flex w-full shrink-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-neutral-200 hover:shadow-md sm:p-6 lg:h-[248px] lg:min-h-[248px] lg:max-h-[248px] lg:w-full lg:flex-row lg:items-stretch dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none dark:hover:border-neutral-700 dark:hover:shadow-none"
                         >
                           <div className="flex min-h-0 min-w-0 flex-1 gap-3 overflow-hidden sm:gap-5">
                             {employerHref ? (
@@ -394,14 +394,14 @@ export default function TaskList({
                             <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
                               <div className="flex items-start justify-between gap-2">
                                 <h3
-                                  className={`${discoverBody} block line-clamp-2 text-base !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F] sm:truncate sm:text-[18.5px]`}
+                                  className={`${discoverBody} block line-clamp-2 text-base !font-normal leading-snug text-black transition-colors group-hover:text-[#52C47F] sm:truncate sm:text-[18.5px] dark:text-stone-100`}
                                 >
                                   {taskListTitle(task)}
                                 </h3>
                               </div>
 
                               <div
-                                className={`${discoverBody} mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-neutral-700 sm:gap-x-0 sm:text-[13px]`}
+                                className={`${discoverBody} mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-normal text-neutral-700 sm:gap-x-0 sm:text-[13px] dark:text-neutral-400`}
                               >
                                 <span className="flex items-center gap-1.5">
                                   <MapPin className="h-4 w-4 stroke-[1.6] text-neutral-500" />
@@ -420,7 +420,7 @@ export default function TaskList({
                               </div>
 
                               <p
-                                className={`${discoverBody} mb-3 mt-3 line-clamp-2 max-w-[620px] text-[13.5px] font-normal leading-relaxed text-black`}
+                                className={`${discoverBody} mb-3 mt-3 line-clamp-2 max-w-[620px] text-[13.5px] font-normal leading-relaxed text-black dark:text-neutral-300`}
                               >
                                 {project.description}
                               </p>
@@ -429,7 +429,7 @@ export default function TaskList({
                                 {displaySkills.map((skill) => (
                                   <span
                                     key={skill}
-                                    className={`${discoverBody} rounded-full bg-[#ffede8] px-4 py-1.5 text-[14px] font-normal text-black`}
+                                    className={`${discoverBody} rounded-full bg-[#ffede8] px-4 py-1.5 text-[14px] font-normal text-black dark:bg-neutral-800 dark:text-stone-200`}
                                   >
                                     {skill}
                                   </span>
@@ -438,23 +438,23 @@ export default function TaskList({
                             </div>
                           </div>
 
-                          <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-4 sm:pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0">
+                          <div className="relative mt-4 shrink-0 border-t border-neutral-100 pt-4 sm:pt-5 lg:mt-0 lg:flex lg:w-auto lg:self-stretch lg:border-0 lg:border-l lg:border-neutral-200 lg:pl-8 lg:pt-0 dark:border-neutral-800 lg:dark:border-neutral-700">
                             <div className="flex h-full w-full min-w-0 flex-col items-stretch justify-between gap-4 sm:items-end lg:min-w-[260px]">
                               <div className="w-full text-left sm:text-right">
                                 <span
-                                  className={`${discoverBody} block text-lg font-normal leading-none tracking-tight text-black sm:text-[21px]`}
+                                  className={`${discoverBody} block text-lg font-normal leading-none tracking-tight text-black sm:text-[21px] dark:text-stone-100`}
                                 >
                                   {formatTaskBudgetLabel(task)}
                                 </span>
                                 <span
-                                  className={`${discoverBody} mt-1.5 block text-[13px] font-normal text-neutral-700`}
+                                  className={`${discoverBody} mt-1.5 block text-[13px] font-normal text-neutral-700 dark:text-neutral-400`}
                                 >
                                   {formatTaskTypeLabel(task)}
                                 </span>
                               </div>
 
                               <span
-                                className={`${discoverBody} group/btn relative flex h-auto w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-8 py-2.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white lg:min-w-[250px]`}
+                                className={`${discoverBody} group/btn relative flex h-auto w-full shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[6px] bg-[#ebf8f2] px-8 py-2.5 text-[16px] font-normal text-[#52C47F] transition-colors duration-300 group-hover/btn:text-white lg:min-w-[250px] dark:bg-emerald-950/60 dark:text-emerald-300`}
                               >
                                 <span
                                   aria-hidden
@@ -482,7 +482,7 @@ export default function TaskList({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
                     title="Previous page"
                   >
                     <ChevronLeft className="h-4.5 w-4.5" />
@@ -492,7 +492,7 @@ export default function TaskList({
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10"
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-neutral-200 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-10 sm:w-10 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800"
                     title="Next page"
                   >
                     <ChevronRight className="h-4.5 w-4.5" />

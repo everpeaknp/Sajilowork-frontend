@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (html.dark) — not OS preference alone */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
   --primary: #1161fe;
@@ -27,6 +31,38 @@
   --brand-emerald: #45a874;
   --brand-dark: #193e32;
   --brand-light-bg: #f4f8f6;
+  --canvas: #f0efec;
+  --elevated: #ffffff;
+  --elevated-border: #e8e6e1;
+}
+
+html.dark {
+  color-scheme: dark;
+  --background: #0c0e12;
+  --foreground: #f5f5f4;
+  --primary: #5b8fff;
+  --on-surface-variant: #a1a1aa;
+  --outline-variant: #2a2e38;
+  --surface-container-low: #12151c;
+  --surface-container: #181c24;
+  --surface: #12151c;
+  --surface-low: #161a22;
+  --surface-dim: #1c212b;
+  --surface-variant: #2a2e38;
+  --error: #f87171;
+  --border: #2a2e38;
+  --muted: #1c212b;
+  --muted-foreground: #a1a1aa;
+  --popover: #161a22;
+  --popover-foreground: #f5f5f4;
+  --accent: #1c212b;
+  --ring: #5b8fff;
+  --brand-emerald: #52c47f;
+  --brand-dark: #d8ebe2;
+  --brand-light-bg: #141a18;
+  --canvas: #0c0e12;
+  --elevated: #161a22;
+  --elevated-border: #2a2e38;
 }
 
 @theme inline {
@@ -111,22 +147,311 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --border: #27272a;
-    --muted: #18181b;
-    --muted-foreground: #a1a1aa;
-    --popover: #18181b;
-    --popover-foreground: #ededed;
-    --accent: #27272a;
-  }
+  /* Kept empty: theme is driven by html.dark via ThemeProvider / localStorage */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-stack-body);
+}
+
+/*
+ * Site-wide dark surfaces for pages that still use light-only Tailwind utilities.
+ * Brand greens / intentionally dark blocks (bg-[#222], bg-brand-*) are left alone.
+ */
+html.dark .bg-white,
+html.dark .bg-\[\#fff\],
+html.dark .bg-\[\#ffffff\],
+html.dark .bg-\[\#FFF\],
+html.dark .bg-\[\#FFFFFF\] {
+  background-color: var(--surface) !important;
+}
+
+html.dark .bg-neutral-50,
+html.dark .bg-gray-50,
+html.dark .bg-zinc-50,
+html.dark .bg-stone-50,
+html.dark .bg-slate-50,
+html.dark .bg-\[\#f9fafb\],
+html.dark .bg-\[\#f6f5f0\],
+html.dark .bg-\[\#f4f8f6\],
+html.dark .bg-\[\#f0efec\] {
+  background-color: var(--surface-low) !important;
+}
+
+html.dark .bg-neutral-100,
+html.dark .bg-gray-100,
+html.dark .bg-zinc-100,
+html.dark .bg-stone-100 {
+  background-color: var(--surface-dim) !important;
+}
+
+/* Marketplace peach / cream surfaces (heroes, skill chips, map cards, footer) */
+html.dark .bg-\[\#fbf2ed\],
+html.dark .bg-\[\#fdf8f5\],
+html.dark .bg-\[\#FDF8F3\],
+html.dark .bg-\[\#fff5f2\],
+html.dark .bg-\[\#fff1ec\],
+html.dark .bg-\[\#ffede8\],
+html.dark .bg-\[\#ffdcd0\],
+html.dark .bg-\[\#fef0ea\],
+html.dark .bg-\[\#FEF0EA\],
+html.dark .bg-\[\#FEF1EC\],
+html.dark .bg-\[\#fafaf9\],
+html.dark .bg-\[\#fdfdfc\],
+html.dark .bg-\[\#FAF6F0\],
+html.dark .bg-\[\#faf6f0\],
+html.dark .bg-\[\#FAF9F6\],
+html.dark .bg-\[\#FAF9F7\],
+html.dark .bg-\[\#FAF0E3\],
+html.dark .bg-\[\#FAF5EE\],
+html.dark .bg-\[\#FAF7F0\],
+html.dark .bg-\[\#FAFBF9\],
+html.dark .bg-\[\#FCF7F2\],
+html.dark .bg-\[\#F9F9FB\],
+html.dark .bg-\[\#f4f3ee\],
+html.dark .bg-\[\#f3f3f3\],
+html.dark .bg-\[\#f8faf9\],
+html.dark .bg-\[\#f8fcf9\] {
+  background-color: #1a1d24 !important;
+}
+
+html.dark .hover\:bg-\[\#ffede8\]:hover,
+html.dark .hover\:bg-\[\#ffdcd0\]:hover,
+html.dark .hover\:bg-\[\#fff5f2\]:hover,
+html.dark .hover\:bg-\[\#FAF9F6\]:hover,
+html.dark .hover\:bg-\[\#F7EFE8\]:hover,
+html.dark .hover\:bg-\[\#FEE2E2\]:hover,
+html.dark .hover\:bg-\[\#FCE2DC\]:hover {
+  background-color: #252a33 !important;
+}
+
+html.dark .border-\[\#fff1ec\],
+html.dark .border-\[\#ffede8\],
+html.dark .border-\[\#F2ECE6\],
+html.dark .border-\[\#EBF9F1\],
+html.dark .border-\[\#FFF6E9\] {
+  border-color: #3d342f !important;
+}
+
+/* Warm accent blobs on light heroes */
+html.dark .bg-\[\#fcd074\],
+html.dark .bg-\[\#fcd074\]\/40,
+html.dark .bg-\[\#fcd074\]\/80,
+html.dark .bg-\[\#fcd074\]\/90,
+html.dark .bg-\[\#fcd074\]\/95,
+html.dark .bg-\[\#ffb89a\]\/55,
+html.dark .bg-\[\#ffa07a\]\/90 {
+  background-color: rgb(180 120 40 / 0.28) !important;
+}
+
+/* Soft mint CTAs / green status washes */
+html.dark .bg-\[\#ebf8f2\],
+html.dark .bg-\[\#f0faf4\],
+html.dark .bg-\[\#f4fbf7\],
+html.dark .bg-\[\#eefaf2\],
+html.dark .bg-\[\#eefaf2\]\/50,
+html.dark .bg-\[\#eefaf2\]\/20,
+html.dark .bg-\[\#EAF6F1\],
+html.dark .bg-\[\#EBF9F1\] {
+  background-color: rgb(16 61 48 / 0.45) !important;
+}
+
+/* Soft blue washes (blog / feature bands) */
+html.dark .bg-\[\#E7F0FF\],
+html.dark .bg-\[\#E7F0FF\]\/60,
+html.dark .bg-\[\#F0F8FF\],
+html.dark .bg-\[\#e8ecf4\] {
+  background-color: rgb(30 58 95 / 0.45) !important;
+}
+
+/* Soft coral / amber status washes */
+html.dark .bg-\[\#FFF6E9\],
+html.dark .bg-\[\#FFF5F4\],
+html.dark .bg-\[\#FEF1EE\] {
+  background-color: rgb(90 40 40 / 0.35) !important;
+}
+
+html.dark .text-\[\#d48c71\] {
+  color: #e8a98a !important;
+}
+
+/* Opacity / hover variants that bypass plain .bg-white */
+html.dark .bg-neutral-50\/40,
+html.dark .bg-neutral-50\/50,
+html.dark .bg-neutral-50\/60,
+html.dark .bg-neutral-50\/80,
+html.dark .bg-gray-50\/50 {
+  background-color: color-mix(in srgb, var(--surface-low) 70%, transparent) !important;
+}
+
+html.dark .hover\:bg-white:hover,
+html.dark .hover\:bg-white\/95:hover,
+html.dark .hover\:bg-white\/60:hover,
+html.dark .disabled\:hover\:bg-white:hover:disabled,
+html.dark .focus\:bg-white:focus,
+html.dark .focus\:bg-white:focus-visible {
+  background-color: var(--surface-dim) !important;
+}
+
+html.dark .bg-white\/95,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80,
+html.dark .bg-white\/70,
+html.dark .bg-white\/60 {
+  background-color: color-mix(in srgb, var(--surface) 92%, transparent) !important;
+}
+
+/* Soft green washes that stay bright in dark mode */
+html.dark .bg-emerald-50,
+html.dark .bg-green-50 {
+  background-color: rgb(6 78 59 / 0.35) !important;
+}
+
+/* Soft overlays on dark chips (sidebar active) — keep translucent */
+html.dark .hover\:bg-white\/10:hover {
+  background-color: rgb(255 255 255 / 0.08) !important;
+}
+
+html.dark .text-black,
+html.dark .text-neutral-900,
+html.dark .text-gray-900,
+html.dark .text-zinc-900,
+html.dark .text-stone-900,
+html.dark .text-slate-900,
+html.dark .text-\[\#193E32\],
+html.dark .text-\[\#193e32\],
+html.dark .text-\[\#1D3E35\],
+html.dark .text-\[\#1d3e35\],
+html.dark .text-\[\#131118\],
+html.dark .text-\[\#03113c\] {
+  color: var(--foreground) !important;
+}
+
+html.dark .text-black\/70,
+html.dark .text-black\/80,
+html.dark .text-black\/60,
+html.dark .text-brand-dark\/70 {
+  color: color-mix(in srgb, var(--foreground) 70%, transparent) !important;
+}
+
+html.dark .text-\[\#6a719a\],
+html.dark .text-\[\#5e586c\] {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .text-neutral-800,
+html.dark .text-gray-800,
+html.dark .text-zinc-800 {
+  color: #e7e5e4 !important;
+}
+
+html.dark .text-neutral-700,
+html.dark .text-gray-700,
+html.dark .text-zinc-700 {
+  color: #d6d3d1 !important;
+}
+
+html.dark .text-neutral-600,
+html.dark .text-gray-600,
+html.dark .text-zinc-600 {
+  color: #a8a29e !important;
+}
+
+html.dark .text-neutral-500,
+html.dark .text-gray-500,
+html.dark .text-zinc-500 {
+  color: #a1a1aa !important;
+}
+
+html.dark .text-neutral-400,
+html.dark .text-gray-400 {
+  color: #a1a1aa !important;
+}
+
+html.dark .border-neutral-100,
+html.dark .border-gray-100,
+html.dark .border-zinc-100,
+html.dark .border-stone-100,
+html.dark .border-neutral-200,
+html.dark .border-gray-200,
+html.dark .border-zinc-200,
+html.dark .border-stone-200,
+html.dark .border-neutral-200\/60,
+html.dark .border-neutral-200\/80,
+html.dark .border-gray-200\/80 {
+  border-color: var(--elevated-border) !important;
+}
+
+html.dark .border-black {
+  border-color: #a8a29e !important;
+}
+
+html.dark .divide-neutral-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-neutral-200 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--elevated-border) !important;
+}
+
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-neutral-50:hover,
+html.dark .hover\:bg-neutral-100:hover,
+html.dark .hover\:bg-gray-100:hover {
+  background-color: var(--surface-dim) !important;
+}
+
+html.dark .hover\:bg-red-50:hover {
+  background-color: rgb(127 29 29 / 0.35) !important;
+}
+
+html.dark .shadow-sm,
+html.dark .shadow,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl {
+  --tw-shadow-color: rgb(0 0 0 / 0.45);
+}
+
+html.dark .ring-neutral-200,
+html.dark .ring-gray-200,
+html.dark .ring-black\/5 {
+  --tw-ring-color: rgb(255 255 255 / 0.08);
+}
+
+/* Preserve dark-on-dark intentional nav active chips */
+html.dark .bg-\[\#222222\],
+html.dark .bg-\[\#222\] {
+  background-color: #e8e6e1 !important;
+  color: #0c0e12 !important;
+}
+
+html.dark .bg-\[\#222222\] .text-white,
+html.dark .bg-\[\#222\] .text-white,
+html.dark .bg-\[\#222222\] [class*="text-white"],
+html.dark a.bg-\[\#222222\],
+html.dark button.bg-\[\#222222\] {
+  color: #0c0e12 !important;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color-scheme: dark;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark textarea,
+html.dark select {
+  background-color: var(--surface-low);
+  border-color: var(--elevated-border);
+  color: var(--foreground);
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #71717a;
 }
 
 /* Custom scrollbar styles */
@@ -150,6 +475,22 @@ body {
   height: 100%;
   width: 100%;
   z-index: 0;
+  /* leaflet.css defaults to #ddd — shows as white hairlines in dark tile seams */
+  background: #e4e4e7;
+}
+
+html.dark .leaflet-container {
+  /* Match Carto dark_all void color so subpixel tile gaps stay invisible */
+  background: #0b0b0b;
+}
+
+/*
+ * Hairline tile seams (esp. dark basemaps + fractional DPR / Windows display scaling).
+ * Overlap tiles by half a CSS pixel so GPU gaps don't flash the container background.
+ */
+html.dark .leaflet-container .leaflet-tile-container img {
+  width: 256.5px !important;
+  height: 256.5px !important;
 }
 
 /* Blog article HTML from admin TinyMCE */
@@ -170,6 +511,21 @@ body {
   line-height: 1.25;
   margin-top: 2rem;
   margin-bottom: 1rem;
+}
+
+html.dark .blog-content {
+  color: #a3a3a3;
+}
+
+html.dark .blog-content h1,
+html.dark .blog-content h2,
+html.dark .blog-content h3,
+html.dark .blog-content h4 {
+  color: #f5f5f4;
+}
+
+html.dark .blog-content blockquote {
+  color: #e7e5e4;
 }
 
 .blog-content h2 {

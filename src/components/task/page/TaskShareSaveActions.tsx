@@ -15,7 +15,7 @@ interface TaskShareSaveActionsProps {
 }
 
 const circleClass =
-  'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 transition-colors group-hover:border-neutral-300';
+  'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-800 transition-colors group-hover:border-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-200 dark:group-hover:border-neutral-600';
 
 export default function TaskShareSaveActions({
   task,
@@ -97,7 +97,7 @@ export default function TaskShareSaveActions({
             <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
           )}
         </span>
-        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Share</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline dark:text-stone-100">Share</span>
       </button>
 
       <button
@@ -113,12 +113,12 @@ export default function TaskShareSaveActions({
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Heart
-              className={`h-4 w-4 ${isSaved ? 'fill-neutral-900 text-neutral-900' : ''}`}
+              className={`h-4 w-4 ${isSaved ? 'fill-neutral-900 text-neutral-900 dark:fill-stone-100 dark:text-stone-100' : ''}`}
               strokeWidth={1.5}
             />
           )}
         </span>
-        <span className="hidden text-sm font-normal text-neutral-900 sm:inline">Save</span>
+        <span className="hidden text-sm font-normal text-neutral-900 sm:inline dark:text-stone-100">Save</span>
       </button>
     </div>
   );

@@ -5,30 +5,30 @@ export function TaskCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative flex w-full animate-pulse flex-col overflow-hidden rounded-[20px] border border-neutral-200/40 bg-[#fbf2ed] p-4 shadow-sm sm:rounded-[24px] sm:p-5',
+        'relative flex w-full animate-pulse flex-col overflow-hidden rounded-[20px] border border-neutral-200/40 bg-[#fbf2ed] p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 sm:rounded-[24px] sm:p-5',
         className,
       )}
       aria-hidden
     >
-      <div className="pointer-events-none absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-[#fcd074]/40 sm:-bottom-10 sm:-right-10" />
+      <div className="pointer-events-none absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-[#fcd074]/40 sm:-bottom-10 sm:-right-10 dark:bg-neutral-700/40" />
       <div className="relative z-10 mb-4 flex items-start justify-between gap-3">
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-full rounded bg-neutral-200/80" />
-          <div className="h-4 w-3/5 rounded bg-neutral-200/60" />
+          <div className="h-4 w-full rounded bg-neutral-200/80 dark:bg-neutral-700/80" />
+          <div className="h-4 w-3/5 rounded bg-neutral-200/60 dark:bg-neutral-700/60" />
         </div>
         <div className="h-5 w-16 shrink-0 rounded bg-[#52C47F]/20" />
       </div>
       <div className="relative z-10 mb-4 space-y-2.5">
-        <div className="h-3.5 w-4/5 rounded bg-neutral-200/70" />
-        <div className="h-3.5 w-2/3 rounded bg-neutral-200/60" />
-        <div className="h-3.5 w-1/2 rounded bg-neutral-200/50" />
+        <div className="h-3.5 w-4/5 rounded bg-neutral-200/70 dark:bg-neutral-700/70" />
+        <div className="h-3.5 w-2/3 rounded bg-neutral-200/60 dark:bg-neutral-700/60" />
+        <div className="h-3.5 w-1/2 rounded bg-neutral-200/50 dark:bg-neutral-700/50" />
       </div>
       <div className="relative z-10 flex items-center justify-between pt-2">
         <div className="space-y-1.5">
-          <div className="h-3.5 w-20 rounded bg-neutral-200/80" />
-          <div className="h-3 w-14 rounded bg-neutral-200/50" />
+          <div className="h-3.5 w-20 rounded bg-neutral-200/80 dark:bg-neutral-700/80" />
+          <div className="h-3 w-14 rounded bg-neutral-200/50 dark:bg-neutral-700/50" />
         </div>
-        <div className="h-10 w-10 shrink-0 rounded-full bg-neutral-200/80 ring-2 ring-white/80" />
+        <div className="h-10 w-10 shrink-0 rounded-full bg-neutral-200/80 ring-2 ring-white/80 dark:bg-neutral-700/80 dark:ring-neutral-800" />
       </div>
     </div>
   );
@@ -56,7 +56,7 @@ export function TaskAvatarListSkeleton({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="h-12 w-12 animate-pulse rounded-full bg-slate-200 ring-2 ring-slate-100"
+          className="h-12 w-12 animate-pulse rounded-full bg-slate-200 ring-2 ring-slate-100 dark:bg-neutral-700 dark:ring-neutral-800"
         />
       ))}
     </div>

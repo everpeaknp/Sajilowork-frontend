@@ -38,7 +38,7 @@ export default function FreelancerTransport({ options }: FreelancerTransportProp
 
   return (
     <div className="mt-10 w-full max-w-4xl">
-      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl">
+      <h3 className="mb-8 text-xl font-normal tracking-tight text-black sm:text-2xl dark:text-stone-100">
         Transport and mobility
       </h3>
 
@@ -48,7 +48,7 @@ export default function FreelancerTransport({ options }: FreelancerTransportProp
           return (
             <div
               key={option.id}
-              className="flex min-w-[5.5rem] flex-col items-center justify-center gap-2.5 rounded-xl bg-emerald-50 px-4 py-4 text-[#1D3E35] ring-2 ring-[#52C47F]/35"
+              className="flex min-w-[5.5rem] flex-col items-center justify-center gap-2.5 rounded-xl bg-emerald-50 px-4 py-4 text-[#1D3E35] ring-2 ring-[#52C47F]/35 dark:bg-emerald-950/40 dark:text-emerald-200"
             >
               <Icon className="h-6 w-6 text-[#52C47F]" strokeWidth={2} />
               <span className="text-xs font-semibold tracking-wide">{option.label}</span>

@@ -98,14 +98,8 @@ export default function SingleJobPage({
   }, [hideApplication, isOwner, openApplicationCheckout]);
 
   return (
-    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
+    <div className="select-none bg-white pb-8 pt-6 font-normal text-black antialiased sm:pb-12 sm:pt-8 dark:bg-neutral-950 dark:text-stone-100 [&_button]:font-normal [&_h1]:font-normal [&_h2]:font-normal [&_h3]:font-normal [&_label]:font-normal [&_p]:font-normal [&_span]:font-normal">
       <div className={`mx-auto w-full max-w-7xl ${isOverlay ? 'px-4 py-2 sm:px-6' : 'px-4 sm:px-6 lg:px-8'}`}>
-        {!isOverlay ? (
-          <div className="mb-4 flex justify-end sm:mb-5">
-            <JobShareSaveActions job={job} />
-          </div>
-        ) : null}
-
         <JobProfileHero job={job} onApply={handleApplyClick} isOwner={isOwner} editHref={editHref} />
 
         <div className="mx-auto w-full max-w-3xl">
@@ -116,6 +110,11 @@ export default function SingleJobPage({
           <JobSoftSkills job={job} />
           <JobKeyResponsibilities job={job} />
           <JobWorkExperience job={job} onApply={handleApplyClick} isOwner={isOwner} editHref={editHref} />
+
+          <div className="mt-5 flex justify-center sm:mt-6">
+            <JobShareSaveActions job={job} className="justify-center sm:justify-center" />
+          </div>
+
           {!hideApplication && !useApplicationModal ? (
             <div
               id={APPLY_JOB_SECTION_ID}
@@ -127,17 +126,8 @@ export default function SingleJobPage({
           ) : null}
           <JobRelatedJobs job={job} relatedJobs={relatedJobs} />
 
-          {isOverlay ? (
-            <div className="mt-10 sm:mt-12">
-              <JobShareSaveActions
-                job={job}
-                className="justify-center sm:justify-center"
-              />
-            </div>
-          ) : null}
-
           <div className="mt-10 flex flex-col items-center gap-4 text-center sm:mt-14 sm:flex-row sm:flex-wrap sm:justify-between sm:text-left">
-            <p className="text-sm font-normal text-neutral-500">
+            <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
               {footerHint ??
                 (isOverlay
                   ? 'Browse more jobs on the job map.'
@@ -155,7 +145,7 @@ export default function SingleJobPage({
               ) : null}
               <Link
                 href={backLink?.href ?? '/jobs'}
-                className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-1.5 text-sm font-normal text-black transition-opacity hover:opacity-80 dark:text-stone-200"
               >
                 {backLink?.label ?? 'Back to all jobs'}
                 <ArrowUpRight className="h-4 w-4" />
