@@ -845,12 +845,12 @@ export default function Settings({
   };
 
   const inputClass = isDashboard
-    ? 'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3.5 text-sm font-medium text-neutral-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F] dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-200 dark:placeholder:text-neutral-500'
+    ? 'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3.5 text-sm font-medium text-neutral-800 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:ring-2 focus:ring-[#52C47F] dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:placeholder:text-neutral-400'
     : 'w-full rounded-2xl border border-outline-variant bg-gray-50 p-4 font-semibold outline-none transition-all focus:bg-white focus:ring-2 focus:ring-brand-emerald dark:bg-neutral-900 dark:text-stone-100 dark:focus:bg-neutral-950';
 
   const inputDisabledClass = isDashboard
-    ? 'cursor-not-allowed bg-neutral-100 text-neutral-500 focus:ring-0 dark:bg-neutral-900 dark:text-neutral-500'
-    : 'cursor-not-allowed bg-gray-100 text-gray-500 focus:ring-0 dark:bg-neutral-900 dark:text-neutral-500';
+    ? 'cursor-not-allowed bg-neutral-100 text-neutral-500 focus:ring-0 dark:bg-neutral-800 dark:text-neutral-400'
+    : 'cursor-not-allowed bg-gray-100 text-gray-500 focus:ring-0 dark:bg-neutral-900 dark:text-neutral-400';
 
   const primaryButtonClass = isDashboard
     ? 'flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0'
@@ -933,12 +933,12 @@ export default function Settings({
         >
           <div className="space-y-6">
             <div
-              className={`flex items-center gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-5 md:p-6 ${
+              className={`flex items-center gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/50 p-5 md:p-6 dark:border-emerald-900/50 dark:bg-emerald-950/30 ${
                 isDashboard ? 'rounded-xl' : ''
               }`}
             >
               <div
-                className={`shrink-0 rounded-full bg-white shadow-sm ${
+                className={`shrink-0 rounded-full bg-white shadow-sm dark:bg-neutral-900 ${
                   isDashboard ? 'p-3.5 text-[#52C47F]' : 'p-4 text-brand-emerald'
                 }`}
               >
@@ -954,7 +954,7 @@ export default function Settings({
                 </h4>
                 <p
                   className={`mt-1 text-sm ${
-                    isDashboard ? 'font-normal text-neutral-500' : 'font-medium text-gray-600'
+                    isDashboard ? 'font-normal text-neutral-500 dark:text-neutral-400' : 'font-medium text-gray-600 dark:text-neutral-400'
                   }`}
                 >
                   Upload your documents here. Our admins review them and update your verification status.
@@ -962,16 +962,16 @@ export default function Settings({
                 {kyc?.status && kyc.status !== 'not_started' ? (
                   <p className={`mt-2 text-xs font-semibold uppercase tracking-wide ${
                     kyc.status === 'approved'
-                      ? 'text-green-700'
+                      ? 'text-green-700 dark:text-emerald-400'
                       : kyc.status === 'rejected'
-                        ? 'text-red-700'
-                        : 'text-amber-700'
+                        ? 'text-red-700 dark:text-red-400'
+                        : 'text-amber-700 dark:text-amber-400'
                   }`}>
                     Verification status: {kyc.status_display || kyc.status.replace('_', ' ')}
                   </p>
                 ) : null}
                 {kyc?.status === 'rejected' && kyc.rejection_reason ? (
-                  <p className="mt-2 text-sm font-medium text-red-700">{kyc.rejection_reason}</p>
+                  <p className="mt-2 text-sm font-medium text-red-700 dark:text-red-400">{kyc.rejection_reason}</p>
                 ) : null}
               </div>
             </div>
