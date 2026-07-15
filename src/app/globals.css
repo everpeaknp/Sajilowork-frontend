@@ -231,7 +231,9 @@ html.dark .border-\[\#fff1ec\],
 html.dark .border-\[\#ffede8\],
 html.dark .border-\[\#F2ECE6\],
 html.dark .border-\[\#EBF9F1\],
-html.dark .border-\[\#FFF6E9\] {
+html.dark .border-\[\#FFF6E9\],
+html.dark .border-\[\#FCF0ED\],
+html.dark .border-\[\#F3F9FE\] {
   border-color: #3d342f !important;
 }
 
@@ -258,19 +260,48 @@ html.dark .bg-\[\#EBF9F1\] {
   background-color: rgb(16 61 48 / 0.45) !important;
 }
 
-/* Soft blue washes (blog / feature bands) */
+/* Soft blue washes (blog / feature bands / wallet pending) */
 html.dark .bg-\[\#E7F0FF\],
 html.dark .bg-\[\#E7F0FF\]\/60,
 html.dark .bg-\[\#F0F8FF\],
-html.dark .bg-\[\#e8ecf4\] {
+html.dark .bg-\[\#e8ecf4\],
+html.dark .bg-\[\#F3F9FE\] {
   background-color: rgb(30 58 95 / 0.45) !important;
 }
 
 /* Soft coral / amber status washes */
 html.dark .bg-\[\#FFF6E9\],
 html.dark .bg-\[\#FFF5F4\],
-html.dark .bg-\[\#FEF1EE\] {
+html.dark .bg-\[\#FEF1EE\],
+html.dark .bg-\[\#FCF0ED\],
+html.dark .bg-\[\#FCE6E1\] {
   background-color: rgb(90 40 40 / 0.35) !important;
+}
+
+html.dark .hover\:bg-\[\#FCE6E1\]:hover {
+  background-color: rgb(90 40 40 / 0.5) !important;
+}
+
+/* Tailwind pastel status / metric discs */
+html.dark .bg-red-50 {
+  background-color: rgb(127 29 29 / 0.35) !important;
+}
+
+html.dark .bg-amber-50 {
+  background-color: rgb(120 53 15 / 0.35) !important;
+}
+
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-50\/30 {
+  background-color: rgb(6 78 59 / 0.4) !important;
+}
+
+html.dark .border-red-100,
+html.dark .border-red-200,
+html.dark .border-amber-200,
+html.dark .border-emerald-100,
+html.dark .border-emerald-200 {
+  border-color: rgb(255 255 255 / 0.1) !important;
 }
 
 html.dark .text-\[\#d48c71\] {
@@ -324,8 +355,24 @@ html.dark .text-\[\#193e32\],
 html.dark .text-\[\#1D3E35\],
 html.dark .text-\[\#1d3e35\],
 html.dark .text-\[\#131118\],
-html.dark .text-\[\#03113c\] {
+html.dark .text-\[\#03113c\],
+html.dark .text-\[\#222222\],
+html.dark .text-\[\#222\] {
   color: var(--foreground) !important;
+}
+
+html.dark .text-red-800,
+html.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+html.dark .text-amber-900,
+html.dark .text-amber-800 {
+  color: #fcd34d !important;
+}
+
+html.dark .text-emerald-800 {
+  color: #6ee7b7 !important;
 }
 
 html.dark .text-black\/70,
@@ -453,6 +500,14 @@ html.dark select:not(:disabled) {
   background-color: var(--surface-low);
   border-color: var(--elevated-border);
   color: var(--foreground) !important;
+}
+
+/* Nested search/filter fields that sit inside a themed shell */
+html.dark input.bg-transparent,
+html.dark textarea.bg-transparent,
+html.dark select.bg-transparent {
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 html.dark input:disabled,

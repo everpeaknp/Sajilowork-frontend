@@ -14,18 +14,18 @@ interface JobTableProps {
 
 function statusBadgeClass(status: Job['status']) {
   if (status === 'Active') {
-    return 'bg-[#F0F8FF] text-[#0080FF] hover:bg-[#E1F0FF]';
+    return 'bg-[#F0F8FF] text-[#0080FF] hover:bg-[#E1F0FF] dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/60';
   }
   if (status === 'Pending') {
-    return 'bg-[#FFF6E9] text-[#F2994A] hover:bg-[#FFF0DB]';
+    return 'bg-[#FFF6E9] text-[#F2994A] hover:bg-[#FFF0DB] dark:bg-orange-950/40 dark:text-orange-300 dark:hover:bg-orange-950/60';
   }
   if (status === 'Draft') {
-    return 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200';
+    return 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700';
   }
   if (status === 'Closed') {
-    return 'bg-[#EBF9F1] text-[#27AE60] hover:bg-[#E0F5EA]';
+    return 'bg-[#EBF9F1] text-[#27AE60] hover:bg-[#E0F5EA] dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60';
   }
-  return 'bg-[#FFF5F5] text-[#EB5757] hover:bg-[#FEEAEA]';
+  return 'bg-[#FFF5F5] text-[#EB5757] hover:bg-[#FEEAEA] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60';
 }
 
 export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddClick }: JobTableProps) {
@@ -112,7 +112,7 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
                       type="button"
                       id={`job-edit-btn-${job.id}`}
                       onClick={() => onEdit(job)}
-                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444]"
+                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                       title="Edit this job posting"
                     >
                       <Pencil className="h-[18px] w-[18px]" strokeWidth={2.2} />
@@ -122,7 +122,7 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
                       type="button"
                       id={`job-delete-btn-${job.id}`}
                       onClick={() => onDelete(job.id)}
-                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444]"
+                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                       title="Delete this job campaign"
                     >
                       <Trash2 className="h-[18px] w-[18px]" strokeWidth={2.2} />

@@ -461,7 +461,7 @@ export default function DashboardEmployerApplications() {
               <div className="col-span-12 text-right md:col-span-1">Action</div>
             </div>
 
-            <div className="divide-y divide-neutral-100">
+            <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -469,12 +469,12 @@ export default function DashboardEmployerApplications() {
                 </div>
               ) : shortlistedRows.length === 0 ? (
                 <div className="py-12 text-center text-sm text-neutral-500">
-                  <p className="font-medium text-neutral-900">No shortlisted freelancers yet</p>
+                  <p className="font-medium text-neutral-900 dark:text-stone-100">No shortlisted freelancers yet</p>
                   <p className="mt-2">Accepted applicants will appear here after you hire from Applications.</p>
                 </div>
               ) : isEmptyFromFilters ? (
                 <div className="py-12 text-center text-sm text-neutral-500">
-                  <p className="font-medium text-neutral-900">No shortlisted freelancers match your search</p>
+                  <p className="font-medium text-neutral-900 dark:text-stone-100">No shortlisted freelancers match your search</p>
                   <p className="mt-2">Try a different keyword or clear the search.</p>
                 </div>
               ) : (
@@ -504,7 +504,7 @@ export default function DashboardEmployerApplications() {
                     </div>
 
                     <div className="col-span-12 md:col-span-3">
-                      <p className="truncate text-sm font-medium text-neutral-900">{row.jobTitle}</p>
+                      <p className="truncate text-sm font-medium text-neutral-900 dark:text-stone-100">{row.jobTitle}</p>
                       <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-neutral-600">
                         <MapPin strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500" />
                         {row.location}
@@ -512,7 +512,7 @@ export default function DashboardEmployerApplications() {
                     </div>
 
                     <div className="col-span-6 md:col-span-2">
-                      <p className="text-sm font-semibold text-neutral-900">{formatNPR(row.amount)}</p>
+                      <p className="text-sm font-semibold text-neutral-900 dark:text-stone-100">{formatNPR(row.amount)}</p>
                     </div>
 
                     <div className="col-span-6 md:col-span-2">
@@ -523,7 +523,7 @@ export default function DashboardEmployerApplications() {
                       <div className="flex md:justify-end">
                         <Link
                           href={getEmployerBidDetailHref(row.jobSlug, row.bidId, 'applications')}
-                          className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC]"
+                          className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                         >
                           View
                           <ChevronRight className="h-4 w-4" strokeWidth={1.8} />
@@ -544,7 +544,7 @@ export default function DashboardEmployerApplications() {
           <div className="col-span-12 text-right md:col-span-2">Action</div>
         </div>
 
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -557,7 +557,7 @@ export default function DashboardEmployerApplications() {
             </div>
           ) : isEmptyFromFilters ? (
             <div className="py-12 text-center text-sm text-neutral-500">
-              <p className="font-medium text-neutral-900">No jobs match your search</p>
+              <p className="font-medium text-neutral-900 dark:text-stone-100">No jobs match your search</p>
               <p className="mt-2">Try a different keyword or clear the filters.</p>
             </div>
           ) : (
@@ -593,7 +593,7 @@ export default function DashboardEmployerApplications() {
                 </div>
 
                 <div className="col-span-6 md:col-span-2">
-                  <p className="text-sm font-semibold text-neutral-900">
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-stone-100">
                     {group.totalApplications} application{group.totalApplications === 1 ? '' : 's'}
                   </p>
                   <p className="mt-0.5 text-xs text-neutral-500">
@@ -626,7 +626,7 @@ export default function DashboardEmployerApplications() {
                   <div className="flex md:justify-end">
                     <Link
                       href={getDashboardApplicationsListingHref(group.slug)}
-                      className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC]"
+                      className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                     >
                       View applications
                       <ChevronRight className="h-4 w-4" strokeWidth={1.8} />

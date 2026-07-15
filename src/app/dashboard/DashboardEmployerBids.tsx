@@ -368,7 +368,7 @@ export default function DashboardEmployerBids() {
           <div className="col-span-12 text-right md:col-span-2">Action</div>
         </div>
 
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -382,7 +382,7 @@ export default function DashboardEmployerBids() {
             </div>
           ) : isEmptyFromFilters ? (
             <div className="py-12 text-center text-sm text-neutral-500">
-              <p className="font-medium text-neutral-900">No listings match your search</p>
+              <p className="font-medium text-neutral-900 dark:text-stone-100">No listings match your search</p>
               <p className="mt-2">
                 Try a different keyword{hasActiveFilters ? ' or clear the filters' : ''}.
               </p>
@@ -422,7 +422,7 @@ export default function DashboardEmployerBids() {
                 </div>
 
                 <div className="col-span-6 md:col-span-2">
-                  <p className="text-sm font-semibold text-neutral-900">
+                  <p className="text-sm font-semibold text-neutral-900 dark:text-stone-100">
                     {group.totalBids} bid{group.totalBids === 1 ? '' : 's'}
                   </p>
                   <p className="mt-0.5 text-xs text-neutral-500">
@@ -436,7 +436,7 @@ export default function DashboardEmployerBids() {
                     {isCustomer ? (
                       <Link
                         href={getDashboardBidsListingHref(group.slug)}
-                        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC]"
+                        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                       >
                         View bids
                         <ChevronRight className="h-4 w-4" strokeWidth={1.8} />
@@ -444,7 +444,7 @@ export default function DashboardEmployerBids() {
                     ) : (
                       <Link
                         href={getDashboardBidsListingHref(group.slug)}
-                        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC]"
+                        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                       >
                         View offer
                         <ChevronRight className="h-4 w-4" strokeWidth={1.8} />

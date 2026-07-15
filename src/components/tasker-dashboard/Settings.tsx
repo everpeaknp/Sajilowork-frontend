@@ -979,7 +979,7 @@ export default function Settings({
             <div
               className={`space-y-4 rounded-xl border p-5 md:p-6 ${
                 isDashboard
-                  ? 'border-neutral-200/90 bg-neutral-50/40'
+                  ? 'border-neutral-200/90 bg-neutral-50/40 dark:border-neutral-700/80 dark:bg-neutral-950/60'
                   : 'rounded-3xl border-outline-variant bg-white'
               }`}
             >
@@ -991,7 +991,7 @@ export default function Settings({
                 >
                   Personal details
                 </p>
-                <p className={`text-sm ${isDashboard ? 'text-neutral-500' : 'font-medium text-gray-500'}`}>
+                <p className={`text-sm ${isDashboard ? 'text-neutral-500 dark:text-neutral-400' : 'font-medium text-gray-500'}`}>
                   Use the same profile photo, name, contact details, and address as on your identity documents.
                 </p>
               </div>
@@ -999,8 +999,8 @@ export default function Settings({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="relative shrink-0 self-start">
                   <div
-                    className={`h-24 w-24 overflow-hidden rounded-2xl border bg-white shadow-sm ${
-                      isDashboard ? 'border-neutral-200' : 'border-outline-variant'
+                    className={`h-24 w-24 overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-neutral-900 ${
+                      isDashboard ? 'border-neutral-200 dark:border-neutral-700' : 'border-outline-variant'
                     }`}
                   >
                     <img
@@ -1213,7 +1213,7 @@ export default function Settings({
             <div
               className={`flex items-start gap-4 p-5 ${
                 isDashboard
-                  ? 'rounded-xl border border-neutral-200/90 bg-neutral-50/60'
+                  ? 'rounded-xl border border-neutral-200/90 bg-neutral-50/60 dark:border-neutral-700/80 dark:bg-neutral-950/60'
                   : 'rounded-3xl border border-outline-variant bg-surface-low'
               }`}
             >
@@ -1222,15 +1222,29 @@ export default function Settings({
               />
               <p
                 className={`text-sm leading-relaxed ${
-                  isDashboard ? 'font-normal text-neutral-600' : 'font-medium text-gray-600'
+                  isDashboard
+                    ? 'font-normal text-neutral-600 dark:text-neutral-400'
+                    : 'font-medium text-gray-600'
                 }`}
               >
                 Accepted formats:{' '}
-                <span className={isDashboard ? 'font-semibold text-neutral-900' : 'font-black text-brand-dark'}>
+                <span
+                  className={
+                    isDashboard
+                      ? 'font-semibold text-neutral-900 dark:text-stone-100'
+                      : 'font-black text-brand-dark'
+                  }
+                >
                   JPG/PNG/PDF
                 </span>
                 , max{' '}
-                <span className={isDashboard ? 'font-semibold text-neutral-900' : 'font-black text-brand-dark'}>
+                <span
+                  className={
+                    isDashboard
+                      ? 'font-semibold text-neutral-900 dark:text-stone-100'
+                      : 'font-black text-brand-dark'
+                  }
+                >
                   5MB
                 </span>
                 . If a document is rejected, you’ll see the rejection reason here and can re-upload a corrected file.
@@ -1297,10 +1311,10 @@ export default function Settings({
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className={isDashboard ? 'text-[15px] font-semibold text-neutral-900' : 'font-bold text-brand-dark'}>
+                <p className={isDashboard ? 'text-[15px] font-semibold text-neutral-900 dark:text-stone-100' : 'font-bold text-brand-dark'}>
                   Global channel toggles
                 </p>
-                <p className={isDashboard ? 'text-sm text-neutral-500' : 'text-xs text-gray-500'}>
+                <p className={isDashboard ? 'text-sm text-neutral-500 dark:text-neutral-400' : 'text-xs text-gray-500'}>
                   These apply to all notification types.
                 </p>
               </div>
@@ -1322,14 +1336,14 @@ export default function Settings({
               <div
                 className={`rounded-2xl border p-4 text-sm font-semibold ${
                   isDashboard
-                    ? 'rounded-xl border-neutral-200/90 bg-neutral-50 font-medium text-neutral-500'
+                    ? 'rounded-xl border-neutral-200/90 bg-neutral-50 font-medium text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400'
                     : 'border-outline-variant bg-gray-50 text-gray-500'
                 }`}
               >
                 Loading notification settings…
               </div>
             ) : (
-              <div className={isDashboard ? 'divide-y divide-neutral-100' : 'space-y-1 divide-y divide-gray-50'}>
+              <div className={isDashboard ? '' : 'space-y-1'}>
                 {[
                   {
                     key: 'push_enabled' as const,
@@ -1354,13 +1368,13 @@ export default function Settings({
                         <p
                           className={
                             isDashboard
-                              ? 'text-[15px] font-semibold text-neutral-900'
+                              ? 'text-[15px] font-semibold text-neutral-900 dark:text-stone-100'
                               : 'font-bold text-brand-dark transition-colors group-hover:text-brand-emerald'
                           }
                         >
                           {n.label}
                         </p>
-                        <p className={isDashboard ? 'text-sm text-neutral-500' : 'text-xs text-gray-500'}>
+                        <p className={isDashboard ? 'text-sm text-neutral-500 dark:text-neutral-400' : 'text-xs text-gray-500'}>
                           {n.desc}
                         </p>
                       </div>
@@ -1403,20 +1417,20 @@ export default function Settings({
           appearance={appearance}
         >
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-orange-50 text-orange-700 rounded-2xl border border-orange-100">
-              <AlertCircle className="w-5 h-5 shrink-0" />
+            <div className="flex items-center gap-3 rounded-2xl border border-orange-100 bg-orange-50 p-4 text-orange-700 dark:border-orange-900/50 dark:bg-orange-950/40 dark:text-orange-200">
+              <AlertCircle className="h-5 w-5 shrink-0" />
               <p className="text-sm font-semibold">
                 You have {alertKeywords.length} active keyword alert{alertKeywords.length === 1 ? '' : 's'}.
               </p>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-2xl border border-outline-variant space-y-4">
+            <div className="space-y-4 rounded-2xl border border-outline-variant bg-gray-50 p-6 dark:border-neutral-800 dark:bg-neutral-950/60">
               <div className="flex items-center justify-between">
-                <p className="font-bold text-brand-dark">Keyword alerts</p>
-                <span className="text-xs font-bold text-gray-400">EVERY MATCH</span>
+                <p className="font-bold text-brand-dark dark:text-stone-100">Keyword alerts</p>
+                <span className="text-xs font-bold text-gray-400 dark:text-neutral-500">EVERY MATCH</span>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   value={newAlertKeyword}
                   onChange={(e) => setNewAlertKeyword(e.target.value)}
@@ -1424,7 +1438,7 @@ export default function Settings({
                     if (e.key === 'Enter') void addAlertKeyword();
                   }}
                   placeholder="Add keyword (e.g. Moving, IKEA)"
-                  className={isDashboard ? `flex-1 ${inputClass}` : 'flex-1 rounded-2xl border border-outline-variant bg-white p-4 font-semibold outline-none transition-all focus:ring-2 focus:ring-brand-emerald'}
+                  className={isDashboard ? `flex-1 ${inputClass}` : 'flex-1 rounded-2xl border border-outline-variant bg-white p-4 font-semibold outline-none transition-all focus:ring-2 focus:ring-brand-emerald dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100'}
                   disabled={alertsLoading}
                 />
                 <button
@@ -1443,7 +1457,7 @@ export default function Settings({
               </div>
 
               {alertsLoading ? (
-                <div className="p-4 bg-white rounded-2xl border border-outline-variant text-sm font-semibold text-gray-500">
+                <div className="rounded-2xl border border-outline-variant bg-white p-4 text-sm font-semibold text-gray-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
                   Loading alerts…
                 </div>
               ) : (
@@ -1454,14 +1468,14 @@ export default function Settings({
                         key={String(k.id)}
                         type="button"
                         onClick={() => void removeAlertKeyword(String(k.id))}
-                        className="px-3 py-1.5 bg-white rounded-xl border border-gray-200 text-xs font-bold text-brand-emerald hover:bg-emerald-50 transition-colors"
+                        className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-brand-emerald transition-colors hover:bg-emerald-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-emerald-400 dark:hover:bg-emerald-950/40"
                         title="Remove keyword"
                       >
-                        #{k.keyword} <span className="text-gray-400">×</span>
+                        #{k.keyword} <span className="text-gray-400 dark:text-neutral-500">×</span>
                       </button>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500 font-semibold">
+                    <p className="text-sm font-semibold text-gray-500 dark:text-neutral-400">
                       Add keywords to get notified when new tasks match.
                     </p>
                   )}
@@ -1478,7 +1492,7 @@ export default function Settings({
       <div className={DASHBOARD_PAGE_ROOT}>
         <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
           <h1 className={DASHBOARD_HEADING}>Settings</h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             Manage your email, phone, verification, payment methods, password, and notifications.
           </p>
         </div>

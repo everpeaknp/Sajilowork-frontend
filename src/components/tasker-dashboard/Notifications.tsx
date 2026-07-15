@@ -168,25 +168,25 @@ function getIconStyles(type: string) {
     case 'task_completed':
     case 'bid_received':
     case 'bid_accepted':
-      return 'bg-emerald-50 text-emerald-600 ring-emerald-100';
+      return 'bg-emerald-50 text-emerald-600 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/50';
     case 'bid_rejected':
     case 'task_cancelled':
     case 'task_expired':
     case 'payment_failed':
-      return 'bg-red-50 text-red-600 ring-red-100';
+      return 'bg-red-50 text-red-600 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50';
     case 'payment_received':
     case 'payment_sent':
     case 'payout_processed':
       return 'bg-brand-emerald/10 text-brand-emerald ring-brand-emerald/15';
     case 'review_received':
     case 'review_response':
-      return 'bg-amber-50 text-amber-600 ring-amber-100';
+      return 'bg-amber-50 text-amber-600 ring-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900/50';
     case 'message_received':
     case 'conversation_started':
     case 'bid_message':
-      return 'bg-violet-50 text-violet-600 ring-violet-100';
+      return 'bg-violet-50 text-violet-600 ring-violet-100 dark:bg-violet-950/40 dark:text-violet-300 dark:ring-violet-900/50';
     default:
-      return 'bg-slate-50 text-slate-600 ring-slate-100';
+      return 'bg-slate-50 text-slate-600 ring-slate-100 dark:bg-neutral-800 dark:text-neutral-300 dark:ring-neutral-700';
   }
 }
 

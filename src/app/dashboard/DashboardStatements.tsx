@@ -92,13 +92,13 @@ function PaymentStatusBadge({ status }: { status: string }) {
   }
   if (kind === 'failed') {
     return (
-      <span className="inline-flex rounded-xl border border-red-100 bg-red-50 px-5 py-2.5 text-xs font-normal text-red-700">
+      <span className="inline-flex rounded-xl border border-red-100 bg-red-50 px-5 py-2.5 text-xs font-normal text-red-700 dark:border-red-900/50 dark:text-red-300">
         {label}
       </span>
     );
   }
   return (
-    <span className="inline-flex rounded-xl bg-neutral-100 px-5 py-2.5 text-xs font-normal text-neutral-600">
+    <span className="inline-flex rounded-xl bg-neutral-100 px-5 py-2.5 text-xs font-normal text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
       {label}
     </span>
   );
@@ -282,7 +282,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
       {!embedded ? (
         <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
           <h1 className={DASHBOARD_HEADING}>Statements</h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
             {direction === 'outgoing'
               ? 'Task payments and outgoing transactions.'
               : 'Earnings and releases from completed work.'}
@@ -296,17 +296,17 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               {direction === 'outgoing' ? 'Total Outgoing' : 'Net Income'}
             </span>
-            <h3 className={DASHBOARD_STAT_VALUE}>
+            <h3 className={`${DASHBOARD_STAT_VALUE} dark:text-stone-100`}>
               {formatNPR(totalNetIncome, { compact: true })}
             </h3>
             <p className="font-sans text-[12px] font-normal leading-tight text-[#52C47F]">
               {statements.length}{' '}
-              <span className="text-neutral-500">
+              <span className="text-neutral-500 dark:text-neutral-400">
                 {direction === 'outgoing' ? 'Payments' : 'Transactions'}
               </span>
             </p>
           </div>
-          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#EBF9F1] text-[#27AE60]">
+          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#EBF9F1] text-[#27AE60] dark:bg-emerald-950/40">
             <TrendingUp className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-[#27AE60]/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
@@ -317,14 +317,14 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Withdrawn
             </span>
-            <h3 className={DASHBOARD_STAT_VALUE}>
+            <h3 className={`${DASHBOARD_STAT_VALUE} dark:text-stone-100`}>
               {formatNPR(Math.max(0, walletStats.withdrawn), { compact: true })}
             </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
-              <span className="text-neutral-500">From wallet</span>
+              <span className="text-neutral-500 dark:text-neutral-400">From wallet</span>
             </p>
           </div>
-          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#FCF0ED] text-[#F2994A]">
+          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#FCF0ED] text-[#F2994A] dark:bg-orange-950/40">
             <Wallet className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-[#F2994A]/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
@@ -335,14 +335,14 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Pending Clearance
             </span>
-            <h3 className={DASHBOARD_STAT_VALUE}>
+            <h3 className={`${DASHBOARD_STAT_VALUE} dark:text-stone-100`}>
               {formatNPR(walletStats.pending, { compact: true })}
             </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
-              <span className="text-neutral-500">In escrow / pending</span>
+              <span className="text-neutral-500 dark:text-neutral-400">In escrow / pending</span>
             </p>
           </div>
-          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F9FE] text-[#2F80ED]">
+          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full bg-[#F3F9FE] text-[#2F80ED] dark:bg-blue-950/40">
             <Clock className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-[#2F80ED]/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
@@ -353,14 +353,14 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               Available for Withdrawal
             </span>
-            <h3 className={DASHBOARD_STAT_VALUE}>
+            <h3 className={`${DASHBOARD_STAT_VALUE} dark:text-stone-100`}>
               {formatNPR(walletStats.available, { compact: true })}
             </h3>
             <p className="text-[12px] font-normal leading-tight text-[#52C47F]">
-              <span className="text-neutral-500">Wallet balance</span>
+              <span className="text-neutral-500 dark:text-neutral-400">Wallet balance</span>
             </p>
           </div>
-          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-[#193E32]">
+          <div className="z-10 flex h-12 w-12 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-[#193E32] dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">
             <CircleDollarSign className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="absolute bottom-0 right-0 h-20 w-20 translate-x-4 translate-y-4 rounded-full bg-emerald-500/[0.01] transition-transform duration-300 group-hover:scale-[1.3]" />
@@ -418,10 +418,10 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                     <td className="break-words py-6 pr-4 align-middle text-sm font-medium text-neutral-900 dark:text-stone-100">
                       {st.title}
                     </td>
-                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-500">
+                    <td className="py-6 pr-4 align-middle text-sm font-normal text-neutral-500 dark:text-neutral-400">
                       {st.date}
                     </td>
-                    <td className="py-6 align-middle text-sm font-medium text-neutral-800">
+                    <td className="py-6 align-middle text-sm font-medium text-neutral-800 dark:text-stone-200">
                       {st.price}
                     </td>
                     <td className="py-6 align-middle text-sm font-bold text-neutral-900 dark:text-stone-100">
@@ -434,7 +434,7 @@ export default function DashboardStatements({ embedded = false }: { embedded?: b
                       <button
                         type="button"
                         onClick={() => setSelectedStatement(st)}
-                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF0ED] px-5 py-2.5 text-xs font-medium text-[#222222] transition-all hover:scale-[1.02] hover:bg-[#FCE6E1] active:scale-[0.98]"
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF0ED] px-5 py-2.5 text-xs font-medium text-[#222222] transition-all hover:scale-[1.02] hover:bg-[#FCE6E1] active:scale-[0.98] dark:text-stone-100"
                       >
                         <Eye className="h-3.5 w-3.5" strokeWidth={1.8} />
                         <span>View</span>

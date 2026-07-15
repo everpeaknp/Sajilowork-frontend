@@ -148,7 +148,7 @@ export default function DashboardRecharges({
         hint: `${recharges.filter((item) => item.status === 'Approved').length} `,
         hintMuted: 'Approved top-ups',
         icon: TrendingUp,
-        iconWrapClass: 'bg-[#EBF9F1] text-[#27AE60]',
+        iconWrapClass: 'bg-[#EBF9F1] text-[#27AE60] dark:bg-emerald-950/40',
         iconClass: 'text-[#27AE60]',
         glowClass: 'bg-[#27AE60]/[0.01]',
       },
@@ -158,7 +158,7 @@ export default function DashboardRecharges({
         hint: `${recharges.filter((item) => item.status !== 'Approved').length} `,
         hintMuted: 'Awaiting confirmation',
         icon: Clock,
-        iconWrapClass: 'bg-[#F3F9FE] text-[#2F80ED]',
+        iconWrapClass: 'bg-[#F3F9FE] text-[#2F80ED] dark:bg-blue-950/40',
         iconClass: 'text-[#2F80ED]',
         glowClass: 'bg-[#2F80ED]/[0.01]',
       },
@@ -167,7 +167,7 @@ export default function DashboardRecharges({
         value: String(recharges.length),
         hintMuted: 'Total recharge records',
         icon: Zap,
-        iconWrapClass: 'bg-[#FCF0ED] text-[#F2994A]',
+        iconWrapClass: 'bg-[#FCF0ED] text-[#F2994A] dark:bg-orange-950/40',
         iconClass: 'text-[#F2994A]',
         glowClass: 'bg-[#F2994A]/[0.01]',
       },
@@ -176,8 +176,9 @@ export default function DashboardRecharges({
         value: formatNPR(walletSummary?.rechargeBalance ?? totalApproved, { compact: true }),
         hintMuted: 'Total topped up in wallet',
         icon: CircleDollarSign,
-        iconWrapClass: 'border border-emerald-100 bg-emerald-50 text-[#193E32]',
-        iconClass: 'text-[#193E32]',
+        iconWrapClass:
+          'border border-emerald-100 bg-emerald-50 text-[#193E32] dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300',
+        iconClass: 'text-[#193E32] dark:text-emerald-300',
         glowClass: 'bg-emerald-500/[0.01]',
       },
     ],
@@ -233,7 +234,7 @@ export default function DashboardRecharges({
         <div className="mx-auto mb-8 flex max-w-7xl flex-col gap-5 pl-1 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-[34px] font-normal leading-none tracking-tight text-neutral-900 dark:text-stone-100">Recharges</h1>
-            <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
+            <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
               Lorem ipsum dolor sit amet, consectetur.
             </p>
           </div>
@@ -241,7 +242,7 @@ export default function DashboardRecharges({
           <button
             type="button"
             onClick={handleCreateClick}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:scale-[1.01] hover:bg-neutral-800 active:scale-[0.99]"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-neutral-900 px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:scale-[1.01] hover:bg-neutral-800 active:scale-[0.99] dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white"
           >
             <span>Create Recharge</span>
             <ArrowDownLeft className="h-4 w-4 text-white" strokeWidth={2} />
@@ -250,7 +251,7 @@ export default function DashboardRecharges({
       ) : null}
 
       {successNote ? (
-        <div className="animate-in slide-in-from-bottom-2 mx-auto mb-5 flex max-w-7xl items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800 shadow-sm duration-300">
+        <div className="animate-in slide-in-from-bottom-2 mx-auto mb-5 flex max-w-7xl items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800 shadow-sm duration-300 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200 dark:shadow-none">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
             <span>{successNote}</span>
@@ -258,7 +259,7 @@ export default function DashboardRecharges({
           <button
             type="button"
             onClick={() => setSuccessNote(null)}
-            className="rounded p-1 text-emerald-600 transition-all hover:bg-emerald-100"
+            className="rounded p-1 text-emerald-600 transition-all hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
           >
             <X className="h-4 w-4" />
           </button>
@@ -283,7 +284,7 @@ export default function DashboardRecharges({
 
       <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-neutral-100 bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
         {loading ? (
-          <div className="py-16 text-center text-sm text-neutral-500">Loading recharges…</div>
+          <div className="py-16 text-center text-sm text-neutral-500 dark:text-neutral-400">Loading recharges…</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full table-auto border-collapse text-left">
@@ -300,7 +301,7 @@ export default function DashboardRecharges({
               <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
                 {currentRecharges.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-sm text-neutral-500">
+                    <td colSpan={6} className="py-12 text-center text-sm text-neutral-500 dark:text-neutral-400">
                       {recharges.length === 0
                         ? 'No recharges yet. Create your first recharge to get started.'
                         : 'No matching recharges found. Try a different search or payment status filter.'}
@@ -315,8 +316,8 @@ export default function DashboardRecharges({
                       <td className="select-all py-6 align-middle text-[15px] font-medium text-neutral-900 dark:text-stone-100">
                         {item.amount}
                       </td>
-                      <td className="py-6 align-middle text-sm font-normal text-neutral-500">{item.date}</td>
-                      <td className="py-6 align-middle text-sm font-normal text-neutral-800">{item.rechargeMethod}</td>
+                      <td className="py-6 align-middle text-sm font-normal text-neutral-500 dark:text-neutral-400">{item.date}</td>
+                      <td className="py-6 align-middle text-sm font-normal text-neutral-800 dark:text-stone-200">{item.rechargeMethod}</td>
                       <td className="py-6 align-middle">
                         <StatusBadge status={item.status} />
                       </td>
@@ -324,7 +325,7 @@ export default function DashboardRecharges({
                         <button
                           type="button"
                           onClick={() => setSelectedInvoice(mapRechargeToInvoice(item))}
-                          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF0ED] px-4 py-2.5 text-xs font-medium text-[#222222] transition-all hover:scale-[1.02] hover:bg-[#FCE6E1] active:scale-[0.98]"
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#FCF0ED] px-4 py-2.5 text-xs font-medium text-[#222222] transition-all hover:scale-[1.02] hover:bg-[#FCE6E1] active:scale-[0.98] dark:text-stone-100"
                         >
                           <Eye className="h-3.5 w-3.5" strokeWidth={1.8} />
                           <span>Invoice</span>
@@ -407,7 +408,7 @@ export default function DashboardRecharges({
           <div className="animate-in slide-in-from-bottom-2 relative z-10 w-full max-w-md space-y-6 rounded-2xl border border-neutral-100 bg-white p-6 shadow-2xl duration-300 md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-3.5 dark:border-neutral-800">
               <h3 className="flex items-center gap-2 text-lg font-bold text-neutral-900 dark:text-stone-100">
-                <div className="rounded-lg bg-emerald-50 p-2">
+                <div className="rounded-lg bg-emerald-50 p-2 dark:bg-emerald-950/40">
                   <Wallet className="h-5 w-5 text-[#52C47F]" />
                 </div>
                 <span>New Recharge</span>
@@ -423,7 +424,7 @@ export default function DashboardRecharges({
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   Amount (NPR)
                 </label>
                 <div className="flex items-center rounded-xl border border-neutral-200 px-4 dark:border-neutral-700">
@@ -435,16 +436,16 @@ export default function DashboardRecharges({
                     placeholder="e.g. 500"
                     value={newAmount}
                     onChange={(e) => setNewAmount(e.target.value)}
-                    className="w-full border-0 bg-transparent py-3 pl-1.5 text-sm font-semibold text-neutral-800 outline-none focus:outline-none focus:ring-0"
+                    className="w-full border-0 bg-transparent py-3 pl-1.5 text-sm font-semibold text-neutral-800 outline-none focus:outline-none focus:ring-0 dark:text-stone-100"
                   />
                 </div>
-                <p className="text-[11px] text-neutral-400">
+                <p className="text-[11px] text-neutral-400 dark:text-neutral-500">
                   Value will format as {formatNPR(Number(newAmount || 0))}
                 </p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   Recharge Method
                 </label>
                 <select
@@ -459,7 +460,7 @@ export default function DashboardRecharges({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500">
+                <label className="text-xs font-bold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
                   Payment Status
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -494,13 +495,13 @@ export default function DashboardRecharges({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 cursor-pointer rounded-xl bg-neutral-100 py-3.5 text-center text-xs font-bold text-neutral-700 transition-all hover:bg-neutral-200"
+                  className="flex-1 cursor-pointer rounded-xl bg-neutral-100 py-3.5 text-center text-xs font-bold text-neutral-700 transition-all hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-200 dark:hover:bg-neutral-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 cursor-pointer rounded-xl bg-[#222222] py-3.5 text-center text-xs font-bold text-white transition-all hover:bg-black"
+                  className="flex-1 cursor-pointer rounded-xl bg-neutral-900 py-3.5 text-center text-xs font-bold text-white transition-all hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white"
                 >
                   Confirm Recharge
                 </button>

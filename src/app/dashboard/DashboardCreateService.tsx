@@ -608,7 +608,7 @@ export default function DashboardCreateService({
         <button
           type="button"
           onClick={() => handleSubmit()}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 self-start rounded-none bg-[#222222] px-6 py-4 text-sm font-normal text-white shadow-md transition-colors hover:bg-neutral-800 md:self-auto"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 self-start rounded-none bg-neutral-900 px-6 py-4 text-sm font-normal text-white shadow-md transition-colors hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white md:self-auto"
         >
           {isEdit ? 'Save Changes' : 'Save & Publish'}
           <ArrowUpRight className="h-4 w-4" />

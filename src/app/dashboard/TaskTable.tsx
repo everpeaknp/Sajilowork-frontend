@@ -131,7 +131,7 @@ export default function TaskTable({
                       {viewHref ? (
                         <Link
                           href={viewHref}
-                          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[#ebf8f2] px-3.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#dff5ea]"
+                          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[#ebf8f2] px-3.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#dff5ea] dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
                         >
                           <span>View</span>
                           <ExternalLink className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />

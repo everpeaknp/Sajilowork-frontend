@@ -43,6 +43,10 @@ export function dashboardPageButtonClass(active: boolean): string {
 export const DASHBOARD_STAT_VALUE =
   'text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl dark:text-stone-100';
 
+/** Primary page CTAs — avoid bg-[#222222] (globals invert it to cream in dark). */
+export const DASHBOARD_PRIMARY_CTA =
+  'bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white';
+
 export function dashboardSubtabClass(active: boolean): string {
   return `relative cursor-pointer pb-4 text-[15px] font-normal tracking-tight transition-all outline-none ${
     active

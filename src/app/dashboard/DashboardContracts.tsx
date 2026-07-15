@@ -137,18 +137,18 @@ function contractStatusBadgeClass(bid: Bid): string {
   const taskStatus = resolveContractTaskStatus(bid);
   switch (taskStatus) {
     case 'completed':
-      return 'bg-violet-50 text-violet-700';
+      return 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300';
     case 'cancelled':
-      return 'bg-neutral-100 text-neutral-600';
+      return 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300';
     case 'in_progress':
     case 'pending_approval':
     case 'disputed':
-      return 'bg-blue-50 text-blue-700';
+      return 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300';
     case 'assigned':
     case 'funded':
-      return 'bg-emerald-50 text-emerald-700';
+      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
     default:
-      return 'bg-emerald-50 text-emerald-700';
+      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
   }
 }
 
@@ -400,19 +400,19 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
           <div className="col-span-1 text-right">Action</div>
         </div>
 
-        <div className="divide-y divide-neutral-100">
+        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
           {loading ? (
             <div className="flex justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" />
             </div>
           ) : contracts.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium text-neutral-900">{emptyTitle}</p>
-              <p className="mt-2 text-sm text-neutral-500">{emptyDescription}</p>
+              <p className="text-sm font-medium text-neutral-900 dark:text-stone-100">{emptyTitle}</p>
+              <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">{emptyDescription}</p>
             </div>
           ) : isEmptyFromFilters ? (
             <div className="py-16 text-center">
-              <p className="text-sm font-medium text-neutral-900">{filterEmptyTitle}</p>
+              <p className="text-sm font-medium text-neutral-900 dark:text-stone-100">{filterEmptyTitle}</p>
               <p className="mt-2 text-sm text-neutral-500">
                 Try a different keyword{hasActiveFilters ? ' or clear the filters' : ''}.
               </p>
@@ -489,7 +489,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
                     <p className="text-[11px] font-medium uppercase tracking-wide text-neutral-400 md:hidden">
                       Offer
                     </p>
-                    <p className="text-sm font-semibold text-neutral-900">
+                    <p className="text-sm font-semibold text-neutral-900 dark:text-stone-100">
                       {formatNPR(Number(bid.amount) || 0)}
                     </p>
                   </div>
@@ -513,7 +513,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
                       {detailHref ? (
                         <Link
                           href={detailHref}
-                          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#FEF1EE] px-3 py-2 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                          className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[#FEF1EE] px-3 py-2 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                         >
                           View
                           <ChevronRight className="h-4 w-4" strokeWidth={1.8} />

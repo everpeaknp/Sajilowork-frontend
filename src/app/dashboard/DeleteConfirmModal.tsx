@@ -23,7 +23,8 @@ export function isConfirmModalTarget(target: EventTarget | null): boolean {
 
 const CONFIRM_TONE_CLASS: Record<NonNullable<DeleteConfirmModalProps['confirmTone']>, string> = {
   danger: 'bg-[#E53935] hover:bg-[#d32f2f]',
-  primary: 'bg-[#222222] hover:bg-neutral-800',
+  primary:
+    'bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white',
   brand: 'bg-[#52C47F] hover:bg-[#45a86d]',
 };
 

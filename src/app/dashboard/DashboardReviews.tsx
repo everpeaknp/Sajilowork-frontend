@@ -260,7 +260,7 @@ export default function DashboardReviews() {
                     <button
                       type="button"
                       onClick={handleFlagReview}
-                      className="cursor-pointer rounded-lg p-2 text-neutral-400 transition-all hover:bg-neutral-50 hover:text-neutral-800"
+                      className="cursor-pointer rounded-lg p-2 text-neutral-400 transition-all hover:bg-neutral-50 hover:text-neutral-800 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
                       title="Flag review for policy violation"
                     >
                       <Flag className="h-[18px] w-[18px]" strokeWidth={1.5} />

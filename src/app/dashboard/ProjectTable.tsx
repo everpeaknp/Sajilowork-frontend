@@ -152,7 +152,7 @@ export default function ProjectTable({
                   {isAssigned && viewHref ? (
                     <Link
                       href={viewHref}
-                      className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-[#ebf8f2] px-3.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#dff5ea]"
+                      className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg bg-[#ebf8f2] px-3.5 text-sm font-normal text-[#52C47F] transition-colors hover:bg-[#dff5ea] dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
                     >
                       <span>View</span>
                       <ExternalLink className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
@@ -162,7 +162,7 @@ export default function ProjectTable({
                       {viewHref ? (
                         <Link
                           href={viewHref}
-                          className="inline-flex h-9 shrink-0 items-center rounded-lg bg-[#FEF1EE] px-3 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                          className="inline-flex h-9 shrink-0 items-center rounded-lg bg-[#FEF1EE] px-3 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                         >
                           View
                         </Link>

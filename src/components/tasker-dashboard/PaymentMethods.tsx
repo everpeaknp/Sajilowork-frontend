@@ -737,8 +737,9 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         value: formatNPR(walletSummary.availableBalance, { compact: true }),
         hintMuted: 'Total spendable wallet funds',
         icon: CircleDollarSign,
-        iconWrapClass: 'border border-emerald-100 bg-emerald-50 text-[#193E32]',
-        iconClass: 'text-[#193E32]',
+        iconWrapClass:
+          'border border-emerald-100 bg-emerald-50 text-[#193E32] dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300',
+        iconClass: 'text-[#193E32] dark:text-emerald-300',
         glowClass: 'bg-emerald-500/[0.01]',
       },
       {
@@ -746,7 +747,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         value: formatNPR(walletSummary.rechargeBalance, { compact: true }),
         hintMuted: 'Total topped up',
         icon: Zap,
-        iconWrapClass: 'bg-[#EBF9F1] text-[#27AE60]',
+        iconWrapClass: 'bg-[#EBF9F1] text-[#27AE60] dark:bg-emerald-950/40',
         iconClass: 'text-[#27AE60]',
         glowClass: 'bg-[#27AE60]/[0.01]',
       },
@@ -755,7 +756,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         value: formatNPR(Number(walletData?.earned_balance ?? 0), { compact: true }),
         hintMuted: 'From completed work',
         icon: TrendingUp,
-        iconWrapClass: 'bg-[#FCF0ED] text-[#F2994A]',
+        iconWrapClass: 'bg-[#FCF0ED] text-[#F2994A] dark:bg-orange-950/40',
         iconClass: 'text-[#F2994A]',
         glowClass: 'bg-[#F2994A]/[0.01]',
       },
@@ -764,7 +765,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
         value: formatNPR(pendingClearance, { compact: true }),
         hintMuted: 'Escrow, held & pending payouts',
         icon: Clock,
-        iconWrapClass: 'bg-[#F3F9FE] text-[#2F80ED]',
+        iconWrapClass: 'bg-[#F3F9FE] text-[#2F80ED] dark:bg-blue-950/40',
         iconClass: 'text-[#2F80ED]',
         glowClass: 'bg-[#2F80ED]/[0.01]',
       },
@@ -821,7 +822,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                 type="button"
                 onClick={openRechargeModal}
                 disabled={isRecharging || walletData?.is_frozen}
-                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-emerald px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-brand-emerald/90 disabled:cursor-not-allowed disabled:bg-neutral-300"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-brand-emerald px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-brand-emerald/90 disabled:cursor-not-allowed disabled:bg-neutral-300 dark:disabled:bg-neutral-700 dark:disabled:text-neutral-400"
               >
                 {isRecharging ? (
                   <>
@@ -843,7 +844,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               >
                 {isWithdrawing ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark border-t-transparent" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-dark border-t-transparent dark:border-stone-100 dark:border-t-transparent" />
                     Processing…
                   </>
                 ) : (
@@ -860,7 +861,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
             <button
               type="button"
               onClick={openRechargeModal}
-              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800"
+              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-neutral-900 px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white"
             >
               <span>Create Recharge</span>
               <ArrowDownLeft className="h-4 w-4" strokeWidth={2} />
@@ -872,7 +873,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               type="button"
               onClick={openWithdrawModal}
               disabled={walletData?.is_frozen || withdrawableBalance < 10}
-              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-[#222222] px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
+              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-neutral-900 px-6 py-4 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white dark:disabled:bg-neutral-600 dark:disabled:text-neutral-300"
             >
               <span>Create Payout</span>
               <ArrowUpRight className="h-4 w-4" strokeWidth={2} />
@@ -953,13 +954,13 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
               <DashboardMetricCards cards={walletStatCards} />
 
               {walletData?.is_frozen ? (
-                <div className="mx-auto max-w-7xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <div className="mx-auto max-w-7xl rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
                   Your wallet is frozen. Recharge and withdrawals are temporarily disabled.
                 </div>
               ) : null}
 
               {!walletData?.is_frozen && pendingWithdrawalsAmount > 0 ? (
-                <div className="mx-auto max-w-7xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                <div className="mx-auto max-w-7xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
                   Pending withdrawals: {formatNPR(pendingWithdrawalsAmount)} — not deducted from your
                   balance until approved.
                 </div>
@@ -1043,7 +1044,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                 <div className="space-y-2">
                   <label className={fieldLabelClass}>Amount</label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400 dark:text-neutral-500">
                       Rs.
                     </span>
                     <input
@@ -1062,14 +1063,14 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                       placeholder="500"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-neutral-500">
                     Minimum {formatNPR(withdrawMinAmount)} · you can request up to {formatNPR(withdrawableBalance)} now
                     {pendingWithdrawalsAmount > 0 && (
                       <> ({formatNPR(pendingWithdrawalsAmount)} already in pending requests)</>
                     )}
                   </p>
                   {withdrawAmountError && (
-                    <p className="text-sm font-medium text-red-600">{withdrawAmountError}</p>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400">{withdrawAmountError}</p>
                   )}
                 </div>
 
@@ -1121,10 +1122,10 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                   <div className="space-y-2">
                     <label className={fieldLabelClass}>eSewa account</label>
                     {esewaPaymentMethods.length === 0 ? (
-                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
                         <Link
                           href="/dashboard/settings?tab=payment-methods"
-                          className="font-semibold underline hover:text-amber-950"
+                          className="font-semibold underline hover:text-amber-950 dark:hover:text-amber-100"
                         >
                           Link an eSewa account in Settings
                         </Link>{' '}
@@ -1198,7 +1199,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                   </div>
                 )}
 
-                <p className="text-center text-xs text-gray-400">
+                <p className="text-center text-xs text-gray-400 dark:text-neutral-500">
                   Withdrawal requests are reviewed by admin before transfer.
                 </p>
               </div>
@@ -1212,7 +1213,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                     withdrawAmountValidation.amount === null ||
                     withdrawAmountValidation.error !== null
                   }
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/25 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:bg-gray-300 disabled:shadow-none"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-emerald py-3.5 text-base font-bold text-white shadow-lg shadow-brand-emerald/25 transition-all hover:bg-brand-emerald/90 active:scale-[0.99] disabled:bg-gray-300 disabled:shadow-none dark:disabled:bg-neutral-700"
                 >
                   {isWithdrawing ? (
                     <>
@@ -1270,7 +1271,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                 <div className="space-y-2">
                   <label className={fieldLabelClass}>Amount</label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400 dark:text-neutral-500">
                       Rs.
                     </span>
                     <input
@@ -1285,11 +1286,11 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                       placeholder="500"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-neutral-500">
                     Rs. {rechargeMinAmount.toLocaleString()} – Rs. {rechargeMaxAmount.toLocaleString()}
                   </p>
                   {rechargeAmountError && (
-                    <p className="text-sm font-medium text-red-600">{rechargeAmountError}</p>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400">{rechargeAmountError}</p>
                   )}
                 </div>
 
@@ -1317,7 +1318,7 @@ export default function PaymentMethods({ initialTab = 'wallet' }: PaymentMethods
                     Request via WhatsApp
                   </button>
 
-                  <p className="text-center text-xs text-gray-400">
+                  <p className="text-center text-xs text-gray-400 dark:text-neutral-500">
                     {adminWhatsAppNumber
                       ? `Admin: +${adminWhatsAppNumber} · manual confirmation required`
                       : 'Manual recharge requires admin confirmation'}

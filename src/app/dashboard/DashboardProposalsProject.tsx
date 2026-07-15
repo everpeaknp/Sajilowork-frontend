@@ -383,14 +383,14 @@ export default function DashboardProposalsProject({
                   {isCustomer ? (
                     <Link
                       href={getEmployerBidDetailHref(projectSlug, bid.id, detailFrom)}
-                      className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                      className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                     >
                       View
                     </Link>
                   ) : (
                     <Link
                       href={getEmployerBidDetailHref(projectSlug, bid.id, 'bids')}
-                      className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC]"
+                      className="inline-flex rounded-lg bg-[#FEF1EE] px-4 py-2.5 text-sm font-normal text-[#FF6B6B] transition-colors hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                     >
                       View offer
                     </Link>

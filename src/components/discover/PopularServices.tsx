@@ -173,7 +173,7 @@ export default function PopularServices({ className = '', initialServices }: Pop
                       href={getServiceDetailPath(service)}
                       className="group flex h-full min-h-[192px] w-full flex-col overflow-hidden rounded-xl border border-neutral-200/70 bg-white transition-all duration-300 hover:border-neutral-300 md:flex-row dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
                     >
-                      <div className="relative h-[192px] w-full shrink-0 overflow-hidden bg-neutral-100 md:w-[190px]">
+                      <div className="relative h-[192px] w-full shrink-0 overflow-hidden bg-neutral-100 md:h-auto md:w-[190px] md:self-stretch dark:bg-neutral-800">
                         <OptimizedImage
                           src={service.image}
                           alt={service.title}

@@ -127,7 +127,7 @@ export default function DashboardProjects() {
         <button
           type="button"
           onClick={openCreatePage}
-          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#222222] px-6 py-3.5 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 active:scale-[0.99] sm:w-auto sm:py-4"
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-neutral-900 px-6 py-3.5 text-sm font-medium text-white shadow-md transition-all hover:bg-neutral-800 dark:bg-stone-100 dark:text-neutral-900 dark:hover:bg-white active:scale-[0.99] sm:w-auto sm:py-4"
         >
           <Plus className="h-4 w-4" />
           <span>Post New Project</span>

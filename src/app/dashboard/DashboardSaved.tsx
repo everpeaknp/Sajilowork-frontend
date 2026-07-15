@@ -95,7 +95,7 @@ function SavedCard({
       </div>
 
       <div className="px-5 pb-5">
-        <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+        <div className="flex items-center justify-between border-t border-neutral-100 pt-4 dark:border-neutral-800">
           <div className="flex min-w-0 items-center gap-2.5">
             <UserAvatar
               src={item.authorAvatar}

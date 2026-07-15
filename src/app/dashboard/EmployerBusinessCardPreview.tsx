@@ -110,7 +110,7 @@ export default function EmployerBusinessCardPreview() {
   if (loading) {
     return (
       <section className="mx-auto max-w-7xl">
-        <h2 className="text-xl font-semibold tracking-tight text-neutral-900">Your business card</h2>
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Your business card</h2>
         <p className="mt-4 text-sm text-neutral-500">Loading…</p>
       </section>
     );
@@ -120,7 +120,7 @@ export default function EmployerBusinessCardPreview() {
     <section className="mx-auto max-w-7xl">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-neutral-900">Your business card</h2>
+          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Your business card</h2>
           <p className="mt-1 text-sm text-neutral-500">
             Generated from your business profile. Print or save as PDF for networking and hiring.
           </p>

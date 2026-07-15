@@ -11,9 +11,9 @@ import { toast } from 'sonner';
 import { USER_PROFILE_UPDATED, notifyUserProfileUpdated } from '@/lib/userProfileSync';
 import DeleteConfirmModal from '@/app/dashboard/DeleteConfirmModal';
 
-const fieldLabelClass = 'text-sm font-semibold text-gray-600';
+const fieldLabelClass = 'text-sm font-semibold text-gray-600 dark:text-neutral-400';
 const fieldInputClass =
-  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-base font-semibold text-brand-dark outline-none transition-all placeholder:text-gray-400 focus:border-brand-emerald focus:bg-white focus:ring-2 focus:ring-brand-emerald/15';
+  'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-base font-semibold text-brand-dark outline-none transition-all placeholder:text-gray-400 focus:border-brand-emerald focus:bg-white focus:ring-2 focus:ring-brand-emerald/15 dark:border-neutral-700 dark:bg-neutral-900 dark:text-stone-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900';
 
 export default function LinkedPaymentMethods() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodData[]>([]);
@@ -173,7 +173,7 @@ export default function LinkedPaymentMethods() {
     <div className="space-y-6 pt-2">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-gray-500">Accounts for payouts, withdrawals, and wallet top-ups.</p>
+          <p className="text-sm text-gray-500 dark:text-neutral-400">Accounts for payouts, withdrawals, and wallet top-ups.</p>
         </div>
         <button
           type="button"
@@ -187,21 +187,21 @@ export default function LinkedPaymentMethods() {
       {loading ? (
         <div className="py-12 text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-brand-emerald border-t-transparent" />
-          <p className="text-sm font-medium text-gray-500">Loading payment methods...</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-neutral-400">Loading payment methods...</p>
         </div>
       ) : !paymentMethods.length ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <button
             type="button"
             onClick={() => setShowLinkESewaModal(true)}
-            className="group flex flex-col items-center justify-center gap-4 rounded-[40px] border-2 border-dashed border-outline-variant p-8 text-gray-400 transition-all hover:border-brand-emerald hover:bg-brand-emerald/5 hover:text-brand-emerald"
+            className="group flex flex-col items-center justify-center gap-4 rounded-[40px] border-2 border-dashed border-outline-variant p-8 text-gray-400 transition-all hover:border-brand-emerald hover:bg-brand-emerald/5 hover:text-brand-emerald dark:border-neutral-700 dark:text-neutral-500 dark:hover:border-brand-emerald dark:hover:text-brand-emerald"
           >
-            <div className="rounded-full bg-surface-low p-4 transition-colors group-hover:bg-brand-emerald/10">
+            <div className="rounded-full bg-surface-low p-4 transition-colors group-hover:bg-brand-emerald/10 dark:bg-neutral-800">
               <Plus className="h-8 w-8" />
             </div>
             <div className="text-center">
-              <p className="text-lg font-black uppercase tracking-tight">Link eSewa</p>
-              <p className="text-xs font-medium text-gray-400">Add eSewa as a payment method</p>
+              <p className="text-lg font-black uppercase tracking-tight dark:text-stone-100">Link eSewa</p>
+              <p className="text-xs font-medium text-gray-400 dark:text-neutral-500">Add eSewa as a payment method</p>
             </div>
           </button>
         </div>
@@ -213,8 +213,8 @@ export default function LinkedPaymentMethods() {
               className={cn(
                 'relative space-y-5 overflow-hidden rounded-[28px] border p-6 transition-all',
                 method.is_default
-                  ? 'border-brand-emerald/40 bg-brand-emerald/5 shadow-sm'
-                  : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm',
+                  ? 'border-brand-emerald/40 bg-brand-emerald/5 shadow-sm dark:border-brand-emerald/30 dark:bg-brand-emerald/[0.08]'
+                  : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700 dark:hover:shadow-none',
               )}
             >
               <div className="relative z-10 flex items-start justify-between">
@@ -225,13 +225,13 @@ export default function LinkedPaymentMethods() {
                       ? 'bg-brand-emerald'
                       : method.method_type === 'esewa'
                         ? 'bg-[#60bb46]'
-                        : 'bg-gray-100',
+                        : 'bg-gray-100 dark:bg-neutral-800',
                   )}
                 >
                   {method.method_type === 'esewa' ? (
                     <Wallet className="h-8 w-8 text-white" />
                   ) : (
-                    <CreditCard className={cn('h-8 w-8', method.is_default ? 'text-white' : 'text-gray-600')} />
+                    <CreditCard className={cn('h-8 w-8', method.is_default ? 'text-white' : 'text-gray-600 dark:text-neutral-300')} />
                   )}
                 </div>
                 {method.is_default && (
@@ -241,7 +241,7 @@ export default function LinkedPaymentMethods() {
                 )}
               </div>
               <div className="relative z-10">
-                <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-neutral-500">
                   {method.method_type === 'card'
                     ? 'Card'
                     : method.method_type === 'esewa'
@@ -250,18 +250,18 @@ export default function LinkedPaymentMethods() {
                 </p>
                 {method.method_type === 'esewa' ? (
                   <>
-                    <p className="text-2xl font-black tracking-tight text-brand-dark">
+                    <p className="text-2xl font-black tracking-tight text-brand-dark dark:text-stone-100">
                       {method.esewa_phone_number && method.esewa_phone_number.length >= 4
                         ? `${method.esewa_phone_number.substring(0, 5)}****${method.esewa_phone_number.substring(method.esewa_phone_number.length - 2)}`
                         : method.esewa_account_name}
                     </p>
-                    <p className="mt-1 text-xs font-semibold text-gray-500">{method.esewa_account_name}</p>
+                    <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-neutral-400">{method.esewa_account_name}</p>
                   </>
                 ) : (
                   <>
-                    <p className="text-2xl font-black tracking-tight text-brand-dark">****{method.last_four}</p>
+                    <p className="text-2xl font-black tracking-tight text-brand-dark dark:text-stone-100">****{method.last_four}</p>
                     {method.method_type === 'card' && method.expiry_date && (
-                      <p className="mt-1 text-xs font-semibold text-gray-500">Card • Expires {method.expiry_date}</p>
+                      <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-neutral-400">Card • Expires {method.expiry_date}</p>
                     )}
                   </>
                 )}
@@ -273,7 +273,7 @@ export default function LinkedPaymentMethods() {
                   <button
                     type="button"
                     onClick={() => handleSetDefault(method.id)}
-                    className="text-xs font-black text-brand-dark underline hover:text-brand-emerald"
+                    className="text-xs font-black text-brand-dark underline hover:text-brand-emerald dark:text-stone-100"
                   >
                     Set as Default
                   </button>
@@ -281,7 +281,7 @@ export default function LinkedPaymentMethods() {
                 <button
                   type="button"
                   onClick={() => requestDeletePaymentMethod(method.id)}
-                  className="flex items-center gap-1 text-xs font-black text-red-500 hover:text-red-700"
+                  className="flex items-center gap-1 text-xs font-black text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="h-3 w-3" />
                   Delete
@@ -293,14 +293,14 @@ export default function LinkedPaymentMethods() {
           <button
             type="button"
             onClick={() => setShowLinkESewaModal(true)}
-            className="group flex flex-col items-center justify-center gap-4 rounded-[40px] border-2 border-dashed border-outline-variant p-8 text-gray-400 transition-all hover:border-brand-emerald hover:bg-brand-emerald/5 hover:text-brand-emerald"
+            className="group flex flex-col items-center justify-center gap-4 rounded-[40px] border-2 border-dashed border-outline-variant p-8 text-gray-400 transition-all hover:border-brand-emerald hover:bg-brand-emerald/5 hover:text-brand-emerald dark:border-neutral-700 dark:text-neutral-500 dark:hover:border-brand-emerald dark:hover:text-brand-emerald"
           >
-            <div className="rounded-full bg-surface-low p-4 transition-colors group-hover:bg-brand-emerald/10">
+            <div className="rounded-full bg-surface-low p-4 transition-colors group-hover:bg-brand-emerald/10 dark:bg-neutral-800">
               <Plus className="h-8 w-8" />
             </div>
             <div className="text-center">
-              <p className="text-lg font-black uppercase tracking-tight">Link eSewa</p>
-              <p className="text-xs font-medium text-gray-400">Add eSewa as a payment method</p>
+              <p className="text-lg font-black uppercase tracking-tight dark:text-stone-100">Link eSewa</p>
+              <p className="text-xs font-medium text-gray-400 dark:text-neutral-500">Add eSewa as a payment method</p>
             </div>
           </button>
         </div>
@@ -319,7 +319,7 @@ export default function LinkedPaymentMethods() {
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="pointer-events-auto flex max-h-[min(92vh,calc(100dvh-1rem))] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:rounded-[28px]"
+                className="pointer-events-auto flex max-h-[min(92vh,calc(100dvh-1rem))] w-full max-w-lg flex-col overflow-hidden rounded-t-[28px] border border-transparent bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 sm:rounded-[28px]"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="shrink-0 px-6 pb-5 pt-6">
@@ -334,14 +334,14 @@ export default function LinkedPaymentMethods() {
                         />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-brand-dark">Link eSewa</h3>
-                        <p className="mt-1 text-sm text-gray-500">For withdrawals and payouts</p>
+                        <h3 className="text-xl font-bold text-brand-dark dark:text-stone-100">Link eSewa</h3>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-neutral-400">For withdrawals and payouts</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowLinkESewaModal(false)}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-neutral-800 dark:hover:text-stone-100"
                       aria-label="Close"
                     >
                       <X className="h-5 w-5" />
@@ -371,15 +371,15 @@ export default function LinkedPaymentMethods() {
                       maxLength={10}
                       className={fieldInputClass}
                     />
-                    <p className="text-xs text-gray-400">10 digits, starting with 97 or 98</p>
+                    <p className="text-xs text-gray-400 dark:text-neutral-500">10 digits, starting with 97 or 98</p>
                   </div>
                 </div>
 
-                <div className="flex shrink-0 gap-3 border-t border-gray-100 px-6 py-5">
+                <div className="flex shrink-0 gap-3 border-t border-gray-100 px-6 py-5 dark:border-neutral-800">
                   <button
                     type="button"
                     onClick={() => setShowLinkESewaModal(false)}
-                    className="flex-1 rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50"
+                    className="flex-1 rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:border-neutral-700 dark:text-stone-200 dark:hover:bg-neutral-800"
                   >
                     Cancel
                   </button>
@@ -387,7 +387,7 @@ export default function LinkedPaymentMethods() {
                     type="button"
                     onClick={handleLinkESewaAccount}
                     disabled={isLinkingESewa}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#60bb46] py-3 text-sm font-bold text-white transition-all hover:bg-[#52a13c] disabled:cursor-not-allowed disabled:bg-gray-300"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#60bb46] py-3 text-sm font-bold text-white transition-all hover:bg-[#52a13c] disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-neutral-700"
                   >
                     {isLinkingESewa ? (
                       <>
