@@ -11,13 +11,12 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to console for debugging
     console.error('Application error:', error);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-neutral-950">
+      <div className="w-full max-w-md rounded-lg border border-transparent bg-white p-8 text-center shadow-lg dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
         <div className="mb-4">
           <svg
             className="mx-auto h-12 w-12 text-red-500"
@@ -33,37 +32,38 @@ export default function Error({
             />
           </svg>
         </div>
-        
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+
+        <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-stone-100">
           Something went wrong!
         </h2>
-        
-        <p className="text-gray-600 mb-4">
+
+        <p className="mb-4 text-gray-600 dark:text-neutral-400">
           {error.message || 'An unexpected error occurred'}
         </p>
 
         {process.env.NODE_ENV === 'development' && (
           <details className="mb-4 text-left">
-            <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
+            <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700 dark:text-neutral-500 dark:hover:text-neutral-300">
               Error Details (Development Only)
             </summary>
-            <pre className="mt-2 text-xs bg-gray-100 p-3 rounded overflow-auto max-h-40">
+            <pre className="mt-2 max-h-40 overflow-auto rounded bg-gray-100 p-3 text-xs dark:bg-neutral-800 dark:text-neutral-300">
               {error.stack}
             </pre>
           </details>
         )}
-        
-        <div className="flex gap-3 justify-center">
+
+        <div className="flex justify-center gap-3">
           <button
+            type="button"
             onClick={reset}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="rounded-lg bg-brand-emerald px-4 py-2 text-white transition-colors hover:bg-[#3d9665] dark:text-neutral-950 dark:hover:bg-emerald-400"
           >
             Try again
           </button>
-          
+
           <Link
             href="/"
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-300 dark:bg-neutral-800 dark:text-stone-200 dark:hover:bg-neutral-700"
           >
             Go home
           </Link>

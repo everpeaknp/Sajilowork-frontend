@@ -1,10 +1,13 @@
 import { notFound } from 'next/navigation';
 
 import {
-  fetchPublicJobBySlug,
   fetchPublicJobs,
   getRelatedJobsFromList,
+  mapTaskToPublicJob,
 } from '@/lib/jobApi';
+import { fetchPublicJson } from '@/lib/seo/api';
+import type { Task } from '@/types';
+import type { Job } from '@/components/jobs/jobListData';
 
 import JobSlugPageClient from './JobSlugPageClient';
 
@@ -16,14 +19,28 @@ export default async function JobSlugPage({ params }: Props) {
   const { slug } = await params;
   if (!slug) notFound();
 
-  const [job, allJobs] = await Promise.all([
-    fetchPublicJobBySlug(slug),
-    fetchPublicJobs(),
-  ]);
+  // Prefer native fetch for RSC — avoids axios/js-cookie edge cases on the server.
+  const raw = await fetchPublicJson<Task>(`/jobs/${encodeURIComponent(slug)}/`, {
+    revalidate: 300,
+  });
+  if (!raw) notFound();
 
-  if (!job) notFound();
+  let job: Job;
+  try {
+    job = mapTaskToPublicJob(raw);
+  } catch (error) {
+    console.error('[JobSlugPage] Failed to map job', slug, error);
+    notFound();
+  }
 
-  const relatedJobs = getRelatedJobsFromList(job, allJobs, 3);
+  // Related jobs are optional — never fail the detail page if the list API errors.
+  let relatedJobs: Job[] = [];
+  try {
+    const allJobs = await fetchPublicJobs({ page_size: 24 });
+    relatedJobs = getRelatedJobsFromList(job, allJobs, 3);
+  } catch (error) {
+    console.error('[JobSlugPage] Related jobs unavailable', slug, error);
+  }
 
   return <JobSlugPageClient job={job} relatedJobs={relatedJobs} />;
 }

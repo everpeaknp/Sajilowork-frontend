@@ -28,25 +28,35 @@ export async function generateMetadata({ params }: Pick<Props, 'params'>): Promi
 
 export default async function JobSlugLayout({ children, params }: Props) {
   const { slug } = await params;
-  const [job, settings] = await Promise.all([
-    fetchListingSeo('/jobs', slug),
-    fetchSiteSettings(),
-  ]);
 
-  const schema =
-    job &&
-    buildListingDetailSchemaGraph({
-      type: 'job',
-      slug,
-      record: job,
-      settings,
-    });
+  let schema: ReturnType<typeof buildListingDetailSchemaGraph> = null;
+  let jobTitle: string | undefined;
+  let jobDescription: string | undefined;
+
+  try {
+    const [job, settings] = await Promise.all([
+      fetchListingSeo('/jobs', slug),
+      fetchSiteSettings(),
+    ]);
+    jobTitle = job?.title;
+    jobDescription = job?.description || job?.excerpt;
+    schema =
+      job &&
+      buildListingDetailSchemaGraph({
+        type: 'job',
+        slug,
+        record: job,
+        settings,
+      });
+  } catch (error) {
+    console.error('[JobSlugLayout] SEO enrichment failed', slug, error);
+  }
 
   return (
     <>
       {schema ? <JsonLd data={schema} /> : null}
-      {job?.title ? (
-        <CrawlableDetailShell title={job.title} description={job.description || job.excerpt} />
+      {jobTitle ? (
+        <CrawlableDetailShell title={jobTitle} description={jobDescription} />
       ) : null}
       {children}
     </>

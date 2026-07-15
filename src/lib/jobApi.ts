@@ -578,37 +578,39 @@ export function dashboardJobStatusToTaskFields(
 
 
 export async function fetchPublicJobs(
-
   params?: Record<string, string | number>,
-
 ): Promise<Job[]> {
-
-  const response = await jobService.getJobs(params);
-
-  if (!response.success || !response.data) {
-
-    throw new Error(response.message || 'Failed to load jobs');
-
+  try {
+    const response = await jobService.getJobs(params);
+    if (!response.success || !response.data) {
+      return [];
+    }
+    return extractTaskList(response.data)
+      .map((task) => {
+        try {
+          return mapTaskToPublicJob(task);
+        } catch {
+          return null;
+        }
+      })
+      .filter((job): job is Job => job != null);
+  } catch (error) {
+    console.error('[fetchPublicJobs]', error);
+    return [];
   }
-
-  return extractTaskList(response.data).map(mapTaskToPublicJob);
-
 }
 
-
-
 export async function fetchPublicJobBySlug(slug: string): Promise<Job | null> {
-
-  const response = await jobService.getJobBySlug(slug);
-
-  if (!response.success || !response.data) {
-
+  try {
+    const response = await jobService.getJobBySlug(slug);
+    if (!response.success || !response.data) {
+      return null;
+    }
+    return mapTaskToPublicJob(response.data);
+  } catch (error) {
+    console.error('[fetchPublicJobBySlug]', slug, error);
     return null;
-
   }
-
-  return mapTaskToPublicJob(response.data);
-
 }
 
 
