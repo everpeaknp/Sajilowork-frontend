@@ -14,6 +14,7 @@ export function useAuth() {
     user,
     isAuthenticated,
     isLoading,
+    hasHydrated,
     error,
     login,
     register,
@@ -27,6 +28,7 @@ export function useAuth() {
     user,
     isAuthenticated,
     isLoading,
+    hasHydrated,
     error,
 
     // Actions

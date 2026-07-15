@@ -24,7 +24,7 @@ export default function MarketingCta({
       {secondaryHref && secondaryLabel ? (
         <Link
           href={secondaryHref}
-          className="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-emerald/30 bg-white px-8 py-3.5 text-center text-sm font-semibold text-brand-dark transition hover:bg-brand-light-bg active:scale-[0.98] sm:text-base"
+          className="inline-flex min-h-12 items-center justify-center rounded-full border border-brand-emerald/30 bg-white px-8 py-3.5 text-center text-sm font-semibold text-brand-dark transition hover:bg-brand-light-bg active:scale-[0.98] dark:border-brand-emerald/40 dark:bg-neutral-900 dark:text-stone-100 dark:hover:bg-neutral-800 sm:text-base"
         >
           {secondaryLabel}
         </Link>

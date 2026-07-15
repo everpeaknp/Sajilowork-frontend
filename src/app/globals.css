@@ -383,7 +383,8 @@ html.dark .text-brand-dark\/70 {
 }
 
 html.dark .text-\[\#6a719a\],
-html.dark .text-\[\#5e586c\] {
+html.dark .text-\[\#5e586c\],
+html.dark .text-\[\#384179\] {
   color: var(--muted-foreground) !important;
 }
 
@@ -607,6 +608,16 @@ html.dark .blog-content h4 {
 }
 
 html.dark .blog-content blockquote {
+  color: #e7e5e4;
+}
+
+html.dark .blog-content a {
+  color: var(--brand-emerald);
+}
+
+html.dark .blog-content pre,
+html.dark .blog-content code {
+  background: #1c1917;
   color: #e7e5e4;
 }
 

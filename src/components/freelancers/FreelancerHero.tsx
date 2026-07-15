@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { discoverBody, discoverHeadline } from '@/components/LangingHome/landingTypography';
 import HeroImage from '@/components/ui/hero-image';
+import MarketplaceHeroBreadcrumbs from '@/components/marketplace/MarketplaceHeroBreadcrumbs';
 import { FREELANCER_HERO_PORTRAIT } from './freelancerData';
 
 export default function FreelancerHero() {
@@ -10,6 +11,12 @@ export default function FreelancerHero() {
     <section className="select-none bg-white px-4 pb-8 pt-8 sm:px-6 lg:px-8 dark:bg-neutral-950">
       <div className="mx-auto w-full max-w-7xl">
         <div className="relative flex min-h-[180px] w-full items-stretch overflow-hidden rounded-[24px] bg-[#FEF0EA] shadow-sm sm:min-h-[220px] lg:min-h-[280px] dark:bg-neutral-900 dark:shadow-none">
+          <MarketplaceHeroBreadcrumbs
+            serpKey="freelancers"
+            sectionPath="/freelancers"
+            variant="light"
+          />
+
           <div className="pointer-events-none absolute bottom-0 left-0 top-0 z-0 select-none">
             <svg
               viewBox="0 0 120 400"

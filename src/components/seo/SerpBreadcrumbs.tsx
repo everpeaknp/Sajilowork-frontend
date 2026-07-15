@@ -19,19 +19,24 @@ export default function SerpBreadcrumbs({ items, className }: SerpBreadcrumbsPro
 
   return (
     <nav aria-label="Breadcrumb" className={cn('w-full', className)}>
-      <ol className="flex flex-wrap items-center gap-1 text-xs text-neutral-500 sm:text-sm">
+      <ol className="flex flex-wrap items-center gap-1 text-xs text-neutral-500 dark:text-neutral-400 sm:text-sm">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
             <li key={`${item.label}-${index}`} className="flex items-center gap-1">
               {index > 0 ? (
-                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-neutral-300" aria-hidden />
+                <ChevronRight
+                  className="h-3.5 w-3.5 shrink-0 text-neutral-300 dark:text-neutral-600"
+                  aria-hidden
+                />
               ) : null}
               {isLast || !item.href ? (
                 <span
                   className={cn(
                     'font-medium',
-                    isLast ? 'text-neutral-800' : 'text-neutral-500',
+                    isLast
+                      ? 'text-neutral-800 dark:text-stone-100'
+                      : 'text-neutral-500 dark:text-neutral-400',
                   )}
                   {...(isLast ? { 'aria-current': 'page' as const } : {})}
                 >
@@ -40,7 +45,7 @@ export default function SerpBreadcrumbs({ items, className }: SerpBreadcrumbsPro
               ) : (
                 <Link
                   href={item.href}
-                  className="font-medium text-neutral-600 transition-colors hover:text-brand-emerald"
+                  className="font-medium text-neutral-600 transition-colors hover:text-brand-emerald dark:text-neutral-400 dark:hover:text-brand-emerald"
                 >
                   {item.label}
                 </Link>

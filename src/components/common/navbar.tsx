@@ -126,10 +126,12 @@ export default function Navbar() {
   const pathname = usePathname();
   const taskerDashboardNav = useTaskerDashboardNavOptional();
   const isTaskerDashboard = pathname.startsWith('/tasker-dashboard');
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, hasHydrated, logout } = useAuth();
   const { display_name: displayName, logo_url: logoUrl } = useSiteSettings();
-  const authResolved = !isLoading;
-  const showSignedOutCtas = authResolved && !isAuthenticated;
+  // After localStorage hydrate, trust last login/logout for navbar chrome immediately.
+  // Session is re-confirmed in the background (isLoading) without hiding CTAs.
+  const showSignedOutCtas = hasHydrated && !isAuthenticated;
+  const showAuthedChrome = hasHydrated && isAuthenticated;
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -423,10 +425,6 @@ export default function Navbar() {
         />
       </div>
 
-      <div className="border-t border-neutral-100 dark:border-neutral-800">
-        <ThemeMenuToggle />
-      </div>
-
       <div className="border-t border-neutral-100 py-1 dark:border-neutral-800">
         <button
           type="button"
@@ -547,9 +545,10 @@ export default function Navbar() {
         </div>
 
         {/* Right section: Utilities Dashboard & Profile */}
-        <div className="flex shrink-0 items-center gap-0 sm:gap-1 md:gap-5">
+        <div className="flex shrink-0 items-center gap-0 sm:gap-1 md:gap-3">
           {showSignedOutCtas ? (
             <>
+              <ThemeMenuToggle variant="inline" />
               <Link
                 href="/signin"
                 className={`${landingBody} hidden sm:hidden min-h-9 items-center rounded-full px-3 text-xs font-semibold tracking-tight text-neutral-600 transition hover:bg-gray-50 hover:text-brand-emerald min-[380px]:flex sm:text-sm dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-brand-emerald`}
@@ -571,13 +570,18 @@ export default function Navbar() {
               </Link>
               </div>
             </>
-          ) : isAuthenticated ? (
+          ) : showAuthedChrome ? (
             <>
               {/* Help button */}
-              <div className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald dark:text-neutral-300 dark:hover:text-brand-emerald`}>
+              <Link
+                href="/help"
+                className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald dark:text-neutral-300 dark:hover:text-brand-emerald`}
+              >
                 <HelpCircle className="h-4.5 w-4.5" />
                 <span>Help</span>
-              </div>
+              </Link>
+
+              <ThemeMenuToggle variant="inline" />
 
               {/* Notifications Trigger */}
               <div
@@ -808,14 +812,14 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div className="hidden h-10 w-36 sm:block" aria-hidden="true" />
-          )}
-
-          {/* Utilities: theme (guests) + hamburger */}
-          {showSignedOutCtas && (
-            <div className="hidden sm:block">
+            <>
+              {/* Briefly before localStorage hydrate */}
               <ThemeMenuToggle variant="inline" />
-            </div>
+              <div
+                className="hidden h-9 w-28 animate-pulse rounded-full bg-neutral-200 sm:block dark:bg-neutral-800"
+                aria-hidden="true"
+              />
+            </>
           )}
 
           {/* Hamburger: tasker dashboard sidebar, or guest sign-in menu */}
@@ -925,7 +929,9 @@ export default function Navbar() {
 
             <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
 
-            <ThemeMenuToggle />
+            <div className="px-1 py-1">
+              <ThemeMenuToggle variant="inline" />
+            </div>
 
             <div className="my-2 h-px bg-gray-100 dark:bg-neutral-800" />
 

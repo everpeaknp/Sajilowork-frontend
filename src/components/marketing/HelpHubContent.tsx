@@ -43,7 +43,7 @@ const HELP_LINKS = [
 export default function HelpHubContent() {
   return (
     <div className="min-w-0">
-      <p className="mb-8 flex items-start gap-3 rounded-2xl border border-brand-emerald/20 bg-brand-light-bg p-4 text-sm text-[#384179] sm:mb-10 sm:p-5 sm:text-base">
+      <p className="mb-8 flex items-start gap-3 rounded-2xl border border-brand-emerald/20 bg-brand-light-bg p-4 text-sm text-[#384179] dark:border-brand-emerald/30 dark:bg-neutral-900 dark:text-neutral-300 sm:mb-10 sm:p-5 sm:text-base">
         <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-emerald" aria-hidden />
         Find guides and policies for posters and Taskers. For urgent payment issues, include your task
         ID when you contact us.
@@ -56,20 +56,22 @@ export default function HelpHubContent() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="group flex h-full min-h-[5.5rem] flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-brand-emerald/30 hover:shadow-md"
+                className="group flex h-full min-h-[5.5rem] flex-col justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-brand-emerald/30 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-brand-emerald/40 dark:hover:shadow-none"
               >
                 <div>
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light-bg text-brand-emerald">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light-bg text-brand-emerald dark:bg-neutral-800">
                       <Icon className="h-4 w-4" aria-hidden />
                     </span>
                     <ChevronRight
-                      className="h-4 w-4 text-gray-300 transition group-hover:text-brand-emerald"
+                      className="h-4 w-4 text-gray-300 transition group-hover:text-brand-emerald dark:text-neutral-600"
                       aria-hidden
                     />
                   </div>
-                  <h2 className="text-base font-bold text-brand-dark">{item.title}</h2>
-                  <p className="mt-1.5 text-sm leading-relaxed text-[#6a719a]">{item.description}</p>
+                  <h2 className="text-base font-bold text-brand-dark dark:text-stone-100">{item.title}</h2>
+                  <p className="mt-1.5 text-sm leading-relaxed text-[#6a719a] dark:text-neutral-400">
+                    {item.description}
+                  </p>
                 </div>
               </Link>
             </li>

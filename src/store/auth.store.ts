@@ -17,6 +17,8 @@ interface AuthState {
   tokens: AuthTokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** True after localStorage rehydrate — safe to show login/logout chrome. */
+  hasHydrated: boolean;
   error: string | null;
 
   // Actions
@@ -27,20 +29,24 @@ interface AuthState {
   clearError: () => void;
   setUser: (user: User) => void;
   initialize: () => Promise<void>;
+  setHasHydrated: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      // Initial state
+      // Persist restore may flip isAuthenticated before initialize() finishes.
       user: null,
       tokens: null,
       isAuthenticated: false,
-      isLoading: false,
+      isLoading: true,
+      hasHydrated: false,
       error: null,
 
+      setHasHydrated: (value: boolean) => set({ hasHydrated: value }),
+
       /**
-       * Initialize auth state from stored tokens
+       * Initialize auth state from stored tokens / BFF session cookies
        */
       initialize: async () => {
         set({ isLoading: true });
@@ -281,17 +287,19 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        // Only persist user, not tokens (tokens are in cookies)
+        // Only persist user, not tokens (tokens are in cookies / memory)
         user: state.user,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (!state || typeof window === 'undefined') return;
-        const hasTokens =
-          !!tokenManager.getAccessToken() && !!tokenManager.getRefreshToken();
-        if (!hasTokens) {
-          state.isAuthenticated = false;
-          state.user = null;
+      onRehydrateStorage: () => (state, _error) => {
+        // Runs after the store exists. Trust persisted login/logout for UI immediately;
+        // AuthProvider.initialize() confirms the session in the background.
+        useAuthStore.setState({
+          hasHydrated: true,
+          isLoading: true,
+        });
+        if (state) {
+          state.isLoading = true;
         }
       },
     }

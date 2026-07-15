@@ -16,7 +16,7 @@ export default function TrustAndSafetyPage() {
         policies so you can hire and work with more confidence.
       </MarketingLead>
       <MarketingProse sections={[...TRUST_SAFETY_SECTIONS]} />
-      <p className="mt-8 text-sm text-[#6a719a]">
+      <p className="mt-8 text-sm text-[#6a719a] dark:text-neutral-400">
         Read our{' '}
         <Link href="/cancellation-policy" className="font-semibold text-brand-emerald hover:underline">
           cancellation policy

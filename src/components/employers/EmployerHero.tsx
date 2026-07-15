@@ -3,6 +3,7 @@
 import type { FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import HeroImage from '@/components/ui/hero-image';
+import MarketplaceHeroBreadcrumbs from '@/components/marketplace/MarketplaceHeroBreadcrumbs';
 import { MARKETPLACE_HERO_IMAGE } from '@/lib/placeholderImages';
 
 interface EmployerHeroProps {
@@ -17,9 +18,15 @@ export default function EmployerHero({ searchQuery, onSearchQueryChange, onSearc
       <div className="mx-auto w-full max-w-7xl">
         <div
           id="employer-banner-box"
-          className="relative flex h-auto flex-col items-center justify-between gap-8 overflow-hidden rounded-[24px] border border-neutral-200/40 bg-[#f6f5f0] p-6 shadow-sm sm:p-8 md:flex-row md:p-10 dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none"
+          className="relative flex min-h-[200px] w-full flex-col overflow-hidden rounded-[24px] border border-neutral-200/40 bg-[#f6f5f0] shadow-sm sm:min-h-[240px] md:min-h-[260px] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none"
         >
-          <div className="relative z-10 w-full flex-1 space-y-5">
+          <MarketplaceHeroBreadcrumbs
+            serpKey="employers"
+            sectionPath="/employers"
+            variant="light"
+          />
+
+          <div className="relative z-10 flex w-full flex-1 flex-col justify-center space-y-5 px-6 pb-6 pt-11 sm:px-8 sm:pb-8 sm:pt-12 md:max-w-[58%] md:px-10 md:pb-10 md:pt-12">
             <div className="space-y-1.5">
               <h1
                 className="text-3xl font-black leading-none tracking-tight text-[#193E32] sm:text-4xl dark:text-stone-100"
@@ -56,7 +63,8 @@ export default function EmployerHero({ searchQuery, onSearchQueryChange, onSearc
             </form>
           </div>
 
-          <div className="relative mt-2 flex h-[140px] w-full max-w-[320px] flex-shrink-0 items-end justify-center overflow-hidden select-none sm:mt-0 sm:h-[180px] md:h-[200px] md:w-[40%] md:justify-end">
+          {/* Flush to bottom of hero (no bottom padding) */}
+          <div className="relative z-10 mt-2 flex h-[130px] w-full items-end justify-center self-end overflow-hidden select-none sm:h-[160px] md:absolute md:bottom-0 md:right-4 md:mt-0 md:h-[min(200px,92%)] md:max-w-[36%] md:justify-end lg:right-8 xl:right-10">
             <HeroImage
               src={MARKETPLACE_HERO_IMAGE}
               alt="Employers and hiring professionals"

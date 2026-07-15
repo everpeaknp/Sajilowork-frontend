@@ -47,26 +47,6 @@ function LinkedinIcon({ className }: { className?: string }) {
   );
 }
 
-function FooterLinkList({ sectionTitle }: { sectionTitle: string }) {
-  const section = FOOTER_SECTIONS.find((item) => item.title === sectionTitle);
-  if (!section) return null;
-
-  return (
-    <ul className="space-y-1 sm:space-y-2.5 md:space-y-4">
-      {section.links.map((link) => (
-        <li key={link.href}>
-          <Link
-            href={link.href}
-            className="inline-flex min-h-10 w-full items-center py-1.5 text-sm text-white transition-colors hover:text-white/80 sm:min-h-0 sm:w-auto sm:py-0.5 sm:text-[15px]"
-          >
-            {link.label}
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 type FooterProps = {
   outerClassName?: string;
 };
@@ -82,7 +62,12 @@ export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950'
   };
 
   return (
-    <footer className={cn('min-w-0 overflow-x-clip border-t border-neutral-200 dark:border-neutral-800', outerClassName)}>
+    <footer
+      className={cn(
+        'min-w-0 overflow-x-clip border-t border-neutral-200 dark:border-neutral-800',
+        outerClassName,
+      )}
+    >
       <div className="bg-white text-brand-dark dark:bg-neutral-950 dark:text-stone-100">
         <div className="mx-auto max-w-7xl px-4 py-12 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-16 md:py-20 lg:px-8">
           <div className="mb-12 grid gap-10 sm:mb-16 sm:gap-12 lg:mb-20 lg:grid-cols-5 lg:gap-16">
@@ -94,7 +79,7 @@ export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950'
                 size="footer"
                 className="mb-6 lg:mb-8"
               />
-              <p className="max-w-sm text-sm leading-relaxed text-neutral-500 sm:text-base">
+              <p className="max-w-sm text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 sm:text-base">
                 Connecting people who need tasks done with those who have the skills to do them.
                 Nepal&apos;s marketplace for hiring taskers and finding freelance work.
               </p>
@@ -107,30 +92,32 @@ export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950'
                 return (
                   <div
                     key={section.title}
-                    className="overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50"
+                    className="overflow-hidden rounded-xl border border-neutral-100 bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900"
                   >
                     <button
                       type="button"
                       onClick={() => toggleSection(section.title)}
-                      className="flex min-h-12 w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-neutral-100/50"
+                      className="flex min-h-12 w-full items-center justify-between px-5 py-3 text-left transition-colors hover:bg-neutral-100/50 dark:hover:bg-neutral-800/60"
                       aria-expanded={isOpen}
                     >
-                      <span className="text-[15px] font-semibold text-brand-dark">{section.title}</span>
+                      <span className="text-[15px] font-semibold text-brand-dark dark:text-stone-100">
+                        {section.title}
+                      </span>
                       <ChevronDown
                         className={cn(
-                          'h-4 w-4 shrink-0 text-neutral-400 transition-transform duration-200',
-                          isOpen && 'rotate-180 text-brand-emerald',
+                          'h-4 w-4 shrink-0 text-neutral-400 transition-transform duration-200 dark:text-neutral-500',
+                          isOpen && 'rotate-180 text-brand-emerald dark:text-brand-emerald',
                         )}
                       />
                     </button>
                     {isOpen ? (
-                      <div className="border-t border-neutral-100 px-5 pb-4 pt-2">
+                      <div className="border-t border-neutral-100 px-5 pb-4 pt-2 dark:border-neutral-800">
                         <ul className="space-y-2">
                           {section.links.map((link) => (
                             <li key={link.href}>
                               <Link
                                 href={link.href}
-                                className="inline-flex min-h-10 w-full items-center text-[15px] text-neutral-500 transition-colors hover:text-brand-emerald"
+                                className="inline-flex min-h-10 w-full items-center text-[15px] text-neutral-500 transition-colors hover:text-brand-emerald dark:text-neutral-400 dark:hover:text-brand-emerald"
                               >
                                 {link.label}
                               </Link>
@@ -148,7 +135,7 @@ export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950'
             <div className="hidden min-w-0 grid-cols-2 gap-x-6 gap-y-10 sm:grid sm:gap-x-8 sm:gap-y-12 lg:col-span-3 lg:grid-cols-3">
               {FOOTER_SECTIONS.map((section) => (
                 <div key={section.title} className="min-w-0">
-                  <h4 className="mb-5 text-sm font-bold text-brand-dark sm:text-base md:mb-6">
+                  <h4 className="mb-5 text-sm font-bold text-brand-dark dark:text-stone-100 sm:text-base md:mb-6">
                     {section.title}
                   </h4>
                   <ul className="space-y-3 md:space-y-4">
@@ -156,7 +143,7 @@ export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950'
                       <li key={link.href}>
                         <Link
                           href={link.href}
-                          className="inline-flex items-center text-[15px] text-neutral-500 transition-colors hover:text-brand-emerald"
+                          className="inline-flex items-center text-[15px] text-neutral-500 transition-colors hover:text-brand-emerald dark:text-neutral-400 dark:hover:text-brand-emerald"
                         >
                           {link.label}
                         </Link>
@@ -168,32 +155,34 @@ export default function Footer({ outerClassName = 'bg-white dark:bg-neutral-950'
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-6 border-t border-neutral-200 pt-8 sm:flex-row sm:justify-between sm:gap-8 sm:pt-10">
+          <div className="flex flex-col items-center gap-6 border-t border-neutral-200 pt-8 dark:border-neutral-800 sm:flex-row sm:justify-between sm:gap-8 sm:pt-10">
             <div className="flex flex-col items-center gap-5 sm:flex-row sm:gap-8">
-              <div className="flex items-center gap-3.5 rounded-full bg-neutral-50 px-5 py-2.5 ring-1 ring-neutral-200/60">
-                <span className="text-sm font-medium text-neutral-500">Powered by</span>
-                <img 
-                  src="/Everacy_logo_bg.jpeg" 
-                  alt="Everacy Tech Logo" 
-                  className="h-8 w-auto rounded-md object-cover transition-transform hover:scale-105" 
+              <div className="flex items-center gap-3.5 rounded-full bg-neutral-50 px-5 py-2.5 ring-1 ring-neutral-200/60 dark:bg-neutral-900 dark:ring-neutral-700">
+                <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                  Powered by
+                </span>
+                <img
+                  src="/Everacy_logo_bg.jpeg"
+                  alt="Everacy Tech Logo"
+                  className="h-8 w-auto rounded-md object-cover transition-transform hover:scale-105"
                 />
               </div>
-              <div className="hidden h-6 w-px bg-neutral-200 sm:block"></div>
+              <div className="hidden h-6 w-px bg-neutral-200 dark:bg-neutral-700 sm:block" />
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {SOCIAL_LINKS.map(({ label, Icon }) => (
                   <a
                     key={label}
                     href="#"
                     aria-label={label}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-50 text-neutral-500 ring-1 ring-neutral-200/60 transition-all hover:bg-brand-emerald hover:text-white hover:ring-transparent active:scale-95"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-50 text-neutral-500 ring-1 ring-neutral-200/60 transition-all hover:bg-brand-emerald hover:text-white hover:ring-transparent active:scale-95 dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 dark:hover:bg-brand-emerald dark:hover:text-white"
                   >
                     <Icon className="h-[18px] w-[18px]" />
                   </a>
                 ))}
               </div>
             </div>
-            
-            <p className="w-full text-center text-[13px] leading-relaxed text-neutral-400 sm:w-auto sm:text-right">
+
+            <p className="w-full text-center text-[13px] leading-relaxed text-neutral-400 dark:text-neutral-500 sm:w-auto sm:text-right">
               © {new Date().getFullYear()} {displayName}. All rights reserved.
             </p>
           </div>

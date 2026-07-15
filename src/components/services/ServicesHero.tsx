@@ -298,7 +298,7 @@ export default function ServicesHero({ className = '', onSearchSubmit }: Service
           </div>
 
           <div className="relative z-10 grid w-full grid-cols-1 items-stretch gap-4 px-5 pb-0 pt-11 sm:gap-6 sm:px-12 sm:pt-12 md:px-16 lg:grid-cols-12 lg:pb-0 lg:pt-14">
-            <div className="flex flex-col justify-center pb-4 text-left sm:pb-10 lg:col-span-8 lg:pb-10">
+            <div className="flex flex-col justify-center pb-4 pl-5 text-left sm:pb-10 sm:pl-8 md:pl-10 lg:col-span-8 lg:pb-10 lg:pl-12">
               <motion.h1
                 className={`${discoverHeadline} mb-2.5 text-2xl leading-tight text-white sm:text-3xl md:text-[38px] lg:text-[40px]`}
                 initial={{ opacity: 0, y: -10 }}

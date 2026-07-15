@@ -54,7 +54,7 @@ const SECTIONS = [
 export default function CancellationPolicyContent() {
   return (
     <article className="min-w-0">
-      <p className="mb-8 text-sm leading-relaxed text-[#6a719a] sm:mb-10 sm:text-base">
+      <p className="mb-8 text-sm leading-relaxed text-[#6a719a] dark:text-neutral-400 sm:mb-10 sm:text-base">
         This policy explains what happens when a task is cancelled on Sajilowork, including fees,
         escrow refunds, and account moderation. Specific amounts may vary by task and are shown
         when you cancel.
@@ -63,13 +63,15 @@ export default function CancellationPolicyContent() {
       <div className="space-y-8 md:space-y-10">
         {SECTIONS.map((section) => (
           <section key={section.title}>
-            <h2 className="mb-3 text-lg font-bold text-brand-dark md:text-xl">{section.title}</h2>
-            <div className="space-y-3 text-sm leading-relaxed text-[#384179] sm:text-base">
+            <h2 className="mb-3 text-lg font-bold text-brand-dark dark:text-stone-100 md:text-xl">
+              {section.title}
+            </h2>
+            <div className="space-y-3 text-sm leading-relaxed text-[#384179] dark:text-neutral-400 sm:text-base">
               {section.body.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
               {'list' in section && section.list && (
-                <ul className="list-disc pl-5 space-y-2">
+                <ul className="list-disc space-y-2 pl-5">
                   {section.list.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
@@ -80,7 +82,7 @@ export default function CancellationPolicyContent() {
         ))}
       </div>
 
-      <p className="mt-10 border-t border-gray-100 pt-6 text-xs text-[#6a719a] sm:mt-12 sm:text-sm">
+      <p className="mt-10 border-t border-gray-100 pt-6 text-xs text-[#6a719a] dark:border-neutral-800 dark:text-neutral-500 sm:mt-12 sm:text-sm">
         Last updated: May 2026. Sajilowork may update this policy; continued use of the platform
         constitutes acceptance of the current version.
       </p>
