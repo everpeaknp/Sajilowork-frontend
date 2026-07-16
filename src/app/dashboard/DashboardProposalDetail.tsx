@@ -662,7 +662,7 @@ export default function DashboardProposalDetail({
         open={showAcceptFeeModal}
         onClose={() => setShowAcceptFeeModal(false)}
         onConfirm={() => void confirmAcceptWithFees()}
-        mode="accept"
+        mode={isJobProposal ? 'hire' : 'accept'}
         amount={Number(bid.amount) || 0}
         listingKind={normalizeFeeListingKind(listingKind)}
         confirming={actionLoading}

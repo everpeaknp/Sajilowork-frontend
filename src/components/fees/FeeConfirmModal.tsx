@@ -12,7 +12,7 @@ import {
 import { paymentService, type FeePreview } from '@/services/payment.service';
 import { CONFIRM_MODAL_ROOT_ATTR } from '@/app/dashboard/DeleteConfirmModal';
 
-export type FeeConfirmMode = 'accept' | 'cancel' | 'withdraw' | 'submit' | 'purchase';
+export type FeeConfirmMode = 'accept' | 'hire' | 'cancel' | 'withdraw' | 'submit' | 'purchase';
 
 type FeeConfirmModalProps = {
   open: boolean;
@@ -45,6 +45,12 @@ const MODE_DEFAULTS: Record<
     description:
       'Fees below follow your platform Fee Rules. The total will be held from your wallet in escrow until work is completed.',
     confirmLabel: 'Accept & hold funds',
+  },
+  hire: {
+    title: 'Accept this application?',
+    description:
+      'Job applications do not place funds in escrow or charge platform commission at hire time. You can arrange payment separately with the candidate.',
+    confirmLabel: 'Accept application',
   },
   cancel: {
     title: 'Cancellation fee',
@@ -164,6 +170,8 @@ export default function FeeConfirmModal({
 
   const defaults = MODE_DEFAULTS[mode];
   const isCancellationMode = mode === 'cancel' || mode === 'withdraw';
+  /** Jobs hire without escrow — do not load marketplace commission / service fees. */
+  const skipSettlementPreview = mode === 'hire' || (mode === 'accept' && listingKind === 'job');
 
   useEffect(() => {
     setMounted(true);
@@ -179,7 +187,22 @@ export default function FeeConfirmModal({
   }, [open]);
 
   useEffect(() => {
-    if (!open || !(amount > 0)) {
+    if (!open) {
+      setSettlement(null);
+      setCancellation(null);
+      setError(null);
+      return;
+    }
+
+    if (skipSettlementPreview) {
+      setSettlement(null);
+      setCancellation(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    if (!(amount > 0)) {
       setSettlement(null);
       setCancellation(null);
       setError(null);
@@ -242,6 +265,7 @@ export default function FeeConfirmModal({
     categoryId,
     cancellationStage,
     isCancellationMode,
+    skipSettlementPreview,
   ]);
 
   if (!open || !mounted) return null;
@@ -280,19 +304,31 @@ export default function FeeConfirmModal({
           id="fee-confirm-modal-title"
           className="pr-8 text-lg font-semibold tracking-tight text-black sm:text-xl dark:text-stone-100"
         >
-          {title ?? defaults.title}
+          {title ?? (skipSettlementPreview ? MODE_DEFAULTS.hire.title : defaults.title)}
         </h3>
         <p className="mt-3 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-          {description ?? defaults.description}
+          {description ??
+            (skipSettlementPreview ? MODE_DEFAULTS.hire.description : defaults.description)}
         </p>
 
-        {listingKind ? (
+        {listingKind && !skipSettlementPreview ? (
           <p className="mt-2 text-xs uppercase tracking-wide text-neutral-400">
             Listing: {listingKind}
           </p>
         ) : null}
 
-        {loading ? (
+        {skipSettlementPreview ? (
+          amount > 0 ? (
+            <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50/80 px-4 py-3 text-sm dark:border-neutral-700 dark:bg-neutral-950/50">
+              <div className="flex justify-between gap-3">
+                <span className="text-neutral-500 dark:text-neutral-400">Expected salary</span>
+                <span className="font-semibold tabular-nums text-neutral-900 dark:text-stone-100">
+                  {formatNPR(amount)}
+                </span>
+              </div>
+            </div>
+          ) : null
+        ) : loading ? (
           <div className="mt-6 flex justify-center py-6">
             <Loader2 className="h-6 w-6 animate-spin text-[#52C47F]" />
           </div>
@@ -346,11 +382,12 @@ export default function FeeConfirmModal({
           <button
             type="button"
             onClick={() => void onConfirm()}
-            disabled={confirming || loading || Boolean(error)}
+            disabled={confirming || (!skipSettlementPreview && (loading || Boolean(error)))}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#52C47F] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#45a86d] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {confirming ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {confirmLabel ?? defaults.confirmLabel}
+            {confirmLabel ??
+              (skipSettlementPreview ? MODE_DEFAULTS.hire.confirmLabel : defaults.confirmLabel)}
           </button>
         </div>
       </div>
