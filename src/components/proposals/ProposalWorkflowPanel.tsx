@@ -5,6 +5,7 @@ import type { TaskTimelineStepState } from '@/lib/taskStatusTimeline';
 import {
   canCancelMyTask,
   canConfirmWorkComplete,
+  canTaskerStartWork,
   getCompletionStatusMessage,
   isTaskReadyToStart,
   resolveMyTaskRoles,
@@ -404,7 +405,8 @@ function ContractActions({
     Boolean(onStart) &&
     (isServiceOrderWorkflow
       ? canServiceOrderSellerStart(bid, task, userId)
-      : isOwner && isTaskReadyToStart(rawStatus));
+      : canTaskerStartWork(task, userId) ||
+        (isOwner && isTaskReadyToStart(rawStatus)));
   const canHire =
     isJobApplication &&
     Boolean(onComplete) &&

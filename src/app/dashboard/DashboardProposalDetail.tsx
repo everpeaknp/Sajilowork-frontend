@@ -33,6 +33,11 @@ import {
   isServiceOrderBid,
   canManageServiceOrderWorkflow,
 } from '@/lib/proposalDetailUtils';
+import { resolveListingBySlug } from '@/lib/resolveListingBySlug';
+import {
+  isCurrentUserAssignedTasker,
+  isCurrentUserTaskOwner,
+} from '@/lib/taskUtils';
 
 interface DashboardProposalDetailProps {
   projectSlug: string;
@@ -118,18 +123,23 @@ export default function DashboardProposalDetail({
   const loadTask = useCallback(async (slug: string) => {
     setTaskLoading(true);
     try {
-      const response = await taskService.getTaskBySlug(slug);
-      if (response.success && response.data) {
-        setTask(response.data);
-      } else {
-        setTask(null);
-      }
+      const kind = bid ? resolveBidListingKind(bid) : null;
+      const preferredOrder =
+        kind === 'job'
+          ? (['job', 'task', 'project', 'service'] as const)
+          : kind === 'project'
+            ? (['project', 'task', 'job', 'service'] as const)
+            : kind === 'service'
+              ? (['service', 'task', 'project', 'job'] as const)
+              : (['task', 'project', 'job', 'service'] as const);
+      const resolved = await resolveListingBySlug(slug, [...preferredOrder]);
+      setTask(resolved);
     } catch {
       setTask(null);
     } finally {
       setTaskLoading(false);
     }
-  }, []);
+  }, [bid]);
 
   useEffect(() => {
     if (!bid) {
@@ -444,7 +454,16 @@ export default function DashboardProposalDetail({
             ? isCustomer
             : isServiceOrder
               ? canManageServiceOrderWorkflow(bid, task, user?.id, isCustomer)
-              : isCustomer
+              : Boolean(
+                  user?.id &&
+                    ((task &&
+                      (isCurrentUserTaskOwner(task, user.id) ||
+                        isCurrentUserAssignedTasker(task, user.id))) ||
+                      (isCustomer && !task) ||
+                      (!isCustomer &&
+                        bid.tasker?.id &&
+                        String(bid.tasker.id) === String(user.id))),
+                )
         }
         isServiceOrder={isServiceOrder}
         onStart={

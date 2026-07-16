@@ -7,11 +7,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { formatNPR, shortenCommaSeparatedLocation } from '@/lib/nepalLocale';
 import { mapTaskToPublicProject } from '@/lib/projectApi';
+import { resolveListingBySlug } from '@/lib/resolveListingBySlug';
 import { getMediaUrl } from '@/lib/utils';
-import { jobService } from '@/services/job.service';
-import { projectService } from '@/services/project.service';
-import { serviceService } from '@/services/service.service';
-import { taskService } from '@/services/task.service';
 import { bidService, extractBidList, getBidTaskId, sortBidsByIdAlphanumeric } from '@/services/bid.service';
 import type { Task } from '@/types';
 import type { Bid, BidStatus } from '@/types';
@@ -58,46 +55,6 @@ function formatDisplayDate(value?: string): string {
     day: '2-digit',
     year: 'numeric',
   });
-}
-
-async function fetchListingIfAvailable(
-  fetcher: () => Promise<{ success: boolean; data?: Task | null }>,
-): Promise<Task | null> {
-  try {
-    const response = await fetcher();
-    if (response.success && response.data) {
-      return response.data;
-    }
-  } catch {
-    // Wrong listing type for this slug (404) — fall through to the next kind.
-  }
-  return null;
-}
-
-async function resolveListingBySlug(
-  slug: string,
-  listingKinds?: Array<'task' | 'project' | 'job' | 'service'>,
-): Promise<Task | null> {
-  const order: Array<'task' | 'project' | 'job' | 'service'> =
-    listingKinds ?? ['project', 'task', 'job', 'service'];
-
-  for (const kind of order) {
-    let task: Task | null = null;
-
-    if (kind === 'project') {
-      task = await fetchListingIfAvailable(() => projectService.getProjectBySlug(slug));
-    } else if (kind === 'task') {
-      task = await fetchListingIfAvailable(() => taskService.getTaskBySlug(slug));
-    } else if (kind === 'job') {
-      task = await fetchListingIfAvailable(() => jobService.getJobBySlug(slug));
-    } else if (kind === 'service') {
-      task = await fetchListingIfAvailable(() => serviceService.getServiceBySlug(slug));
-    }
-
-    if (task) return task;
-  }
-
-  return null;
 }
 
 function taskerName(bid: Bid): string {
