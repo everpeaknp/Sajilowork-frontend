@@ -317,10 +317,11 @@ export default function Notifications() {
     maxReconnectAttempts: 8,
     onMessage: (message: { type?: string; notification?: NotificationItem }) => {
       if (message.type !== 'new_notification' || !message.notification) return;
+      const incoming = message.notification;
       setNotifications((prev) => {
         const current = Array.isArray(prev) ? prev : [];
-        if (current.some((item) => item.id === message.notification?.id)) return current;
-        return [message.notification, ...current];
+        if (current.some((item) => item.id === incoming.id)) return current;
+        return [incoming, ...current];
       });
     },
   });
