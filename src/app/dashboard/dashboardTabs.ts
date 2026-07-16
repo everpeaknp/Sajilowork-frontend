@@ -46,6 +46,11 @@ export function getDashboardProposalDetailHref(projectSlug: string, bidId: strin
   return `/dashboard/proposals/${encodeURIComponent(projectSlug)}/${encodeURIComponent(bidId)}`;
 }
 
+/** Dedicated application detail URL (jobs) — not under /proposals. */
+export function getDashboardApplicationDetailHref(listingSlug: string, bidId: string): string {
+  return `/dashboard/applications/${encodeURIComponent(listingSlug)}/${encodeURIComponent(bidId)}`;
+}
+
 export type EmployerBidDetailFrom = 'contracts' | 'applications' | 'bids' | 'orders';
 
 export function getEmployerBidDetailHref(
@@ -53,6 +58,9 @@ export function getEmployerBidDetailHref(
   bidId: string,
   from: EmployerBidDetailFrom,
 ): string {
+  if (from === 'applications') {
+    return getDashboardApplicationDetailHref(projectSlug, bidId);
+  }
   return `${getDashboardProposalDetailHref(projectSlug, bidId)}?from=${from}`;
 }
 

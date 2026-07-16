@@ -1,7 +1,8 @@
 /**
- * Unified media upload — images go to Cloudinary (backend env), other files use /uploads/.
+ * Unified media upload — prefers Cloudinary for images, PDFs, and other files.
  */
 
+import { getCloudinaryFolder } from '@/lib/cloudinaryFolders';
 import { getMediaUrl } from '@/lib/utils';
 import { cloudinaryService, isImageFile } from '@/services/cloudinary.service';
 import { uploadService, type UploadFileType, type UploadRecord } from '@/services/upload.service';
@@ -29,14 +30,18 @@ function inferFileType(file: File): UploadFileType {
 }
 
 /**
- * Upload a file. Images prefer Cloudinary when backend CLOUDINARY_* env is configured.
+ * Upload a file. Uses Cloudinary when backend CLOUDINARY_* env is configured.
  */
 export async function uploadMediaFile(
   file: File,
   options?: MediaUploadOptions,
 ): Promise<MediaUploadResult> {
+  const folder =
+    options?.folder ??
+    (await getCloudinaryFolder('uploads').catch(() => undefined));
+
   const cloudinaryResult = await cloudinaryService.tryUploadFile(file, {
-    folder: options?.folder,
+    folder,
     onProgress: options?.onProgress,
   });
 
@@ -53,7 +58,7 @@ export async function uploadMediaFile(
     {
       file_type: options?.file_type ?? inferFileType(file),
       is_public: options?.is_public,
-      folder: options?.folder,
+      folder,
     },
     options?.onProgress,
   );

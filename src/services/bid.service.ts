@@ -318,12 +318,28 @@ export const bidService = {
   },
 
   /**
-   * Upload bid attachment via the uploads API
+   * Upload bid / job-application attachment (Cloudinary when configured).
    */
   async uploadBidAttachment(file: File): Promise<ApiResponse<{ url: string }>> {
+    const { getCloudinaryFolder } = await import('@/lib/cloudinaryFolders');
+    const { tryUploadFileToCloudinary } = await import('@/services/cloudinary.service');
     const { uploadService } = await import('./upload.service');
+    const { getMediaUrl } = await import('@/lib/utils');
+
+    const folder = await getCloudinaryFolder('uploads', 'bids');
+    const cloudinary = await tryUploadFileToCloudinary(file, { folder });
+    if (cloudinary?.url) {
+      return {
+        success: true,
+        message: 'Upload successful',
+        data: { url: cloudinary.url },
+        errors: null,
+      };
+    }
+
     const response = await uploadService.upload(file, {
       file_type: inferUploadFileType(file.type) as 'image' | 'document' | 'video' | 'audio' | 'other',
+      folder,
     });
     const filePath = response.data?.file;
 

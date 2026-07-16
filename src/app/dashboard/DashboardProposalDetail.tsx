@@ -21,6 +21,7 @@ import { paymentService } from '@/services/payment.service';
 import { taskService } from '@/services/task.service';
 import type { Bid, Task, TaskStatus } from '@/types';
 import {
+  getDashboardApplicationsListingHref,
   getDashboardBidsListingHref,
   getDashboardHref,
   getEmployerBidDetailCopy,
@@ -47,6 +48,8 @@ import {
 interface DashboardProposalDetailProps {
   projectSlug: string;
   bidId: string;
+  /** When set (e.g. applications route), overrides ?from= query for section chrome. */
+  detailFrom?: 'contracts' | 'applications' | 'bids' | 'orders' | 'proposals';
 }
 
 function taskerName(bid: Bid | null): string {
@@ -92,6 +95,7 @@ function getTaskStatusFromBid(bid: Bid): string | null {
 export default function DashboardProposalDetail({
   projectSlug,
   bidId,
+  detailFrom: detailFromProp,
 }: DashboardProposalDetailProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -359,12 +363,13 @@ export default function DashboardProposalDetail({
   };
 
   if (loading) {
+    const fromParam = detailFromProp ?? searchParams.get('from');
     const loadingCopy = isCustomer
       ? getEmployerBidDetailCopy(
-          resolveEmployerBidDetailFrom('pending', searchParams.get('from')),
+          resolveEmployerBidDetailFrom('pending', fromParam),
         )
       : getFreelancerBidDetailCopy(
-          resolveFreelancerBidDetailFrom('pending', searchParams.get('from')),
+          resolveFreelancerBidDetailFrom('pending', fromParam),
         );
     return (
       <div className="flex min-h-[40vh] items-center justify-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
@@ -374,9 +379,10 @@ export default function DashboardProposalDetail({
     );
   }
 
+  const fromParam = detailFromProp ?? searchParams.get('from');
   const detailFrom = isCustomer
-    ? resolveEmployerBidDetailFrom(bid?.status ?? 'pending', searchParams.get('from'))
-    : resolveFreelancerBidDetailFrom(bid?.status ?? 'pending', searchParams.get('from'));
+    ? resolveEmployerBidDetailFrom(bid?.status ?? 'pending', fromParam)
+    : resolveFreelancerBidDetailFrom(bid?.status ?? 'pending', fromParam);
   const detailCopy = isCustomer
     ? getEmployerBidDetailCopy(
         detailFrom as 'contracts' | 'applications' | 'bids' | 'orders',
@@ -391,7 +397,7 @@ export default function DashboardProposalDetail({
     ? detailFrom === 'bids'
       ? getDashboardBidsListingHref(projectSlug)
       : detailFrom === 'applications'
-        ? getDashboardHref('applications')
+        ? getDashboardApplicationsListingHref(projectSlug)
         : detailFrom === 'orders'
           ? getDashboardHref('orders')
           : getDashboardHref('contracts')

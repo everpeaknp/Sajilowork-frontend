@@ -236,6 +236,24 @@ export const chatService = {
     }
   ): Promise<ApiResponse<Message>> {
     if (data.attachment) {
+      try {
+        const { getCloudinaryFolder } = await import('@/lib/cloudinaryFolders');
+        const { tryUploadFileToCloudinary } = await import('@/services/cloudinary.service');
+        const folder = await getCloudinaryFolder('chat');
+        const cloudinary = await tryUploadFileToCloudinary(data.attachment, { folder });
+        if (cloudinary?.url) {
+          return apiClient.post<Message>(`/chat/conversations/${conversationId}/messages/`, {
+            content: data.content,
+            message_type: data.message_type || (data.attachment.type.startsWith('image/') ? 'image' : 'file'),
+            attachment_url: cloudinary.url,
+            attachment_name: data.attachment.name,
+            attachment_size: data.attachment.size,
+          });
+        }
+      } catch {
+        // Fall back to multipart upload (backend may still push to Cloudinary).
+      }
+
       const formData = new FormData();
       formData.append('content', data.content);
       formData.append('message_type', data.message_type || 'text');
