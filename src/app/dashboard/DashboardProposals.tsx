@@ -238,9 +238,9 @@ function ProposalListAvatar({
 }
 
 function statusBadgeClass(rawStatus: BidStatus): string {
-  if (rawStatus === 'accepted') return 'bg-emerald-50 text-emerald-700';
-  if (rawStatus === 'pending') return 'bg-amber-50 text-amber-800';
-  return 'bg-neutral-100 text-neutral-600';
+  if (rawStatus === 'accepted') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
+  if (rawStatus === 'pending') return 'bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200';
+  return 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300';
 }
 
 function emptyMessageForFilter(
@@ -467,7 +467,7 @@ export default function DashboardProposals({
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className={DASHBOARD_HEADING_PROPOSALS}>{pageTitle}</h2>
-          <p className="mt-1.5 font-sans text-sm text-neutral-800">{subtitle}</p>
+          <p className="mt-1.5 font-sans text-sm text-neutral-800 dark:text-neutral-300">{subtitle}</p>
         </div>
       </div>
 
@@ -546,19 +546,19 @@ export default function DashboardProposals({
                         {row.amountLabel}
                         <span className="ml-1.5 text-xs font-normal text-neutral-500">{row.rateType}</span>
                       </p>
-                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-normal tracking-tight text-neutral-800">
-                        <span className="flex items-center gap-1 text-neutral-800">
-                          <FileText strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500" />
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-normal tracking-tight text-neutral-800 dark:text-neutral-300">
+                        <span className="flex items-center gap-1 text-neutral-800 dark:text-neutral-300">
+                          <FileText strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
                           <span>{row.freelancerName}</span>
                         </span>
-                        <span className="font-normal text-neutral-300">|</span>
-                        <span className="flex items-center gap-1 text-neutral-800">
-                          <MapPin strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500" />
+                        <span className="font-normal text-neutral-300 dark:text-neutral-600">|</span>
+                        <span className="flex items-center gap-1 text-neutral-800 dark:text-neutral-300">
+                          <MapPin strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
                           <span>{row.location}</span>
                         </span>
-                        <span className="font-normal text-neutral-300">|</span>
-                        <span className="flex items-center gap-1 font-sans text-neutral-800">
-                          <Calendar strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500" />
+                        <span className="font-normal text-neutral-300 dark:text-neutral-600">|</span>
+                        <span className="flex items-center gap-1 font-sans text-neutral-800 dark:text-neutral-300">
+                          <Calendar strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
                           <span>{row.date}</span>
                         </span>
                       </div>
@@ -568,7 +568,7 @@ export default function DashboardProposals({
 
                 <div className="col-span-12 flex flex-wrap items-center gap-2 md:contents">
                   <div className="md:col-span-2">
-                  <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-700">
+                  <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                     {PROPOSAL_TYPE_LABELS[row.listingType]}
                   </span>
                 </div>
@@ -591,7 +591,7 @@ export default function DashboardProposals({
                           row.id,
                           employerView === 'bids' ? 'bids' : 'applications',
                         )}
-                        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC]"
+                        className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-[#FEF1EE] px-3 py-2.5 text-sm font-normal text-[#FF6B6B] transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                       >
                         View
                       </Link>
@@ -614,14 +614,14 @@ export default function DashboardProposals({
                         {row.amountLabel}
                         <span className="ml-1.5 text-xs font-normal text-neutral-500">{row.rateType}</span>
                       </p>
-                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-normal tracking-tight text-neutral-800">
-                        <span className="flex items-center gap-1 text-neutral-800">
-                          <MapPin strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500" />
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs font-normal tracking-tight text-neutral-800 dark:text-neutral-300">
+                        <span className="flex items-center gap-1 text-neutral-800 dark:text-neutral-300">
+                          <MapPin strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
                           <span>{row.location}</span>
                         </span>
-                        <span className="font-normal text-neutral-300">|</span>
-                        <span className="flex items-center gap-1 font-sans text-neutral-800">
-                          <Calendar strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500" />
+                        <span className="font-normal text-neutral-300 dark:text-neutral-600">|</span>
+                        <span className="flex items-center gap-1 font-sans text-neutral-800 dark:text-neutral-300">
+                          <Calendar strokeWidth={1.5} className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
                           <span>{row.date}</span>
                         </span>
                       </div>
@@ -631,7 +631,7 @@ export default function DashboardProposals({
 
                 <div className="col-span-12 flex flex-wrap items-center gap-2 md:contents">
                   <div className="md:col-span-2">
-                  <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-700">
+                  <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-normal text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                     {PROPOSAL_TYPE_LABELS[row.listingType]}
                   </span>
                 </div>
@@ -650,7 +650,7 @@ export default function DashboardProposals({
                     {row.projectSlug ? (
                       <Link
                         href={getFreelancerBidDetailHref(row.projectSlug, row.id, 'proposals')}
-                        className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-neutral-100 px-3 py-2.5 text-sm font-normal text-neutral-800 transition-all hover:bg-neutral-200"
+                        className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-neutral-100 px-3 py-2.5 text-sm font-normal text-neutral-800 transition-all hover:bg-neutral-200 dark:bg-neutral-800 dark:text-stone-200 dark:hover:bg-neutral-700"
                       >
                         View
                       </Link>
@@ -659,7 +659,7 @@ export default function DashboardProposals({
                       <button
                         type="button"
                         onClick={() => setWithdrawTargetId(row.id)}
-                        className="shrink-0 cursor-pointer rounded-lg border-0 bg-[#FEF1EE] p-3 text-[#FF6B6B] outline-none transition-all hover:bg-[#FCE2DC]"
+                        className="shrink-0 cursor-pointer rounded-lg border-0 bg-[#FEF1EE] p-3 text-[#FF6B6B] outline-none transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                         title="Withdraw proposal"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -707,7 +707,7 @@ export default function DashboardProposals({
               </button>
             </div>
 
-            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
+            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800 dark:text-neutral-300">
               {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, rows.length)} of {rows.length}{' '}
               {isFreelancerProposals ? 'applied listings' : 'proposals'}
             </div>

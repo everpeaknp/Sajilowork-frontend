@@ -3,12 +3,14 @@
  *
  * Restores the session on mount. Navbar uses isLoading to avoid flashing
  * Sign in / Sign up before cookies + profile are confirmed.
+ * Also syncs Web Push subscription when the user is already granted permission.
  */
 
 'use client';
 
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store';
+import { syncWebPushSubscription } from '@/lib/webPush';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -17,6 +19,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const initialize = useAuthStore((state) => state.initialize);
   const setHasHydrated = useAuthStore((state) => state.setHasHydrated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +39,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       cancelled = true;
     };
   }, [initialize, setHasHydrated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    void syncWebPushSubscription();
+  }, [isAuthenticated]);
 
   return <>{children}</>;
 }

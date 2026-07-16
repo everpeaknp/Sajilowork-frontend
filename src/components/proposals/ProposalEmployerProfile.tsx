@@ -67,18 +67,18 @@ export default function ProposalEmployerProfile({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50 py-16 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-neutral-200 bg-neutral-50/50 py-16 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
         <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" />
-        <p className="text-sm text-neutral-500">{loadingMessage}</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">{loadingMessage}</p>
       </div>
     );
   }
 
   if (!pageData || loadFailed) {
     return (
-      <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-6 py-10 text-center">
-        <p className="text-sm font-medium text-neutral-900">{displayName}</p>
-        <p className="mt-2 text-sm text-neutral-500">
+      <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-6 py-10 text-center dark:border-neutral-800 dark:bg-neutral-900">
+        <p className="text-sm font-medium text-neutral-900 dark:text-stone-100">{displayName}</p>
+        <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
           Employer public profile is not available yet.
         </p>
       </div>
@@ -88,13 +88,13 @@ export default function ProposalEmployerProfile({
   const profileHref = getEmployerProfilePath(pageData.employer);
 
   return (
-    <div className="overflow-hidden rounded-[20px] bg-white">
-      <div className="border-b border-neutral-100 bg-white px-4 py-3 sm:px-6">
+    <div className="overflow-hidden rounded-[20px] bg-white dark:bg-neutral-900">
+      <div className="border-b border-neutral-100 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
         <Link
           href={profileHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm font-normal text-[#45a874] transition-opacity hover:opacity-80"
+          className="inline-flex items-center gap-1.5 text-sm font-normal text-[#45a874] transition-opacity hover:opacity-80 dark:text-emerald-400"
         >
           View public profile
           <ArrowUpRight className="h-4 w-4" />

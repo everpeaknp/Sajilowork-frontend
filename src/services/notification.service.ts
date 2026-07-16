@@ -1,6 +1,6 @@
 /**
  * Notification Service
- * 
+ *
  * Handles all notification-related API calls
  */
 
@@ -15,71 +15,50 @@ export interface NotificationFilters {
   to_date?: string;
 }
 
+export interface DeviceTokenPayload {
+  token: string;
+  platform: 'web' | 'ios' | 'android';
+  device_name?: string;
+}
+
 class NotificationService {
   private readonly BASE_PATH = '/notifications/notifications';
   private readonly PREFS_PATH = '/notifications/preferences';
+  private readonly DEVICE_TOKENS_PATH = '/notifications/device-tokens';
   private readonly TASK_ALERT_KEYWORDS_PATH = '/notifications/task-alert-keywords';
 
-  /**
-   * Get all notifications for current user
-   */
   async getNotifications(filters?: NotificationFilters): Promise<ApiResponse<Notification[]>> {
     return apiClient.get(`${this.BASE_PATH}/`, { params: filters });
   }
 
-  /**
-   * Get notification by ID
-   */
   async getNotification(id: string | number): Promise<ApiResponse<Notification>> {
     return apiClient.get(`${this.BASE_PATH}/${id}/`);
   }
 
-  /**
-   * Mark notification as read
-   */
   async markAsRead(id: string | number): Promise<ApiResponse<Notification>> {
     return apiClient.post(`${this.BASE_PATH}/${id}/mark_read/`);
   }
 
-  /**
-   * Mark all notifications as read
-   */
   async markAllAsRead(): Promise<ApiResponse<{ message: string }>> {
-    // Backend expects `{ mark_all: true }` (otherwise it marks 0)
     return apiClient.post(`${this.BASE_PATH}/mark_all_read/`, { mark_all: true });
   }
 
-  /**
-   * Delete notification
-   */
   async deleteNotification(id: string | number): Promise<ApiResponse<void>> {
     return apiClient.delete(`${this.BASE_PATH}/${id}/`);
   }
 
-  /**
-   * Get unread count
-   */
   async getUnreadCount(): Promise<ApiResponse<{ count: number }>> {
     return apiClient.get(`${this.BASE_PATH}/unread_count/`);
   }
 
-  /**
-   * Get notification preferences for current user
-   */
   async getPreferences(): Promise<ApiResponse<any[]>> {
     return apiClient.get(`${this.PREFS_PATH}/`);
   }
 
-  /**
-   * Reset preferences to backend defaults (creates rows if missing)
-   */
   async resetPreferencesToDefaults(): Promise<ApiResponse<{ status: string }>> {
     return apiClient.post(`${this.PREFS_PATH}/reset_to_defaults/`);
   }
 
-  /**
-   * Update a single preference row
-   */
   async updatePreference(
     id: string,
     patch: Partial<{
@@ -96,6 +75,22 @@ class NotificationService {
     }>
   ): Promise<ApiResponse<any>> {
     return apiClient.patch(`${this.PREFS_PATH}/${id}/`, patch);
+  }
+
+  async getVapidPublicKey(): Promise<ApiResponse<{ public_key: string }>> {
+    return apiClient.get(`${this.DEVICE_TOKENS_PATH}/vapid-public-key/`);
+  }
+
+  async registerDeviceToken(payload: DeviceTokenPayload): Promise<ApiResponse<unknown>> {
+    return apiClient.post(`${this.DEVICE_TOKENS_PATH}/`, payload);
+  }
+
+  async unsubscribeDeviceToken(token: string): Promise<ApiResponse<{ status: string; count: number }>> {
+    return apiClient.post(`${this.DEVICE_TOKENS_PATH}/unsubscribe/`, { token });
+  }
+
+  async deactivateAllDeviceTokens(): Promise<ApiResponse<{ status: string; count: number }>> {
+    return apiClient.post(`${this.DEVICE_TOKENS_PATH}/deactivate_all/`);
   }
 
   async getTaskAlertKeywords(): Promise<ApiResponse<any[]>> {

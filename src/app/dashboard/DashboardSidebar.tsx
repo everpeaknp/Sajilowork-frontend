@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Home,
@@ -29,6 +29,11 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 import UserAvatar from '@/components/common/UserAvatar';
 import {
+  dashboardService,
+  type DashboardPendingCounts,
+  type DashboardPendingCountsRole,
+} from '@/services/dashboard.service';
+import {
   getDashboardHref,
   getDashboardCreateHref,
   getNavTabsForRole,
@@ -47,6 +52,71 @@ interface NavigationItem {
   label: string;
   icon: LucideIcon;
   href: string;
+}
+
+const PENDING_COUNT_TABS = new Set<DashboardTab>([
+  'applications',
+  'bids',
+  'proposals',
+  'contracts',
+  'orders',
+  'message',
+  'questions',
+  'reviews',
+]);
+
+function formatBadgeCount(count: number): string {
+  return count > 9 ? '9+' : String(count);
+}
+
+function countForTab(
+  counts: DashboardPendingCountsRole | null,
+  tabId: DashboardTab,
+): number {
+  if (!counts) return 0;
+  switch (tabId) {
+    case 'applications':
+      return counts.applications ?? 0;
+    case 'bids':
+      return counts.bids ?? 0;
+    case 'proposals':
+      return counts.proposals ?? 0;
+    case 'contracts':
+      return counts.contracts ?? 0;
+    case 'orders':
+      return counts.orders ?? 0;
+    case 'message':
+      return counts.messages ?? 0;
+    case 'questions':
+      return counts.questions ?? 0;
+    case 'reviews':
+      return counts.reviews ?? 0;
+    default:
+      return 0;
+  }
+}
+
+function PendingBadge({
+  count,
+  isActive,
+  collapsed,
+}: {
+  count: number;
+  isActive: boolean;
+  collapsed: boolean;
+}) {
+  if (count <= 0) return null;
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-red-500 font-bold text-white ${
+        collapsed
+          ? 'absolute -right-1 -top-1 h-4 min-w-4 px-0.5 text-[9px]'
+          : `ml-auto h-5 min-w-5 px-1.5 text-[11px] ${isActive ? 'ring-1 ring-white/30' : ''}`
+      }`}
+    >
+      {formatBadgeCount(count)}
+    </span>
+  );
 }
 
 function isCreateTab(tab: DashboardTab): tab is DashboardCreateTab {
@@ -143,7 +213,41 @@ export default function DashboardSidebar({
   onToggleCollapse,
 }: DashboardSidebarProps) {
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const sidebarRole = useDashboardSidebarRole();
+  const [pendingCounts, setPendingCounts] = useState<DashboardPendingCounts | null>(null);
+
+  const loadPendingCounts = useCallback(async () => {
+    if (!isAuthenticated) {
+      setPendingCounts(null);
+      return;
+    }
+    try {
+      const response = await dashboardService.getPendingCounts();
+      if (response.success && response.data) {
+        setPendingCounts(response.data);
+      }
+    } catch {
+      // Keep last known counts; sidebar badges are non-critical.
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    void loadPendingCounts();
+  }, [loadPendingCounts, sidebarRole]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      void loadPendingCounts();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [loadPendingCounts]);
+
+  const roleCounts = useMemo((): DashboardPendingCountsRole | null => {
+    if (!pendingCounts) return null;
+    return sidebarRole === 'tasker' ? pendingCounts.freelancer : pendingCounts.employer;
+  }, [pendingCounts, sidebarRole]);
 
   const navItems = useMemo(
     () =>
@@ -178,31 +282,47 @@ export default function DashboardSidebar({
   ) => {
     const isActive = activeTab === item.id;
     const Icon = item.icon;
+    const badgeCount = PENDING_COUNT_TABS.has(item.id) ? countForTab(roleCounts, item.id) : 0;
 
     return (
       <Link
         key={item.id}
         href={item.href}
-        title={collapsed ? item.label : undefined}
+        title={collapsed ? (badgeCount > 0 ? `${item.label} (${badgeCount})` : item.label) : undefined}
         onClick={() => {
           onTabChange(item.id);
           onClose?.();
         }}
         className={itemLinkClass(isActive, collapsed)}
       >
-        {icon ?? (
-          <Icon
-            className={`h-[22px] w-[22px] shrink-0 transition-transform ${SIDEBAR_MOTION} ${
-              isActive ? 'text-[#52C47F]' : 'text-black dark:text-stone-300'
-            }`}
-            strokeWidth={1.8}
-          />
+        {collapsed ? (
+          <span className="relative inline-flex shrink-0">
+            {icon ?? (
+              <Icon
+                className={`h-[22px] w-[22px] shrink-0 transition-transform ${SIDEBAR_MOTION} ${
+                  isActive ? 'text-[#52C47F]' : 'text-black dark:text-stone-300'
+                }`}
+                strokeWidth={1.8}
+              />
+            )}
+            <PendingBadge count={badgeCount} isActive={isActive} collapsed />
+          </span>
+        ) : (
+          <>
+            {icon ?? (
+              <Icon
+                className={`h-[22px] w-[22px] shrink-0 transition-transform ${SIDEBAR_MOTION} ${
+                  isActive ? 'text-[#52C47F]' : 'text-black dark:text-stone-300'
+                }`}
+                strokeWidth={1.8}
+              />
+            )}
+            <SidebarReveal collapsed={false} className="truncate tracking-wide">
+              {item.label}
+            </SidebarReveal>
+            <PendingBadge count={badgeCount} isActive={isActive} collapsed={false} />
+          </>
         )}
-        {!collapsed ? (
-          <SidebarReveal collapsed={false} className="truncate tracking-wide">
-            {item.label}
-          </SidebarReveal>
-        ) : null}
       </Link>
     );
   };

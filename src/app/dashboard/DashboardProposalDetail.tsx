@@ -328,7 +328,7 @@ export default function DashboardProposalDetail({
           resolveFreelancerBidDetailFrom('pending', searchParams.get('from')),
         );
     return (
-      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-sm text-neutral-500">
+      <div className="flex min-h-[40vh] items-center justify-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
         <Loader2 className="h-4 w-4 animate-spin" />
         {loadingCopy.loadingLabel}
       </div>
@@ -372,7 +372,7 @@ export default function DashboardProposalDetail({
           <ArrowLeft className="h-4 w-4" />
           {detailCopy.listBackLabel}
         </Link>
-        <p className="text-sm text-neutral-600">{detailCopy.notFoundLabel}</p>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">{detailCopy.notFoundLabel}</p>
       </div>
     );
   }
@@ -387,7 +387,7 @@ export default function DashboardProposalDetail({
           <ArrowLeft className="h-4 w-4" />
           {detailCopy.listBackLabel}
         </Link>
-        <p className="text-sm text-neutral-600">You do not have permission to view this proposal.</p>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">You do not have permission to view this proposal.</p>
       </div>
     );
   }
@@ -415,7 +415,7 @@ export default function DashboardProposalDetail({
           <ArrowLeft className="h-4 w-4" />
           {detailCopy.sectionLabel}
         </Link>
-        <span className="text-neutral-300">/</span>
+        <span className="text-neutral-300 dark:text-neutral-600">/</span>
         <Link
           href={listingMiddleHref}
           className="text-sm font-normal text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-stone-100"

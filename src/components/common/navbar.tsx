@@ -11,16 +11,21 @@ import {
   ClipboardList,
   Briefcase,
 } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTaskerDashboardNavOptional } from '@/context/TaskerDashboardNavContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { TASK_BROWSE_PATH, TASK_MAP_PATH } from '@/lib/taskBrowsePath';
 import { JOB_BROWSE_PATH, JOB_MAP_PATH } from '@/lib/jobBrowsePath';
 import { PROJECT_MAP_PATH } from '@/lib/projectBrowsePath';
 import { SERVICE_MAP_PATH } from '@/lib/serviceBrowsePath';
 import { dashboardMessageConversationHref, DASHBOARD_MESSAGES_PATH } from '@/lib/dashboardChat';
+import {
+  buildNotificationWebSocketUrl,
+  isWebSocketsEnabled,
+} from '@/lib/notificationWebSocket';
 import { cn } from '@/lib/utils';
 import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -256,6 +261,35 @@ export default function Navbar() {
     const interval = setInterval(refreshNavbarData, 45000);
     return () => clearInterval(interval);
   }, [isAuthenticated, refreshNavbarData]);
+
+  const notificationWsUrl = useMemo(() => {
+    if (!isAuthenticated || !isWebSocketsEnabled()) return null;
+    return buildNotificationWebSocketUrl();
+  }, [isAuthenticated]);
+
+  const handleNotificationWsMessage = useCallback(
+    (message: { type: string; count?: number; notification?: NotificationType }) => {
+      if (message.type === 'unread_count' && typeof message.count === 'number') {
+        setUnreadCount(message.count);
+        return;
+      }
+      if (message.type === 'new_notification' && message.notification) {
+        const incoming = message.notification;
+        setNotifications((prev) => {
+          if (prev.some((n) => n.id === incoming.id)) return prev;
+          return [incoming, ...prev].slice(0, 6);
+        });
+        // Badge count comes from the paired unread_count event.
+      }
+    },
+    [],
+  );
+
+  useWebSocket(notificationWsUrl, {
+    enabled: Boolean(notificationWsUrl),
+    onMessage: handleNotificationWsMessage,
+    maxReconnectAttempts: 8,
+  });
 
   useEffect(() => {
     if (notificationsOpen && isAuthenticated) {

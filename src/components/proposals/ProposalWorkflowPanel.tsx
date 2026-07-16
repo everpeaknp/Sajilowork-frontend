@@ -305,16 +305,16 @@ function stepDotClass(state: TaskTimelineStepState): string {
     return 'border-[#52C47F] bg-[#52C47F]';
   }
   if (state === 'skipped') {
-    return 'border-neutral-200 bg-neutral-100';
+    return 'border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800';
   }
-  return 'border-neutral-200 bg-white';
+  return 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900';
 }
 
 function stepLabelClass(state: TaskTimelineStepState): string {
-  if (state === 'current') return 'font-semibold text-neutral-900';
-  if (state === 'complete') return 'font-medium text-neutral-700';
-  if (state === 'skipped') return 'font-medium text-neutral-400 line-through';
-  return 'font-medium text-neutral-400';
+  if (state === 'current') return 'font-semibold text-neutral-900 dark:text-stone-100';
+  if (state === 'complete') return 'font-medium text-neutral-700 dark:text-neutral-300';
+  if (state === 'skipped') return 'font-medium text-neutral-400 line-through dark:text-neutral-500';
+  return 'font-medium text-neutral-400 dark:text-neutral-500';
 }
 
 function WorkflowStepper({ steps }: { steps: TimelineStepWithState[] }) {
@@ -332,7 +332,7 @@ function WorkflowStepper({ steps }: { steps: TimelineStepWithState[] }) {
   return (
     <div className="relative">
       <div
-        className="absolute left-0 right-0 top-[11px] hidden h-0.5 bg-neutral-100 sm:block"
+        className="absolute left-0 right-0 top-[11px] hidden h-0.5 bg-neutral-100 dark:bg-neutral-800 sm:block"
         aria-hidden
       >
         <div
@@ -356,9 +356,9 @@ function WorkflowStepper({ steps }: { steps: TimelineStepWithState[] }) {
             <div className="min-w-0">
               <p className={`text-sm ${stepLabelClass(step.state)}`}>{step.label}</p>
               {step.date ? (
-                <p className="mt-0.5 text-xs text-neutral-500">{step.date}</p>
+                <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">{step.date}</p>
               ) : step.state === 'upcoming' ? null : (
-                <p className="mt-0.5 text-xs text-neutral-400">Pending</p>
+                <p className="mt-0.5 text-xs text-neutral-400 dark:text-neutral-500">Pending</p>
               )}
             </div>
           </li>
@@ -427,7 +427,7 @@ function ContractActions({
   }
 
   return (
-    <div className="mt-6 flex flex-col gap-3 border-t border-neutral-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mt-6 flex flex-col gap-3 border-t border-neutral-100 pt-6 dark:border-neutral-800 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap gap-2">
         {canStart ? (
           <button
@@ -470,14 +470,14 @@ function ContractActions({
             type="button"
             disabled={actionLoading}
             onClick={onCancel}
-            className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+            className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-900/50 dark:bg-neutral-900 dark:text-red-300 dark:hover:bg-red-950/30"
           >
             Cancel
           </button>
         ) : null}
       </div>
       {completionMessage ? (
-        <p className="max-w-xl text-sm text-neutral-600">{completionMessage}</p>
+        <p className="max-w-xl text-sm text-neutral-600 dark:text-neutral-400">{completionMessage}</p>
       ) : null}
     </div>
   );
@@ -523,15 +523,15 @@ function WorkflowHeader({
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#52C47F]">
           {subtitle}
         </p>
-        <h3 className="mt-0.5 text-lg font-semibold tracking-tight text-neutral-900">{title}</h3>
+        <h3 className="mt-0.5 text-lg font-semibold tracking-tight text-neutral-900 dark:text-stone-100">{title}</h3>
       </div>
       {taskLoading ? (
-        <span className="inline-flex items-center gap-2 text-sm text-neutral-500">
+        <span className="inline-flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
           <Loader2 className="h-4 w-4 animate-spin" />
           Syncing status…
         </span>
       ) : task ? (
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium capitalize text-neutral-700">
+        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium capitalize text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
           {bid ? formatWorkflowStatusLabel(task, bid) : task.status.replace(/_/g, ' ')}
         </span>
       ) : null}
@@ -596,7 +596,7 @@ function WorkflowBody({
   }
 
   return (
-    <section className="rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.04)] sm:p-6">
+    <section className="rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_rgba(15,23,42,0.04)] dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none sm:p-6">
       {content}
     </section>
   );

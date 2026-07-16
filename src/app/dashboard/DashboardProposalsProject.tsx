@@ -276,14 +276,14 @@ export default function DashboardProposalsProject({
                 <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs capitalize text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
                   {listingKind}
                 </span>
-                <span className="text-neutral-300">|</span>
+                <span className="text-neutral-300 dark:text-neutral-600">|</span>
               </>
             ) : null}
             <span className="inline-flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 text-neutral-500" />
+              <MapPin className="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400" />
               {projectLocation}
             </span>
-            <span className="text-neutral-300">|</span>
+            <span className="text-neutral-300 dark:text-neutral-600">|</span>
             <span>
               {hasActiveFilters
                 ? `${filteredBids.length} of ${bids.length} bid${bids.length === 1 ? '' : 's'}`
@@ -317,12 +317,12 @@ export default function DashboardProposalsProject({
 
       <div className="rounded-xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] sm:p-8 dark:border dark:border-neutral-800 dark:bg-neutral-900">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-neutral-500">
+          <div className="flex items-center justify-center gap-2 py-16 text-sm text-neutral-500 dark:text-neutral-400">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading {isApplicationsView ? 'applications' : 'proposals'}…
           </div>
         ) : bids.length === 0 ? (
-          <p className="py-12 text-center text-sm text-neutral-500">
+          <p className="py-12 text-center text-sm text-neutral-500 dark:text-neutral-400">
             {isApplicationsView
               ? 'No applications received for this job yet.'
               : isCustomer
@@ -330,7 +330,7 @@ export default function DashboardProposalsProject({
                 : 'You have not submitted a bid on this listing yet.'}
           </p>
         ) : isEmptyFromFilters ? (
-          <div className="py-12 text-center text-sm text-neutral-500">
+          <div className="py-12 text-center text-sm text-neutral-500 dark:text-neutral-400">
             <p className="font-medium text-neutral-900 dark:text-stone-100">
               No {isApplicationsView ? 'applications' : 'bids'} match your search
             </p>
@@ -358,15 +358,15 @@ export default function DashboardProposalsProject({
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-[15px] font-medium text-black dark:text-stone-100">{taskerName(bid)}</h4>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-neutral-600">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-neutral-600 dark:text-neutral-400">
                         <span className="inline-flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
                           {formatDisplayDate(bid.created_at)}
                         </span>
-                        <span className="text-neutral-300">|</span>
+                        <span className="text-neutral-300 dark:text-neutral-600">|</span>
                         <span className="capitalize">{bid.status}</span>
                       </div>
-                      <p className="mt-2 line-clamp-2 break-words text-sm text-neutral-700 [overflow-wrap:anywhere]">
+                      <p className="mt-2 line-clamp-2 break-words text-sm text-neutral-700 [overflow-wrap:anywhere] dark:text-neutral-300">
                         {bid.proposal}
                       </p>
                     </div>

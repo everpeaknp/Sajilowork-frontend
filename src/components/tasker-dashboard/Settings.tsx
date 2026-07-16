@@ -422,7 +422,25 @@ export default function Settings({
           notificationService.updatePreference(String(pref.id), { [key]: value } as any)
         )
       );
-      toast.success('Notification settings updated');
+
+      if (key === 'push_enabled') {
+        if (value) {
+          const { subscribeWebPush } = await import('@/lib/webPush');
+          const result = await subscribeWebPush();
+          if (!result.ok) {
+            toast.error(result.reason || 'Could not enable browser push notifications.');
+            // Keep preference on — in-app still works; push will retry on next login if granted later.
+          } else {
+            toast.success('Browser push notifications enabled');
+          }
+        } else {
+          const { unsubscribeWebPush } = await import('@/lib/webPush');
+          await unsubscribeWebPush();
+          toast.success('Browser push notifications disabled');
+        }
+      } else {
+        toast.success('Notification settings updated');
+      }
       await refreshNotificationPrefs();
     } catch (e: any) {
       toast.error(e?.message || 'Failed to update notification settings');
@@ -1348,7 +1366,7 @@ export default function Settings({
                   {
                     key: 'push_enabled' as const,
                     label: 'Push Notifications',
-                    desc: 'Real-time updates on your phone',
+                    desc: 'Browser alerts even when SajiloWork is in the background',
                   },
                   {
                     key: 'email_enabled' as const,

@@ -253,6 +253,22 @@ export interface TopPerformer {
   total_earned: number;
 }
 
+export type DashboardPendingCountsRole = {
+  applications?: number;
+  bids?: number;
+  proposals?: number;
+  contracts: number;
+  orders: number;
+  messages: number;
+  questions: number;
+  reviews: number;
+};
+
+export type DashboardPendingCounts = {
+  employer: DashboardPendingCountsRole;
+  freelancer: DashboardPendingCountsRole;
+};
+
 class DashboardService {
   private readonly BASE_PATH = '/dashboard';
 
@@ -272,6 +288,10 @@ class DashboardService {
 
   async getMyOverview(): Promise<ApiResponse<DashboardOverviewResponse>> {
     return apiClient.get(`${this.BASE_PATH}/my_overview/`);
+  }
+
+  async getPendingCounts(): Promise<ApiResponse<DashboardPendingCounts>> {
+    return apiClient.get(`${this.BASE_PATH}/pending_counts/`);
   }
 
   /**

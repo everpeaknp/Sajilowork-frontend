@@ -100,7 +100,7 @@ export function ProposalOfferSections({
   return (
     <>
       {amount > 0 ? (
-        <div className="mt-6 border-t border-neutral-100 pt-6">
+        <div className="mt-6 border-t border-neutral-100 pt-6 dark:border-neutral-800">
           <ProposalHighlightStat label={copy.amountLabel} value={formatNPR(amount)} />
         </div>
       ) : null}
@@ -167,11 +167,11 @@ export default function ProposalApplicantPanel({
       : undefined;
 
   const headerTrailing = isEmployerProfile ? (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 ring-2 ring-white">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 ring-2 ring-white dark:bg-neutral-800 dark:ring-neutral-900">
       {avatarSrc ? (
         <img src={avatarSrc} alt={name} className="h-full w-full object-cover" />
       ) : (
-        <Building2 className="h-4 w-4 text-neutral-500" />
+        <Building2 className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
       )}
     </div>
   ) : (
@@ -180,7 +180,7 @@ export default function ProposalApplicantPanel({
       name={name}
       alt={name}
       size="sm"
-      className="!h-9 !w-9 ring-2 ring-white"
+      className="!h-9 !w-9 ring-2 ring-white dark:ring-neutral-900"
     />
   );
 
