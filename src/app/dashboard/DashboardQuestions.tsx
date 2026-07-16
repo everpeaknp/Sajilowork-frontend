@@ -20,6 +20,8 @@ import {
   resolveListingQuestionKind,
 } from '@/lib/listingQuestions';
 import { useDashboardSidebarRole } from './DashboardRoleSwitchContext';
+import WalletTableToolbar from './WalletTableToolbar';
+import { matchesSearchQuery } from './dashboardListSearch';
 import {
   DASHBOARD_CARD,
   DASHBOARD_HEADING_MD,
@@ -27,8 +29,54 @@ import {
   DASHBOARD_PAGINATION_ARROW_PLAIN,
   DASHBOARD_PAGINATION_INNER,
   DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
+
+type QuestionListingType = 'job' | 'service' | 'project' | 'task';
+type QuestionTypeFilter = 'all' | QuestionListingType;
+type QuestionStatusFilter = 'all' | 'open' | 'answered';
+
+const QUESTION_TYPE_TABS: { key: QuestionTypeFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'job', label: 'Jobs' },
+  { key: 'service', label: 'Services' },
+  { key: 'project', label: 'Projects' },
+  { key: 'task', label: 'Tasks' },
+];
+
+const QUESTION_STATUS_FILTER_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'open', label: 'Awaiting reply' },
+  { value: 'answered', label: 'Answered' },
+];
+
+function resolveQuestionListingType(kind?: string | null): QuestionListingType {
+  if (kind === 'job') return 'job';
+  if (kind === 'service') return 'service';
+  if (kind === 'project') return 'project';
+  return 'task';
+}
+
+function matchesQuestionTypeFilter(
+  kind: string | null | undefined,
+  filter: QuestionTypeFilter,
+): boolean {
+  if (filter === 'all') return true;
+  return resolveQuestionListingType(kind) === filter;
+}
+
+function matchesQuestionStatusFilter(
+  item: DashboardQuestionItem,
+  filter: QuestionStatusFilter,
+): boolean {
+  if (filter === 'all') return true;
+  const answered = Boolean(item.answer?.trim());
+  if (filter === 'answered') return answered;
+  return !answered;
+}
 
 function formatRelativeTime(iso?: string | null): string {
   if (!iso) return '';
@@ -48,6 +96,9 @@ export default function DashboardQuestions() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [typeFilter, setTypeFilter] = useState<QuestionTypeFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<QuestionStatusFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
   const [submittingAnswerId, setSubmittingAnswerId] = useState<string | null>(null);
   const itemsPerPage = 10;
@@ -86,15 +137,36 @@ export default function DashboardQuestions() {
     };
   }, [loadQuestions]);
 
-  const totalPages = Math.max(1, Math.ceil(questions.length / itemsPerPage));
+  const filteredQuestions = useMemo(() => {
+    return questions.filter((item) => {
+      if (!matchesQuestionTypeFilter(item.task_listing_kind, typeFilter)) return false;
+      if (!matchesQuestionStatusFilter(item, statusFilter)) return false;
+      return matchesSearchQuery(
+        searchQuery,
+        item.task_title,
+        item.asked_by_name,
+        item.question,
+        item.answer,
+        item.task_slug,
+      );
+    });
+  }, [questions, searchQuery, statusFilter, typeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / itemsPerPage));
   const activePage = Math.min(currentPage, totalPages);
   const indexOfLastItem = activePage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const paginatedQuestions = questions.slice(indexOfFirstItem, indexOfLastItem);
+  const paginatedQuestions = filteredQuestions.slice(indexOfFirstItem, indexOfLastItem);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const unansweredCount = useMemo(
-    () => questions.filter((item) => !item.answer?.trim()).length,
-    [questions],
+    () => filteredQuestions.filter((item) => !item.answer?.trim()).length,
+    [filteredQuestions],
   );
 
   const subtitle =
@@ -147,9 +219,16 @@ export default function DashboardQuestions() {
     }
   };
 
+  const emptyMessage =
+    questions.length === 0
+      ? dashboardRole === 'customer'
+        ? 'No questions on your listings yet.'
+        : 'You have not asked any listing questions yet.'
+      : 'No questions match your filters.';
+
   return (
-    <div className={DASHBOARD_PAGE_ROOT}>
-      <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
+    <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
+      <div>
         <h1 className={DASHBOARD_HEADING_MD}>Questions</h1>
         <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">{subtitle}</p>
         {dashboardRole === 'customer' && unansweredCount > 0 ? (
@@ -158,6 +237,40 @@ export default function DashboardQuestions() {
           </p>
         ) : null}
       </div>
+
+      <div className={DASHBOARD_SUBTABS_WRAP}>
+        <div className={DASHBOARD_SUBTABS_ROW}>
+          {QUESTION_TYPE_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => {
+                setTypeFilter(tab.key);
+                setCurrentPage(1);
+              }}
+              className={dashboardSubtabClass(typeFilter === tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <WalletTableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search by listing, asker, or question"
+        filterStatus={statusFilter}
+        onFilterChange={(value) => {
+          setStatusFilter(value as QuestionStatusFilter);
+          setCurrentPage(1);
+        }}
+        filterOptions={QUESTION_STATUS_FILTER_OPTIONS}
+        filterLabel="Status:"
+      />
 
       <div className={DASHBOARD_CARD}>
         {loading ? (
@@ -173,12 +286,8 @@ export default function DashboardQuestions() {
               Try again
             </button>
           </div>
-        ) : questions.length === 0 ? (
-          <div className="py-20 text-center text-sm text-neutral-400">
-            {dashboardRole === 'customer'
-              ? 'No questions on your listings yet.'
-              : 'You have not asked any listing questions yet.'}
-          </div>
+        ) : filteredQuestions.length === 0 ? (
+          <div className="py-20 text-center text-sm text-neutral-400">{emptyMessage}</div>
         ) : (
           <div className="space-y-8">
             {paginatedQuestions.map((item) => {
@@ -187,6 +296,7 @@ export default function DashboardQuestions() {
                 : null;
               const hasAnswer = Boolean(item.answer?.trim());
               const canAnswer = Boolean(item.can_answer && !hasAnswer && item.task_slug);
+              const listingType = resolveQuestionListingType(item.task_listing_kind);
 
               return (
                 <div key={item.id} className="border-b border-neutral-100 pb-8 last:border-0 last:pb-0 dark:border-neutral-800">
@@ -203,6 +313,9 @@ export default function DashboardQuestions() {
                           {item.asked_by_name || 'User'}
                         </h4>
                         <div className="flex flex-wrap items-center gap-2.5 text-xs text-neutral-500">
+                          <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-medium capitalize text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+                            {listingType}
+                          </span>
                           {item.created_at ? (
                             <span className="font-normal text-neutral-400">
                               {formatRelativeTime(item.created_at)}
@@ -295,7 +408,7 @@ export default function DashboardQuestions() {
           </div>
         )}
 
-        {!loading && !loadError && questions.length > 0 ? (
+        {!loading && !loadError && filteredQuestions.length > 0 ? (
           <div className={DASHBOARD_PAGINATION_OUTER}>
             <div className={DASHBOARD_PAGINATION_INNER}>
               <button
@@ -308,16 +421,18 @@ export default function DashboardQuestions() {
               </button>
 
               <div className="flex shrink-0 items-center gap-1">
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={dashboardPageButtonClass(activePage === page)}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => index + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={dashboardPageButtonClass(activePage === page)}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
               </div>
 
               <button
@@ -330,9 +445,9 @@ export default function DashboardQuestions() {
               </button>
             </div>
 
-            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, questions.length)} of{' '}
-              {questions.length} questions
+            <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800 dark:text-neutral-300">
+              {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, filteredQuestions.length)} of{' '}
+              {filteredQuestions.length} questions
             </div>
           </div>
         ) : null}

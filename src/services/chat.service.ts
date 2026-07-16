@@ -263,10 +263,14 @@ export const chatService = {
   },
 
   /**
-   * Get total unread message count across all conversations
+   * Get total unread message count (optional employer/tasker inbox view)
    */
-  async getUnreadCount(): Promise<ApiResponse<{ unread_count: number }>> {
-    return apiClient.get<{ unread_count: number }>('/chat/conversations/unread_count/');
+  async getUnreadCount(params?: {
+    view?: 'employer' | 'tasker';
+  }): Promise<ApiResponse<{ unread_count: number }>> {
+    return apiClient.get<{ unread_count: number }>('/chat/conversations/unread_count/', {
+      params,
+    });
   },
 
   /**

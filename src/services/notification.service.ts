@@ -13,6 +13,8 @@ export interface NotificationFilters {
   type?: string;
   from_date?: string;
   to_date?: string;
+  /** employer = listing owner inbox; tasker = freelancer inbox */
+  view?: 'employer' | 'tasker';
 }
 
 export interface DeviceTokenPayload {
@@ -47,8 +49,10 @@ class NotificationService {
     return apiClient.delete(`${this.BASE_PATH}/${id}/`);
   }
 
-  async getUnreadCount(): Promise<ApiResponse<{ count: number }>> {
-    return apiClient.get(`${this.BASE_PATH}/unread_count/`);
+  async getUnreadCount(params?: {
+    view?: 'employer' | 'tasker';
+  }): Promise<ApiResponse<{ count: number }>> {
+    return apiClient.get(`${this.BASE_PATH}/unread_count/`, { params });
   }
 
   async getPreferences(): Promise<ApiResponse<any[]>> {

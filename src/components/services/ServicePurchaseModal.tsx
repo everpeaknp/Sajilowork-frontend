@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, ChevronDown, ChevronUp, Loader2, Wallet, X } from 'lucide-react';
 import { toast } from 'sonner';
+import FeeConfirmModal from '@/components/fees/FeeConfirmModal';
 import { formatNPR } from '@/lib/nepalLocale';
 import { paymentService } from '@/services';
 import { serviceService } from '@/services/service.service';
@@ -46,6 +47,7 @@ export default function ServicePurchaseModal({
   const [noteExpanded, setNoteExpanded] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState<string | null>(null);
+  const [showFeeConfirm, setShowFeeConfirm] = useState(false);
 
   useEffect(() => {
     if (!service.slug) return;
@@ -61,7 +63,9 @@ export default function ServicePurchaseModal({
         const [previewRes, walletRes, feeRes] = await Promise.all([
           serviceService.getPurchasePreview(service.slug!, selectedPackage.id),
           paymentService.getWalletBalance(),
-          paymentService.getFeePreview(selectedPackage.price, 'wallet'),
+          paymentService.getFeePreview(selectedPackage.price, 'wallet', {
+            listing_kind: 'service',
+          }),
         ]);
 
         if (cancelled) return;
@@ -103,7 +107,7 @@ export default function ServicePurchaseModal({
     };
   }, [selectedPackage.id, selectedPackage.price, service.slug]);
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!service.slug) return;
 
     if (!termsAccepted) {
@@ -116,6 +120,12 @@ export default function ServicePurchaseModal({
       setError('Insufficient wallet balance. Add funds before purchasing.');
       return;
     }
+
+    setShowFeeConfirm(true);
+  };
+
+  const confirmPurchaseWithFees = async () => {
+    if (!service.slug) return;
 
     setPurchasing(true);
     setError(null);
@@ -136,6 +146,7 @@ export default function ServicePurchaseModal({
         bid_id: response.data.bid_id,
         conversation_id: response.data.conversation_id ?? undefined,
       };
+      setShowFeeConfirm(false);
       onSuccess?.(result);
       if (!onSuccess) {
         router.push(
@@ -207,6 +218,26 @@ export default function ServicePurchaseModal({
               {!embedded ? (
                 <>
                   <div className="space-y-2 border-t border-neutral-200 pt-4 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-neutral-500">Package</span>
+                      <span className="text-neutral-900">{formatNPR(selectedPackage.price)}</span>
+                    </div>
+                    {feePreview ? (
+                      <>
+                        {(feePreview.escrow ?? 0) > 0 ? (
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-neutral-500">Service fee</span>
+                            <span className="text-neutral-900">{formatNPR(feePreview.escrow ?? 0)}</span>
+                          </div>
+                        ) : null}
+                        {(feePreview.tax ?? 0) > 0 ? (
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-neutral-500">Tax</span>
+                            <span className="text-neutral-900">{formatNPR(feePreview.tax ?? 0)}</span>
+                          </div>
+                        ) : null}
+                      </>
+                    ) : null}
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-neutral-500">Wallet</span>
                       <span className="text-neutral-900">{formatNPR(walletAvailable)}</span>
@@ -313,7 +344,7 @@ export default function ServicePurchaseModal({
           ) : null}
           <button
             type="button"
-            onClick={() => void handlePurchase()}
+            onClick={handlePurchase}
             disabled={loading || purchasing || !walletSufficient || !termsAccepted}
             className={`flex items-center justify-center gap-2 rounded-xl bg-[#52C47F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#49b071] disabled:cursor-not-allowed disabled:opacity-50 ${
               embedded ? 'w-full' : 'flex-1'
@@ -326,13 +357,34 @@ export default function ServicePurchaseModal({
       </div>
   );
 
+  const feeModal = (
+    <FeeConfirmModal
+      open={showFeeConfirm}
+      onClose={() => setShowFeeConfirm(false)}
+      onConfirm={() => void confirmPurchaseWithFees()}
+      mode="purchase"
+      amount={selectedPackage.price}
+      listingKind="service"
+      confirming={purchasing}
+      confirmLabel={`Pay ${formatNPR(totalHeld)}`}
+    />
+  );
+
   if (presentation === 'page') {
-    return panel;
+    return (
+      <>
+        {panel}
+        {feeModal}
+      </>
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      {panel}
-    </div>
+    <>
+      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-4 sm:items-center">
+        {panel}
+      </div>
+      {feeModal}
+    </>
   );
 }

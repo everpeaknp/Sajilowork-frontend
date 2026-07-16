@@ -46,7 +46,9 @@ export function AcceptOfferModal({
     (async () => {
       try {
         setFeeLoading(true);
-        const res = await paymentService.getFeePreview(offer.amount, 'wallet');
+        const res = await paymentService.getFeePreview(offer.amount, 'wallet', {
+          listing_kind: 'task',
+        });
         if (!cancelled && res.success && res.data) {
           setFeePreview(res.data);
         }

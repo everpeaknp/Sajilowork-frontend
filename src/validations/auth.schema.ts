@@ -18,6 +18,9 @@ export const loginSchema = z.object({
     .string()
     .min(1, 'Password is required')
     .min(8, 'Password must be at least 8 characters'),
+  role: z.enum(['customer', 'tasker'], {
+    required_error: 'Please select how you want to sign in',
+  }),
   remember: z.boolean().optional(),
 });
 

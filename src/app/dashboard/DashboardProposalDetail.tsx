@@ -4,12 +4,17 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Loader2, X } from 'lucide-react';
+import FeeConfirmModal from '@/components/fees/FeeConfirmModal';
 import ProposalApplicantPanel from '@/components/proposals/ProposalApplicantPanel';
 import ProposalDetailHeroCard from '@/components/proposals/ProposalDetailHeroCard';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '@/lib/api/client';
 import { resolveBidListingKind } from '@/lib/buildFreelancerCvData';
+import {
+  cancellationStageFromStatus,
+  normalizeFeeListingKind,
+} from '@/lib/feeUtils';
 import { formatNPR } from '@/lib/nepalLocale';
 import { bidService } from '@/services/bid.service';
 import { paymentService } from '@/services/payment.service';
@@ -99,6 +104,8 @@ export default function DashboardProposalDetail({
   const [workflowLoading, setWorkflowLoading] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showInsufficientWalletModal, setShowInsufficientWalletModal] = useState(false);
+  const [showAcceptFeeModal, setShowAcceptFeeModal] = useState(false);
+  const [showCancelFeeModal, setShowCancelFeeModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [walletAvailableBalance, setWalletAvailableBalance] = useState<number | null>(null);
   const [escrowHoldAmount, setEscrowHoldAmount] = useState<number | null>(null);
@@ -160,21 +167,27 @@ export default function DashboardProposalDetail({
     void loadBid();
   }, [loadBid]);
 
-  const fetchWalletPreview = useCallback(async (amount: number) => {
-    const [walletRes, feeRes] = await Promise.all([
-      paymentService.getWalletBalance(),
-      paymentService.getFeePreview(amount, 'wallet'),
-    ]);
-    const available =
-      walletRes.success && walletRes.data ? Number(walletRes.data.available_balance) : null;
-    const hold =
-      feeRes.success && feeRes.data
-        ? Number(feeRes.data.poster_total_held ?? amount)
-        : amount;
-    return { available, hold };
-  }, []);
+  const fetchWalletPreview = useCallback(
+    async (amount: number, listingKind?: string | null) => {
+      const feeKind = normalizeFeeListingKind(listingKind);
+      const [walletRes, feeRes] = await Promise.all([
+        paymentService.getWalletBalance(),
+        paymentService.getFeePreview(amount, 'wallet', {
+          listing_kind: feeKind,
+        }),
+      ]);
+      const available =
+        walletRes.success && walletRes.data ? Number(walletRes.data.available_balance) : null;
+      const hold =
+        feeRes.success && feeRes.data
+          ? Number(feeRes.data.poster_total_held ?? amount)
+          : amount;
+      return { available, hold };
+    },
+    [],
+  );
 
-  const handleAcceptClick = async () => {
+  const handleAcceptClick = () => {
     if (!bid || bid.status !== 'pending') return;
 
     const taskStatus = getTaskStatusFromBid(bid);
@@ -182,22 +195,30 @@ export default function DashboardProposalDetail({
       toast.error(
         taskStatus
           ? `This project is not open for proposals (status: ${taskStatus.replace(/_/g, ' ')}).`
-          : 'This project is not open for proposals.'
+          : 'This project is not open for proposals.',
       );
       return;
     }
 
+    setShowAcceptFeeModal(true);
+  };
+
+  const confirmAcceptWithFees = async () => {
+    if (!bid || bid.status !== 'pending') return;
+
     setActionLoading(true);
     try {
       const isJobProposal = resolveBidListingKind(bid) === 'job';
+      const listingKind = resolveBidListingKind(bid);
 
       if (!isJobProposal) {
         const amount = Number(bid.amount) || 0;
-        const { available, hold } = await fetchWalletPreview(amount);
+        const { available, hold } = await fetchWalletPreview(amount, listingKind);
         setWalletAvailableBalance(available);
         setEscrowHoldAmount(hold);
 
         if (available !== null && available < hold) {
+          setShowAcceptFeeModal(false);
           setShowInsufficientWalletModal(true);
           return;
         }
@@ -209,6 +230,7 @@ export default function DashboardProposalDetail({
         return;
       }
       toast.success('Proposal accepted');
+      setShowAcceptFeeModal(false);
       await loadBid();
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to accept proposal'));
@@ -313,7 +335,11 @@ export default function DashboardProposalDetail({
     }
   };
 
-  const handleWorkflowCancel = async () => {
+  const handleWorkflowCancel = () => {
+    setShowCancelFeeModal(true);
+  };
+
+  const confirmCancelWithFees = async () => {
     const slug = task?.slug || projectSlug;
     if (!slug) return;
     setWorkflowLoading(true);
@@ -323,6 +349,7 @@ export default function DashboardProposalDetail({
         throw new Error(response.message || 'Failed to cancel contract');
       }
       toast.success('Contract cancelled');
+      setShowCancelFeeModal(false);
       await loadTask(slug);
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Failed to cancel contract'));
@@ -472,14 +499,14 @@ export default function DashboardProposalDetail({
             : undefined
         }
         onComplete={bid.status === 'accepted' ? () => void handleWorkflowComplete() : undefined}
-        onCancel={bid.status === 'accepted' ? () => void handleWorkflowCancel() : undefined}
+        onCancel={bid.status === 'accepted' ? handleWorkflowCancel : undefined}
         headerActions={
           isCustomer && isPending ? (
             <>
               <button
                 type="button"
                 disabled={actionLoading}
-                onClick={() => void handleAcceptClick()}
+                onClick={handleAcceptClick}
                 className="rounded-lg bg-[#52C47F] px-4 py-2 text-sm font-normal text-white transition-colors hover:bg-[#49b071] disabled:opacity-60"
               >
                 {actionLoading ? 'Processing…' : 'Accept'}
@@ -630,6 +657,29 @@ export default function DashboardProposalDetail({
           </div>
         </div>
       ) : null}
+
+      <FeeConfirmModal
+        open={showAcceptFeeModal}
+        onClose={() => setShowAcceptFeeModal(false)}
+        onConfirm={() => void confirmAcceptWithFees()}
+        mode="accept"
+        amount={Number(bid.amount) || 0}
+        listingKind={normalizeFeeListingKind(listingKind)}
+        confirming={actionLoading}
+        confirmLabel={isJobProposal ? 'Accept application' : 'Accept & hold funds'}
+      />
+
+      <FeeConfirmModal
+        open={showCancelFeeModal}
+        onClose={() => setShowCancelFeeModal(false)}
+        onConfirm={() => void confirmCancelWithFees()}
+        mode="cancel"
+        amount={Number(bid.amount) || Number(task?.budget_amount) || 0}
+        listingKind={normalizeFeeListingKind(listingKind)}
+        cancellationStage={cancellationStageFromStatus(task?.status ?? getTaskStatusFromBid(bid))}
+        confirming={workflowLoading}
+        confirmLabel="Cancel contract"
+      />
     </div>
   );
 }

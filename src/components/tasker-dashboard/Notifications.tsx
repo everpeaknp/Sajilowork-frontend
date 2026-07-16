@@ -36,6 +36,9 @@ import {
   landingHeadlineSm,
 } from '@/components/LangingHome/landingTypography';
 import { normalizeNotificationCurrency } from '@/lib/nepalLocale';
+import { notificationMatchesInboxView, roleToInboxView } from '@/lib/roleInbox';
+import { USER_PROFILE_UPDATED } from '@/lib/userProfileSync';
+import { useDashboardSidebarRole } from '@/app/dashboard/DashboardRoleSwitchContext';
 
 const DASHBOARD_TYPO = `${landingBody} [&_h1]:font-formula [&_h1]:font-black [&_h1]:tracking-tight [&_h2]:font-formula [&_h2]:font-extrabold [&_h2]:tracking-tight`;
 
@@ -263,6 +266,8 @@ function NotificationSkeleton() {
 
 export default function Notifications() {
   const router = useRouter();
+  const sidebarRole = useDashboardSidebarRole();
+  const inboxView = roleToInboxView(sidebarRole);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -277,9 +282,10 @@ export default function Notifications() {
       if (opts?.silent) setRefreshing(true);
       else setLoading(true);
 
-      const response = await notificationService.getNotifications(
-        filter === 'unread' ? { is_read: false } : undefined,
-      );
+      const response = await notificationService.getNotifications({
+        view: inboxView,
+        ...(filter === 'unread' ? { is_read: false } : {}),
+      });
 
       if (response.success && response.data) {
         const notificationsData = Array.isArray(response.data)
@@ -303,7 +309,7 @@ export default function Notifications() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [filter]);
+  }, [filter, inboxView]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -312,12 +318,21 @@ export default function Notifications() {
     return () => window.clearTimeout(timeoutId);
   }, [fetchNotifications]);
 
+  useEffect(() => {
+    const onProfileUpdated = () => {
+      void fetchNotifications({ silent: true });
+    };
+    window.addEventListener(USER_PROFILE_UPDATED, onProfileUpdated);
+    return () => window.removeEventListener(USER_PROFILE_UPDATED, onProfileUpdated);
+  }, [fetchNotifications]);
+
   useWebSocket(notificationWsUrl, {
     enabled: Boolean(notificationWsUrl),
     maxReconnectAttempts: 8,
     onMessage: (message: { type?: string; notification?: NotificationItem }) => {
       if (message.type !== 'new_notification' || !message.notification) return;
       const incoming = message.notification;
+      if (!notificationMatchesInboxView(incoming, inboxView)) return;
       setNotifications((prev) => {
         const current = Array.isArray(prev) ? prev : [];
         if (current.some((item) => item.id === incoming.id)) return current;

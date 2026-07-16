@@ -29,6 +29,14 @@ interface WalletTableToolbarProps {
   secondaryFilterLabel?: string;
 }
 
+const FILTER_SHELL_CLASS =
+  'flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:w-auto dark:border-neutral-700 dark:bg-neutral-900';
+
+const FILTER_SELECT_CLASS =
+  'max-w-[220px] cursor-pointer border-none bg-white p-0 font-bold text-neutral-800 outline-none focus:outline-none focus:ring-0 dark:bg-neutral-900 dark:text-stone-100 dark:[color-scheme:dark]';
+
+const FILTER_OPTION_CLASS = 'bg-white text-neutral-800 dark:bg-neutral-900 dark:text-stone-100';
+
 export default function WalletTableToolbar({
   searchQuery,
   onSearchChange,
@@ -57,33 +65,37 @@ export default function WalletTableToolbar({
       </div>
       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
         {!hidePrimaryFilter ? (
-        <div className="flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:w-auto dark:border-neutral-800 dark:bg-neutral-900">
-          <Filter className="h-3.5 w-3.5 text-neutral-400" />
-          <span className="font-normal text-neutral-500 dark:text-neutral-400">{filterLabel}</span>
-          <select
-            value={filterStatus}
-            onChange={(e) => onFilterChange(e.target.value)}
-            className="cursor-pointer border-none bg-transparent p-0 font-bold text-neutral-800 outline-none focus:outline-none focus:ring-0 dark:bg-transparent dark:text-stone-100"
-          >
-            {filterOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className={FILTER_SHELL_CLASS}>
+            <Filter className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+            <span className="shrink-0 font-normal text-neutral-500 dark:text-neutral-400">
+              {filterLabel}
+            </span>
+            <select
+              value={filterStatus}
+              onChange={(e) => onFilterChange(e.target.value)}
+              className={FILTER_SELECT_CLASS}
+            >
+              {filterOptions.map((option) => (
+                <option key={option.value} value={option.value} className={FILTER_OPTION_CLASS}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         ) : null}
         {secondaryFilterOptions && onSecondaryFilterChange ? (
-          <div className="flex w-full items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs sm:w-auto dark:border-neutral-800 dark:bg-neutral-900">
-            <Filter className="h-3.5 w-3.5 text-neutral-400" />
-            <span className="font-normal text-neutral-500 dark:text-neutral-400">{secondaryFilterLabel}</span>
+          <div className={FILTER_SHELL_CLASS}>
+            <Filter className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+            <span className="shrink-0 font-normal text-neutral-500 dark:text-neutral-400">
+              {secondaryFilterLabel}
+            </span>
             <select
               value={secondaryFilterStatus ?? 'all'}
               onChange={(e) => onSecondaryFilterChange(e.target.value)}
-            className="cursor-pointer border-none bg-transparent p-0 font-bold text-neutral-800 outline-none focus:outline-none focus:ring-0 dark:bg-transparent dark:text-stone-100"
-          >
+              className={FILTER_SELECT_CLASS}
+            >
               {secondaryFilterOptions.map((option) => (
-                <option key={option.value} value={option.value}>
+                <option key={option.value} value={option.value} className={FILTER_OPTION_CLASS}>
                   {option.label}
                 </option>
               ))}

@@ -327,19 +327,6 @@ export default function DashboardEmployerApplications() {
     );
   }, [searchQuery, shortlistedRows]);
 
-  const totals = useMemo(() => {
-    const jobsWithApplications = groups.filter((group) => group.totalApplications > 0).length;
-    const pendingApplications = groups.reduce((sum, group) => sum + group.pendingApplications, 0);
-    const totalApplications = groups.reduce((sum, group) => sum + group.totalApplications, 0);
-    return {
-      jobs: groups.length,
-      jobsWithApplications,
-      totalApplications,
-      pendingApplications,
-      shortlisted: shortlistedRows.length,
-    };
-  }, [groups, shortlistedRows]);
-
   const isShortlistedView = viewTab === 'shortlisted';
   const activeItemCount = isShortlistedView ? filteredShortlisted.length : filteredGroups.length;
   const totalPages = Math.max(1, Math.ceil(activeItemCount / ITEMS_PER_PAGE));
@@ -389,26 +376,6 @@ export default function DashboardEmployerApplications() {
             ? 'Freelancers you accepted for your job postings.'
             : 'All your job postings with application counts. Select a job to review every applicant.'}
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Jobs</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.jobs}</p>
-          <p className="mt-1 text-xs text-neutral-500">Posted job listings</p>
-        </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Applications</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.totalApplications}</p>
-          <p className="mt-1 text-xs text-neutral-500">
-            {totals.jobsWithApplications} job{totals.jobsWithApplications === 1 ? '' : 's'} with applicants
-          </p>
-        </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Shortlisted</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.shortlisted}</p>
-          <p className="mt-1 text-xs text-neutral-500">Accepted freelancers</p>
-        </div>
       </div>
 
       <WalletTableToolbar

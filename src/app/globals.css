@@ -503,12 +503,25 @@ html.dark select:not(:disabled) {
   color: var(--foreground) !important;
 }
 
+/* Native <select> menus — keep options dark (Windows/Chrome often default to white) */
+html.dark select option,
+html.dark select optgroup {
+  background-color: var(--surface-low);
+  color: var(--foreground);
+}
+
 /* Nested search/filter fields that sit inside a themed shell */
 html.dark input.bg-transparent,
-html.dark textarea.bg-transparent,
-html.dark select.bg-transparent {
+html.dark textarea.bg-transparent {
   background-color: transparent !important;
   border-color: transparent !important;
+}
+
+/* Selects inside filter chips stay solid dark — transparent makes the menu flash white */
+html.dark select.bg-transparent {
+  background-color: var(--surface-low) !important;
+  border-color: transparent !important;
+  color: var(--foreground) !important;
 }
 
 html.dark input:disabled,

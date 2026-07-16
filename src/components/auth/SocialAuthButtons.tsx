@@ -10,12 +10,12 @@ interface SocialAuthButtonsProps {
 
 export default function SocialAuthButtons({
   mode,
-  nextPath = '/discover',
+  nextPath = '/dashboard',
   role = 'customer',
 }: SocialAuthButtonsProps) {
   const options = {
     next: nextPath,
-    ...(mode === 'signup' ? { role } : {}),
+    ...(role ? { role } : {}),
   };
 
   return (

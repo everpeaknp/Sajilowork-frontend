@@ -31,6 +31,64 @@ export function extractBidList<T>(data: PaginatedResponse<T> | T[] | null | unde
   return data.results ?? [];
 }
 
+type BidListParams = {
+  status?: string;
+  page?: number;
+  page_size?: number;
+};
+
+async function fetchAllBidPages(
+  path: string,
+  params?: BidListParams,
+): Promise<ApiResponse<PaginatedResponse<Bid>>> {
+  const pageSize = params?.page_size ?? 100;
+  const first = await apiClient.get<PaginatedResponse<Bid>>(path, {
+    params: {
+      ...(params?.status ? { status: params.status } : {}),
+      page: 1,
+      page_size: pageSize,
+    },
+  });
+
+  if (!first.success || !first.data) {
+    return first;
+  }
+
+  if (Array.isArray(first.data)) {
+    return first;
+  }
+
+  const all = extractBidList(first.data);
+  const total = Number(first.data.count ?? all.length);
+  let page = 2;
+
+  while (all.length < total && page <= 50) {
+    const next = await apiClient.get<PaginatedResponse<Bid>>(path, {
+      params: {
+        ...(params?.status ? { status: params.status } : {}),
+        page,
+        page_size: pageSize,
+      },
+    });
+    if (!next.success || !next.data) break;
+    const chunk = extractBidList(next.data);
+    if (chunk.length === 0) break;
+    all.push(...chunk);
+    page += 1;
+  }
+
+  return {
+    success: true,
+    message: first.message || 'OK',
+    data: {
+      count: all.length,
+      next: null,
+      previous: null,
+      results: all,
+    },
+  };
+}
+
 export function getBidTaskId(bid: Pick<Bid, 'task'>): string {
   const task = bid.task as string | { id?: string };
   if (task && typeof task === 'object' && 'id' in task && task.id) {
@@ -171,18 +229,42 @@ export const bidService = {
   /**
    * Get current user's bids
    */
-  async getMyBids(status?: string): Promise<ApiResponse<PaginatedResponse<Bid>>> {
+  async getMyBids(
+    status?: string,
+    options?: { page_size?: number; fetchAll?: boolean },
+  ): Promise<ApiResponse<PaginatedResponse<Bid>>> {
+    if (options?.fetchAll) {
+      return fetchAllBidPages('/bids/bids/my_bids/', {
+        status,
+        page_size: options.page_size ?? 100,
+      });
+    }
     return apiClient.get<PaginatedResponse<Bid>>('/bids/bids/my_bids/', {
-      params: status ? { status } : undefined,
+      params: {
+        ...(status ? { status } : {}),
+        ...(options?.page_size ? { page_size: options.page_size } : {}),
+      },
     });
   },
 
   /**
    * Get bids received on user's tasks
    */
-  async getReceivedBids(status?: string): Promise<ApiResponse<PaginatedResponse<Bid>>> {
+  async getReceivedBids(
+    status?: string,
+    options?: { page_size?: number; fetchAll?: boolean },
+  ): Promise<ApiResponse<PaginatedResponse<Bid>>> {
+    if (options?.fetchAll) {
+      return fetchAllBidPages('/bids/bids/received_bids/', {
+        status,
+        page_size: options.page_size ?? 100,
+      });
+    }
     return apiClient.get<PaginatedResponse<Bid>>('/bids/bids/received_bids/', {
-      params: status ? { status } : undefined,
+      params: {
+        ...(status ? { status } : {}),
+        ...(options?.page_size ? { page_size: options.page_size } : {}),
+      },
     });
   },
 

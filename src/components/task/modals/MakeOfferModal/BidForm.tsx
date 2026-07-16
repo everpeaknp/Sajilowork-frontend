@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { Calendar, FileText, Paperclip, Send, X, Loader2 } from 'lucide-react';
+import FeeConfirmModal from '@/components/fees/FeeConfirmModal';
 import { bidSchema, type BidFormData } from '@/validations/bid.schema';
 import { bidService, extractBidList } from '@/services/bid.service';
 import { tokenManager } from '@/lib/api/client';
@@ -39,6 +40,7 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
   const [isCheckingExistingBid, setIsCheckingExistingBid] = useState(true);
+  const [pendingOffer, setPendingOffer] = useState<BidFormData | null>(null);
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -156,7 +158,14 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
     setUploadedUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const onSubmit = async (data: BidFormData) => {
+  const onSubmit = (data: BidFormData) => {
+    setPendingOffer(data);
+  };
+
+  const confirmSubmitWithFees = async () => {
+    if (!pendingOffer) return;
+    const data = pendingOffer;
+
     setIsSubmitting(true);
     try {
       const token = tokenManager.getAccessToken();
@@ -193,6 +202,7 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
             : "We'll notify you when the task poster accepts your bid.",
         duration: 6000,
       });
+      setPendingOffer(null);
       onSuccess(response.data);
     } catch (error: unknown) {
       let errorMessage = 'Failed to submit offer. Please try again.';
@@ -466,6 +476,17 @@ export default function BidForm({ task, listingKind = 'task', onSuccess, onCance
           </div>
         </form>
       )}
+
+      <FeeConfirmModal
+        open={pendingOffer !== null}
+        onClose={() => setPendingOffer(null)}
+        onConfirm={() => void confirmSubmitWithFees()}
+        mode="submit"
+        amount={Number(pendingOffer?.amount) || 0}
+        listingKind={listingKind === 'project' ? 'project' : 'task'}
+        confirming={isSubmitting}
+        confirmLabel={listingKind === 'project' ? 'Submit proposal' : 'Submit offer'}
+      />
     </motion.div>
   );
 }

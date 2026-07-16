@@ -10,6 +10,8 @@ import {
   LogOut,
   ClipboardList,
   Briefcase,
+  LayoutDashboard,
+  User,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
@@ -31,12 +33,17 @@ import { notificationService, taskService, chatService } from '@/services';
 import UserAvatar from '@/components/common/UserAvatar';
 import SiteBrand from '@/components/common/SiteBrand';
 import RouteListingBreadcrumbs from '@/components/seo/RouteListingBreadcrumbs';
-import AccountRoleMode from '@/components/common/AccountRoleMode';
 import ThemeMenuToggle from '@/components/common/ThemeMenuToggle';
 import { useSiteSettings } from '@/providers';
 import { isConfirmModalTarget } from '@/app/dashboard/DeleteConfirmModal';
+import { getDashboardHref } from '@/app/dashboard/dashboardTabs';
 import type { Conversation, Notification as NotificationType, PaginatedResponse } from '@/types';
 import { normalizeNotificationCurrency } from '@/lib/nepalLocale';
+import {
+  notificationMatchesInboxView,
+  roleToInboxView,
+} from '@/lib/roleInbox';
+import { USER_PROFILE_UPDATED } from '@/lib/userProfileSync';
 import {
   landingBody,
   landingHeadline,
@@ -169,6 +176,7 @@ export default function Navbar() {
   // Session is re-confirmed in the background (isLoading) without hiding CTAs.
   const showSignedOutCtas = hasHydrated && !isAuthenticated;
   const showAuthedChrome = hasHydrated && isAuthenticated;
+  const inboxView = roleToInboxView(user?.role);
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -194,7 +202,7 @@ export default function Navbar() {
   const fetchNotifications = useCallback(async () => {
     try {
       setNotificationsLoading(true);
-      const response = await notificationService.getNotifications();
+      const response = await notificationService.getNotifications({ view: inboxView });
       if (response.success && response.data) {
         const list = extractList(response.data as PaginatedResponse<NotificationType> | NotificationType[]);
         const sorted = [...list].sort((a, b) => {
@@ -212,11 +220,11 @@ export default function Navbar() {
     } finally {
       setNotificationsLoading(false);
     }
-  }, []);
+  }, [inboxView]);
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const response = await notificationService.getUnreadCount();
+      const response = await notificationService.getUnreadCount({ view: inboxView });
       if (response.success && response.data) {
         setUnreadCount(response.data.count ?? 0);
       }
@@ -224,12 +232,15 @@ export default function Navbar() {
       console.warn('Could not fetch unread count:', error);
       setUnreadCount(0);
     }
-  }, []);
+  }, [inboxView]);
 
   const fetchConversations = useCallback(async () => {
     try {
       setConversationsLoading(true);
-      const response = await chatService.getConversations({ page_size: 8 });
+      const response = await chatService.getConversations({
+        page_size: 8,
+        view: inboxView,
+      });
       if (response.success && response.data) {
         const list = extractList(response.data);
         const sorted = [...list].sort((a, b) => {
@@ -247,11 +258,11 @@ export default function Navbar() {
     } finally {
       setConversationsLoading(false);
     }
-  }, []);
+  }, [inboxView]);
 
   const fetchUnreadMessagesCount = useCallback(async () => {
     try {
-      const response = await chatService.getUnreadCount();
+      const response = await chatService.getUnreadCount({ view: inboxView });
       if (response.success && response.data) {
         setUnreadMessagesCount(response.data.unread_count ?? 0);
       }
@@ -259,12 +270,15 @@ export default function Navbar() {
       console.warn('Could not fetch message unread count:', error);
       setUnreadMessagesCount(0);
     }
-  }, []);
+  }, [inboxView]);
 
   const fetchMyTasksCount = useCallback(async () => {
     try {
       setTasksLoading(true);
-      const response = await taskService.getMyTasks({ listing_kind: 'task' });
+      const response =
+        inboxView === 'tasker'
+          ? await taskService.getAssignedTasks({ listing_kind: 'task' })
+          : await taskService.getMyTasks({ listing_kind: 'task' });
       if (response.success && response.data) {
         setMyTasksCount(response.data.count ?? response.data.results?.length ?? 0);
       }
@@ -274,7 +288,7 @@ export default function Navbar() {
     } finally {
       setTasksLoading(false);
     }
-  }, []);
+  }, [inboxView]);
 
   const refreshNavbarData = useCallback(() => {
     void fetchUnreadCount();
@@ -286,7 +300,32 @@ export default function Navbar() {
     if (!isAuthenticated) return;
     void fetchNotifications();
     refreshNavbarData();
-  }, [isAuthenticated, fetchNotifications, refreshNavbarData]);
+  }, [isAuthenticated, inboxView, fetchNotifications, refreshNavbarData]);
+
+  useEffect(() => {
+    setConversations([]);
+    setNotifications([]);
+    setUnreadCount(0);
+    setUnreadMessagesCount(0);
+    setMyTasksCount(0);
+  }, [inboxView]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const onProfileUpdated = () => {
+      void fetchNotifications();
+      refreshNavbarData();
+      if (messagesOpen) void fetchConversations();
+    };
+    window.addEventListener(USER_PROFILE_UPDATED, onProfileUpdated);
+    return () => window.removeEventListener(USER_PROFILE_UPDATED, onProfileUpdated);
+  }, [
+    isAuthenticated,
+    messagesOpen,
+    fetchNotifications,
+    fetchConversations,
+    refreshNavbarData,
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -302,19 +341,21 @@ export default function Navbar() {
   const handleNotificationWsMessage = useCallback(
     (message: { type: string; count?: number; notification?: NotificationType }) => {
       if (message.type === 'unread_count' && typeof message.count === 'number') {
-        setUnreadCount(message.count);
+        // Server sends global count; refresh role-scoped badge.
+        void fetchUnreadCount();
         return;
       }
       if (message.type === 'new_notification' && message.notification) {
         const incoming = message.notification;
+        if (!notificationMatchesInboxView(incoming, inboxView)) return;
         setNotifications((prev) => {
           if (prev.some((n) => n.id === incoming.id)) return prev;
           return [incoming, ...prev].slice(0, 6);
         });
-        // Badge count comes from the paired unread_count event.
+        void fetchUnreadCount();
       }
     },
-    [],
+    [inboxView, fetchUnreadCount],
   );
 
   useWebSocket(notificationWsUrl, {
@@ -483,15 +524,31 @@ export default function Navbar() {
         </p>
       </div>
 
-      <div className="border-t border-neutral-100 dark:border-neutral-800">
-        <AccountRoleMode
-          variant="navbar"
-          navigateToDashboard
-          onSwitched={() => setProfileMenuOpen(false)}
-        />
-      </div>
-
       <div className="border-t border-neutral-100 py-1 dark:border-neutral-800">
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            router.push(getDashboardHref('dashboard'));
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-stone-300 dark:hover:bg-neutral-800"
+        >
+          <LayoutDashboard className="h-4 w-4 text-gray-400" />
+          <span>Dashboard</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setProfileMenuOpen(false);
+            router.push(getDashboardHref('profile'));
+          }}
+          className="flex w-full cursor-pointer items-center space-x-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50 dark:text-stone-300 dark:hover:bg-neutral-800"
+        >
+          <User className="h-4 w-4 text-gray-400" />
+          <span>My profile</span>
+        </button>
+
         <button
           type="button"
           onClick={() => {

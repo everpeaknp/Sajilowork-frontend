@@ -83,7 +83,11 @@ export function useCheckoutWalletPreview({
 
         let totalHeld = holdAmount;
         if (holdAmount > 0) {
-          const feeRes = await paymentService.getFeePreview(holdAmount, 'wallet');
+          const feeRes = await paymentService.getFeePreview(holdAmount, 'wallet', {
+            listing_kind: kind === 'service' || kind === 'job' || kind === 'task' || kind === 'project'
+              ? kind
+              : undefined,
+          });
           if (feeRes.success && feeRes.data?.poster_total_held != null) {
             totalHeld = Number(feeRes.data.poster_total_held);
           }

@@ -21,7 +21,10 @@ import {
   DASHBOARD_PAGINATION_ARROW_PLAIN,
   DASHBOARD_PAGINATION_INNER,
   DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 const ITEMS_PER_PAGE = 10;
@@ -36,20 +39,25 @@ const LISTING_TYPE_LABELS: Record<ListingType, string> = {
 };
 
 type ContractTypeFilter = 'all' | ListingType;
+type ContractStatusFilter = 'active' | 'history' | 'all';
 
-const EMPLOYER_TYPE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'task', label: 'Tasks' },
-  { value: 'project', label: 'Projects' },
+const CONTRACT_TYPE_TABS: { key: ContractTypeFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'job', label: 'Jobs' },
+  { key: 'service', label: 'Services' },
+  { key: 'project', label: 'Projects' },
+  { key: 'task', label: 'Tasks' },
 ];
 
-const FREELANCER_TYPE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'task', label: 'Tasks' },
-  { value: 'project', label: 'Projects' },
-  { value: 'job', label: 'Jobs' },
-  { value: 'service', label: 'Services' },
+const CONTRACT_STATUS_FILTER_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'history', label: 'History' },
+  { value: 'all', label: 'All statuses' },
 ];
+
+function isHistoryContractStatus(status: TaskStatus | null): boolean {
+  return status === 'completed' || status === 'cancelled';
+}
 
 function formatDisplayDate(value?: string): string {
   if (!value) return '—';
@@ -80,17 +88,9 @@ function resolveListingType(kind?: string | null): ListingType {
   return 'task';
 }
 
-function isTaskOrProjectListing(kind?: string | null): boolean {
-  if (!kind) return true;
-  return kind === 'task' || kind === 'project';
-}
-
 function matchesContractTypeFilter(kind: string | null | undefined, filter: ContractTypeFilter): boolean {
   if (filter === 'all') return true;
-  if (filter === 'task' || filter === 'project') {
-    return kind === filter || (filter === 'task' && !kind);
-  }
-  return kind === filter;
+  return resolveListingType(kind) === filter;
 }
 
 function getContractCounterpartyName(bid: Bid, isCustomer: boolean): string {
@@ -225,6 +225,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
   const [contracts, setContracts] = useState<Bid[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<ContractTypeFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<ContractStatusFilter>('active');
   const [currentPage, setCurrentPage] = useState(1);
 
   const loadContracts = useCallback(async () => {
@@ -236,9 +237,11 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
 
     setLoading(true);
     try {
+      // Always load accepted agreements (including completed/cancelled tasks).
+      // Fetch all pages so older completed contracts are not dropped by pagination.
       const response = isCustomer
-        ? await bidService.getReceivedBids()
-        : await bidService.getMyBids();
+        ? await bidService.getReceivedBids('accepted', { fetchAll: true, page_size: 100 })
+        : await bidService.getMyBids('accepted', { fetchAll: true, page_size: 100 });
       if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to load contracts');
       }
@@ -247,8 +250,6 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
         if (isOrdersView) {
           return bid.task_listing_kind === 'service';
         }
-        if (isCustomer && !isTaskOrProjectListing(bid.task_listing_kind)) return false;
-        if (!isCustomer && bid.task_listing_kind === 'service') return false;
         return true;
       });
       setContracts(accepted);
@@ -272,19 +273,18 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
         : 'Accepted service orders from buyers — track delivery and order status.';
     }
     return isCustomer
-      ? 'Accepted bids on your tasks and projects — active agreements with freelancers.'
-      : 'Work you are under contract to deliver after an accepted proposal.';
+      ? 'Accepted bids on your jobs, services, projects, and tasks — active work and completed history.'
+      : 'Work you are under contract to deliver across all listing types, plus completed and cancelled history.';
   }, [isCustomer, isOrdersView]);
-
-  const typeFilterOptions = isOrdersView
-    ? []
-    : isCustomer
-      ? EMPLOYER_TYPE_FILTER_OPTIONS
-      : FREELANCER_TYPE_FILTER_OPTIONS;
 
   const filteredContracts = useMemo(() => {
     return contracts.filter((bid) => {
       if (!matchesContractTypeFilter(bid.task_listing_kind, typeFilter)) return false;
+
+      const taskStatus = resolveContractTaskStatus(bid);
+      if (statusFilter === 'active' && isHistoryContractStatus(taskStatus)) return false;
+      if (statusFilter === 'history' && !isHistoryContractStatus(taskStatus)) return false;
+
       const counterpartyName = getContractCounterpartyName(bid, isCustomer);
       return matchesSearchQuery(
         searchQuery,
@@ -295,7 +295,7 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
         formatBidDisplayId(bid.id),
       );
     });
-  }, [contracts, isCustomer, searchQuery, typeFilter]);
+  }, [contracts, isCustomer, searchQuery, statusFilter, typeFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredContracts.length / ITEMS_PER_PAGE));
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
@@ -316,31 +316,39 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
     return pages;
   }, [totalPages]);
 
-  const hasActiveFilters = searchQuery.trim().length > 0 || typeFilter !== 'all';
+  const hasActiveFilters =
+    searchQuery.trim().length > 0 || typeFilter !== 'all' || statusFilter !== 'active';
   const isEmptyFromFilters = !loading && contracts.length > 0 && filteredContracts.length === 0;
 
-  const totals = useMemo(() => {
-    const totalValue = filteredContracts.reduce((sum, bid) => sum + (Number(bid.amount) || 0), 0);
-    return {
-      count: filteredContracts.length,
-      totalValue,
-    };
-  }, [filteredContracts]);
-
   const pageTitle = isOrdersView ? 'Orders' : 'Contracts';
-  const countLabel = isOrdersView ? 'Active orders' : 'Active contracts';
-  const countHint = isOrdersView ? 'Accepted service orders' : 'Accepted agreements';
-  const valueLabel = isOrdersView ? 'Order value' : 'Contract value';
-  const valueHint = isOrdersView ? 'Total order amount' : 'Total offer amount';
-  const emptyTitle = isOrdersView ? 'No active orders yet' : 'No active contracts yet';
-  const emptyDescription = isOrdersView
-    ? isCustomer
-      ? 'When you purchase a service, your order will appear here.'
-      : 'When a buyer accepts your service offer, the order shows up here.'
-    : isCustomer
-      ? 'Accepted bids on your tasks and projects will appear here.'
-      : 'When an employer accepts your proposal, the contract shows up here.';
-  const filterEmptyTitle = isOrdersView ? 'No orders match your search' : 'No contracts match your search';
+  const emptyTitle =
+    statusFilter === 'history'
+      ? isOrdersView
+        ? 'No order history yet'
+        : 'No contract history yet'
+      : isOrdersView
+        ? 'No active orders yet'
+        : 'No active contracts yet';
+  const emptyDescription =
+    statusFilter === 'history'
+      ? isCustomer
+        ? 'Completed and cancelled listings will appear here.'
+        : 'Completed and cancelled contracts will appear here.'
+      : isOrdersView
+        ? isCustomer
+          ? 'When you purchase a service, your order will appear here.'
+          : 'When a buyer accepts your service offer, the order shows up here.'
+        : isCustomer
+          ? 'Accepted bids on your jobs, services, projects, and tasks will appear here.'
+          : 'When an employer accepts your proposal, the contract shows up here.';
+  const filterEmptyTitle =
+    statusFilter === 'history'
+      ? isOrdersView
+        ? 'No past orders match your search'
+        : 'No past contracts match your search'
+      : isOrdersView
+        ? 'No orders match your search'
+        : 'No contracts match your search';
   const paginationLabel = isOrdersView ? 'orders' : 'contracts';
   const detailFrom = isOrdersView ? 'orders' : 'contracts';
 
@@ -351,18 +359,25 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
         <p className="mt-2 text-sm text-neutral-500">{subtitle}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{countLabel}</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.count}</p>
-          <p className="mt-1 text-xs text-neutral-500">{countHint}</p>
+      {!isOrdersView ? (
+        <div className={DASHBOARD_SUBTABS_WRAP}>
+          <div className={DASHBOARD_SUBTABS_ROW}>
+            {CONTRACT_TYPE_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => {
+                  setTypeFilter(tab.key);
+                  setCurrentPage(1);
+                }}
+                className={dashboardSubtabClass(typeFilter === tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">{valueLabel}</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{formatNPR(totals.totalValue)}</p>
-          <p className="mt-1 text-xs text-neutral-500">{valueHint}</p>
-        </div>
-      </div>
+      ) : null}
 
       <WalletTableToolbar
         searchQuery={searchQuery}
@@ -379,14 +394,13 @@ export default function DashboardContracts({ variant = 'contracts' }: { variant?
               ? 'Search by title, freelancer, location, or contract #'
               : 'Search by title, employer, location, or contract #'
         }
-        filterStatus={typeFilter}
+        filterStatus={statusFilter}
         onFilterChange={(value) => {
-          setTypeFilter(value as ContractTypeFilter);
+          setStatusFilter(value as ContractStatusFilter);
           setCurrentPage(1);
         }}
-        filterOptions={typeFilterOptions}
-        filterLabel="Listing type:"
-        hidePrimaryFilter={isOrdersView}
+        filterOptions={CONTRACT_STATUS_FILTER_OPTIONS}
+        filterLabel="Status:"
       />
 
       <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-8`}>

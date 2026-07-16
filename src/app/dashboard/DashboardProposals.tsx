@@ -16,15 +16,18 @@ import {
   Wrench,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import FeeConfirmModal from '@/components/fees/FeeConfirmModal';
 import { useAuth } from '@/hooks/useAuth';
 import UserAvatar from '@/components/common/UserAvatar';
 import { resolveOwnerAvatarBg, resolveOwnerInitials } from '@/lib/employerAvatarUtils';
+import { normalizeFeeListingKind, type FeeListingKind } from '@/lib/feeUtils';
 import { formatNPR, shortenCommaSeparatedLocation } from '@/lib/nepalLocale';
 import { getMediaUrl } from '@/lib/utils';
 import { bidService, extractBidList, sortBidsByIdAlphanumeric } from '@/services/bid.service';
 import type { Bid, BidStatus } from '@/types';
-import DeleteConfirmModal from './DeleteConfirmModal';
 import { getEmployerBidDetailHref, getFreelancerBidDetailHref } from './dashboardTabs';
+import WalletTableToolbar from './WalletTableToolbar';
+import { matchesSearchQuery } from './dashboardListSearch';
 import {
   DASHBOARD_CARD_PLAIN,
   DASHBOARD_HEADING_PROPOSALS,
@@ -38,12 +41,13 @@ import {
   dashboardSubtabClass,
 } from './dashboardResponsive';
 
-type ProposalFilter = 'pending' | 'accepted' | 'cancelled';
+type ProposalFilter = 'pending' | 'accepted' | 'cancelled' | 'all';
 
-const PROPOSAL_FILTER_TABS: { key: ProposalFilter; label: string }[] = [
-  { key: 'pending', label: 'Pending' },
-  { key: 'accepted', label: 'Accepted' },
-  { key: 'cancelled', label: 'Cancelled' },
+const PROPOSAL_STATUS_FILTER_OPTIONS = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'accepted', label: 'Accepted' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'all', label: 'All statuses' },
 ];
 
 type ProposalType = 'job' | 'service' | 'project' | 'task';
@@ -52,10 +56,10 @@ type ProposalTypeFilter = 'all' | ProposalType;
 
 const PROPOSAL_TYPE_TABS: { key: ProposalTypeFilter; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'job', label: 'Job' },
+  { key: 'job', label: 'Jobs' },
   { key: 'service', label: 'Services' },
-  { key: 'project', label: 'Project' },
-  { key: 'task', label: 'Task' },
+  { key: 'project', label: 'Projects' },
+  { key: 'task', label: 'Tasks' },
 ];
 
 const PROPOSAL_TYPE_LABELS: Record<ProposalType, string> = {
@@ -90,6 +94,7 @@ type FreelancerRow = ProposalRowBase & {
   projectTitle: string;
   projectSlug?: string;
   canWithdraw: boolean;
+  amount: number;
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -119,6 +124,7 @@ function isCancelledStatus(status: BidStatus): boolean {
 }
 
 function matchesProposalFilter(rawStatus: BidStatus, filter: ProposalFilter): boolean {
+  if (filter === 'all') return true;
   if (filter === 'pending') return rawStatus === 'pending';
   if (filter === 'accepted') return rawStatus === 'accepted';
   return isCancelledStatus(rawStatus);
@@ -145,7 +151,7 @@ function isFreelancerAppliedListingKind(kind?: string | null): boolean {
 }
 
 function isFreelancerAppliedBid(bid: Bid): boolean {
-  return bid.status === 'pending' && isFreelancerAppliedListingKind(bid.task_listing_kind);
+  return isFreelancerAppliedListingKind(bid.task_listing_kind);
 }
 
 function matchesProposalType(listingType: ProposalType, filter: ProposalTypeFilter): boolean {
@@ -247,13 +253,12 @@ function emptyMessageForFilter(
   statusFilter: ProposalFilter,
   typeFilter: ProposalTypeFilter,
   isCustomer: boolean,
-  freelancerAppliedOnly = false,
 ): string {
-  const scope = isCustomer ? 'proposals on your listings' : 'applications';
+  const scope = isCustomer ? 'proposals on your listings' : 'proposals';
   const typeLabel =
     typeFilter === 'all' ? '' : ` ${PROPOSAL_TYPE_LABELS[typeFilter].toLowerCase()}`;
-  if (freelancerAppliedOnly) {
-    return `No applied${typeLabel} listings yet. Browse jobs, services, projects, or tasks and submit an offer.`;
+  if (statusFilter === 'all') {
+    return `No${typeLabel} ${scope} yet.`;
   }
   if (statusFilter === 'pending') return `No pending${typeLabel} ${scope}.`;
   if (statusFilter === 'accepted') return `No accepted${typeLabel} ${scope}.`;
@@ -275,11 +280,17 @@ export default function DashboardProposals({
     employerView === 'applications' ? 'pending' : 'pending',
   );
   const [activeTypeFilter, setActiveTypeFilter] = useState<ProposalTypeFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
+  const [withdrawTarget, setWithdrawTarget] = useState<{
+    id: string;
+    amount: number;
+    listingKind?: FeeListingKind;
+  } | null>(null);
+  const [withdrawConfirming, setWithdrawConfirming] = useState(false);
 
   const loadEmployerRows = useCallback(async () => {
-    const response = await bidService.getReceivedBids();
+    const response = await bidService.getReceivedBids(undefined, { fetchAll: true, page_size: 100 });
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to load proposals');
     }
@@ -307,7 +318,7 @@ export default function DashboardProposals({
   const isFreelancerProposals = !isCustomer && !employerView;
 
   const loadFreelancerRows = useCallback(async () => {
-    const response = await bidService.getMyBids();
+    const response = await bidService.getMyBids(undefined, { fetchAll: true, page_size: 100 });
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Failed to load proposals');
     }
@@ -331,6 +342,7 @@ export default function DashboardProposals({
       status: statusLabel(bid.status),
       rawStatus: bid.status,
       amountLabel: formatNPR(Number(bid.amount) || 0),
+      amount: Number(bid.amount) || 0,
       rateType: 'Offer',
       canWithdraw: bid.status === 'pending',
     }));
@@ -373,19 +385,29 @@ export default function DashboardProposals({
     const source = isCustomer ? employerRows : freelancerRows;
     return source.filter((row) => {
       const matchesType = matchesProposalType(row.listingType, activeTypeFilter);
-      if (isFreelancerProposals) {
-        return matchesType && row.rawStatus === 'pending';
+      if (!matchesProposalFilter(row.rawStatus, activeFilter) || !matchesType) return false;
+
+      if (isCustomer) {
+        const employerRow = row as EmployerRow;
+        return matchesSearchQuery(
+          searchQuery,
+          employerRow.projectTitle,
+          employerRow.freelancerName,
+          employerRow.location,
+          employerRow.projectSlug,
+        );
       }
-      return matchesProposalFilter(row.rawStatus, activeFilter) && matchesType;
+
+      const freelancerRow = row as FreelancerRow;
+      return matchesSearchQuery(
+        searchQuery,
+        freelancerRow.projectTitle,
+        freelancerRow.ownerName,
+        freelancerRow.location,
+        freelancerRow.projectSlug,
+      );
     });
-  }, [
-    activeFilter,
-    activeTypeFilter,
-    employerRows,
-    freelancerRows,
-    isCustomer,
-    isFreelancerProposals,
-  ]);
+  }, [activeFilter, activeTypeFilter, employerRows, freelancerRows, isCustomer, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / ITEMS_PER_PAGE));
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
@@ -399,19 +421,22 @@ export default function DashboardProposals({
   }, [currentPage, totalPages]);
 
   const confirmWithdraw = async () => {
-    if (!withdrawTargetId) return;
+    if (!withdrawTarget) return;
 
+    setWithdrawConfirming(true);
     try {
-      const response = await bidService.withdrawBid(withdrawTargetId, 'Withdrawn from dashboard');
+      const response = await bidService.withdrawBid(withdrawTarget.id, 'Withdrawn from dashboard');
       if (!response.success) {
         toast.error(response.message || 'Failed to withdraw proposal');
         return;
       }
       toast.success('Proposal withdrawn');
-      setWithdrawTargetId(null);
+      setWithdrawTarget(null);
       await loadRows();
     } catch {
       toast.error('Failed to withdraw proposal');
+    } finally {
+      setWithdrawConfirming(false);
     }
   };
 
@@ -425,7 +450,7 @@ export default function DashboardProposals({
     if (isCustomer) {
       return 'Review proposals on your jobs, services, projects, and tasks — accept or reject from the detail view.';
     }
-    return 'Applied offers on jobs, services, projects, and tasks that are waiting for a response.';
+    return 'Your proposals across jobs, services, projects, and tasks — pending, accepted, and closed.';
   }, [employerView, isCustomer]);
 
   const pageTitle = useMemo(() => {
@@ -436,23 +461,10 @@ export default function DashboardProposals({
 
   const statusTabs = useMemo(() => {
     if (employerView === 'applications') {
-      return PROPOSAL_FILTER_TABS.filter((tab) => tab.key === 'pending');
+      return PROPOSAL_STATUS_FILTER_OPTIONS.filter((tab) => tab.value === 'pending');
     }
-    if (isFreelancerProposals) {
-      return [];
-    }
-    return PROPOSAL_FILTER_TABS;
-  }, [employerView, isFreelancerProposals]);
-
-  const typeTabClass = (filter: ProposalTypeFilter) =>
-    `cursor-pointer rounded-full px-4 py-2 text-sm font-normal transition-all outline-none ${
-      activeTypeFilter === filter
-        ? 'bg-black text-white'
-        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 hover:text-black dark:bg-neutral-800 dark:text-stone-300 dark:hover:bg-neutral-700 dark:hover:text-stone-100'
-    }`;
-
-  const filterTabClass = (filter: ProposalFilter) =>
-    dashboardSubtabClass(activeFilter === filter);
+    return PROPOSAL_STATUS_FILTER_OPTIONS;
+  }, [employerView]);
 
   const pageNumbers = useMemo(() => {
     const pages: number[] = [];
@@ -471,9 +483,8 @@ export default function DashboardProposals({
         </div>
       </div>
 
-      <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-10`}>
-        <div className="mb-6 overflow-x-auto pb-1">
-          <div className="flex w-max min-w-full flex-nowrap gap-2">
+      <div className={DASHBOARD_SUBTABS_WRAP}>
+        <div className={DASHBOARD_SUBTABS_ROW}>
           {PROPOSAL_TYPE_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -482,34 +493,36 @@ export default function DashboardProposals({
                 setActiveTypeFilter(tab.key);
                 setCurrentPage(1);
               }}
-              className={typeTabClass(tab.key)}
+              className={dashboardSubtabClass(activeTypeFilter === tab.key)}
             >
               {tab.label}
             </button>
           ))}
-          </div>
         </div>
+      </div>
 
-        {statusTabs.length > 0 ? (
-          <div className={DASHBOARD_SUBTABS_WRAP}>
-            <div className={DASHBOARD_SUBTABS_ROW}>
-              {statusTabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => {
-                    setActiveFilter(tab.key);
-                    setCurrentPage(1);
-                  }}
-                  className={filterTabClass(tab.key)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
+      <WalletTableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={(value) => {
+          setSearchQuery(value);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder={
+          isCustomer
+            ? 'Search by title, freelancer, or location'
+            : 'Search by title, employer, or location'
+        }
+        filterStatus={activeFilter}
+        onFilterChange={(value) => {
+          setActiveFilter(value as ProposalFilter);
+          setCurrentPage(1);
+        }}
+        filterOptions={statusTabs}
+        filterLabel="Status:"
+        hidePrimaryFilter={statusTabs.length <= 1}
+      />
 
+      <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-10`}>
         <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid dark:border-neutral-800 dark:text-stone-100">
           <div className="col-span-12 md:col-span-5">Name</div>
           <div className="col-span-6 md:col-span-2">Type</div>
@@ -525,12 +538,7 @@ export default function DashboardProposals({
             </div>
           ) : currentItems.length === 0 ? (
             <div className="py-12 text-center text-sm text-neutral-500">
-              {emptyMessageForFilter(
-                activeFilter,
-                activeTypeFilter,
-                isCustomer,
-                isFreelancerProposals,
-              )}
+              {emptyMessageForFilter(activeFilter, activeTypeFilter, isCustomer)}
             </div>
           ) : isCustomer ? (
             (currentItems as EmployerRow[]).map((row) => (
@@ -658,7 +666,13 @@ export default function DashboardProposals({
                     {row.canWithdraw ? (
                       <button
                         type="button"
-                        onClick={() => setWithdrawTargetId(row.id)}
+                        onClick={() =>
+                          setWithdrawTarget({
+                            id: row.id,
+                            amount: row.amount,
+                            listingKind: normalizeFeeListingKind(row.listingType),
+                          })
+                        }
                         className="shrink-0 cursor-pointer rounded-lg border-0 bg-[#FEF1EE] p-3 text-[#FF6B6B] outline-none transition-all hover:bg-[#FCE2DC] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
                         title="Withdraw proposal"
                       >
@@ -715,10 +729,16 @@ export default function DashboardProposals({
         ) : null}
       </div>
 
-      <DeleteConfirmModal
-        open={withdrawTargetId !== null}
-        onClose={() => setWithdrawTargetId(null)}
+      <FeeConfirmModal
+        open={withdrawTarget !== null}
+        onClose={() => setWithdrawTarget(null)}
         onConfirm={() => void confirmWithdraw()}
+        mode="withdraw"
+        amount={withdrawTarget?.amount ?? 0}
+        listingKind={withdrawTarget?.listingKind}
+        cancellationStage="BEFORE_ACCEPT"
+        confirming={withdrawConfirming}
+        confirmLabel="Withdraw proposal"
       />
     </div>
   );

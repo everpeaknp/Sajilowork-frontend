@@ -109,14 +109,21 @@ class PaymentService {
 
   /**
    * Preview fees for a bid amount before accepting an offer.
+   * Uses FeeRule rows (optionally scoped by listing_kind) via POST /fees/calculate/.
    */
   async getFeePreview(
     amount: number,
-    paymentMethod: 'wallet' | 'card' = 'wallet'
+    paymentMethod: 'wallet' | 'card' = 'wallet',
+    options?: {
+      listing_kind?: 'task' | 'project' | 'service' | 'job';
+      category_id?: string;
+    }
   ): Promise<ApiResponse<FeePreview>> {
     const feesRes = await apiClient.post<FeePreview>('/fees/calculate/', {
       task_amount: amount,
       payment_method: paymentMethod,
+      ...(options?.listing_kind ? { listing_kind: options.listing_kind } : {}),
+      ...(options?.category_id ? { category_id: options.category_id } : {}),
     });
     if (feesRes.success && feesRes.data) {
       const d: any = feesRes.data;
@@ -153,6 +160,30 @@ class PaymentService {
     }
     return apiClient.get(`${this.PAYMENTS_PATH}/fee_preview/`, {
       params: { amount, payment_method: paymentMethod },
+    });
+  }
+
+  /**
+   * Preview cancellation / early-withdraw fee from FeeRule (CANCELLATION_FEE).
+   */
+  async getCancellationFeePreview(data: {
+    task_amount: number;
+    stage: 'BEFORE_ACCEPT' | 'AFTER_ACCEPT' | 'IN_PROGRESS';
+    listing_kind?: 'task' | 'project' | 'service' | 'job';
+    category_id?: string;
+  }): Promise<
+    ApiResponse<{
+      cancellation_fee: number;
+      stage: string;
+      rule_id?: string | null;
+      rule_name?: string;
+    }>
+  > {
+    return apiClient.post(`/fees/cancellation/`, {
+      task_amount: data.task_amount,
+      stage: data.stage,
+      ...(data.listing_kind ? { listing_kind: data.listing_kind } : {}),
+      ...(data.category_id ? { category_id: data.category_id } : {}),
     });
   }
 

@@ -26,25 +26,22 @@ import {
   DASHBOARD_PAGINATION_ARROW_PLAIN,
   DASHBOARD_PAGINATION_INNER,
   DASHBOARD_PAGINATION_OUTER,
+  DASHBOARD_SUBTABS_ROW,
+  DASHBOARD_SUBTABS_WRAP,
   dashboardPageButtonClass,
+  dashboardSubtabClass,
 } from './dashboardResponsive';
 
 type ListingKind = 'task' | 'project' | 'job' | 'service';
 type ListingKindFilter = 'all' | ListingKind;
 type BidActivityFilter = 'all' | 'pending' | 'accepted' | 'mixed';
 
-const EMPLOYER_TYPE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'task', label: 'Tasks' },
-  { value: 'project', label: 'Projects' },
-];
-
-const FREELANCER_TYPE_FILTER_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'task', label: 'Tasks' },
-  { value: 'project', label: 'Projects' },
-  { value: 'job', label: 'Jobs' },
-  { value: 'service', label: 'Services' },
+const BID_TYPE_TABS: { key: ListingKindFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'job', label: 'Jobs' },
+  { key: 'service', label: 'Services' },
+  { key: 'project', label: 'Projects' },
+  { key: 'task', label: 'Tasks' },
 ];
 
 const BID_ACTIVITY_FILTER_OPTIONS = [
@@ -101,20 +98,15 @@ function isListingKind(kind?: string | null): kind is ListingKind {
   return kind === 'task' || kind === 'project' || kind === 'job' || kind === 'service';
 }
 
-function isTaskOrProjectListing(kind?: string | null): boolean {
-  return kind === 'task' || kind === 'project' || !kind;
-}
-
 function resolveListingKind(kind?: string | null): ListingKind {
   if (isListingKind(kind)) return kind;
   return 'task';
 }
 
-function groupBidsByListing(bids: Bid[], employerView: boolean): ListingBidGroup[] {
+function groupBidsByListing(bids: Bid[]): ListingBidGroup[] {
   const grouped = new Map<string, ListingBidGroup>();
 
   for (const bid of bids) {
-    if (employerView && !isTaskOrProjectListing(bid.task_listing_kind)) continue;
     const slug = bid.task_slug?.trim();
     if (!slug) continue;
 
@@ -224,12 +216,12 @@ export default function DashboardEmployerBids() {
     setLoading(true);
     try {
       const response = isCustomer
-        ? await bidService.getReceivedBids()
-        : await bidService.getMyBids();
+        ? await bidService.getReceivedBids(undefined, { fetchAll: true, page_size: 100 })
+        : await bidService.getMyBids(undefined, { fetchAll: true, page_size: 100 });
       if (!response.success || !response.data) {
         throw new Error(response.message || 'Failed to load bids');
       }
-      setGroups(groupBidsByListing(extractBidList(response.data), isCustomer));
+      setGroups(groupBidsByListing(extractBidList(response.data)));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to load bids';
       toast.error(message);
@@ -265,16 +257,6 @@ export default function DashboardEmployerBids() {
     });
   }, [activityFilter, groups, kindFilter, searchQuery]);
 
-  const totals = useMemo(() => {
-    const totalBids = filteredGroups.reduce((sum, group) => sum + group.totalBids, 0);
-    const pendingBids = filteredGroups.reduce((sum, group) => sum + group.pendingBids, 0);
-    return {
-      listings: filteredGroups.length,
-      totalBids,
-      pendingBids,
-    };
-  }, [filteredGroups]);
-
   const totalPages = Math.max(1, Math.ceil(filteredGroups.length / ITEMS_PER_PAGE));
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
@@ -294,15 +276,14 @@ export default function DashboardEmployerBids() {
     return pages;
   }, [totalPages]);
 
-  const typeFilterOptions = isCustomer ? EMPLOYER_TYPE_FILTER_OPTIONS : FREELANCER_TYPE_FILTER_OPTIONS;
   const hasActiveFilters =
     searchQuery.trim().length > 0 || kindFilter !== 'all' || activityFilter !== 'all';
   const isEmptyFromFilters = !loading && groups.length > 0 && filteredGroups.length === 0;
 
   const pageTitle = isCustomer ? 'Bids' : 'My bids';
   const pageDescription = isCustomer
-    ? 'All bids received on your tasks and projects. Select a listing to view every bid.'
-    : 'Bids you have submitted, grouped by listing. Select a listing to review your offers.';
+    ? 'All bids received on your jobs, services, projects, and tasks. Select a listing to view every bid.'
+    : 'Bids you have submitted across jobs, services, projects, and tasks. Select a listing to review your offers.';
 
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
@@ -311,25 +292,21 @@ export default function DashboardEmployerBids() {
         <p className="mt-1.5 font-sans text-sm text-neutral-800">{pageDescription}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Listings</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.listings}</p>
-          <p className="mt-1 text-xs text-neutral-500">
-            {isCustomer ? 'Tasks & projects with bids' : 'Listings with your bids'}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Total bids</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.totalBids}</p>
-          <p className="mt-1 text-xs text-neutral-500">Across filtered listings</p>
-        </div>
-        <div className="rounded-2xl border border-neutral-200/60 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-400">Pending</p>
-          <p className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-stone-100">{totals.pendingBids}</p>
-          <p className="mt-1 text-xs text-neutral-500">
-            {isCustomer ? 'Awaiting your review' : 'Still under review'}
-          </p>
+      <div className={DASHBOARD_SUBTABS_WRAP}>
+        <div className={DASHBOARD_SUBTABS_ROW}>
+          {BID_TYPE_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => {
+                setKindFilter(tab.key);
+                setCurrentPage(1);
+              }}
+              className={dashboardSubtabClass(kindFilter === tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -344,20 +321,13 @@ export default function DashboardEmployerBids() {
             ? 'Search listings by title or location'
             : 'Search listings by title, employer, or location'
         }
-        filterStatus={kindFilter}
+        filterStatus={activityFilter}
         onFilterChange={(value) => {
-          setKindFilter(value as ListingKindFilter);
-          setCurrentPage(1);
-        }}
-        filterOptions={typeFilterOptions}
-        filterLabel="Listing type:"
-        secondaryFilterStatus={activityFilter}
-        onSecondaryFilterChange={(value) => {
           setActivityFilter(value as BidActivityFilter);
           setCurrentPage(1);
         }}
-        secondaryFilterOptions={BID_ACTIVITY_FILTER_OPTIONS}
-        secondaryFilterLabel="Bid activity:"
+        filterOptions={BID_ACTIVITY_FILTER_OPTIONS}
+        filterLabel="Bid activity:"
       />
 
       <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-10`}>
@@ -377,7 +347,7 @@ export default function DashboardEmployerBids() {
           ) : groups.length === 0 ? (
             <div className="py-12 text-center text-sm text-neutral-500">
               {isCustomer
-                ? 'No bids on your tasks or projects yet.'
+                ? 'No bids on your listings yet.'
                 : 'You have not submitted any bids yet.'}
             </div>
           ) : isEmptyFromFilters ? (
