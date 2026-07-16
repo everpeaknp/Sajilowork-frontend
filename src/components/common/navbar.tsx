@@ -88,6 +88,7 @@ function getNotificationHref(notification: NotificationType): string {
   }
 
   const data = notification.data as Record<string, unknown> | undefined;
+  const listingKind = typeof data?.listing_kind === 'string' ? data.listing_kind : undefined;
 
   if (notification.notification_type === 'message_received') {
     const convId = data?.conversation_id ?? data?.conversation;
@@ -96,17 +97,48 @@ function getNotificationHref(notification: NotificationType): string {
   }
 
   if (
+    notification.notification_type === 'new_bid' ||
+    notification.notification_type === 'counter_offer' ||
+    notification.notification_type === 'bid_message' ||
     notification.notification_type === 'bid_received' ||
     notification.notification_type === 'bid_accepted' ||
     notification.notification_type === 'bid_rejected' ||
+    notification.notification_type === 'bid_withdrawn' ||
     notification.notification_type === 'task_assigned' ||
-    notification.notification_type === 'task_completed'
+    notification.notification_type === 'task_started' ||
+    notification.notification_type === 'task_progress_updated' ||
+    notification.notification_type === 'task_completion_requested' ||
+    notification.notification_type === 'task_approved' ||
+    notification.notification_type === 'task_completed' ||
+    notification.notification_type === 'task_cancelled' ||
+    notification.notification_type === 'revision_requested' ||
+    notification.notification_type === 'task_status_update'
   ) {
+    if (listingKind === 'project') return '/dashboard/projects';
+    if (listingKind === 'job') return '/dashboard/jobs';
+    if (listingKind === 'service') return '/dashboard/orders';
     return '/my-tasks';
+  }
+
+  if (notification.notification_type === 'task_created') {
+    if (listingKind === 'project') return '/dashboard/projects';
+    if (listingKind === 'job') return '/dashboard/jobs';
+    if (listingKind === 'service') return '/dashboard/services';
+    return '/task';
   }
 
   if (notification.notification_type === 'review_received') {
     return '/discover';
+  }
+
+  if (
+    notification.notification_type === 'payment_received' ||
+    notification.notification_type === 'payment_sent' ||
+    notification.notification_type === 'payment_succeeded' ||
+    notification.notification_type === 'payment_failed' ||
+    notification.notification_type === 'payout_processed'
+  ) {
+    return '/dashboard/statements';
   }
 
   return '/my-tasks';

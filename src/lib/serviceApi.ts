@@ -20,6 +20,7 @@ import { extractTaskList, formatTaskDisplayTitle } from '@/lib/taskUtils';
 import { getMediaUrl } from '@/lib/utils';
 
 import { serviceService } from '@/services/service.service';
+import { fetchPublicJson } from '@/lib/seo/api';
 
 import type { Task, User } from '@/types';
 
@@ -547,21 +548,17 @@ export async function fetchPublicServices(
 
 
 export async function fetchPublicServiceBySlug(slug: string): Promise<Service | null> {
-
-  const response = await serviceService.getServiceBySlug(slug);
-
-  if (!response.success || !response.data) {
-
-    return null;
-
-  }
-
-  if (getListingKind(response.data) !== 'service') {
+  const raw = await fetchPublicJson<Task>(`/services/${encodeURIComponent(slug)}/`, {
+    revalidate: 300,
+  });
+  if (!raw || getListingKind(raw) !== 'service') {
     return null;
   }
 
-  return mapTaskToPublicService(response.data);
-
+  try {
+    return mapTaskToPublicService(raw);
+  } catch (error) {
+    console.error('[fetchPublicServiceBySlug] Failed to map service', slug, error);
+    return null;
+  }
 }
-
-

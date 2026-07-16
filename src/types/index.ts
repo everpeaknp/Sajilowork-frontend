@@ -618,27 +618,53 @@ export interface Message {
 
 export type NotificationType = 
   | 'task_created'
+  | 'task_updated'
+  | 'task_assigned'
+  | 'task_started'
+  | 'task_progress_updated'
+  | 'task_completion_requested'
+  | 'task_approved'
   | 'bid_received'
+  | 'new_bid'
   | 'bid_accepted'
   | 'bid_rejected'
-  | 'task_assigned'
+  | 'bid_withdrawn'
+  | 'bid_message'
+  | 'counter_offer'
   | 'task_completed'
+  | 'task_cancelled'
+  | 'task_expired'
+  | 'task_reminder'
+  | 'task_status_update'
+  | 'revision_requested'
   | 'review_received'
+  | 'review_response'
+  | 'mutual_review_complete'
   | 'message_received'
+  | 'conversation_started'
   | 'payment_received'
-  | 'payment_sent';
+  | 'payment_sent'
+  | 'payment_succeeded'
+  | 'payment_failed'
+  | 'payout_processed'
+  | 'system_announcement';
 
 export interface Notification {
   id: string;
-  user: string;
+  user?: string;
+  recipient?: string;
   notification_type: NotificationType;
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   action_url?: string;
   is_read?: boolean;
+  is_archived?: boolean;
   read_at?: string;
   created_at?: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  sender_name?: string;
+  sender_avatar?: string;
 }
 
 // ============================================================================

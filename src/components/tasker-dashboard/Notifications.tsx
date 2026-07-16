@@ -27,6 +27,8 @@ import { cn } from '@/lib/utils';
 import { notificationService } from '@/services';
 import { Notification as NotificationItem } from '@/types';
 import { toast } from 'sonner';
+import { buildNotificationWebSocketUrl, isWebSocketsEnabled } from '@/lib/notificationWebSocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import {
   landingBody,
   landingBodyMuted,
@@ -77,6 +79,7 @@ function getNotificationHref(notification: NotificationItem): string {
   }
 
   const data = notification.data as Record<string, unknown> | undefined;
+  const listingKind = typeof data?.listing_kind === 'string' ? data.listing_kind : undefined;
 
   if (notification.notification_type === 'message_received') {
     const convId = data?.conversation_id ?? data?.conversation;
@@ -85,17 +88,48 @@ function getNotificationHref(notification: NotificationItem): string {
   }
 
   if (
+    notification.notification_type === 'new_bid' ||
+    notification.notification_type === 'counter_offer' ||
+    notification.notification_type === 'bid_message' ||
     notification.notification_type === 'bid_received' ||
     notification.notification_type === 'bid_accepted' ||
     notification.notification_type === 'bid_rejected' ||
+    notification.notification_type === 'bid_withdrawn' ||
     notification.notification_type === 'task_assigned' ||
-    notification.notification_type === 'task_completed'
+    notification.notification_type === 'task_started' ||
+    notification.notification_type === 'task_progress_updated' ||
+    notification.notification_type === 'task_completion_requested' ||
+    notification.notification_type === 'task_approved' ||
+    notification.notification_type === 'task_completed' ||
+    notification.notification_type === 'task_cancelled' ||
+    notification.notification_type === 'revision_requested' ||
+    notification.notification_type === 'task_status_update'
   ) {
+    if (listingKind === 'project') return '/dashboard/projects';
+    if (listingKind === 'job') return '/dashboard/jobs';
+    if (listingKind === 'service') return '/dashboard/orders';
     return '/my-tasks';
+  }
+
+  if (notification.notification_type === 'task_created') {
+    if (listingKind === 'project') return '/dashboard/projects';
+    if (listingKind === 'job') return '/dashboard/jobs';
+    if (listingKind === 'service') return '/dashboard/services';
+    return TASK_BROWSE_PATH;
   }
 
   if (notification.notification_type === 'review_received') {
     return '/tasker-dashboard/profile';
+  }
+
+  if (
+    notification.notification_type === 'payment_received' ||
+    notification.notification_type === 'payment_sent' ||
+    notification.notification_type === 'payment_succeeded' ||
+    notification.notification_type === 'payment_failed' ||
+    notification.notification_type === 'payout_processed'
+  ) {
+    return '/dashboard/statements';
   }
 
   return '/my-tasks';
@@ -233,6 +267,10 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const notificationWsUrl = useMemo(
+    () => (isWebSocketsEnabled() ? buildNotificationWebSocketUrl() : null),
+    [],
+  );
 
   const fetchNotifications = useCallback(async (opts?: { silent?: boolean }) => {
     try {
@@ -268,8 +306,24 @@ export default function Notifications() {
   }, [filter]);
 
   useEffect(() => {
-    fetchNotifications();
+    const timeoutId = window.setTimeout(() => {
+      void fetchNotifications();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [fetchNotifications]);
+
+  useWebSocket(notificationWsUrl, {
+    enabled: Boolean(notificationWsUrl),
+    maxReconnectAttempts: 8,
+    onMessage: (message: { type?: string; notification?: NotificationItem }) => {
+      if (message.type !== 'new_notification' || !message.notification) return;
+      setNotifications((prev) => {
+        const current = Array.isArray(prev) ? prev : [];
+        if (current.some((item) => item.id === message.notification?.id)) return current;
+        return [message.notification, ...current];
+      });
+    },
+  });
 
   const filteredNotifications = useMemo(() => {
     const list = Array.isArray(notifications) ? notifications : [];

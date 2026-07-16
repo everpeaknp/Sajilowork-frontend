@@ -10,6 +10,7 @@ import { parseServiceSkills, parseTaskDashboardMeta } from '@/lib/dashboardListi
 import { formatNPR, formatTaskLocationShort } from '@/lib/nepalLocale';
 import { getTimeSlotById } from '@/lib/timeSlot';
 import { extractTaskList, formatTaskDisplayTitle, resolveTaskCategoryName } from '@/lib/taskUtils';
+import { fetchPublicJson } from '@/lib/seo/api';
 import { projectService } from '@/services/project.service';
 import { getMediaUrl, isTaskImageAttachment } from '@/lib/utils';
 import { resolveOwnerAvatarBg } from '@/lib/employerAvatarUtils';
@@ -341,11 +342,17 @@ export async function fetchPublicProjects(
 }
 
 export async function fetchPublicProjectBySlug(slug: string): Promise<Project | null> {
-  const response = await projectService.getProjectBySlug(slug);
-  if (!response.success || !response.data) {
+  const raw = await fetchPublicJson<Task>(`/projects/${encodeURIComponent(slug)}/`, {
+    revalidate: 300,
+  });
+  if (!raw) return null;
+
+  try {
+    return mapTaskToPublicProject(raw);
+  } catch (error) {
+    console.error('[fetchPublicProjectBySlug] Failed to map project', slug, error);
     return null;
   }
-  return mapTaskToPublicProject(response.data);
 }
 
 /** Minimal task shape for reviews on public project pages. */

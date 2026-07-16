@@ -60,41 +60,41 @@ function formatDisplayDate(value?: string): string {
   });
 }
 
+async function fetchListingIfAvailable(
+  fetcher: () => Promise<{ success: boolean; data?: Task | null }>,
+): Promise<Task | null> {
+  try {
+    const response = await fetcher();
+    if (response.success && response.data) {
+      return response.data;
+    }
+  } catch {
+    // Wrong listing type for this slug (404) — fall through to the next kind.
+  }
+  return null;
+}
+
 async function resolveListingBySlug(
   slug: string,
   listingKinds?: Array<'task' | 'project' | 'job' | 'service'>,
 ): Promise<Task | null> {
-  const allowProject = !listingKinds || listingKinds.includes('project');
-  const allowTask = !listingKinds || listingKinds.includes('task');
-  const allowJob = !listingKinds || listingKinds.includes('job');
-  const allowService = !listingKinds || listingKinds.includes('service');
+  const order: Array<'task' | 'project' | 'job' | 'service'> =
+    listingKinds ?? ['project', 'task', 'job', 'service'];
 
-  if (allowProject) {
-    const projectResponse = await projectService.getProjectBySlug(slug);
-    if (projectResponse.success && projectResponse.data) {
-      return projectResponse.data;
-    }
-  }
+  for (const kind of order) {
+    let task: Task | null = null;
 
-  if (allowTask) {
-    const taskResponse = await taskService.getTaskBySlug(slug);
-    if (taskResponse.success && taskResponse.data) {
-      return taskResponse.data;
+    if (kind === 'project') {
+      task = await fetchListingIfAvailable(() => projectService.getProjectBySlug(slug));
+    } else if (kind === 'task') {
+      task = await fetchListingIfAvailable(() => taskService.getTaskBySlug(slug));
+    } else if (kind === 'job') {
+      task = await fetchListingIfAvailable(() => jobService.getJobBySlug(slug));
+    } else if (kind === 'service') {
+      task = await fetchListingIfAvailable(() => serviceService.getServiceBySlug(slug));
     }
-  }
 
-  if (allowJob) {
-    const jobResponse = await jobService.getJobBySlug(slug);
-    if (jobResponse.success && jobResponse.data) {
-      return jobResponse.data;
-    }
-  }
-
-  if (allowService) {
-    const serviceResponse = await serviceService.getServiceBySlug(slug);
-    if (serviceResponse.success && serviceResponse.data) {
-      return serviceResponse.data;
-    }
+    if (task) return task;
   }
 
   return null;

@@ -24,6 +24,7 @@ import {
   resolveFreelancerBidDetailFrom,
 } from './dashboardTabs';
 import { DASHBOARD_PAGE_ROOT } from './dashboardResponsive';
+import { getTaskDetailPath } from '@/lib/taskPageApi';
 import {
   canUserViewBid,
   getEmployerAvatarBg,
@@ -64,9 +65,10 @@ function getListingLabel(kind: string | null): string {
 }
 
 function getPublicListingHref(kind: string | null, slug: string): string {
-  if (kind === 'job') return `/jobs/${slug}`;
-  if (kind === 'project') return `/projects/${slug}`;
-  return `/tasks/${slug}`;
+  if (kind === 'job') return `/jobs/${encodeURIComponent(slug)}`;
+  if (kind === 'project') return `/projects/${encodeURIComponent(slug)}`;
+  if (kind === 'service') return `/services/${encodeURIComponent(slug)}`;
+  return getTaskDetailPath({ slug, id: slug });
 }
 
 function getTaskStatusFromBid(bid: Bid): string | null {
