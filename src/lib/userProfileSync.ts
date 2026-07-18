@@ -19,7 +19,8 @@ export function normalizeUserFromApi(raw: Record<string, unknown>): User {
       false,
     is_email_verified:
       (raw.is_email_verified as boolean | undefined) ??
-      (raw.email_verified as boolean | undefined),
+      (raw.email_verified as boolean | undefined) ??
+      (raw.is_verified as boolean | undefined),
   };
 }
 

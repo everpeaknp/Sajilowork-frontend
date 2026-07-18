@@ -822,6 +822,8 @@ export interface ProfileFormData {
   state?: string;
   country?: string;
   postal_code?: string;
+  latitude?: number;
+  longitude?: number;
   hourly_rate?: number;
   service_radius?: number;
 }

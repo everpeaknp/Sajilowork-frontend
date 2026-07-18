@@ -103,22 +103,34 @@ const COOKIE_OPTIONS = {
 
 /** In-memory refresh token — httpOnly cookie is not readable from JS. */
 let memoryRefreshToken: string | null = null;
+/** Deduplicate concurrent refresh calls (avoids rotating/blacklisting the same refresh twice). */
+let refreshInFlight: Promise<{ access: string; refresh: string } | null> | null = null;
 
 async function refreshTokensViaBff(): Promise<{ access: string; refresh: string } | null> {
-  try {
-    const response = await fetch('/api/auth/refresh', {
-      method: 'POST',
-      credentials: 'same-origin',
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    if (typeof data?.access === 'string' && typeof data?.refresh === 'string') {
-      return { access: data.access, refresh: data.refresh };
-    }
-    return null;
-  } catch {
-    return null;
+  if (refreshInFlight) {
+    return refreshInFlight;
   }
+
+  refreshInFlight = (async () => {
+    try {
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'same-origin',
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (typeof data?.access === 'string' && typeof data?.refresh === 'string') {
+        return { access: data.access, refresh: data.refresh };
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
 }
 
 export const tokenManager = {
@@ -151,7 +163,9 @@ export const tokenManager = {
 
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    void persistSessionCookies(access, refresh);
+    if (access && refresh) {
+      void persistSessionCookies(access, refresh);
+    }
   },
 
   clearTokens: (): void => {

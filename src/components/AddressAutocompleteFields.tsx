@@ -29,12 +29,15 @@ type AddressAutocompleteFieldsProps = {
   values: AddressFieldValues;
   onChange: (updates: Partial<AddressFieldValues>) => void;
   variant?: 'dashboard' | 'default';
+  /** Show only street search; city/state/country/postal still fill from geocode. */
+  streetOnly?: boolean;
 };
 
 export default function AddressAutocompleteFields({
   values,
   onChange,
   variant = 'default',
+  streetOnly = false,
 }: AddressAutocompleteFieldsProps) {
   const isDashboard = variant === 'dashboard';
   const [isDetecting, setIsDetecting] = useState(false);
@@ -99,20 +102,41 @@ export default function AddressAutocompleteFields({
 
   const selectCity = useCallback(
     (city: City) => {
-      onChange({
-        city: city.name,
-        state: city.state_name || values.state,
-        country: DEFAULT_COUNTRY,
-        ...(city.latitude !== undefined && city.longitude !== undefined
-          ? { latitude: city.latitude, longitude: city.longitude }
-          : {}),
-      });
+      const latitude = city.latitude;
+      const longitude = city.longitude;
+      const label = [city.name, city.state_name].filter(Boolean).join(', ');
+
+      if (latitude !== undefined && longitude !== undefined) {
+        void (async () => {
+          try {
+            const geo = await reverseGeocodeNepal(latitude, longitude);
+            const parsed = parseNepalAddressFromNominatim(geo.address);
+            applyParsedAddress(parsed, { latitude, longitude }, label);
+          } catch {
+            onChange({
+              address: streetOnly ? label : values.address || label,
+              city: city.name,
+              state: city.state_name || values.state,
+              country: DEFAULT_COUNTRY,
+              latitude,
+              longitude,
+            });
+          }
+        })();
+      } else {
+        onChange({
+          address: streetOnly ? label : values.address || label,
+          city: city.name,
+          state: city.state_name || values.state,
+          country: DEFAULT_COUNTRY,
+        });
+      }
       setSuggestions([]);
       setCitySuggestions([]);
       setShowSuggestions(false);
       setHighlightIndex(-1);
     },
-    [onChange, values.state]
+    [applyParsedAddress, onChange, streetOnly, values.address, values.state]
   );
 
   useEffect(() => {
@@ -214,8 +238,8 @@ export default function AddressAutocompleteFields({
 
   return (
     <>
-      <div className="space-y-2 sm:col-span-2">
-        <label className={labelClass}>Street address</label>
+      <div className={cn('space-y-2', streetOnly ? undefined : 'sm:col-span-2')}>
+        <label className={labelClass}>{streetOnly ? 'Location' : 'Street address'}</label>
         <div className="relative" ref={addressInputRef}>
           <MapPin className="absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <input
@@ -369,53 +393,57 @@ export default function AddressAutocompleteFields({
         </p>
       </div>
 
-      <div className="space-y-2">
-        <label className={labelClass}>City</label>
-        <input
-          type="text"
-          value={values.city}
-          onChange={(e) => onChange({ city: e.target.value })}
-          placeholder="Kathmandu"
-          className={inputClass}
-        />
-      </div>
+      {!streetOnly ? (
+        <>
+          <div className="space-y-2">
+            <label className={labelClass}>City</label>
+            <input
+              type="text"
+              value={values.city}
+              onChange={(e) => onChange({ city: e.target.value })}
+              placeholder="Kathmandu"
+              className={inputClass}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <label className={labelClass}>State / Province</label>
-        <input
-          type="text"
-          value={values.state}
-          onChange={(e) => onChange({ state: e.target.value })}
-          placeholder="Bagmati"
-          className={inputClass}
-        />
-      </div>
+          <div className="space-y-2">
+            <label className={labelClass}>State / Province</label>
+            <input
+              type="text"
+              value={values.state}
+              onChange={(e) => onChange({ state: e.target.value })}
+              placeholder="Bagmati"
+              className={inputClass}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <label className={labelClass}>Country</label>
-        <input
-          type="text"
-          value={values.country}
-          onChange={(e) => onChange({ country: e.target.value })}
-          placeholder="Nepal"
-          className={inputClass}
-        />
-      </div>
+          <div className="space-y-2">
+            <label className={labelClass}>Country</label>
+            <input
+              type="text"
+              value={values.country}
+              onChange={(e) => onChange({ country: e.target.value })}
+              placeholder="Nepal"
+              className={inputClass}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <label className={labelClass}>Postal code</label>
-        <input
-          type="text"
-          value={values.postalCode}
-          onChange={(e) =>
-            onChange({ postalCode: e.target.value.replace(/\D/g, '').slice(0, 5) })
-          }
-          placeholder="44600"
-          maxLength={5}
-          inputMode="numeric"
-          className={inputClass}
-        />
-      </div>
+          <div className="space-y-2">
+            <label className={labelClass}>Postal code</label>
+            <input
+              type="text"
+              value={values.postalCode}
+              onChange={(e) =>
+                onChange({ postalCode: e.target.value.replace(/\D/g, '').slice(0, 5) })
+              }
+              placeholder="44600"
+              maxLength={5}
+              inputMode="numeric"
+              className={inputClass}
+            />
+          </div>
+        </>
+      ) : null}
     </>
   );
 }

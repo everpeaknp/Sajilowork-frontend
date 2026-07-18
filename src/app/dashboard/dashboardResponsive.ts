@@ -55,5 +55,5 @@ export function dashboardSubtabClass(active: boolean): string {
   }`;
 }
 
-export const DASHBOARD_MESSAGES_HEIGHT =
-  'h-[min(560px,calc(100dvh-12rem))] lg:h-[650px]';
+/** Fill parent height; page scroll is locked on the messages tab — only panes scroll. */
+export const DASHBOARD_MESSAGES_HEIGHT = 'h-full min-h-0';

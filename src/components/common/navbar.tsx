@@ -618,6 +618,7 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center space-x-5 lg:space-x-6">
             <button
               type="button"
+              data-tour="navbar-browse-tasks"
               onClick={handleBrowseTasksClick}
               className={navLinkClass(isBrowseTasksActive)}
               aria-current={isBrowseTasksActive ? 'page' : undefined}
@@ -626,6 +627,7 @@ export default function Navbar() {
             </button>
             <Link
               href="/jobs"
+              data-tour="navbar-jobs"
               className={navLinkClass(isJobsActive)}
               aria-current={isJobsActive ? 'page' : undefined}
             >
@@ -633,6 +635,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/projects"
+              data-tour="navbar-projects"
               className={navLinkClass(isProjectsActive)}
               aria-current={isProjectsActive ? 'page' : undefined}
             >
@@ -640,6 +643,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/services"
+              data-tour="navbar-services"
               className={navLinkClass(isServicesActive)}
               aria-current={isServicesActive ? 'page' : undefined}
             >
@@ -651,6 +655,7 @@ export default function Navbar() {
 
               <button
                 type="button"
+                data-tour="navbar-my-tasks"
                 onClick={handleMyTasksClick}
                 className={cn('relative', navLinkClass(isMyTasksActive))}
                 aria-current={isMyTasksActive ? 'page' : undefined}
@@ -698,18 +703,20 @@ export default function Navbar() {
               {/* Help button */}
               <Link
                 href="/help"
+                data-tour="navbar-help"
                 className={`${landingBody} hidden lg:flex items-center cursor-pointer space-x-1 text-sm font-medium tracking-tight text-neutral-600 hover:text-brand-emerald dark:text-neutral-300 dark:hover:text-brand-emerald`}
               >
                 <HelpCircle className="h-4.5 w-4.5" />
                 <span>Help</span>
               </Link>
 
-              <ThemeMenuToggle variant="inline" />
+              <ThemeMenuToggle variant="inline" data-tour="navbar-theme" />
 
               {/* Notifications Trigger */}
               <div
                 className={`relative ${notificationsOpen ? 'z-[10000]' : ''}`}
                 ref={notificationsRef}
+                data-tour="navbar-notifications"
               >
                 <button
                   onClick={() => {
@@ -787,7 +794,11 @@ export default function Navbar() {
               </div>
 
               {/* Dynamic Message Box Trigger */}
-              <div className={`relative ${messagesOpen ? 'z-[10000]' : ''}`} ref={messagesRef}>
+              <div
+                className={`relative ${messagesOpen ? 'z-[10000]' : ''}`}
+                ref={messagesRef}
+                data-tour="navbar-messages"
+              >
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
@@ -889,7 +900,11 @@ export default function Navbar() {
               </div>
 
               {/* User Profile Avatar — mobile: go to dashboard; desktop: dropdown */}
-              <div className={`relative ${profileMenuOpen ? 'z-[10000]' : ''}`} ref={profileRef}>
+              <div
+                className={`relative ${profileMenuOpen ? 'z-[10000]' : ''}`}
+                ref={profileRef}
+                data-tour="navbar-profile"
+              >
                 <button
                   type="button"
                   onClick={() => {

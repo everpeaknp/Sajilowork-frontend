@@ -812,3 +812,11 @@ html.dark .blog-content code {
     animation: none;
   }
 }
+
+/* Dashboard product tour spotlight */
+.dashboard-tour-highlight {
+  position: relative !important;
+  z-index: 11001 !important;
+  border-radius: 0.75rem;
+}
+

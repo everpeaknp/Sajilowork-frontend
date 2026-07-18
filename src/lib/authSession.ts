@@ -2,6 +2,10 @@ import { devError } from '@/lib/devLog';
 
 export async function persistSessionCookies(access: string, refresh: string): Promise<void> {
   if (typeof window === 'undefined') return;
+  if (!access?.trim() || !refresh?.trim()) {
+    // Never overwrite a valid httpOnly refresh cookie with an empty value.
+    return;
+  }
 
   try {
     await fetch('/api/auth/session', {

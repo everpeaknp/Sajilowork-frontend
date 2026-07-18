@@ -14,15 +14,61 @@ function getProjectViewHref(project: Project): string | null {
 interface ProjectTableProps {
   projects: Project[];
   activeSubTab: string;
+  searchQuery?: string;
   onEdit?: (project: Project) => void;
   onDelete?: (id: string) => void;
   onAddClick?: () => void;
   variant?: 'manage' | 'assigned';
 }
 
+export function ProjectsEmptyState({
+  activeSubTab,
+  searchQuery = '',
+  onAddClick,
+  variant = 'manage',
+}: {
+  activeSubTab: string;
+  searchQuery?: string;
+  onAddClick?: () => void;
+  variant?: 'manage' | 'assigned';
+}) {
+  const isAssigned = variant === 'assigned';
+  const hasSearch = searchQuery.trim().length > 0;
+
+  return (
+    <div className="flex h-full min-h-[16rem] flex-1 flex-col items-center justify-center gap-2 px-4 text-center text-neutral-400">
+      <ClipboardList className="h-10 w-10 text-neutral-300 dark:text-neutral-600" strokeWidth={1.5} />
+      <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
+        {hasSearch
+          ? `No projects match “${searchQuery.trim()}” in ${activeSubTab}.`
+          : isAssigned
+            ? `No assigned projects under ${activeSubTab}.`
+            : `No projects found under ${activeSubTab} Projects.`}
+      </p>
+      {hasSearch ? null : isAssigned ? (
+        <Link
+          href="/projects"
+          className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
+        >
+          Browse available projects
+        </Link>
+      ) : onAddClick ? (
+        <button
+          onClick={onAddClick}
+          type="button"
+          className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
+        >
+          Post a new project campaign
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 export default function ProjectTable({
   projects,
   activeSubTab,
+  searchQuery = '',
   onEdit,
   onDelete,
   onAddClick,
@@ -36,6 +82,17 @@ export default function ProjectTable({
     if (href) router.push(href);
   };
 
+  if (projects.length === 0) {
+    return (
+      <ProjectsEmptyState
+        activeSubTab={activeSubTab}
+        searchQuery={searchQuery}
+        onAddClick={onAddClick}
+        variant={variant}
+      />
+    );
+  }
+
   return (
     <div className="overflow-x-auto" id="projects-table-wrapper">
       <table className="w-full table-auto border-collapse text-left" id="projects-data-table">
@@ -48,39 +105,9 @@ export default function ProjectTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-          {projects.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="py-20 text-center">
-                <div className="flex flex-col items-center justify-center space-y-2 text-neutral-400">
-                  <ClipboardList className="h-10 w-10 text-neutral-300" strokeWidth={1.5} />
-                  <p className="text-sm font-normal">
-                    {isAssigned
-                      ? `No assigned projects under ${activeSubTab}.`
-                      : `No projects found under ${activeSubTab} Projects.`}
-                  </p>
-                  {isAssigned ? (
-                    <Link
-                      href="/projects"
-                      className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
-                    >
-                      Browse available projects
-                    </Link>
-                  ) : onAddClick ? (
-                    <button
-                      onClick={onAddClick}
-                      type="button"
-                      className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
-                    >
-                      Post a new project campaign
-                    </button>
-                  ) : null}
-                </div>
-              </td>
-            </tr>
-          ) : (
-            projects.map((project) => {
-              const viewHref = getProjectViewHref(project);
-              return (
+          {projects.map((project) => {
+            const viewHref = getProjectViewHref(project);
+            return (
               <tr
                 key={project.id}
                 role={viewHref ? 'link' : undefined}
@@ -191,8 +218,7 @@ export default function ProjectTable({
                 </td>
               </tr>
             );
-            })
-          )}
+          })}
         </tbody>
       </table>
     </div>

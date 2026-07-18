@@ -1,7 +1,28 @@
 import Link from 'next/link';
-import { ChevronRight, HelpCircle, Mail, FileText, Shield, MessageCircleQuestion } from 'lucide-react';
+import {
+  ChevronRight,
+  HelpCircle,
+  Mail,
+  FileText,
+  Shield,
+  MessageCircleQuestion,
+  type LucideIcon,
+} from 'lucide-react';
 
-const HELP_LINKS = [
+export type HelpLinkItem = {
+  href: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+export const HELP_LINKS: HelpLinkItem[] = [
+  {
+    href: '/help',
+    title: 'Help Center',
+    description: 'Guides, policies, and answers for employers and freelancers.',
+    icon: HelpCircle,
+  },
   {
     href: '/faq',
     title: 'FAQ',
@@ -38,7 +59,7 @@ const HELP_LINKS = [
     description: 'How we collect, use, and protect your personal information.',
     icon: Shield,
   },
-] as const;
+];
 
 export default function HelpHubContent() {
   return (

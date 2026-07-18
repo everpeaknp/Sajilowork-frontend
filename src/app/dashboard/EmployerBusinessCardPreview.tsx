@@ -13,6 +13,7 @@ import {
 import { getEmployerBusinessProfileHref } from '@/components/employers/employerSlug';
 import { USER_PROFILE_UPDATED } from '@/lib/userProfileSync';
 import { downloadElementAsHtml, printHtmlElement } from '@/lib/printDocument';
+import { cn } from '@/lib/utils';
 
 function contactLines(profile: EmployerBusinessProfile): string[] {
   return [
@@ -26,7 +27,13 @@ function metaLine(profile: EmployerBusinessProfile): string {
   return [profile.industry.trim(), profile.teamSize.trim()].filter(Boolean).join(' · ');
 }
 
-export default function EmployerBusinessCardPreview() {
+type EmployerBusinessCardPreviewProps = {
+  compact?: boolean;
+};
+
+export default function EmployerBusinessCardPreview({
+  compact = false,
+}: EmployerBusinessCardPreviewProps) {
   const user = useAuthStore((s) => s.user);
   const printRef = useRef<HTMLDivElement>(null);
   const [profile, setProfile] = useState<EmployerBusinessProfile | null>(null);
@@ -69,7 +76,9 @@ export default function EmployerBusinessCardPreview() {
   const displayName =
     profile?.accountType === 'company' && profile.companyName.trim()
       ? profile.companyName.trim()
-      : [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() || 'Your business';
+      : [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim() ||
+        profile?.companyName.trim() ||
+        'Your business';
 
   const publicPath = getEmployerBusinessProfileHref({ username: profile?.slug || user?.username });
   const publicUrl =
@@ -81,13 +90,11 @@ export default function EmployerBusinessCardPreview() {
   const meta = profile ? metaLine(profile) : '';
   const website = profile?.website?.trim() ?? '';
   const tagline = profile?.tagline?.trim() ?? '';
+  const isCompany = profile?.accountType === 'company';
 
   const hasContent = Boolean(
     profile &&
-      (displayName !== 'Your business' ||
-        tagline ||
-        contacts.length > 0 ||
-        website),
+      (displayName !== 'Your business' || tagline || contacts.length > 0 || website),
   );
 
   const handleDownload = () => {
@@ -107,35 +114,126 @@ export default function EmployerBusinessCardPreview() {
     }
   };
 
+  const cardBody = (
+    <article
+      className={cn(
+        'overflow-hidden rounded-2xl border border-neutral-200 bg-gradient-to-br from-[#193E32] via-[#2f7a52] to-[#52C47F] text-white shadow-sm dark:border-neutral-700',
+        compact ? 'p-5' : 'p-6 sm:p-8',
+      )}
+    >
+      <div className="flex items-start gap-4">
+        {profile?.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={profile.logoUrl}
+            alt=""
+            referrerPolicy="no-referrer"
+            className={cn(
+              'shrink-0 object-cover ring-2 ring-white/25',
+              isCompany ? 'rounded-xl' : 'rounded-full',
+              compact ? 'h-14 w-14' : 'h-16 w-16',
+            )}
+          />
+        ) : (
+          <div
+            className={cn(
+              'flex shrink-0 items-center justify-center bg-white/15 text-sm font-bold ring-2 ring-white/20',
+              isCompany ? 'rounded-xl' : 'rounded-full',
+              compact ? 'h-14 w-14' : 'h-16 w-16',
+            )}
+            aria-hidden
+          >
+            {displayName.slice(0, 1).toUpperCase()}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className={cn('font-semibold tracking-tight', compact ? 'text-base' : 'text-lg')}>
+            {displayName}
+          </h3>
+          {tagline ? (
+            <p className="mt-1 text-sm leading-snug text-white/85">{tagline}</p>
+          ) : (
+            <p className="mt-1 text-sm text-white/55">Add a tagline to complete your card</p>
+          )}
+          {meta ? <p className="mt-2 text-xs font-medium text-white/70">{meta}</p> : null}
+        </div>
+      </div>
+
+      {contacts.length > 0 ? (
+        <div className="mt-5 space-y-1 border-t border-white/15 pt-4 text-sm text-white/90">
+          {contacts.map((line) => (
+            <p key={line} className="truncate">
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {website || publicUrl ? (
+        <div className="mt-4 space-y-1 break-all text-xs text-white/70">
+          {website ? <p>{website}</p> : null}
+          {publicUrl ? <p>{publicUrl}</p> : null}
+        </div>
+      ) : null}
+    </article>
+  );
+
   if (loading) {
     return (
-      <section className="mx-auto max-w-7xl">
-        <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Your business card</h2>
-        <p className="mt-4 text-sm text-neutral-500">Loading…</p>
+      <section className={compact ? undefined : 'mx-auto max-w-7xl'}>
+        {!compact ? (
+          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
+            Business card
+          </h2>
+        ) : (
+          <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-neutral-400">
+            Preview
+          </p>
+        )}
+        <div className="mt-3 h-40 animate-pulse rounded-2xl bg-neutral-100 dark:bg-neutral-800" />
       </section>
     );
   }
 
   return (
-    <section className="mx-auto max-w-7xl">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <section className={compact ? undefined : 'mx-auto max-w-7xl'}>
+      <div
+        className={cn(
+          'mb-4 flex flex-col gap-3',
+          compact ? 'sm:gap-2' : 'sm:flex-row sm:items-end sm:justify-between',
+        )}
+      >
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Your business card</h2>
-          <p className="mt-1 text-sm text-neutral-500">
-            Generated from your business profile. Print or save as PDF for networking and hiring.
-          </p>
+          {compact ? (
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-neutral-400">Preview</p>
+          ) : (
+            <>
+              <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
+                Business card
+              </h2>
+              <p className="mt-1 text-sm text-neutral-500">
+                Generated from your business profile. Print or save for networking.
+              </p>
+            </>
+          )}
         </div>
         <button
           type="button"
           onClick={handleDownload}
           disabled={!hasContent}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#52C47F] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-50"
+          className={cn(
+            'inline-flex items-center justify-center gap-2 rounded-xl bg-[#52C47F] text-sm font-semibold text-white transition hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-50',
+            compact ? 'w-full px-4 py-2.5' : 'px-5 py-2.5',
+          )}
         >
           <Download className="h-4 w-4" />
-          Download / Print card
+          {compact ? 'Download card' : 'Download / Print card'}
         </button>
       </div>
 
+      {cardBody}
+
+      {/* Print-only markup kept off-screen for the print helpers */}
       <div className="sr-only" aria-hidden="true">
         <div ref={printRef} className="bc-a4-sheet">
           <article className="bc-card">

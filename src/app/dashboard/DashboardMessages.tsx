@@ -908,12 +908,12 @@ function DashboardMessagesContent() {
   const typingDisplayName = otherUserTyping?.userName || activeContact.name;
 
   return (
-    <div className={DASHBOARD_PAGE_ROOT}>
-      <div className="mx-auto grid min-w-0 max-w-7xl grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
+    <div className={`${DASHBOARD_PAGE_ROOT} flex h-full min-h-0 flex-col overflow-hidden`}>
+      <div className="mx-auto grid h-full min-h-0 min-w-0 max-w-7xl flex-1 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
         <div
-          className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 sm:p-5 lg:col-span-4`}
+          className={`${mobilePane === 'thread' ? 'hidden lg:flex' : 'flex'} ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 sm:p-5 lg:col-span-4`}
         >
-          <div className="relative mb-5 flex items-center rounded-xl border border-neutral-100 bg-[#F9F9FB] px-4 py-1 dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="relative mb-5 flex shrink-0 items-center rounded-xl border border-neutral-100 bg-[#F9F9FB] px-4 py-1 dark:border-neutral-800 dark:bg-neutral-900">
             <Search className="mr-2.5 h-[18px] w-[18px] shrink-0 text-neutral-400" />
             <input
               type="text"
@@ -924,7 +924,7 @@ function DashboardMessagesContent() {
             />
           </div>
 
-          <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-2 overflow-y-auto pr-1 dark:scrollbar-thumb-neutral-700">
+          <div className="scrollbar-thin scrollbar-thumb-neutral-200 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 dark:scrollbar-thumb-neutral-700">
             {loadingConversations || resolvingDeepLink ? (
               <div className="flex justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" />
@@ -994,9 +994,9 @@ function DashboardMessagesContent() {
         </div>
 
         <div
-          className={`${mobilePane === 'list' ? 'hidden lg:flex' : 'flex'} relative ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col rounded-2xl border border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 lg:col-span-8`}
+          className={`${mobilePane === 'list' ? 'hidden lg:flex' : 'flex'} relative ${DASHBOARD_MESSAGES_HEIGHT} min-w-0 flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border-neutral-800 dark:bg-neutral-900 dark:text-stone-100 lg:col-span-8`}
         >
-          <div className="flex items-center justify-between gap-3 rounded-t-2xl border-b border-neutral-100 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6 sm:py-4">
+          <div className="flex shrink-0 items-center justify-between gap-3 rounded-t-2xl border-b border-neutral-100 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6 sm:py-4">
             <div className="flex min-w-0 items-center gap-2.5 sm:gap-3.5">
               <button
                 type="button"
@@ -1054,7 +1054,7 @@ function DashboardMessagesContent() {
           ) : null}
 
           {selectedGroup && selectedGroup.conversations.length > 1 ? (
-            <div className="flex gap-2 overflow-x-auto border-b border-neutral-100 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
+            <div className="flex shrink-0 gap-2 overflow-x-auto border-b border-neutral-100 bg-white px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 sm:px-6">
               {selectedGroup.conversations.map((conv) => {
                 const id = conversationKey(conv);
                 if (!id) return null;
@@ -1093,7 +1093,7 @@ function DashboardMessagesContent() {
             </div>
           ) : null}
 
-          <div className="scrollbar-thin scrollbar-thumb-neutral-200 flex-1 space-y-6 overflow-y-auto bg-[#FAF9F7]/10 p-6 dark:bg-neutral-950/40 dark:scrollbar-thumb-neutral-700">
+          <div className="scrollbar-thin scrollbar-thumb-neutral-200 min-h-0 flex-1 space-y-6 overflow-y-auto bg-[#FAF9F7]/10 p-6 dark:bg-neutral-950/40 dark:scrollbar-thumb-neutral-700">
             {loadingMessages ? (
               <div className="flex h-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-[#52C47F]" />
@@ -1222,14 +1222,14 @@ function DashboardMessagesContent() {
           </div>
 
           {!canSendMessages && selectedGroup && replyConversation ? (
-            <p className="border-t border-neutral-100 bg-white px-6 py-2 text-xs text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
+            <p className="shrink-0 border-t border-neutral-100 bg-white px-6 py-2 text-xs text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
               {messagingDisabledText}
             </p>
           ) : null}
 
           <form
             onSubmit={(e) => void handleSendMessage(e)}
-            className="flex items-center justify-between gap-4 rounded-b-2xl border-t border-neutral-100 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
+            className="flex shrink-0 items-center justify-between gap-4 rounded-b-2xl border-t border-neutral-100 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900"
           >
             <input
               type="text"

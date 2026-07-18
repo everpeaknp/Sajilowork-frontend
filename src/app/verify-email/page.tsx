@@ -11,17 +11,10 @@ import Navbar from "@/components/common/navbar";
 import Footer from "@/components/common/footer";
 import authService from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { tokenManager } from "@/lib/api/client";
+import { markOnboardingForce, markOnboardingPending } from "@/lib/dashboardOnboarding";
 
 type VerifyState = "pending" | "verifying" | "success" | "error";
-
-const SETTINGS_VERIFY_PATH = "/dashboard/settings?tab=verify";
-
-function safeRedirectPath(raw: string | null): string | null {
-  if (raw && raw.startsWith("/") && !raw.startsWith("//")) {
-    return raw;
-  }
-  return null;
-}
 
 function VerifyEmailPageContent() {
   const router = useRouter();
@@ -30,17 +23,12 @@ function VerifyEmailPageContent() {
   const token = searchParams.get("token") || "";
   const pending = searchParams.get("pending") === "1";
   const email = searchParams.get("email") || "";
-  const redirectParam = searchParams.get("redirect");
 
   const [state, setState] = useState<VerifyState>(token ? "verifying" : pending ? "pending" : "error");
   const [message, setMessage] = useState("");
   const [isResending, setIsResending] = useState(false);
 
   const canResend = useMemo(() => Boolean(email.trim()), [email]);
-
-  const skipDestination = useMemo(() => {
-    return safeRedirectPath(redirectParam) ?? "/dashboard";
-  }, [redirectParam]);
   useEffect(() => {
     if (!token) return;
 
@@ -85,12 +73,30 @@ function VerifyEmailPageContent() {
   };
 
   const handleSkipForNow = () => {
-    if (isAuthenticated) {
-      router.push(skipDestination);
+    if (email.trim()) markOnboardingPending(email);
+    markOnboardingForce();
+
+    const redirectTarget = searchParams.get("redirect");
+    const dashboardTarget =
+      redirectTarget && redirectTarget.startsWith("/") && !redirectTarget.startsWith("//")
+        ? redirectTarget
+        : "/dashboard";
+
+    // Registration now issues a session. Access may be in a cookie even after reload
+    // (refresh is restored via BFF on dashboard init).
+    const hasAccessToken = Boolean(tokenManager.getAccessToken());
+
+    if (isAuthenticated || hasAccessToken) {
+      window.location.assign(dashboardTarget);
       return;
     }
 
-    router.push(`/signin?redirect=${encodeURIComponent(SETTINGS_VERIFY_PATH)}`);
+    toast.message("Sign in to continue — you can verify your email later from Settings.");
+    const params = new URLSearchParams({
+      redirect: dashboardTarget,
+    });
+    if (email.trim()) params.set("email", email.trim());
+    router.push(`/signin?${params.toString()}`);
   };
 
   return (

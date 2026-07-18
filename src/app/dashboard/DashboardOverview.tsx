@@ -230,7 +230,11 @@ export default function DashboardOverview({ onTabChange }: DashboardOverviewProp
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
       {loading ? <DashboardLoadingFallback fullScreen={false} /> : null}
-      <div className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-4">
+
+      <div
+        data-tour="overview-stats"
+        className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-4"
+      >
         {statCards.map((card, idx) => {
           const IconComp = card.icon;
           return (

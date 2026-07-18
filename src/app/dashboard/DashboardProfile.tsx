@@ -43,7 +43,6 @@ import {
   Briefcase,
   Award,
   Globe,
-  Building2,
   type LucideIcon,
 } from 'lucide-react';
 import DashboardLicenceBadges from '@/app/dashboard/DashboardLicenceBadges';
@@ -60,7 +59,6 @@ import EmployerBusinessProfileForm from '@/app/dashboard/EmployerBusinessProfile
 import EmployerBusinessCardPreview from '@/app/dashboard/EmployerBusinessCardPreview';
 import FreelancerCvPreview from '@/app/dashboard/FreelancerCvPreview';
 import { getEmployerBusinessProfileHref } from '@/components/employers/employerSlug';
-import { getFreelancerBusinessProfileHref } from '@/components/freelancers/freelancerSlug';
 import { STANDARD_HOURLY_RATE_OPTIONS } from '@/lib/nepalLocale';
 
 type ProfileDeleteTarget =
@@ -345,6 +343,11 @@ export default function DashboardProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [existingSkills, setExistingSkills] = useState<UserSkill[]>([]);
+  const [employerProgress, setEmployerProgress] = useState({
+    filled: 0,
+    total: 10,
+    percent: 0,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleSection = (id: string) => {
@@ -409,6 +412,65 @@ export default function DashboardProfile() {
   const isEmployerMode = sidebarRole === 'customer';
   const savedUsername = (user?.username ?? '').trim().toLowerCase();
   const usernameCanChange = user?.username_can_change !== false;
+
+  const freelancerProgress = useMemo(() => {
+    const hasCustomAvatar = Boolean(avatar && avatar !== DEFAULT_AVATAR);
+    const checks = [
+      Boolean(fullName.trim()),
+      Boolean(phone.trim()),
+      Boolean(username.trim()),
+      gender !== 'Select',
+      Boolean(birthday.trim()),
+      locationType === 'remote' || Boolean(location.trim()),
+      hasCustomAvatar,
+      Boolean(tagline.trim()),
+      specialization !== 'Select',
+      hourlyRate !== 'Select',
+      profileType !== 'Select',
+      Boolean(description.trim()),
+      transport.length > 0,
+      languages.some((row) => row.language && row.language !== 'Select'),
+      skills.some((row) => row.skill && row.skill !== 'Select' && row.skill !== 'Other…'),
+      education.length > 0,
+      experience.length > 0,
+      awards.length > 0,
+    ];
+    const filled = checks.filter(Boolean).length;
+    const total = checks.length;
+    return {
+      filled,
+      total,
+      percent: total === 0 ? 0 : Math.round((filled / total) * 100),
+    };
+  }, [
+    avatar,
+    awards.length,
+    birthday,
+    description,
+    education.length,
+    experience.length,
+    fullName,
+    gender,
+    hourlyRate,
+    languages,
+    location,
+    locationType,
+    phone,
+    profileType,
+    skills,
+    specialization,
+    tagline,
+    transport.length,
+    username,
+  ]);
+
+  const profileProgress = isEmployerMode ? employerProgress : freelancerProgress;
+  const handleEmployerProgressChange = useCallback(
+    (progress: { filled: number; total: number; percent: number }) => {
+      setEmployerProgress(progress);
+    },
+    [],
+  );
 
   const persistAllSkills = useCallback(async () => {
     const latestResponse = await userService.getSkills();
@@ -506,7 +568,6 @@ export default function DashboardProfile() {
   }, [isEmployerMode, openSection]);
 
   const employerPublicProfilePath = getEmployerBusinessProfileHref(user);
-  const freelancerPublicProfilePath = getFreelancerBusinessProfileHref(user);
 
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -1040,51 +1101,6 @@ export default function DashboardProfile() {
 
   return (
     <div className={`${DASHBOARD_PAGE_ROOT} relative`}>
-      <div className="mx-auto mb-8 max-w-7xl pl-1">
-        <h1 className="text-[34px] font-semibold leading-none tracking-tight text-neutral-900 dark:text-stone-100" id="profile-heading-id">
-          {isEmployerMode ? 'Business Profile' : 'My Profile'}
-        </h1>
-        {isEmployerMode ? (
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
-            Manage your public employer page
-            {employerPublicProfilePath ? (
-              <>
-                {' '}
-                at{' '}
-                <Link
-                  href={employerPublicProfilePath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-[#2d8f57] hover:underline"
-                >
-                  {employerPublicProfilePath}
-                </Link>
-              </>
-            ) : null}
-            .
-          </p>
-        ) : (
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
-            Manage your public freelancer page
-            {freelancerPublicProfilePath ? (
-              <>
-                {' '}
-                at{' '}
-                <Link
-                  href={freelancerPublicProfilePath}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-[#2d8f57] hover:underline"
-                >
-                  {freelancerPublicProfilePath}
-                </Link>
-              </>
-            ) : null}
-            .
-          </p>
-        )}
-      </div>
-
       {toastMessage ? (
         <div className="animate-in slide-in-from-bottom-2 mx-auto mb-6 flex max-w-7xl items-center justify-between rounded-xl bg-emerald-50 p-4 text-xs font-semibold text-emerald-800 shadow-sm duration-300">
           <div className="flex items-center gap-2">
@@ -1105,10 +1121,31 @@ export default function DashboardProfile() {
       ) : null}
 
       <div
-        className={`mx-auto mb-8 max-w-7xl overflow-hidden rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.01)] md:p-8 dark:border dark:border-neutral-800 dark:bg-neutral-900 ${
+        className={`mx-auto mb-8 max-w-7xl overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.01)] dark:border dark:border-neutral-800 dark:bg-neutral-900 ${
           loading || saving ? 'pointer-events-none opacity-60' : ''
         }`}
       >
+        <div className="sticky top-0 z-20 border-b border-neutral-100 bg-white/95 px-6 py-3.5 backdrop-blur-sm md:px-8 dark:border-neutral-800 dark:bg-neutral-900/95">
+          <div className="mb-1.5 flex items-center justify-between gap-3">
+            <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
+              Profile {profileProgress.filled} of {profileProgress.total} complete
+            </p>
+            <span className="text-xs font-semibold text-[#2f7a52]">{profileProgress.percent}%</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#2f7a52] to-[#52C47F] transition-all duration-300"
+              style={{ width: `${profileProgress.percent}%` }}
+              role="progressbar"
+              aria-valuenow={profileProgress.percent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Profile completion"
+            />
+          </div>
+        </div>
+
+        <div className="p-6 md:p-8">
         {!isEmployerMode ? (
         <ProfileAccordionItem
           title="Profile Details"
@@ -1397,33 +1434,44 @@ export default function DashboardProfile() {
 
         {isEmployerMode ? (
           <div className="space-y-8">
-            <div className="flex flex-col gap-4 border-b border-neutral-100 pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800">
-              <div className="flex min-w-0 items-start gap-4">
-                <div className="shrink-0 rounded-xl bg-[#52C47F] p-3 text-white">
-                  <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-lg font-semibold text-neutral-900 dark:text-stone-100">Edit business profile</h2>
-                  <p className="mt-1 break-all text-sm text-neutral-500 dark:text-neutral-400">
-                    {employerPublicProfilePath
-                      ? `Public page at ${employerPublicProfilePath}`
-                      : 'Set your slug below to publish your employer page.'}
-                  </p>
-                </div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#2f7a52]">
+                  Employer
+                </p>
+                <h2 className="mt-1 text-xl font-semibold tracking-tight text-neutral-900 dark:text-stone-100 sm:text-2xl">
+                  Business profile
+                </h2>
+                <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+                  Manage how your business appears to freelancers. Keep details clear and up to date.
+                </p>
               </div>
               {employerPublicProfilePath ? (
                 <Link
                   href={employerPublicProfilePath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-xl border-2 border-transparent bg-[#52C47F]/10 px-4 py-3 text-sm font-semibold text-[#2d8f57] transition-colors hover:bg-[#52C47F]/20 sm:self-center"
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-xl border border-[#52C47F]/30 bg-[#52C47F]/10 px-4 py-2.5 text-sm font-semibold text-[#2d8f57] transition hover:bg-[#52C47F]/20 sm:self-auto"
                 >
                   View public page
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               ) : null}
             </div>
-            <EmployerBusinessProfileForm onToast={triggerToast} />
+
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+              <div className="min-w-0">
+                <EmployerBusinessProfileForm
+                  onToast={triggerToast}
+                  onProgressChange={handleEmployerProgressChange}
+                />
+              </div>
+              <aside className="hidden xl:block">
+                <div className="sticky top-24">
+                  <EmployerBusinessCardPreview compact />
+                </div>
+              </aside>
+            </div>
           </div>
         ) : null}
 
@@ -1963,15 +2011,22 @@ export default function DashboardProfile() {
         </form>
         </ProfileAccordionItem>
         ) : null}
+        </div>
       </div>
 
-      <div className="mx-auto mb-8 max-w-7xl">
+      <div className="mx-auto mb-8 max-w-7xl xl:hidden">
         {!isEmployerMode ? (
           <FreelancerCvPreview data={freelancerCvData} />
         ) : (
           <EmployerBusinessCardPreview />
         )}
       </div>
+
+      {!isEmployerMode ? (
+        <div className="mx-auto mb-8 hidden max-w-7xl xl:block">
+          <FreelancerCvPreview data={freelancerCvData} />
+        </div>
+      ) : null}
 
       <ProfileFormModal
         open={isEducationModalOpen}

@@ -3,7 +3,7 @@
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, CheckCircle, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, User } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -22,6 +22,7 @@ const Footer = dynamic(() => import('@/components/common/footer'), {
 });
 
 import { useAuth } from '@/hooks/useAuth';
+import { markOnboardingPending } from '@/lib/dashboardOnboarding';
 import { registerSchema, type RegisterFormData } from '@/validations';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 
@@ -36,7 +37,6 @@ function SignUpForm() {
   const {
       register,
       handleSubmit,
-      watch,
       setValue,
       formState: { errors },
     } = useForm<RegisterFormData>({
@@ -52,9 +52,6 @@ function SignUpForm() {
         terms_accepted: false,
       },
     });
-
-  const password = watch('password');
-  const selectedRole = watch('role') as 'customer' | 'tasker';
 
   useEffect(() => {
     const roleParam = searchParams.get('role');
@@ -77,6 +74,12 @@ function SignUpForm() {
 
       if (result.success) {
         toast.success('Account created! Check your email to verify your address.');
+        markOnboardingPending(data.email);
+        try {
+          window.sessionStorage.setItem('sajilowork-onboarding-preferred-role', data.role);
+        } catch {
+          /* ignore */
+        }
         const verifyUrl = `/verify-email?pending=1&email=${encodeURIComponent(data.email)}`;
         const redirect = searchParams.get('redirect');
         router.push(redirect && redirect.startsWith('/') ? `${verifyUrl}&redirect=${encodeURIComponent(redirect)}` : verifyUrl);
@@ -250,50 +253,6 @@ function SignUpForm() {
               )}
             </div>
 
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-brand-dark mb-2">
-                I want to
-              </label>
-              <select
-                {...register('role')}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition-all ${
-                  errors.role 
-                    ? 'border-red-500 focus:border-red-500' 
-                    : 'border-outline-variant focus:border-brand-emerald'
-                }`}
-              >
-                <option value="customer">Post tasks and hire taskers</option>
-                <option value="tasker">Complete tasks and earn money</option>
-              </select>
-              {errors.role && (
-                <p className="mt-1 text-sm text-red-500">{errors.role.message}</p>
-              )}
-            </div>
-
-            {/* Password Requirements */}
-            <div className="bg-surface-dim/30 rounded-xl p-4">
-              <p className="text-sm font-semibold text-brand-dark mb-2">Password must contain:</p>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                  <CheckCircle className={`w-4 h-4 ${password?.length >= 8 ? 'text-green-500' : 'text-gray-300'}`} />
-                  <span>At least 8 characters</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                  <CheckCircle className={`w-4 h-4 ${/[A-Z]/.test(password || '') ? 'text-green-500' : 'text-gray-300'}`} />
-                  <span>One uppercase letter</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                  <CheckCircle className={`w-4 h-4 ${/[a-z]/.test(password || '') ? 'text-green-500' : 'text-gray-300'}`} />
-                  <span>One lowercase letter</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                  <CheckCircle className={`w-4 h-4 ${/[0-9]/.test(password || '') ? 'text-green-500' : 'text-gray-300'}`} />
-                  <span>One number</span>
-                </div>
-              </div>
-            </div>
-
             {/* Terms Agreement */}
             <div>
               <label className="flex items-start gap-3 cursor-pointer">
@@ -350,12 +309,12 @@ function SignUpForm() {
 
           <SocialAuthButtons
             mode="signup"
-            role={selectedRole === 'tasker' ? 'tasker' : 'customer'}
+            role="customer"
             nextPath={
               searchParams.get('redirect')?.startsWith('/') &&
               !searchParams.get('redirect')!.startsWith('//')
                 ? searchParams.get('redirect')!
-                : '/discover'
+                : '/dashboard'
             }
           />
 

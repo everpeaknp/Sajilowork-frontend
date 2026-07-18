@@ -7,8 +7,10 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Filter,
   Loader2,
   MapPin,
+  Search,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,11 +23,8 @@ import { bidService, extractBidList } from '@/services/bid.service';
 import type { Bid } from '@/types';
 import type { Task } from '@/types';
 import { getDashboardApplicationsListingHref, getEmployerBidDetailHref } from './dashboardTabs';
-import WalletTableToolbar from './WalletTableToolbar';
 import { matchesSearchQuery } from './dashboardListSearch';
 import {
-  DASHBOARD_CARD_PLAIN,
-  DASHBOARD_HEADING_PROPOSALS,
   DASHBOARD_PAGE_ROOT,
   DASHBOARD_PAGINATION_ARROW_PLAIN,
   DASHBOARD_PAGINATION_INNER,
@@ -368,56 +367,78 @@ export default function DashboardEmployerApplications() {
   }
 
   return (
-    <div className={`${DASHBOARD_PAGE_ROOT} space-y-6`}>
-      <div>
-        <h2 className={DASHBOARD_HEADING_PROPOSALS}>Applications</h2>
-        <p className="mt-1.5 font-sans text-sm text-neutral-800">
-          {isShortlistedView
-            ? 'Freelancers you accepted for your job postings.'
-            : 'All your job postings with application counts. Select a job to review every applicant.'}
-        </p>
-      </div>
+    <div className={`${DASHBOARD_PAGE_ROOT} relative flex min-h-[calc(100dvh-7.5rem)] flex-col sm:min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-5.5rem)]`}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={`${DASHBOARD_SUBTABS_WRAP} shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 md:px-8`}>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+            <div className={`${DASHBOARD_SUBTABS_ROW} min-w-0 flex-1 overflow-x-auto`}>
+              {APPLICATION_VIEW_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setViewTab(tab.key);
+                    setCurrentPage(1);
+                  }}
+                  className={viewTabClass(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-      <WalletTableToolbar
-        searchQuery={searchQuery}
-        onSearchChange={(value) => {
-          setSearchQuery(value);
-          setCurrentPage(1);
-        }}
-        searchPlaceholder={
-          isShortlistedView
-            ? 'Search shortlisted freelancers by name, job, or location'
-            : 'Search jobs by title or location'
-        }
-        filterStatus={activityFilter}
-        onFilterChange={(value) => {
-          setActivityFilter(value as ApplicationActivityFilter);
-          setCurrentPage(1);
-        }}
-        filterOptions={APPLICATION_ACTIVITY_FILTER_OPTIONS}
-        filterLabel="Applications:"
-        hidePrimaryFilter={isShortlistedView}
-      />
+            <div className="mb-3 flex w-full flex-col gap-2 sm:mb-3.5 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
+              <div className="relative flex w-full items-center rounded-xl border border-neutral-200/80 bg-neutral-50 px-3 shadow-sm sm:w-[240px] md:w-[280px] dark:border-neutral-700 dark:bg-neutral-950 dark:shadow-none">
+                <Search className="mr-2 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} aria-hidden />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder={
+                    isShortlistedView
+                      ? 'Search freelancers…'
+                      : 'Search jobs…'
+                  }
+                  aria-label={isShortlistedView ? 'Search shortlisted freelancers' : 'Search jobs'}
+                  className="w-full border-0 bg-transparent py-2.5 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:bg-transparent dark:text-stone-100 dark:placeholder:text-neutral-500"
+                />
+              </div>
 
-      <div className={`${DASHBOARD_CARD_PLAIN} rounded-xl sm:rounded-2xl md:p-10`}>
-        <div className={DASHBOARD_SUBTABS_WRAP}>
-          <div className={DASHBOARD_SUBTABS_ROW}>
-            {APPLICATION_VIEW_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => {
-                  setViewTab(tab.key);
-                  setCurrentPage(1);
-                }}
-                className={viewTabClass(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
+              {!isShortlistedView ? (
+                <div className="flex w-full items-center gap-2 rounded-xl border border-neutral-200/80 bg-neutral-50 px-3 py-2 shadow-sm sm:w-auto dark:border-neutral-700 dark:bg-neutral-950 dark:shadow-none">
+                  <Filter className="h-3.5 w-3.5 shrink-0 text-neutral-400" aria-hidden />
+                  <span className="shrink-0 text-xs font-normal text-neutral-500 dark:text-neutral-400">
+                    Applications:
+                  </span>
+                  <select
+                    value={activityFilter}
+                    onChange={(e) => {
+                      setActivityFilter(e.target.value as ApplicationActivityFilter);
+                      setCurrentPage(1);
+                    }}
+                    aria-label="Filter by application activity"
+                    className="max-w-[220px] flex-1 cursor-pointer border-none bg-transparent p-0 text-xs font-semibold text-neutral-800 outline-none focus:outline-none focus:ring-0 dark:bg-transparent dark:text-stone-100 dark:[color-scheme:dark]"
+                  >
+                    {APPLICATION_ACTIVITY_FILTER_OPTIONS.map((option) => (
+                      <option
+                        key={option.value}
+                        value={option.value}
+                        className="bg-white text-neutral-800 dark:bg-neutral-900 dark:text-stone-100"
+                      >
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
 
+        <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 pb-6 sm:px-6 md:px-8 md:pb-8">
         {isShortlistedView ? (
           <>
             <div className="hidden grid-cols-12 gap-4 border-b border-neutral-100 pb-4 text-[13px] font-normal text-black select-none md:grid dark:border-neutral-800 dark:text-stone-100">
@@ -428,19 +449,19 @@ export default function DashboardEmployerApplications() {
               <div className="col-span-12 text-right md:col-span-1">Action</div>
             </div>
 
-            <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+            <div className="flex min-h-0 flex-1 flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
               {loading ? (
-                <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
+                <div className="flex flex-1 items-center justify-center gap-2 py-12 text-sm text-neutral-500">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Loading shortlisted freelancers…
                 </div>
               ) : shortlistedRows.length === 0 ? (
-                <div className="py-12 text-center text-sm text-neutral-500">
+                <div className="flex flex-1 flex-col items-center justify-center py-12 text-center text-sm text-neutral-500">
                   <p className="font-medium text-neutral-900 dark:text-stone-100">No shortlisted freelancers yet</p>
                   <p className="mt-2">Accepted applicants will appear here after you hire from Applications.</p>
                 </div>
               ) : isEmptyFromFilters ? (
-                <div className="py-12 text-center text-sm text-neutral-500">
+                <div className="flex flex-1 flex-col items-center justify-center py-12 text-center text-sm text-neutral-500">
                   <p className="font-medium text-neutral-900 dark:text-stone-100">No shortlisted freelancers match your search</p>
                   <p className="mt-2">Try a different keyword or clear the search.</p>
                 </div>
@@ -511,19 +532,19 @@ export default function DashboardEmployerApplications() {
           <div className="col-span-12 text-right md:col-span-2">Action</div>
         </div>
 
-        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+        <div className="flex min-h-0 flex-1 flex-col divide-y divide-neutral-100 dark:divide-neutral-800">
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
+            <div className="flex flex-1 items-center justify-center gap-2 py-12 text-sm text-neutral-500">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading applications…
             </div>
           ) : groups.length === 0 ? (
-            <div className="py-12 text-center text-sm text-neutral-500">
+            <div className="flex flex-1 flex-col items-center justify-center py-12 text-center text-sm text-neutral-500">
               <Briefcase className="mx-auto mb-3 h-10 w-10 text-neutral-300" strokeWidth={1.5} />
               <p>You have not posted any jobs yet.</p>
             </div>
           ) : isEmptyFromFilters ? (
-            <div className="py-12 text-center text-sm text-neutral-500">
+            <div className="flex flex-1 flex-col items-center justify-center py-12 text-center text-sm text-neutral-500">
               <p className="font-medium text-neutral-900 dark:text-stone-100">No jobs match your search</p>
               <p className="mt-2">Try a different keyword or clear the filters.</p>
             </div>
@@ -648,6 +669,7 @@ export default function DashboardEmployerApplications() {
             </div>
           </div>
         ) : null}
+        </div>
       </div>
     </div>
   );

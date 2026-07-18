@@ -154,7 +154,11 @@ interface DashboardSidebarProps {
 }
 
 function DashboardRoleSwitch() {
-  return <AccountRoleMode variant="sidebar" />;
+  return (
+    <div data-tour="nav-role-switch">
+      <AccountRoleMode variant="sidebar" />
+    </div>
+  );
 }
 
 const SIDEBAR_MOTION = 'duration-300 ease-in-out';
@@ -288,6 +292,7 @@ export default function DashboardSidebar({
       <Link
         key={item.id}
         href={item.href}
+        data-tour={`nav-${item.id}`}
         title={collapsed ? (badgeCount > 0 ? `${item.label} (${badgeCount})` : item.label) : undefined}
         onClick={() => {
           onTabChange(item.id);
@@ -338,6 +343,7 @@ export default function DashboardSidebar({
     return (
       <div
         key={item.id}
+        data-tour={`nav-${item.id}`}
         className={`group flex w-full min-w-0 items-center rounded-lg transition-[background-color,box-shadow,padding] ${SIDEBAR_MOTION} ${
           isActive ? 'bg-[#222222] shadow-sm' : 'hover:bg-neutral-50 dark:hover:bg-neutral-900'
         }`}
@@ -435,6 +441,7 @@ export default function DashboardSidebar({
           >
             <Link
               href={profileItem.href}
+              data-tour="nav-profile"
               title={collapsed ? profileItem.label : undefined}
               onClick={() => {
                 onTabChange('profile');
@@ -466,6 +473,7 @@ export default function DashboardSidebar({
 
             <Link
               href={settingsItem.href}
+              data-tour="nav-settings"
               title={settingsItem.label}
               onClick={() => {
                 onTabChange('settings');

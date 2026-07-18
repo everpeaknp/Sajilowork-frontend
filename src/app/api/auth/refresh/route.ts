@@ -21,12 +21,10 @@ export async function POST() {
   const refresh = cookieStore.get('refresh_token')?.value;
 
   if (!refresh) {
-    const response = NextResponse.json(
+    return NextResponse.json(
       { success: false, message: 'No refresh token' },
       { status: 401 },
     );
-    clearAuthCookies(response);
-    return response;
   }
 
   try {
@@ -38,11 +36,16 @@ export async function POST() {
     });
 
     if (!upstream.ok) {
+      // Only wipe the session for confirmed invalid/expired refresh tokens.
+      // Keep cookies on transient upstream errors so the user is not logged out.
+      const shouldClear = upstream.status === 401 || upstream.status === 403;
       const response = NextResponse.json(
         { success: false, message: 'Refresh failed' },
-        { status: 401 },
+        { status: upstream.status === 401 ? 401 : 502 },
       );
-      clearAuthCookies(response);
+      if (shouldClear) {
+        clearAuthCookies(response);
+      }
       return response;
     }
 
@@ -51,12 +54,10 @@ export async function POST() {
     const newRefresh = data.refresh || refresh;
 
     if (!access) {
-      const response = NextResponse.json(
+      return NextResponse.json(
         { success: false, message: 'Invalid refresh response' },
         { status: 502 },
       );
-      clearAuthCookies(response);
-      return response;
     }
 
     const response = NextResponse.json({
@@ -77,11 +78,10 @@ export async function POST() {
 
     return response;
   } catch {
-    const response = NextResponse.json(
+    // Network/upstream outage — keep existing cookies.
+    return NextResponse.json(
       { success: false, message: 'Refresh failed' },
       { status: 500 },
     );
-    clearAuthCookies(response);
-    return response;
   }
 }

@@ -13,6 +13,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { userService } from '@/services';
 import { normalizeUserFromApi, notifyUserProfileUpdated } from '@/lib/userProfileSync';
+import { maybeStartOnboardingAfterRoleSwitch } from '@/lib/dashboardOnboarding';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import {
   getDashboardHref,
@@ -53,6 +54,7 @@ export function DashboardRoleSwitchProvider({ children }: { children: ReactNode 
         if (response.success && response.data) {
           setUser(normalizeUserFromApi(response.data as unknown as Record<string, unknown>));
           notifyUserProfileUpdated();
+          maybeStartOnboardingAfterRoleSwitch(user.id, nextRole);
 
           const activeTab = tabFromPathname(pathname);
           if (!isTabAllowedForRole(activeTab, nextRole)) {

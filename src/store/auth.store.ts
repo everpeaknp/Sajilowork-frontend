@@ -10,6 +10,7 @@ import { User, AuthTokens, LoginCredentials, RegisterData } from '@/types';
 import { authService, tokenManager } from '@/services';
 import { normalizeUserFromApi } from '@/lib/userProfileSync';
 import { persistSessionCookies, clearSessionCookies } from '@/lib/authSession';
+import { isJwtNotExpired } from '@/lib/jwt';
 
 interface AuthState {
   // State
@@ -78,10 +79,11 @@ export const useAuthStore = create<AuthState>()(
             }
           }
 
-          await persistSessionCookies(
-            tokenManager.getAccessToken() || tokens.access,
-            tokenManager.getRefreshToken() || tokens.refresh || '',
-          );
+          const nextAccess = tokenManager.getAccessToken() || tokens.access;
+          const nextRefresh = tokenManager.getRefreshToken() || tokens.refresh || '';
+          if (nextAccess && nextRefresh) {
+            await persistSessionCookies(nextAccess, nextRefresh);
+          }
 
           const currentAccess = tokenManager.getAccessToken() || tokens.access;
 
@@ -89,10 +91,14 @@ export const useAuthStore = create<AuthState>()(
             try {
               await authService.refreshToken();
             } catch {
-              tokenManager.clearTokens();
-              void clearSessionCookies();
-              set({ isAuthenticated: false, user: null, tokens: null, error: null });
-              return;
+              // Keep showing a hydrated user if the access cookie is still usable later;
+              // only clear when we truly have no valid access token.
+              if (!isJwtNotExpired(tokenManager.getAccessToken())) {
+                tokenManager.clearTokens();
+                void clearSessionCookies();
+                set({ isAuthenticated: false, user: null, tokens: null, error: null });
+                return;
+              }
             }
           }
 
@@ -127,7 +133,8 @@ export const useAuthStore = create<AuthState>()(
                 ? Number((error as { status?: number }).status)
                 : 0;
 
-            if (status === 401 || status === 403) {
+            // 403 is usually a permissions/business rule issue, not a dead session.
+            if (status === 401) {
               try {
                 await authService.refreshToken();
                 const retry = await authService.getCurrentUser();

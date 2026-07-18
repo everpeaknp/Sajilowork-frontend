@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import Navbar from '@/components/common/navbar';
+import DashboardProductTour from '@/components/dashboard/DashboardProductTour';
+import FirstRegistrationOnboarding from '@/components/dashboard/FirstRegistrationOnboarding';
 import { useAuthStore } from '@/store/auth.store';
 import { tokenManager } from '@/lib/api/client';
 import dynamic from 'next/dynamic';
@@ -92,8 +94,16 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const isMessagesTab = activeTab === 'message';
+
   return (
-    <div className="mobile-bottom-nav-offset min-h-[100dvh] overflow-x-clip bg-[#f0efec] font-body md:pb-0 dark:bg-neutral-950">
+    <div
+      className={`mobile-bottom-nav-offset bg-[#f0efec] font-body md:pb-0 dark:bg-neutral-950 ${
+        isMessagesTab
+          ? 'flex h-[100dvh] flex-col overflow-hidden'
+          : 'min-h-[100dvh] overflow-x-clip'
+      }`}
+    >
       <Navbar />
 
       <nav
@@ -125,12 +135,16 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
       ) : null}
 
       <main
-        className={`min-w-0 overflow-x-clip bg-[#f0efec] transition-[padding-left] duration-300 ease-in-out dark:bg-neutral-950 ${
-          sidebarCollapsed ? 'lg:pl-[4.75rem]' : 'lg:pl-[17.5rem]'
-        }`}
+        className={`min-w-0 bg-[#f0efec] transition-[padding-left] duration-300 ease-in-out dark:bg-neutral-950 ${
+          isMessagesTab ? 'min-h-0 flex-1 overflow-hidden' : 'overflow-x-clip'
+        } ${sidebarCollapsed ? 'lg:pl-[4.75rem]' : 'lg:pl-[17.5rem]'}`}
       >
-        <div className="mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8 lg:pt-3">
-          <div className="mb-4 flex items-center gap-3 lg:hidden">
+        <div
+          className={`mx-auto w-full min-w-0 p-4 sm:p-6 md:p-8 lg:pt-3 ${
+            isMessagesTab ? 'flex h-full min-h-0 flex-col overflow-hidden' : ''
+          }`}
+        >
+          <div className="mb-4 flex shrink-0 items-center gap-3 lg:hidden">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
@@ -141,9 +155,16 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
             </button>
             <span className="text-sm font-medium text-neutral-800 dark:text-stone-200">Dashboard menu</span>
           </div>
-          {children}
+          {isMessagesTab ? (
+            <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+          ) : (
+            children
+          )}
         </div>
       </main>
+
+      <DashboardProductTour />
+      <FirstRegistrationOnboarding />
     </div>
   );
 }

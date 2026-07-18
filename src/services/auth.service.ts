@@ -23,12 +23,24 @@ export const authService = {
     const responseData = response.data ?? response;
 
     if (responseData?.user) {
+      const access = responseData.access as string | undefined;
+      const refresh = responseData.refresh as string | undefined;
+      const tokens =
+        access && refresh
+          ? { access, refresh }
+          : ((responseData.tokens as AuthTokens | null | undefined) ?? null);
+
+      if (tokens?.access && tokens?.refresh) {
+        tokenManager.setTokens(tokens.access, tokens.refresh);
+        await persistSessionCookies(tokens.access, tokens.refresh);
+      }
+
       return {
         success: true,
         message: responseData.message || 'Registration successful. Please verify your email.',
         data: {
           user: responseData.user as User,
-          tokens: null,
+          tokens,
         },
         errors: null,
       };

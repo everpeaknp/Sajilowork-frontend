@@ -4,15 +4,17 @@ import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/providers/ThemeProvider';
 import { cn } from '@/lib/utils';
 
-type ThemeMenuToggleProps = {
+export type ThemeMenuToggleProps = {
   className?: string;
   /** Compact row for profile/guest menus */
   variant?: 'menu' | 'inline';
+  'data-tour'?: string;
 };
 
 export default function ThemeMenuToggle({
   className,
   variant = 'menu',
+  'data-tour': dataTour,
 }: ThemeMenuToggleProps) {
   const { theme, setTheme, ready } = useTheme();
 
@@ -20,6 +22,7 @@ export default function ThemeMenuToggle({
     return (
       <button
         type="button"
+        data-tour={dataTour}
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         className={cn(
           'inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-600 transition hover:bg-neutral-100 hover:text-brand-emerald dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-brand-emerald',

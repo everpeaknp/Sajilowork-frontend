@@ -7,6 +7,7 @@ import type { Job } from './types';
 interface JobTableProps {
   jobs: Job[];
   activeSubTab: string;
+  searchQuery?: string;
   onEdit: (job: Job) => void;
   onDelete: (id: string) => void;
   onAddClick: () => void;
@@ -28,7 +29,56 @@ function statusBadgeClass(status: Job['status']) {
   return 'bg-[#FFF5F5] text-[#EB5757] hover:bg-[#FEEAEA] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60';
 }
 
-export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddClick }: JobTableProps) {
+export function JobsEmptyState({
+  activeSubTab,
+  searchQuery = '',
+  onAddClick,
+}: {
+  activeSubTab: string;
+  searchQuery?: string;
+  onAddClick: () => void;
+}) {
+  const hasSearch = searchQuery.trim().length > 0;
+
+  return (
+    <div className="flex h-full min-h-[16rem] flex-1 flex-col items-center justify-center gap-2 px-4 text-center text-neutral-400">
+      <ClipboardList className="h-10 w-10 text-neutral-300 dark:text-neutral-600" strokeWidth={1.5} />
+      <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
+        {hasSearch
+          ? `No jobs match “${searchQuery.trim()}” in ${activeSubTab}.`
+          : `No job postings found under ${activeSubTab} Jobs.`}
+      </p>
+      {!hasSearch ? (
+        <button
+          onClick={onAddClick}
+          type="button"
+          className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
+        >
+          Post a new matching job campaign
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export default function JobTable({
+  jobs,
+  activeSubTab,
+  searchQuery = '',
+  onEdit,
+  onDelete,
+  onAddClick,
+}: JobTableProps) {
+  if (jobs.length === 0) {
+    return (
+      <JobsEmptyState
+        activeSubTab={activeSubTab}
+        searchQuery={searchQuery}
+        onAddClick={onAddClick}
+      />
+    );
+  }
+
   return (
     <div className="overflow-x-auto" id="jobs-table-wrapper">
       <table className="w-full table-auto border-collapse text-left" id="jobs-data-table">
@@ -42,96 +92,78 @@ export default function JobTable({ jobs, activeSubTab, onEdit, onDelete, onAddCl
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
-          {jobs.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="py-20 text-center">
-                <div className="flex flex-col items-center justify-center space-y-2 text-neutral-400">
-                  <ClipboardList className="h-10 w-10 text-neutral-300" strokeWidth={1.5} />
-                  <p className="text-sm font-normal">No job postings found under {activeSubTab} Jobs.</p>
+          {jobs.map((job) => (
+            <tr
+              key={job.id}
+              className="transition-colors hover:bg-neutral-50/20 dark:hover:bg-neutral-800/50"
+              id={`job-row-${job.id}`}
+            >
+              <td className="select-all py-6 pl-2 align-top">
+                <div className="flex items-start gap-4">
+                  <div className="relative mt-0.5 shrink-0">
+                    <EmployerAvatarCircle
+                      name={job.company}
+                      avatarUrl={job.logoUrl}
+                      avatarBg={job.logoColor}
+                      sizeClass="h-[52px] w-[52px]"
+                      textClass="text-base font-bold uppercase"
+                    />
+                    <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm dark:border-neutral-900" />
+                  </div>
+
+                  <div className="space-y-0.5">
+                    <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 dark:text-stone-100">
+                      {job.title}
+                    </h4>
+                    <div className="text-[15px] font-medium tracking-tight text-[#52C47F]">{job.company}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td className="py-6 align-middle text-[15px] font-medium text-neutral-800">{job.applications}</td>
+
+              <td className="py-6 align-middle">
+                <div className="flex flex-col">
+                  <span className="text-[15px] font-medium leading-relaxed text-neutral-800">
+                    {job.createdDate}
+                  </span>
+                  <span className="text-[14px] font-normal text-neutral-400">{job.expiredDate}</span>
+                </div>
+              </td>
+
+              <td className="py-6 align-middle">
+                <span
+                  className={`inline-flex cursor-pointer select-none rounded-lg px-[15px] py-[6px] text-sm font-medium transition-colors ${statusBadgeClass(job.status)}`}
+                >
+                  {job.status}
+                </span>
+              </td>
+
+              <td className="py-6 pr-1 text-center align-middle">
+                <div className="flex items-center justify-center gap-2">
                   <button
-                    onClick={onAddClick}
                     type="button"
-                    className="cursor-pointer text-xs font-semibold text-[#52C47F] hover:underline"
+                    id={`job-edit-btn-${job.id}`}
+                    onClick={() => onEdit(job)}
+                    className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
+                    title="Edit this job posting"
                   >
-                    Post a new matching job campaign
+                    <Pencil className="h-[18px] w-[18px]" strokeWidth={2.2} />
+                  </button>
+
+                  <button
+                    type="button"
+                    id={`job-delete-btn-${job.id}`}
+                    onClick={() => onDelete(job.id)}
+                    className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
+                    title="Delete this job campaign"
+                  >
+                    <Trash2 className="h-[18px] w-[18px]" strokeWidth={2.2} />
                   </button>
                 </div>
               </td>
             </tr>
-          ) : (
-            jobs.map((job) => (
-              <tr
-                key={job.id}
-                className="transition-colors hover:bg-neutral-50/20 dark:hover:bg-neutral-800/50"
-                id={`job-row-${job.id}`}
-              >
-                <td className="select-all py-6 pl-2 align-top">
-                  <div className="flex items-start gap-4">
-                    <div className="relative mt-0.5 shrink-0">
-                      <EmployerAvatarCircle
-                        name={job.company}
-                        avatarUrl={job.logoUrl}
-                        avatarBg={job.logoColor}
-                        sizeClass="h-[52px] w-[52px]"
-                        textClass="text-base font-bold uppercase"
-                      />
-                      <span className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-sm dark:border-neutral-900" />
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <h4 className="text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 dark:text-stone-100">
-                        {job.title}
-                      </h4>
-                      <div className="text-[15px] font-medium tracking-tight text-[#52C47F]">{job.company}</div>
-                    </div>
-                  </div>
-                </td>
-
-                <td className="py-6 align-middle text-[15px] font-medium text-neutral-800">{job.applications}</td>
-
-                <td className="py-6 align-middle">
-                  <div className="flex flex-col">
-                    <span className="text-[15px] font-medium leading-relaxed text-neutral-800">
-                      {job.createdDate}
-                    </span>
-                    <span className="text-[14px] font-normal text-neutral-400">{job.expiredDate}</span>
-                  </div>
-                </td>
-
-                <td className="py-6 align-middle">
-                  <span
-                    className={`inline-flex cursor-pointer select-none rounded-lg px-[15px] py-[6px] text-sm font-medium transition-colors ${statusBadgeClass(job.status)}`}
-                  >
-                    {job.status}
-                  </span>
-                </td>
-
-                <td className="py-6 pr-1 text-center align-middle">
-                  <div className="flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      id={`job-edit-btn-${job.id}`}
-                      onClick={() => onEdit(job)}
-                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
-                      title="Edit this job posting"
-                    >
-                      <Pencil className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                    </button>
-
-                    <button
-                      type="button"
-                      id={`job-delete-btn-${job.id}`}
-                      onClick={() => onDelete(job.id)}
-                      className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] p-[10px] text-[#F87171] transition-all hover:scale-[1.02] hover:bg-[#FEE2E2] hover:text-[#EF4444] dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60"
-                      title="Delete this job campaign"
-                    >
-                      <Trash2 className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
     </div>

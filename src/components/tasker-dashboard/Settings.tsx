@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
   DASHBOARD_CARD,
-  DASHBOARD_HEADING,
   DASHBOARD_PAGE_ROOT,
 } from '@/app/dashboard/dashboardResponsive';
 import { 
@@ -28,11 +28,15 @@ import {
   Camera,
   User as UserIcon,
   CreditCard,
+  CircleHelp,
+  Compass,
+  ChevronRight,
 } from 'lucide-react';
 import LinkedPaymentMethods from '@/components/tasker-dashboard/LinkedPaymentMethods';
 import AddressAutocompleteFields, {
   type AddressFieldValues,
 } from '@/components/AddressAutocompleteFields';
+import { HELP_LINKS } from '@/components/marketing/HelpHubContent';
 import { DEFAULT_COUNTRY } from '@/lib/nepalLocale';
 import { genderLabelFromApi, genderValueFromLabel } from '@/lib/dashboardProfileSkills';
 
@@ -1502,18 +1506,132 @@ export default function Settings({
             </div>
           </div>
         </AccordionItem>
+
+        <AccordionItem
+          title="Support & Help"
+          icon={CircleHelp}
+          description="Guides, policies, contact, and product tour"
+          isOpen={openSection === 'support'}
+          onToggle={() => toggleSection('support')}
+          appearance={appearance}
+        >
+          <div className="space-y-5">
+            {isDashboard ? (
+              <div className="space-y-3">
+              <div className="flex flex-col gap-4 rounded-xl border border-[#52C47F]/25 bg-[#52C47F]/5 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-[#52C47F]/30 dark:bg-[#52C47F]/10">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#52C47F] text-white">
+                    <UserCheck className="h-5 w-5" aria-hidden />
+                  </div>
+                  <div>
+                    <p className="text-[15px] font-semibold text-neutral-900 dark:text-stone-100">
+                      Account setup wizard
+                    </p>
+                    <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
+                      Replay verification and profile onboarding for employers and freelancers.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new Event('sajilowork:dashboard-onboarding'));
+                  }}
+                  className={`${primaryButtonClass} shrink-0`}
+                >
+                  Start setup
+                  <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} />
+                </button>
+              </div>
+              <div className="flex flex-col gap-4 rounded-xl border border-[#52C47F]/25 bg-[#52C47F]/5 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-[#52C47F]/30 dark:bg-[#52C47F]/10">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#52C47F] text-white">
+                    <Compass className="h-5 w-5" aria-hidden />
+                  </div>
+                  <div>
+                    <p className="text-[15px] font-semibold text-neutral-900 dark:text-stone-100">
+                      Product tour wizard
+                    </p>
+                    <p className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">
+                      Walk through the dashboard navbar, sidebar, and key features step by step.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new Event('sajilowork:dashboard-tour'));
+                  }}
+                  className={`${primaryButtonClass} shrink-0`}
+                >
+                  Start tour
+                  <ArrowUpRight className="h-5 w-5" strokeWidth={2.5} />
+                </button>
+              </div>
+              </div>
+            ) : null}
+
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {HELP_LINKS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={
+                        isDashboard
+                          ? 'group flex h-full items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition hover:border-[#52C47F]/40 hover:bg-[#52C47F]/5 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-[#52C47F]/35 dark:hover:bg-[#52C47F]/10'
+                          : 'group flex h-full items-start gap-3 rounded-2xl border border-outline-variant bg-white p-4 transition hover:border-brand-emerald/30 hover:bg-brand-light-bg dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-brand-emerald/40'
+                      }
+                    >
+                      <span
+                        className={
+                          isDashboard
+                            ? 'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-[#2f7a52] dark:bg-neutral-800 dark:text-[#52C47F]'
+                            : 'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-light-bg text-brand-emerald dark:bg-neutral-800'
+                        }
+                      >
+                        <Icon className="h-4 w-4" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={
+                            isDashboard
+                              ? 'flex items-center justify-between gap-2 text-[14px] font-semibold text-neutral-900 dark:text-stone-100'
+                              : 'flex items-center justify-between gap-2 text-sm font-bold text-brand-dark dark:text-stone-100'
+                          }
+                        >
+                          {item.title}
+                          <ChevronRight
+                            className="h-4 w-4 shrink-0 text-neutral-300 transition group-hover:text-[#52C47F] dark:text-neutral-600"
+                            aria-hidden
+                          />
+                        </span>
+                        <span
+                          className={
+                            isDashboard
+                              ? 'mt-1 block text-xs leading-relaxed text-neutral-500 dark:text-neutral-400'
+                              : 'mt-1 block text-xs leading-relaxed text-gray-500 dark:text-neutral-400'
+                          }
+                        >
+                          {item.description}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </AccordionItem>
     </>
   );
 
   if (isDashboard) {
     return (
       <div className={DASHBOARD_PAGE_ROOT}>
-        <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
-          <h1 className={DASHBOARD_HEADING}>Settings</h1>
-          <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500 dark:text-neutral-400">
-            Manage your email, phone, verification, payment methods, password, and notifications.
-          </p>
-        </div>
         <div className={`${DASHBOARD_CARD_CLASS} mb-8`}>
           <div className="space-y-0">{settingsSections}</div>
         </div>

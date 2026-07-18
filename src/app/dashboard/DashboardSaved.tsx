@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash2, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Star, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import UserAvatar from '@/components/common/UserAvatar';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -17,9 +17,8 @@ import { BOOKMARKS_CHANGED_EVENT, notifyBookmarksChanged, resolveListingSlug } f
 import { extractTaskList } from '@/lib/taskUtils';
 import { bookmarkService } from '@/services/bookmark.service';
 import type { Task } from '@/types';
+import { matchesSearchQuery } from './dashboardListSearch';
 import {
-  DASHBOARD_CARD,
-  DASHBOARD_HEADING_MD,
   DASHBOARD_PAGE_ROOT,
   DASHBOARD_PAGINATION_ARROW_PLAIN,
   DASHBOARD_PAGINATION_INNER,
@@ -142,6 +141,7 @@ function SavedCard({
 export default function DashboardSaved() {
   const router = useRouter();
   const [activeSubTab, setActiveSubTab] = useState<SavedSubTab>('services');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -188,7 +188,22 @@ export default function DashboardSaved() {
   };
 
   const allItems = useMemo(
-    () => filterBookmarkedTasksByTab(bookmarkedTasks, activeSubTab),
+    () =>
+      filterBookmarkedTasksByTab(bookmarkedTasks, activeSubTab).filter((item) =>
+        matchesSearchQuery(
+          searchQuery,
+          item.title,
+          item.category,
+          item.authorName,
+          item.slug,
+          formatNPR(item.price),
+        ),
+      ),
+    [activeSubTab, bookmarkedTasks, searchQuery],
+  );
+
+  const tabItemsCount = useMemo(
+    () => filterBookmarkedTasksByTab(bookmarkedTasks, activeSubTab).length,
     [activeSubTab, bookmarkedTasks],
   );
 
@@ -247,110 +262,126 @@ export default function DashboardSaved() {
     }`;
 
   return (
-    <div className={DASHBOARD_PAGE_ROOT}>
-      <div className="mx-auto mb-6 max-w-7xl pl-1 sm:mb-8">
-        <h1 className={DASHBOARD_HEADING_MD}>Saved</h1>
-        <p className="mt-2 text-[15px] font-normal tracking-tight text-neutral-500">
-          Your bookmarked services, projects, jobs, and tasks.
-        </p>
-      </div>
+    <div className={`${DASHBOARD_PAGE_ROOT} relative flex min-h-[calc(100dvh-7.5rem)] flex-col sm:min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-5.5rem)]`}>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+        <div className={`${DASHBOARD_SUBTABS_WRAP} shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 md:px-8`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+            <div className={`${DASHBOARD_SUBTABS_ROW} min-w-0 flex-1 overflow-x-auto`}>
+              <button type="button" onClick={() => handleTabChange('services')} className={subTabClass('services')}>
+                Services
+              </button>
+              <button type="button" onClick={() => handleTabChange('project')} className={subTabClass('project')}>
+                Project
+              </button>
+              <button type="button" onClick={() => handleTabChange('jobs')} className={subTabClass('jobs')}>
+                Jobs
+              </button>
+              <button type="button" onClick={() => handleTabChange('task')} className={subTabClass('task')}>
+                Tasks
+              </button>
+            </div>
 
-      <div className={DASHBOARD_CARD}>
-        <div className={DASHBOARD_SUBTABS_WRAP}>
-          <div className={DASHBOARD_SUBTABS_ROW}>
-            <button type="button" onClick={() => handleTabChange('services')} className={subTabClass('services')}>
-              Services
-            </button>
-            <button type="button" onClick={() => handleTabChange('project')} className={subTabClass('project')}>
-              Project
-            </button>
-            <button type="button" onClick={() => handleTabChange('jobs')} className={subTabClass('jobs')}>
-              Jobs
-            </button>
-            <button type="button" onClick={() => handleTabChange('task')} className={subTabClass('task')}>
-              Tasks
-            </button>
+            <div className="relative mb-3 flex w-full shrink-0 items-center rounded-xl border border-neutral-200/80 bg-neutral-50 px-3 shadow-sm sm:mb-3.5 sm:w-[240px] md:w-[280px] dark:border-neutral-700 dark:bg-neutral-950 dark:shadow-none">
+              <Search className="mr-2 h-4 w-4 shrink-0 text-neutral-400" strokeWidth={2} aria-hidden />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Search saved…"
+                aria-label="Search saved items"
+                className="w-full border-0 bg-transparent py-2.5 text-sm font-normal text-neutral-800 outline-none placeholder:text-neutral-400 focus:outline-none focus:ring-0 dark:bg-transparent dark:text-stone-100 dark:placeholder:text-neutral-500"
+              />
+            </div>
           </div>
         </div>
 
-        {showLoading ? (
-          <div className="py-24 text-center text-sm text-neutral-400">Loading saved items…</div>
-        ) : totalItems === 0 ? (
-          <div className="py-24 text-center text-sm text-neutral-400">
-            No saved {activeLabel} found.
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {currentItems.map((item) => (
-                <SavedCard
-                  key={`${item.kind}-${item.id}`}
-                  item={item}
-                  onDelete={setDeleteTarget}
-                  onOpen={openItem}
-                />
-              ))}
+        <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 pb-6 sm:px-6 md:px-8 md:pb-8">
+          {showLoading ? (
+            <div className="flex flex-1 items-center justify-center py-24 text-center text-sm text-neutral-400">
+              Loading saved items…
             </div>
+          ) : totalItems === 0 ? (
+            <div className="flex flex-1 items-center justify-center py-24 text-center text-sm text-neutral-400">
+              {searchQuery.trim() && tabItemsCount > 0
+                ? `No saved ${activeLabel} match “${searchQuery.trim()}”.`
+                : `No saved ${activeLabel} found.`}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {currentItems.map((item) => (
+                  <SavedCard
+                    key={`${item.kind}-${item.id}`}
+                    item={item}
+                    onDelete={setDeleteTarget}
+                    onOpen={openItem}
+                  />
+                ))}
+              </div>
 
-            <div className={DASHBOARD_PAGINATION_OUTER}>
-              <div className={DASHBOARD_PAGINATION_INNER}>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={safePage === 1}
-                  className={DASHBOARD_PAGINATION_ARROW_PLAIN}
-                >
-                  <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
-                </button>
+              <div className={DASHBOARD_PAGINATION_OUTER}>
+                <div className={DASHBOARD_PAGINATION_INNER}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    disabled={safePage === 1}
+                    className={DASHBOARD_PAGINATION_ARROW_PLAIN}
+                  >
+                    <ChevronLeft className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
+                  </button>
 
-                <div className="flex shrink-0 items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((page) =>
-                    totalPages >= page ? (
+                  <div className="flex shrink-0 items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((page) =>
+                      totalPages >= page ? (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setCurrentPage(page)}
+                          className={dashboardPageButtonClass(safePage === page)}
+                        >
+                          {page}
+                        </button>
+                      ) : null,
+                    )}
+
+                    {totalPages > 5 ? (
+                      <span className="pointer-events-none flex h-9 w-9 shrink-0 select-none items-center justify-center text-sm font-normal text-neutral-400 sm:h-[44px] sm:w-[44px]">
+                        ...
+                      </span>
+                    ) : null}
+
+                    {totalPages > 5 ? (
                       <button
-                        key={page}
                         type="button"
-                        onClick={() => setCurrentPage(page)}
-                        className={dashboardPageButtonClass(safePage === page)}
+                        onClick={() => setCurrentPage(totalPages)}
+                        className={dashboardPageButtonClass(safePage === totalPages)}
                       >
-                        {page}
+                        {totalPages}
                       </button>
-                    ) : null,
-                  )}
+                    ) : null}
+                  </div>
 
-                  {totalPages > 5 ? (
-                    <span className="pointer-events-none flex h-9 w-9 shrink-0 select-none items-center justify-center text-sm font-normal text-neutral-400 sm:h-[44px] sm:w-[44px]">
-                      ...
-                    </span>
-                  ) : null}
-
-                  {totalPages > 5 ? (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentPage(totalPages)}
-                      className={dashboardPageButtonClass(safePage === totalPages)}
-                    >
-                      {totalPages}
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    disabled={safePage === totalPages}
+                    className={DASHBOARD_PAGINATION_ARROW_PLAIN}
+                  >
+                    <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={safePage === totalPages}
-                  className={DASHBOARD_PAGINATION_ARROW_PLAIN}
-                >
-                  <ChevronRight className="h-5 w-5 text-black dark:text-stone-100" strokeWidth={1.5} />
-                </button>
+                <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800 dark:text-neutral-300">
+                  {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, totalItems)} of {totalItems}{' '}
+                  {activeLabel} saved
+                </div>
               </div>
-
-              <div className="pt-1 text-sm font-normal tracking-tight text-neutral-800">
-                {indexOfFirstItem + 1} – {Math.min(indexOfLastItem, totalItems)} of {totalItems}{' '}
-                {activeLabel} saved
-              </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       <DeleteConfirmModal

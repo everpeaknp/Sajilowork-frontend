@@ -16,6 +16,7 @@ import {
 import { useAuthStore } from '@/store/auth.store';
 import { userService } from '@/services';
 import { normalizeUserFromApi, notifyUserProfileUpdated } from '@/lib/userProfileSync';
+import { maybeStartOnboardingAfterRoleSwitch } from '@/lib/dashboardOnboarding';
 import { cn } from '@/lib/utils';
 
 interface AccountRoleModeProps {
@@ -120,6 +121,7 @@ export default function AccountRoleMode({
         if (response.success && response.data) {
           setUser(normalizeUserFromApi(response.data as unknown as Record<string, unknown>));
           notifyUserProfileUpdated();
+          maybeStartOnboardingAfterRoleSwitch(user.id, nextRole);
 
           if (navigateToDashboard) {
             goToDashboard();

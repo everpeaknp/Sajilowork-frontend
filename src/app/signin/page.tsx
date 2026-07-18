@@ -96,6 +96,10 @@ function SignInPageContent() {
     if (roleParam === 'tasker' || roleParam === 'customer') {
       setValue('role', roleParam);
     }
+    const emailParam = searchParams.get('email');
+    if (emailParam?.trim()) {
+      setValue('email', emailParam.trim());
+    }
   }, [searchParams, setValue]);
 
   const onSubmit = async (data: LoginFormData) => {
@@ -164,12 +168,6 @@ function SignInPageContent() {
             'An error occurred. Please try again.';
 
       toast.error(errorMessage);
-
-      if (error?.status === 403 && /verify your email/i.test(errorMessage)) {
-        router.push(
-          `/verify-email?pending=1&email=${encodeURIComponent(data.email.trim())}`,
-        );
-      }
     }
   };
 
@@ -177,7 +175,7 @@ function SignInPageContent() {
     <div className="min-h-screen flex flex-col bg-white">
       <Navbar />
 
-      <div className="flex-1 bg-white flex items-center justify-center p-4">
+      <div className="flex flex-1 items-center justify-center bg-white p-4 pb-12 sm:pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, ImageIcon, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { ArrowUpRight, Building2, ImageIcon, Link2, Mail, MapPin, Phone, UserRound, X } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store';
 import { employerService } from '@/services';
@@ -19,6 +19,7 @@ import {
   type EmployerBusinessProfile,
   type EmployerGalleryImage,
 } from '@/lib/employerBusinessProfile';
+import { cn, getMediaUrl } from '@/lib/utils';
 
 const USERNAME_MIN_LENGTH = 3;
 const MAX_GALLERY_IMAGES = 10;
@@ -28,23 +29,58 @@ const USERNAME_MAX_LENGTH = 30;
 const USERNAME_PATTERN = /^[a-z0-9._]+$/;
 
 const inputClass =
-  'w-full rounded-xl border-2 border-transparent bg-neutral-50/80 px-4 py-3.5 text-sm font-medium text-neutral-500 shadow-[0_1px_2px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-neutral-300 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900 dark:focus:border-[#52C47F]';
+  'w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-sm font-medium text-neutral-800 outline-none transition placeholder:text-neutral-400 focus:border-[#52C47F] focus:ring-2 focus:ring-[#52C47F]/20 dark:border-neutral-700 dark:bg-neutral-950 dark:text-stone-100 dark:placeholder:text-neutral-500';
 
-const selectClass = `${inputClass} cursor-pointer appearance-none text-neutral-800 dark:text-stone-100`;
+const selectClass = `${inputClass} cursor-pointer appearance-none`;
+
+const labelClass =
+  'mb-1.5 block text-sm font-semibold text-neutral-800 dark:text-stone-100';
 
 const SELECT_CHEVRON_STYLE = {
   backgroundImage:
     "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")",
   backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 1rem center',
-  backgroundSize: '1.2em',
+  backgroundPosition: 'right 0.9rem center',
+  backgroundSize: '1rem',
 } as const;
 
 type EmployerBusinessProfileFormProps = {
   onToast: (message: string) => void;
+  onProgressChange?: (progress: { filled: number; total: number; percent: number }) => void;
 };
 
-export default function EmployerBusinessProfileForm({ onToast }: EmployerBusinessProfileFormProps) {
+function Section({
+  title,
+  description,
+  children,
+  className,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn('space-y-5', className)}>
+      <div>
+        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
+          {title}
+        </h3>
+        {description ? (
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+            {description}
+          </p>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export default function EmployerBusinessProfileForm({
+  onToast,
+  onProgressChange,
+}: EmployerBusinessProfileFormProps) {
   const user = useAuthStore((s) => s.user);
   const refreshUser = useAuthStore((s) => s.refreshUser);
 
@@ -79,6 +115,46 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
   const fullPublicUrl = slug.trim()
     ? `${siteOrigin || 'http://localhost:3000'}${profilePrefix}${slug.trim().toLowerCase()}`
     : '';
+
+  const profileProgress = useMemo(() => {
+    const checks = [
+      Boolean(slug.trim()),
+      Boolean(companyName.trim()),
+      Boolean(tagline.trim()),
+      Boolean(industry.trim()) || accountType === 'individual',
+      accountType === 'individual' || Boolean(teamSize.trim()),
+      Boolean(location.trim()),
+      Boolean(description.trim()),
+      Boolean(contactEmail.trim() || user?.email?.trim()),
+      Boolean(contactPhone.trim() || user?.phone_number?.trim()),
+      Boolean(logoUrl.trim()),
+    ];
+    const filled = checks.filter(Boolean).length;
+    const total = checks.length;
+    return {
+      filled,
+      total,
+      percent: total === 0 ? 0 : Math.round((filled / total) * 100),
+    };
+  }, [
+    accountType,
+    companyName,
+    contactEmail,
+    contactPhone,
+    description,
+    industry,
+    location,
+    logoUrl,
+    slug,
+    tagline,
+    teamSize,
+    user?.email,
+    user?.phone_number,
+  ]);
+
+  useEffect(() => {
+    onProgressChange?.(profileProgress);
+  }, [onProgressChange, profileProgress]);
 
   useEffect(() => {
     if (window.location.origin) {
@@ -154,56 +230,57 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
 
     const remaining = MAX_GALLERY_IMAGES - galleryImages.length;
     if (remaining <= 0) {
-      onToast(`You can add up to ${MAX_GALLERY_IMAGES} gallery images.`);
+      onToast(`You can upload up to ${MAX_GALLERY_IMAGES} gallery images.`);
       return;
     }
 
     const files = Array.from(list).slice(0, remaining);
     setUploadingGallery(true);
-
     try {
+      const added: EmployerGalleryImage[] = [];
       for (const file of files) {
-        if (!/\.(jpe?g|png|webp)$/i.test(file.name)) {
-          onToast('Gallery images must be JPG, PNG, or WEBP.');
+        if (!/\.(jpe?g|png)$/i.test(file.name)) {
+          onToast('Gallery images must be JPG or PNG.');
           continue;
         }
         if (file.size > MAX_GALLERY_FILE_BYTES) {
           onToast('Each gallery image must be 1MB or smaller.');
           continue;
         }
-
-        const alt = `${companyName.trim() || 'Company'} gallery image`;
-        const response = await employerService.uploadGalleryImage(file, alt);
-        if (!response.success || !response.data) {
-          onToast(response.message || 'Could not upload one of the gallery images.');
-          continue;
+        const response = await employerService.uploadGalleryImage(file);
+        if (response.success && response.data) {
+          added.push({
+            id: response.data.id,
+            url: getMediaUrl(response.data.url) || response.data.url,
+            alt: response.data.alt_text?.trim() || 'Gallery image',
+          });
+        } else {
+          onToast(response.message || 'Could not upload gallery image.');
         }
-
-        const uploaded = response.data;
-        setGalleryImages((prev) => [
-          ...prev,
-          {
-            id: uploaded.id,
-            url: uploaded.url,
-            alt: uploaded.alt_text?.trim() || alt,
-          },
-        ]);
       }
+      if (added.length > 0) {
+        setGalleryImages((prev) => [...prev, ...added].slice(0, MAX_GALLERY_IMAGES));
+      }
+    } catch {
+      onToast('Could not upload gallery images.');
     } finally {
       setUploadingGallery(false);
     }
   };
 
   const removeGalleryImage = async (id: string) => {
-    const isPersistedId = /^[0-9a-f-]{36}$/i.test(id);
-    if (isPersistedId) {
+    const previous = galleryImages;
+    setGalleryImages((prev) => prev.filter((item) => item.id !== id));
+    try {
       const response = await employerService.deleteGalleryImage(id);
       if (!response.success) {
-        onToast(response.message || 'Could not remove gallery image.');
-        return;
+        setGalleryImages(previous);
+        onToast(response.message || 'Could not remove image.');
       }
+    } catch {
+      setGalleryImages(previous);
+      onToast('Could not remove image.');
     }
-    setGalleryImages((prev) => prev.filter((item) => item.id !== id));
   };
 
   const onLogoSelected = async (list: FileList | null) => {
@@ -211,11 +288,11 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
     if (!file) return;
 
     if (!/\.(jpe?g|png|webp)$/i.test(file.name)) {
-      onToast('Company logo must be JPG, PNG, or WEBP.');
+      onToast('Logo must be JPG, PNG, or WEBP.');
       return;
     }
     if (file.size > MAX_LOGO_FILE_BYTES) {
-      onToast('Company logo must be 1MB or smaller.');
+      onToast('Logo must be 1MB or smaller.');
       return;
     }
 
@@ -322,128 +399,150 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
   };
 
   const isCompany = accountType === 'company';
-  const displayNameLabel = isCompany ? 'Company name' : 'Your name';
+  const displayNameLabel = isCompany ? 'Company name' : 'Display name';
   const logoLabel = isCompany ? 'Company logo' : 'Profile photo';
-  const detailsHeading = isCompany ? 'Company details' : 'Profile details';
 
   if (loading) {
     return (
-      <p className="text-sm text-neutral-500" aria-live="polite">
-        Loading business profile…
-      </p>
+      <div className="flex min-h-[240px] items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/50 dark:border-neutral-800 dark:bg-neutral-950/40">
+        <p className="text-sm text-neutral-500" aria-live="polite">
+          Loading business profile…
+        </p>
+      </div>
     );
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-10">
-      <section className="space-y-3 border-b border-neutral-100 pb-8 dark:border-neutral-800">
-        <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-          Account type
-        </label>
-        <p className="max-w-2xl text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-          Choose whether you post work as an individual or on behalf of a company. Both can publish
-          jobs and projects.
-        </p>
-        <select
-          value={accountType}
-          onChange={(e) => setAccountType(e.target.value as EmployerAccountType)}
-          className={`${selectClass} max-w-md`}
-          style={SELECT_CHEVRON_STYLE}
+    <form onSubmit={handleSave} className="space-y-0">
+      <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+        <Section
+          title="Account type"
+          description="Hire as yourself or on behalf of a company. You can change this later."
+          className="pb-8"
         >
-          <option value="individual">Individual</option>
-          <option value="company">Company</option>
-        </select>
-      </section>
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-neutral-200 bg-neutral-50 p-1.5 dark:border-neutral-700 dark:bg-neutral-950 sm:max-w-md">
+            {(
+              [
+                { value: 'individual' as const, label: 'Individual', icon: UserRound },
+                { value: 'company' as const, label: 'Company', icon: Building2 },
+              ] as const
+            ).map((option) => {
+              const active = accountType === option.value;
+              const Icon = option.icon;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setAccountType(option.value)}
+                  aria-pressed={active}
+                  className={cn(
+                    'flex cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition',
+                    active
+                      ? 'bg-white text-neutral-900 shadow-sm dark:bg-neutral-800 dark:text-stone-100'
+                      : 'text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-stone-200',
+                  )}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2.25} />
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </Section>
 
-      <section className="flex flex-col gap-6 border-b border-neutral-100 pb-8 dark:border-neutral-800 lg:flex-row lg:items-start dark:border-neutral-800">
-        <div className="shrink-0 space-y-3">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-            {logoLabel}
-          </label>
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-start">
-            <div className="flex h-[100px] w-[100px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-neutral-100 bg-neutral-50 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-              {logoUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={logoUrl} alt="Company logo preview" className="h-full w-full object-cover" />
-              ) : (
-                <ImageIcon className="h-10 w-10 text-neutral-300" />
-              )}
-            </div>
-            <div className="space-y-3">
+        <Section
+          title="Identity"
+          description="This is how employers and freelancers recognize your brand."
+          className="py-8"
+        >
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+            <div className="shrink-0 space-y-3">
+              <p className={labelClass}>{logoLabel}</p>
+              <div
+                className={cn(
+                  'relative flex h-28 w-28 items-center justify-center overflow-hidden border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-950',
+                  isCompany ? 'rounded-2xl' : 'rounded-full',
+                )}
+              >
+                {logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <ImageIcon className="h-9 w-9 text-neutral-300" />
+                )}
+              </div>
               <input
                 ref={logoInputRef}
                 type="file"
-                accept=".jpg,.jpeg,.png"
+                accept=".jpg,.jpeg,.png,.webp"
                 className="hidden"
                 onChange={(e) => {
                   void onLogoSelected(e.target.files);
                   e.target.value = '';
                 }}
               />
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
                   disabled={uploadingLogo}
-                  className="cursor-pointer rounded-xl bg-[#FCF7F2] px-6 py-3 text-sm font-bold text-[#193e32] shadow-sm transition-all hover:bg-[#F7EFE8] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="cursor-pointer rounded-xl bg-[#52C47F] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#43B26F] disabled:opacity-60"
                 >
-                  {uploadingLogo ? 'Uploading…' : 'Upload logo'}
+                  {uploadingLogo ? 'Uploading…' : 'Upload'}
                 </button>
                 {logoUrl ? (
                   <button
                     type="button"
                     onClick={() => setLogoUrl('')}
-                    className="cursor-pointer rounded-xl border border-transparent bg-[#FFF5F4] px-4 py-3 text-sm font-semibold text-[#F87171] transition-all hover:bg-[#FEE2E2] hover:text-[#EF4444]"
+                    className="cursor-pointer rounded-xl bg-neutral-100 px-3.5 py-2 text-xs font-semibold text-neutral-600 transition hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300"
                   >
                     Remove
                   </button>
                 ) : null}
               </div>
-              <p className="max-w-xs text-xs font-normal leading-relaxed text-neutral-500">
-                JPG or PNG, max 1MB.
-              </p>
+              <p className="max-w-[11rem] text-xs text-neutral-500">JPG, PNG or WEBP · max 1MB</p>
+            </div>
+
+            <div className="grid min-w-0 flex-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className={labelClass} htmlFor="employer-display-name">
+                  {displayNameLabel}
+                </label>
+                <input
+                  id="employer-display-name"
+                  type="text"
+                  required
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className={inputClass}
+                  placeholder={isCompany ? 'Your company name' : 'Your full name'}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className={labelClass} htmlFor="employer-tagline">
+                  Tagline
+                </label>
+                <input
+                  id="employer-tagline"
+                  type="text"
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  className={inputClass}
+                  placeholder="Short headline for your business"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </Section>
 
-        <div className="grid min-w-0 flex-1 grid-cols-1 gap-6">
-          <div className="space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-              {displayNameLabel}
-            </label>
-            <input
-              type="text"
-              required
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              className={inputClass}
-              placeholder={isCompany ? 'Your company name' : 'Your full name'}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-              Tagline
-            </label>
-            <input
-              type="text"
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              className={inputClass}
-              placeholder="Short headline for your business"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-3 border-b border-neutral-100 pb-8 dark:border-neutral-800">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Public profile URL</h3>
-        <div className="flex max-w-3xl flex-col gap-2 sm:flex-row sm:items-stretch">
-          <div
-            className={`flex min-w-0 flex-1 items-stretch overflow-hidden rounded-xl border-2 border-transparent bg-neutral-50/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all focus-within:border-[#52C47F] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:focus-within:bg-neutral-900 ${
-              !usernameCanChange ? 'bg-neutral-50 dark:bg-neutral-800/80' : ''
-            }`}
-          >
-            <span className="flex shrink-0 items-center border-r border-neutral-200/80 bg-neutral-100/70 px-3 py-3.5 text-sm font-medium text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
+        <Section
+          title="Public profile URL"
+          description="Your public employer page lives at this address."
+          className="py-8"
+        >
+          <div className="flex max-w-2xl overflow-hidden rounded-xl border border-neutral-200 bg-white focus-within:border-[#52C47F] focus-within:ring-2 focus-within:ring-[#52C47F]/20 dark:border-neutral-700 dark:bg-neutral-950">
+            <span className="flex shrink-0 items-center gap-1.5 border-r border-neutral-200 bg-neutral-50 px-3 text-sm font-medium text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400">
+              <Link2 className="h-3.5 w-3.5" />
               {profilePrefix}
             </span>
             <input
@@ -454,192 +553,196 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
               disabled={!usernameCanChange}
               readOnly={!usernameCanChange}
               maxLength={USERNAME_MAX_LENGTH}
-              className={`min-w-0 flex-1 border-0 bg-transparent px-3 py-3.5 text-sm font-medium lowercase text-neutral-800 outline-none placeholder:text-neutral-400 sm:px-4 dark:text-stone-100 dark:placeholder:text-neutral-500 ${
-                !usernameCanChange ? 'cursor-not-allowed text-neutral-500 dark:text-neutral-400' : ''
-              }`}
-              placeholder="your-company-slug"
+              className={cn(
+                'min-w-0 flex-1 border-0 bg-transparent px-3 py-3 text-sm font-medium lowercase text-neutral-800 outline-none placeholder:text-neutral-400 dark:text-stone-100',
+                !usernameCanChange && 'cursor-not-allowed opacity-70',
+              )}
+              placeholder="your-company"
             />
           </div>
-        </div>
-        {fullPublicUrl ? (
-          <p className="break-all text-xs text-neutral-500">
-            Live URL:{' '}
-            <Link
-              href={profilePath ?? fullPublicUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-[#2d8f57] hover:underline"
-            >
-              {fullPublicUrl}
-            </Link>
-          </p>
-        ) : null}
-        {!usernameCanChange ? (
-          <p className="text-xs font-medium text-amber-800">
-            Profile URLs can be changed once every 6 months.
-          </p>
-        ) : null}
-      </section>
-
-      <section className="space-y-6 border-b border-neutral-100 pb-8 dark:border-neutral-800">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">{detailsHeading}</h3>
-        <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-        {isCompany ? (
-          <div className="relative space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-              Industry
-            </label>
-            <select
-              value={industry || 'Select'}
-              onChange={(e) => setIndustry(e.target.value === 'Select' ? '' : e.target.value)}
-              className={selectClass}
-              style={SELECT_CHEVRON_STYLE}
-            >
-              <option value="Select">Select</option>
-              {industryOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : null}
-
-        {isCompany ? (
-          <div className="relative space-y-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-              Company size
-            </label>
-            <select
-              value={teamSize || 'Select'}
-              onChange={(e) => setTeamSize(e.target.value === 'Select' ? '' : e.target.value)}
-              className={selectClass}
-              style={SELECT_CHEVRON_STYLE}
-            >
-              <option value="Select">Select</option>
-              {teamSizeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : null}
-
-        <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-            Location
-          </label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className={inputClass}
-            placeholder="City, Country"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-            Cost range
-          </label>
-          <input
-            type="text"
-            value={costRange}
-            onChange={(e) => setCostRange(e.target.value)}
-            className={inputClass}
-            placeholder="e.g. Rs. 2,500 – 4,500 / hr"
-          />
-        </div>
-
-        {isCompany ? (
-          <div className="space-y-2 md:col-span-2">
-            <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-              Website
-            </label>
-            <input
-              type="url"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
-              className={inputClass}
-              placeholder="https://yourcompany.com"
-            />
-          </div>
-        ) : null}
-        </div>
-      </section>
-
-      <section className="space-y-6 border-b border-neutral-100 pb-8 dark:border-neutral-800">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">Contact</h3>
-        <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-            Contact email
-          </label>
-          <input
-            type="email"
-            value={contactEmail}
-            onChange={(e) => setContactEmail(e.target.value)}
-            className={inputClass}
-            placeholder="contact@yourcompany.com"
-          />
-          {user?.email ? (
-            <p className="text-xs text-neutral-500">
-              Account email: <span className="font-medium text-neutral-700">{user.email}</span>
+          {fullPublicUrl ? (
+            <p className="mt-2 break-all text-xs text-neutral-500">
+              Live at{' '}
+              <Link
+                href={profilePath ?? fullPublicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#2f7a52] hover:underline"
+              >
+                {fullPublicUrl}
+              </Link>
             </p>
           ) : null}
-        </div>
+          {!usernameCanChange ? (
+            <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+              Profile URLs can be changed once every 6 months.
+            </p>
+          ) : null}
+        </Section>
 
-        <div className="space-y-2">
-          <label className="block text-[15px] font-semibold leading-tight text-neutral-900 dark:text-stone-100">
-            Contact phone
-          </label>
-          <input
-            type="tel"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
-            className={inputClass}
-            placeholder="e.g. +977 98XXXXXXXX"
-          />
-        </div>
-        </div>
-      </section>
+        <Section
+          title={isCompany ? 'Company details' : 'Profile details'}
+          description="Help freelancers understand where you are and how you work."
+          className="py-8"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {isCompany ? (
+              <>
+                <div>
+                  <label className={labelClass} htmlFor="employer-industry">
+                    Industry
+                  </label>
+                  <select
+                    id="employer-industry"
+                    value={industry || 'Select'}
+                    onChange={(e) => setIndustry(e.target.value === 'Select' ? '' : e.target.value)}
+                    className={selectClass}
+                    style={SELECT_CHEVRON_STYLE}
+                  >
+                    <option value="Select">Select</option>
+                    {industryOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="employer-size">
+                    Company size
+                  </label>
+                  <select
+                    id="employer-size"
+                    value={teamSize || 'Select'}
+                    onChange={(e) => setTeamSize(e.target.value === 'Select' ? '' : e.target.value)}
+                    className={selectClass}
+                    style={SELECT_CHEVRON_STYLE}
+                  >
+                    <option value="Select">Select</option>
+                    {teamSizeOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            ) : null}
 
-      <section className="space-y-6 border-b border-neutral-100 pb-8 dark:border-neutral-800">
-        <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
-          {isCompany ? 'About company' : 'About you'}
-        </h3>
-        <div className="space-y-2">
-          <label className="sr-only" htmlFor="employer-about-company">
-            {isCompany ? 'About company' : 'About you'}
-          </label>
+            <div>
+              <label className={labelClass} htmlFor="employer-location">
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-neutral-400" />
+                  Location
+                </span>
+              </label>
+              <input
+                id="employer-location"
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className={inputClass}
+                placeholder="City, Country"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="employer-cost">
+                Typical budget / rate
+              </label>
+              <input
+                id="employer-cost"
+                type="text"
+                value={costRange}
+                onChange={(e) => setCostRange(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. Rs. 2,500 – 4,500 / hr"
+              />
+            </div>
+
+            {isCompany ? (
+              <div className="sm:col-span-2">
+                <label className={labelClass} htmlFor="employer-website">
+                  Website
+                </label>
+                <input
+                  id="employer-website"
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  className={inputClass}
+                  placeholder="https://yourcompany.com"
+                />
+              </div>
+            ) : null}
+          </div>
+        </Section>
+
+        <Section
+          title="Contact"
+          description="Shown on your public page so freelancers can reach you."
+          className="py-8"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelClass} htmlFor="employer-email">
+                <span className="inline-flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-neutral-400" />
+                  Contact email
+                </span>
+              </label>
+              <input
+                id="employer-email"
+                type="email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                className={inputClass}
+                placeholder="contact@yourcompany.com"
+              />
+            </div>
+            <div>
+              <label className={labelClass} htmlFor="employer-phone">
+                <span className="inline-flex items-center gap-1.5">
+                  <Phone className="h-3.5 w-3.5 text-neutral-400" />
+                  Contact phone
+                </span>
+              </label>
+              <input
+                id="employer-phone"
+                type="tel"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. +977 98XXXXXXXX"
+              />
+            </div>
+          </div>
+        </Section>
+
+        <Section
+          title={isCompany ? 'About company' : 'About you'}
+          description="A short introduction for your public employer page."
+          className="py-8"
+        >
           <textarea
-            id="employer-about-company"
+            id="employer-about"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={6}
-            className="min-h-[160px] w-full rounded-xl border-2 border-transparent bg-neutral-50/80 p-4 text-sm font-medium text-neutral-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-neutral-400 focus:border-[#52C47F] focus:bg-white focus:ring-2 focus:ring-[#52C47F]/25 dark:bg-neutral-900/80 dark:text-stone-200 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900"
+            rows={5}
+            className={cn(inputClass, 'min-h-[140px] resize-y')}
             placeholder={
               isCompany
                 ? 'Describe your company, services, and what makes you unique.'
                 : 'Describe yourself, the work you hire for, and what collaborators should know.'
             }
           />
-        </div>
-      </section>
+        </Section>
 
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-base font-semibold tracking-tight text-neutral-900 dark:text-stone-100">
-            {isCompany ? 'Company gallery' : 'Photo gallery'}
-          </h3>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            {isCompany
-              ? `Images shown on your public employer page. Upload up to ${MAX_GALLERY_IMAGES} images (JPG or PNG, max 1MB each).`
-              : `Photos shown on your public profile. Upload up to ${MAX_GALLERY_IMAGES} images (JPG or PNG, max 1MB each).`}
-          </p>
-        </div>
-        <div className="space-y-3">
+        <Section
+          title={isCompany ? 'Gallery' : 'Photo gallery'}
+          description={`Optional images for your public page · up to ${MAX_GALLERY_IMAGES} · JPG or PNG · 1MB each.`}
+          className="py-8"
+        >
           <input
             ref={galleryInputRef}
             type="file"
@@ -655,16 +758,16 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
             {galleryImages.map((item) => (
               <div
                 key={item.id}
-                className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800"
+                className="relative h-24 w-24 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
+                <img src={item.url} alt={item.alt || ''} className="h-full w-full object-cover" />
                 <button
                   type="button"
                   onClick={() => {
                     void removeGalleryImage(item.id);
                   }}
-                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black"
+                  className="absolute right-1.5 top-1.5 rounded-full bg-black/65 p-1 text-white transition hover:bg-black"
                   aria-label="Remove gallery image"
                 >
                   <X className="h-3 w-3" />
@@ -676,25 +779,30 @@ export default function EmployerBusinessProfileForm({ onToast }: EmployerBusines
                 type="button"
                 onClick={() => galleryInputRef.current?.click()}
                 disabled={uploadingGallery}
-                className="flex h-24 w-24 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-200 bg-[#fff5f2] text-xs font-normal text-neutral-600 transition-colors hover:bg-[#ffede8] disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 text-xs font-medium text-neutral-500 transition hover:border-[#52C47F] hover:bg-[#52C47F]/5 hover:text-[#2f7a52] disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-950"
               >
-                <ImageIcon className="h-5 w-5 text-neutral-400" />
-                {uploadingGallery ? 'Uploading…' : 'Upload'}
+                <ImageIcon className="h-5 w-5" />
+                {uploadingGallery ? '…' : 'Add'}
               </button>
             ) : null}
           </div>
-        </div>
-      </section>
+        </Section>
+      </div>
 
-      <div className="flex items-center justify-between border-t border-neutral-100 pt-6 dark:border-neutral-800">
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[#52C47F] px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-[#52C47F]/10 transition-all hover:-translate-y-px hover:bg-[#43b06c] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <span>{saving ? 'Saving…' : 'Save business profile'}</span>
-          <ArrowUpRight className="h-4 w-4 text-white" strokeWidth={2.5} />
-        </button>
+      <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t border-neutral-100 bg-white/95 px-6 py-4 backdrop-blur-sm md:-mx-8 md:px-8 dark:border-neutral-800 dark:bg-neutral-900/95">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Changes appear on your public employer page after you save.
+          </p>
+          <button
+            type="submit"
+            disabled={saving}
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 self-start rounded-xl bg-[#52C47F] px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#43B26F] disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+          >
+            <span>{saving ? 'Saving…' : 'Save business profile'}</span>
+            <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
     </form>
   );
