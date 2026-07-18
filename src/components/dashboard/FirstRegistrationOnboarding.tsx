@@ -601,9 +601,18 @@ export default function FirstRegistrationOnboarding() {
   };
 
   const handleSkip = () => {
-    if (window.confirm('Skip setup for now? You can finish verification and profile anytime from Settings and Profile.')) {
-      finish(true);
-    }
+    toast.message('Skip setup for now?', {
+      description: 'You can finish verification and profile anytime from Settings and Profile.',
+      duration: 10000,
+      action: {
+        label: 'Skip',
+        onClick: () => finish(true),
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => undefined,
+      },
+    });
   };
 
   const handlePhotoChange = async (file: File | null) => {
