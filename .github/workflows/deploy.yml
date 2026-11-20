@@ -11,9 +11,9 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: "203.134.250.212"
-          port: 2025
-          username: "evaracy"
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /home/evaracy/frontend/Sajilowork-frontend
